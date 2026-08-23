@@ -6,10 +6,17 @@ import { useLanguage } from "@/lib/i18n"
 import { useTransactions } from "@/lib/transactions"
 import { getMonthlyBillAmount, isElectricityBill, isInternetBill } from "@/lib/bill-companies"
 
-const initialBills = [
+interface Bill {
+  id: number
+  name: string
+  dueDate?: string
+}
+
+const initialBills: Bill[] = [
   { id: 1, name: "Electricity Bill", dueDate: "2023-07-15" },
   { id: 2, name: "Internet Service", dueDate: "2023-07-18" },
   { id: 4, name: "Water Bill", dueDate: "2023-07-30" },
+  { id: 3, name: "Credit Card Payment" },
 ]
 
 function formatEuros(value: number): string {
@@ -39,9 +46,11 @@ export function QuickBillPay() {
               <div key={bill.id} className="flex items-center justify-between">
                 <div>
                   <p className="font-medium">{t(bill.name)}</p>
-                  <p className="text-sm text-muted-foreground">
-                    {t("Due:")} {bill.dueDate}
-                  </p>
+                  {bill.dueDate && (
+                    <p className="text-sm text-muted-foreground">
+                      {t("Due:")} {bill.dueDate}
+                    </p>
+                  )}
                 </div>
                 {bill.name === "Electricity Bill" && electricityAmount !== 0 && (
                   <span className="text-sm font-medium tabular-nums text-red-600 dark:text-red-400">
