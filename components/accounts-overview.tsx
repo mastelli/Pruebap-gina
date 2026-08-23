@@ -23,7 +23,22 @@ export function AccountsOverview() {
   const [isAddTransactionModalOpen, setIsAddTransactionModalOpen] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const { t } = useLanguage()
-  const { addBankMovements, checkingBalance, setCheckingBalance } = useTransactions()
+  const { addBankMovements, checkingBalance, setCheckingBalance, transactions } = useTransactions()
+
+  const now = new Date()
+  const currentYear = `${now.getFullYear()}`
+  const monthsElapsed = now.getMonth() + 1
+
+  const yearlyIncome = transactions
+    .filter((transaction) => transaction.amount > 0 && transaction.date.startsWith(currentYear))
+    .reduce((sum, transaction) => sum + transaction.amount, 0)
+
+  const yearlyExpenses = transactions
+    .filter((transaction) => transaction.amount < 0 && transaction.date.startsWith(currentYear))
+    .reduce((sum, transaction) => sum + Math.abs(transaction.amount), 0)
+
+  const monthlyIncomeAverage = yearlyIncome / monthsElapsed
+  const monthlyExpenseAverage = yearlyExpenses / monthsElapsed
 
   const handleFileChange = async (event) => {
     const file = event.target.files?.[0]
@@ -70,6 +85,26 @@ export function AccountsOverview() {
               )}
             </div>
           ))}
+          <div className="flex justify-between items-center">
+            <span className="text-sm text-muted-foreground">{t("Total Income")}</span>
+            <span className="text-sm font-medium tabular-nums text-green-600 dark:text-green-400">
+              {formatEuros(yearlyIncome)}
+            </span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span className="text-sm text-muted-foreground">{t("Average Income")}</span>
+            <span className="text-sm font-medium tabular-nums">{formatEuros(monthlyIncomeAverage)}</span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span className="text-sm text-muted-foreground">{t("Total Expenses")}</span>
+            <span className="text-sm font-medium tabular-nums text-red-600 dark:text-red-400">
+              {formatEuros(yearlyExpenses)}
+            </span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span className="text-sm text-muted-foreground">{t("Average Expenses")}</span>
+            <span className="text-sm font-medium tabular-nums">{formatEuros(monthlyExpenseAverage)}</span>
+          </div>
         </div>
         <div className="mt-auto space-y-2 pt-6">
           <Button className="w-full h-10" onClick={() => fileInputRef.current?.click()}>

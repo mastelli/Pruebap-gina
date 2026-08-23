@@ -60,6 +60,10 @@ const translations: Record<string, string> = {
   "Total balance across all accounts": "Saldo total de todas las cuentas",
   Checking: "Corriente",
   "Savings/Investment": "Ahorro/Inversión",
+  "Total Income": "Ingresos",
+  "Average Income": "Media Ingresos",
+  "Total Expenses": "Gastos",
+  "Average Expenses": "Media Gastos",
 
   // Modales de dinero
   Amount: "Importe",

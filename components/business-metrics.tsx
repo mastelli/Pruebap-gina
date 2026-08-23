@@ -3,6 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { TrendingUp, Users, DollarSign, ArrowRight } from "lucide-react"
+import Link from "next/link"
 import { useLanguage } from "@/lib/i18n"
 import { useTransactions } from "@/lib/transactions"
 
@@ -75,8 +76,10 @@ export function BusinessMetrics() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold">{t("Business Metrics")}</h2>
-        <Button variant="outline" size="sm">
-          {t("View Details")} <ArrowRight className="ml-2 h-4 w-4" />
+        <Button variant="outline" size="sm" asChild>
+          <Link href="/analytics">
+            {t("View Details")} <ArrowRight className="ml-2 h-4 w-4" />
+          </Link>
         </Button>
       </div>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
