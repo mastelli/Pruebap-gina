@@ -7,6 +7,7 @@ import { TopNav } from "@/components/top-nav"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { Toaster } from "@/components/ui/sonner"
 import { SettingsProvider } from "@/contexts/settings-context"
+import { TransactionsProvider } from "@/lib/transactions"
 import type React from "react"
 
 const inter = Inter({ subsets: ["latin"] })
@@ -28,7 +29,8 @@ export default function RootLayout({
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <LanguageProvider>
             <SettingsProvider>
-              <TooltipProvider delayDuration={0}>
+              <TransactionsProvider>
+                <TooltipProvider delayDuration={0}>
                 <div className="min-h-screen flex">
                   <Sidebar />
                   <div className="flex-1">
@@ -38,7 +40,8 @@ export default function RootLayout({
                     </div>
                   </div>
                 </div>
-              </TooltipProvider>
+                </TooltipProvider>
+              </TransactionsProvider>
             </SettingsProvider>
           </LanguageProvider>
           <Toaster />

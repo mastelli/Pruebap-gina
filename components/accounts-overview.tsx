@@ -9,6 +9,7 @@ import { SendMoneyModal } from "./send-money-modal"
 import { RequestMoneyModal } from "./request-money-modal"
 import { useLanguage } from "@/lib/i18n"
 import { parseBankExpenses } from "@/lib/bank-import"
+import { useTransactions } from "@/lib/transactions"
 
 const initialAccounts = [
   { name: "Checking", balance: 7500 },
@@ -22,6 +23,7 @@ export function AccountsOverview() {
   const [isRequestMoneyModalOpen, setIsRequestMoneyModalOpen] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const { t } = useLanguage()
+  const { addBankExpenses } = useTransactions()
 
   const handleSendMoney = (amount, fromAccount) => {
     setAccounts(
@@ -48,13 +50,7 @@ export function AccountsOverview() {
         return
       }
 
-      const totalExpenses = Math.abs(expenses.reduce((sum, expense) => sum + expense.amount, 0))
-
-      setAccounts((prev) =>
-        prev.map((account) =>
-          account.name === "Checking" ? { ...account, balance: account.balance - totalExpenses } : account,
-        ),
-      )
+      addBankExpenses(expenses)
 
       toast.success(`${expenses.length} ${t("expenses imported")}`)
     } catch {

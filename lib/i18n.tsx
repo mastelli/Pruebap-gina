@@ -97,6 +97,10 @@ const translations: Record<string, string> = {
   // Transacciones recientes
   "Recent Transactions": "Transacciones recientes",
   "View All Transactions": "Ver todas las transacciones",
+  "All Transactions": "Todas las transacciones",
+  "Income": "Ingreso",
+  "Expense": "Gasto",
+  "No transactions yet": "Aún no hay transacciones",
   "Amazon.com": "Amazon.com",
   "Whole Foods Market": "Whole Foods Market",
   "Netflix Subscription": "Suscripción de Netflix",
