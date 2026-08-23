@@ -15,13 +15,7 @@ export interface BankExpenseInput {
   amount: number
 }
 
-const DEFAULT_TRANSACTIONS: Transaction[] = [
-  { id: "demo-1", name: "Amazon.com", amount: -129.99, date: "2023-07-15" },
-  { id: "demo-2", name: "Whole Foods Market", amount: -89.72, date: "2023-07-10" },
-  { id: "demo-3", name: "Netflix Subscription", amount: -15.99, date: "2023-07-05" },
-  { id: "demo-4", name: "Freelance Payment", amount: 750, date: "2023-07-12" },
-  { id: "demo-5", name: "Gas Station", amount: -45.5, date: "2023-07-18" },
-]
+const DEFAULT_TRANSACTIONS: Transaction[] = []
 
 interface TransactionsContextValue {
   transactions: Transaction[]
@@ -45,8 +39,13 @@ export function TransactionsProvider({ children }: { children: React.ReactNode }
       const stored = window.localStorage.getItem(STORAGE_KEY)
       if (stored) {
         const parsed = JSON.parse(stored)
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          setTransactions(parsed)
+        if (Array.isArray(parsed)) {
+          const withoutDemos = parsed.filter(
+            (transaction) => typeof transaction?.id === "string" && !transaction.id.startsWith("demo-"),
+          )
+          if (withoutDemos.length > 0) {
+            setTransactions(withoutDemos)
+          }
         }
       }
     } catch {

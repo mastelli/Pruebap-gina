@@ -26,6 +26,9 @@ export function RecentTransactions() {
               </div>
             </div>
           ))}
+          {recent.length === 0 && (
+            <p className="py-4 text-center text-sm text-muted-foreground">{t("No transactions yet")}</p>
+          )}
         </div>
         <Button className="w-full mt-4" variant="outline" asChild>
           <Link href="/transactions">{t("View All Transactions")}</Link>
