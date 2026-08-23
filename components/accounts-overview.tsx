@@ -8,7 +8,7 @@ import { Wallet, Upload, Send, CreditCard, MoreHorizontal } from "lucide-react"
 import { SendMoneyModal } from "./send-money-modal"
 import { RequestMoneyModal } from "./request-money-modal"
 import { useLanguage } from "@/lib/i18n"
-import { parseNorma43Expenses } from "@/lib/norma43"
+import { parseBankExpenses } from "@/lib/bank-import"
 
 const initialAccounts = [
   { name: "Checking", balance: 7500 },
@@ -41,7 +41,7 @@ export function AccountsOverview() {
 
     try {
       const content = await file.text()
-      const expenses = parseNorma43Expenses(content)
+      const expenses = parseBankExpenses(content)
 
       if (expenses.length === 0) {
         toast.error(t("No expenses found in the file"))
@@ -95,7 +95,7 @@ export function AccountsOverview() {
         <input
           ref={fileInputRef}
           type="file"
-          accept=".43,.txt,text/plain"
+          accept=".43,.txt,.csv,text/plain,text/csv"
           className="hidden"
           onChange={handleFileChange}
         />
