@@ -1,6 +1,6 @@
-import { parseNorma43Expenses } from "./norma43"
+import { parseNorma43Movements } from "./norma43"
 
-export interface BankExpense {
+export interface BankMovement {
   date: string
   concept: string
   reference: string
@@ -38,20 +38,15 @@ function isoFromSpanishDate(raw: string): string {
 
 function looksLikeCsv(content: string): boolean {
   const head = content.slice(0, 2000)
-  const firstLine = head.split(/\r?\n/)[0] ?? ""
-  return (
-    head.includes("Cantidades expresadas") ||
-    firstLine.split(";").some((field) => field.trim() === "Fecha")
-  )
+  return head.includes(";")
 }
 
-function parseCsvExpenses(content: string): BankExpense[] {
-  const expenses: BankExpense[] = []
+function parseCsvMovements(content: string): BankMovement[] {
+  const movements: BankMovement[] = []
 
   for (const rawLine of content.split(/\r?\n/)) {
     const line = rawLine.trim()
     if (!line) continue
-    if (line.includes("Cantidades expresadas")) continue
 
     let fields = line
       .split(";")
@@ -59,7 +54,16 @@ function parseCsvExpenses(content: string): BankExpense[] {
       .filter((field) => field !== "")
 
     if (fields.length < 3) continue
-    if (fields.some((field) => field === "Fecha" || field === "Fecha valor" || field === "Concepto" || field === "Importe" || field === "Saldo Posterior")) {
+    if (
+      fields.some(
+        (field) =>
+          field === "Fecha" ||
+          field === "Fecha valor" ||
+          field === "Concepto" ||
+          field === "Importe" ||
+          field === "Saldo Posterior",
+      )
+    ) {
       continue
     }
 
@@ -70,7 +74,7 @@ function parseCsvExpenses(content: string): BankExpense[] {
     }
     if (dates.length === 0) continue
 
-    // Localizar importe y saldo (los campos numéricos restantes)
+    // Localizar importe y saldo (los dos últimos campos numéricos)
     const numericIndices = fields
       .map((field, index) => ({ field, index }))
       .filter(({ field }) => NUMERIC_RE.test(field))
@@ -84,36 +88,34 @@ function parseCsvExpenses(content: string): BankExpense[] {
     const amount = parseEuropeanNumber(amountEntry.field)
     if (Number.isNaN(amount)) continue
 
-    if (amount < 0) {
-      const conceptFields = fields.filter(
-        (_, index) => index !== amountEntry.index && index !== saldoEntry.index,
-      )
-      expenses.push({
-        date: isoFromSpanishDate(dates[0]),
-        concept: conceptFields.join(" ") || "Sin concepto",
-        reference: "",
-        amount,
-      })
+    const conceptFields = fields.filter(
+      (_, index) => index !== amountEntry.index && index !== saldoEntry.index,
+    )
+
+    movements.push({
+      date: isoFromSpanishDate(dates[0]),
+      concept: conceptFields.join(" ") || "Sin concepto",
+      reference: "",
+      amount,
+    })
+  }
+
+  return movements
+}
+
+function parseBankMovements(content: string): BankMovement[] {
+  if (looksLikeCsv(content)) {
+    const csvMovements = parseCsvMovements(content)
+    if (csvMovements.length > 0) {
+      return csvMovements
     }
   }
-
-  return expenses
-}
-
-function parseBankExpenses(content: string): BankExpense[] {
-  if (looksLikeCsv(content)) {
-    return parseCsvExpenses(content)
-  }
-  return parseNorma43AsExpenses(content)
-}
-
-function parseNorma43AsExpenses(content: string): BankExpense[] {
-  return parseNorma43Expenses(content).map((expense) => ({
-    date: expense.date,
-    concept: expense.concept,
-    reference: expense.reference,
-    amount: expense.amount,
+  return parseNorma43Movements(content).map((movement) => ({
+    date: movement.date,
+    concept: movement.concept,
+    reference: movement.reference,
+    amount: movement.amount,
   }))
 }
 
-export { parseBankExpenses }
+export { parseBankMovements }

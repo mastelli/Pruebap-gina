@@ -9,7 +9,7 @@ export interface Transaction {
   date: string
 }
 
-export interface BankExpenseInput {
+export interface BankMovementInput {
   date: string
   concept: string
   amount: number
@@ -19,7 +19,7 @@ const DEFAULT_TRANSACTIONS: Transaction[] = []
 
 interface TransactionsContextValue {
   transactions: Transaction[]
-  addBankExpenses: (expenses: BankExpenseInput[]) => void
+  addBankMovements: (movements: BankMovementInput[]) => void
   removeTransaction: (id: string) => void
 }
 
@@ -64,19 +64,19 @@ export function TransactionsProvider({ children }: { children: React.ReactNode }
     }
   }, [transactions, hydrated])
 
-  const addBankExpenses = (expenses: BankExpenseInput[]) => {
+  const addBankMovements = (movements: BankMovementInput[]) => {
     setTransactions((prev) => {
       const existingKeys = new Set(
         prev.map((transaction) => `${transaction.date}|${transaction.name}|${transaction.amount}`),
       )
 
       const fresh: Transaction[] = []
-      expenses.forEach((expense, index) => {
+      movements.forEach((movement, index) => {
         const transaction: Transaction = {
           id: `bank-${Date.now()}-${index}`,
-          name: expense.concept || "Sin concepto",
-          amount: expense.amount,
-          date: expense.date || new Date().toISOString().slice(0, 10),
+          name: movement.concept || "Sin concepto",
+          amount: movement.amount,
+          date: movement.date || new Date().toISOString().slice(0, 10),
         }
         const key = `${transaction.date}|${transaction.name}|${transaction.amount}`
         if (!existingKeys.has(key)) {
@@ -94,7 +94,7 @@ export function TransactionsProvider({ children }: { children: React.ReactNode }
   }
 
   return (
-    <TransactionsContext.Provider value={{ transactions, addBankExpenses, removeTransaction }}>
+    <TransactionsContext.Provider value={{ transactions, addBankMovements, removeTransaction }}>
       {children}
     </TransactionsContext.Provider>
   )

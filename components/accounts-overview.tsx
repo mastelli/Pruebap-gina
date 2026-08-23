@@ -8,7 +8,7 @@ import { Wallet, Upload, Send, CreditCard, MoreHorizontal } from "lucide-react"
 import { SendMoneyModal } from "./send-money-modal"
 import { RequestMoneyModal } from "./request-money-modal"
 import { useLanguage } from "@/lib/i18n"
-import { parseBankExpenses } from "@/lib/bank-import"
+import { parseBankMovements } from "@/lib/bank-import"
 import { useTransactions } from "@/lib/transactions"
 
 const initialAccounts = [
@@ -23,7 +23,7 @@ export function AccountsOverview() {
   const [isRequestMoneyModalOpen, setIsRequestMoneyModalOpen] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const { t } = useLanguage()
-  const { addBankExpenses } = useTransactions()
+  const { addBankMovements } = useTransactions()
 
   const handleSendMoney = (amount, fromAccount) => {
     setAccounts(
@@ -43,16 +43,16 @@ export function AccountsOverview() {
 
     try {
       const content = await file.text()
-      const expenses = parseBankExpenses(content)
+      const movements = parseBankMovements(content)
 
-      if (expenses.length === 0) {
+      if (movements.length === 0) {
         toast.error(t("No expenses found in the file"))
         return
       }
 
-      addBankExpenses(expenses)
+      addBankMovements(movements)
 
-      toast.success(`${expenses.length} ${t("expenses imported")}`)
+      toast.success(`${movements.length} ${t("movements imported")}`)
     } catch {
       toast.error(t("Error reading the file"))
     } finally {

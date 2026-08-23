@@ -1,4 +1,4 @@
-export interface Norma43Expense {
+export interface Norma43Movement {
   date: string
   concept: string
   reference: string
@@ -67,7 +67,7 @@ function formatDate(yymmdd: string): string {
   return `20${yymmdd.slice(0, 2)}-${yymmdd.slice(2, 4)}-${yymmdd.slice(4, 6)}`
 }
 
-export function parseNorma43Expenses(content: string): Norma43Expense[] {
+export function parseNorma43Movements(content: string): Norma43Movement[] {
   const movements: Array<{
     date: string
     concept: string
@@ -98,7 +98,7 @@ export function parseNorma43Expenses(content: string): Norma43Expense[] {
   }
 
   return movements
-    .filter((movement) => !Number.isNaN(movement.amount) && movement.amount < 0)
+    .filter((movement) => !Number.isNaN(movement.amount))
     .map((movement) => ({
       date: movement.date,
       concept: movement.concept || "Sin concepto",

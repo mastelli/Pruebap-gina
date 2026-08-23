@@ -116,8 +116,8 @@ const translations: Record<string, string> = {
 
   // Extracto bancario (Norma 43)
   "Add bank statement": "Añadir extracto del banco",
-  "expenses imported": "gastos importados",
-  "No expenses found in the file": "No se han encontrado gastos en el archivo",
+  "movements imported": "movimientos importados",
+  "No expenses found in the file": "No se han encontrado movimientos en el archivo",
   "Error reading the file": "Error al leer el archivo",
 
   // Métricas de negocio
