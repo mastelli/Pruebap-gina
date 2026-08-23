@@ -37,11 +37,19 @@ interface MetricTabProps {
   titleKey: string
   firstCardTitleKey?: string
   firstCard?: ReactNode
+  secondCardTitleKey?: string
+  secondCard?: ReactNode
 }
 
 // Plantilla comun para las pestanas de Ingresos, Gastos y Ahorro/Inversion;
 // cada seccion personalizara sus datos sobre esta misma estructura
-export function MetricTab({ titleKey, firstCardTitleKey, firstCard }: MetricTabProps) {
+export function MetricTab({
+  titleKey,
+  firstCardTitleKey,
+  firstCard,
+  secondCardTitleKey,
+  secondCard,
+}: MetricTabProps) {
   const { theme } = useTheme()
   const [timeFrame, setTimeFrame] = useState("last_30_days")
   const { t } = useLanguage()
@@ -84,17 +92,21 @@ export function MetricTab({ titleKey, firstCardTitleKey, firstCard }: MetricTabP
         </Card>
         <Card className="col-span-3">
           <CardHeader>
-            <CardTitle className="text-xl font-semibold">{t("Customer Retention Rate")}</CardTitle>
+            <CardTitle className="text-xl font-semibold">
+              {t(secondCardTitleKey ?? "Customer Retention Rate")}
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={retentionRateData}>
-                <XAxis dataKey="month" tickFormatter={(value) => t(value)} />
-                <YAxis />
-                <Tooltip />
-                <Line type="monotone" dataKey="rate" stroke={theme === "dark" ? "#adfa1d" : "#0ea5e9"} />
-              </LineChart>
-            </ResponsiveContainer>
+            {secondCard ?? (
+              <ResponsiveContainer width="100%" height={300}>
+                <LineChart data={retentionRateData}>
+                  <XAxis dataKey="month" tickFormatter={(value) => t(value)} />
+                  <YAxis />
+                  <Tooltip />
+                  <Line type="monotone" dataKey="rate" stroke={theme === "dark" ? "#adfa1d" : "#0ea5e9"} />
+                </LineChart>
+              </ResponsiveContainer>
+            )}
           </CardContent>
         </Card>
       </div>

@@ -5,8 +5,8 @@ import { useLanguage } from "@/lib/i18n"
 import { useTransactions } from "@/lib/transactions"
 import { getIncomeBreakdown } from "@/lib/income"
 
-// Tonos pastel de verde, uno por categoria
-const BAR_COLORS = ["#a5d6a7", "#81c784", "#66bb6a"]
+// Tonos verdes, uno por categoria
+const BAR_COLORS = ["#66bb6a", "#43a047", "#2e7d32"]
 
 function formatEuros(value: number): string {
   return value.toLocaleString("es-ES", { style: "currency", currency: "EUR" })

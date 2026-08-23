@@ -154,6 +154,7 @@ const translations: Record<string, string> = {
   "Salary": "Nómina",
   "Transfers": "Transferencias",
   "Bizum": "Bizum",
+  "History": "Historial",
   "Write a message": "Escribe un mensaje",
   "No messages yet": "Todavía no hay mensajes",
   "Notes": "Notas",
