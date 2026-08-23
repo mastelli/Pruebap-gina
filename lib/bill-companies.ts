@@ -93,6 +93,47 @@ const INTERNET_COMPANIES = [
   "Wireless Logic",
 ]
 
+const WATER_COMPANIES = [
+  "Aqualia",
+  "Canal de Isabel II",
+  "Agbar",
+  "Aigües de Barcelona",
+  "Acciona Agua",
+  "Global Omnium",
+  "FACSA",
+  "Hidralia",
+  "Hidraqua",
+  "Hidrogea",
+  "GS Inima",
+  "Sacyr Agua",
+  "CASSA",
+  "EMASESA",
+  "EMAYA",
+  "EMACSA",
+  "EMALCSA",
+  "Espina & Delfín",
+  "Aqlara",
+  "Aguas de Valencia",
+  "Aguas de Alicante",
+  "Aguas de Murcia",
+  "Aguas de Córdoba",
+  "Aguas de Cádiz",
+  "Aguas de Huelva",
+  "Aguas de Teruel",
+  "Aguas de Zaragoza",
+  "Consorcio de Aguas Bilbao Bizkaia",
+  "Consorci d’Aigües de Tarragona",
+  "Aguas del Añarbe",
+  "Aguas de Valladolid",
+  "Aguas de Burgos",
+  "Aguas de León",
+  "Aguas de Avilés",
+  "Aguas de Gijón",
+  "Aguas de Oviedo",
+  "Aguas de Santander",
+  "Aguas de Torrelavega",
+]
+
 function makeMatcher(companies: string[]): (concept: string) => boolean {
   const normalizedCompanies = companies.map(normalize)
   return (concept: string) => {
@@ -103,6 +144,7 @@ function makeMatcher(companies: string[]): (concept: string) => boolean {
 
 export const isElectricityBill = makeMatcher(ELECTRICITY_COMPANIES)
 export const isInternetBill = makeMatcher(INTERNET_COMPANIES)
+export const isWaterBill = makeMatcher(WATER_COMPANIES)
 
 export interface DetectableMovement {
   name: string

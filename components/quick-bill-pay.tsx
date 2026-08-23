@@ -4,7 +4,7 @@ import { useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useLanguage } from "@/lib/i18n"
 import { useTransactions } from "@/lib/transactions"
-import { getMonthlyBillAmount, isElectricityBill, isInternetBill } from "@/lib/bill-companies"
+import { getMonthlyBillAmount, isElectricityBill, isInternetBill, isWaterBill } from "@/lib/bill-companies"
 
 interface Bill {
   id: number
@@ -33,15 +33,17 @@ export function QuickBillPay() {
   const currentMonth = String(now.getMonth() + 1).padStart(2, "0")
   const electricityAmount = getMonthlyBillAmount(transactions, currentYear, currentMonth, isElectricityBill)
   const internetAmount = getMonthlyBillAmount(transactions, currentYear, currentMonth, isInternetBill)
+  const waterAmount = getMonthlyBillAmount(transactions, currentYear, currentMonth, isWaterBill)
 
-  // Gastos del mes excluyendo las facturas ya desglosadas (luz e internet)
+  // Gastos del mes excluyendo las facturas ya desglosadas (luz, agua e internet)
   const cardPaymentsAmount = transactions
     .filter(
       (transaction) =>
         transaction.date.startsWith(`${currentYear}-${currentMonth}`) &&
         transaction.amount < 0 &&
         !isElectricityBill(transaction.name) &&
-        !isInternetBill(transaction.name),
+        !isInternetBill(transaction.name) &&
+        !isWaterBill(transaction.name),
     )
     .reduce((sum, transaction) => sum + transaction.amount, 0)
 
@@ -71,6 +73,11 @@ export function QuickBillPay() {
                 {bill.name === "Internet Service" && internetAmount !== 0 && (
                   <span className="text-sm font-medium tabular-nums text-red-600 dark:text-red-400">
                     {formatEuros(internetAmount)}
+                  </span>
+                )}
+                {bill.name === "Water Bill" && waterAmount !== 0 && (
+                  <span className="text-sm font-medium tabular-nums text-red-600 dark:text-red-400">
+                    {formatEuros(waterAmount)}
                   </span>
                 )}
                 {bill.name === "Card Payments" && cardPaymentsAmount !== 0 && (
