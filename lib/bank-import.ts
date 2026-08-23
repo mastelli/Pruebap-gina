@@ -5,6 +5,7 @@ export interface BankMovement {
   concept: string
   reference: string
   amount: number
+  balance?: number
 }
 
 const SPANISH_DATE_RE = /^\d{1,2}\/\d{1,2}\/\d{4}(?:\s+\d{1,2}:\d{2}(?::\d{2})?)?$/
@@ -88,6 +89,15 @@ function parseCsvMovements(content: string): BankMovement[] {
     const amount = parseEuropeanNumber(amountEntry.field)
     if (Number.isNaN(amount)) continue
 
+    // Saldo posterior (el último campo numérico), si existe
+    let balance: number | undefined
+    if (numericIndices.length >= 2) {
+      const parsedBalance = parseEuropeanNumber(saldoEntry.field)
+      if (!Number.isNaN(parsedBalance)) {
+        balance = parsedBalance
+      }
+    }
+
     const conceptFields = fields.filter(
       (_, index) => index !== amountEntry.index && index !== saldoEntry.index,
     )
@@ -97,6 +107,7 @@ function parseCsvMovements(content: string): BankMovement[] {
       concept: conceptFields.join(" ") || "Sin concepto",
       reference: "",
       amount,
+      balance,
     })
   }
 
@@ -115,6 +126,7 @@ function parseBankMovements(content: string): BankMovement[] {
     concept: movement.concept,
     reference: movement.reference,
     amount: movement.amount,
+    balance: movement.balance,
   }))
 }
 

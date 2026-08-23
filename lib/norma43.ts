@@ -3,6 +3,7 @@ export interface Norma43Movement {
   concept: string
   reference: string
   amount: number
+  balance?: number
 }
 
 // Codificación oficial del Cuaderno 43 AEB:
@@ -68,12 +69,7 @@ function formatDate(yymmdd: string): string {
 }
 
 export function parseNorma43Movements(content: string): Norma43Movement[] {
-  const movements: Array<{
-    date: string
-    concept: string
-    reference: string
-    amount: number
-  }> = []
+  const movements: Norma43Movement[] = []
 
   const lines = content.split(/\r?\n/)
 
@@ -87,6 +83,12 @@ export function parseNorma43Movements(content: string): Norma43Movement[] {
         reference: line.slice(44, 90).trim(),
         amount: decodeAmount(line.slice(32, 42)),
       })
+    } else if (line.startsWith("24") && line.slice(2, 4) === "01" && movements.length > 0) {
+      // Registro opcional con el saldo posterior al movimiento anterior
+      const saldo = decodeAmount(line.slice(16, 26))
+      if (!Number.isNaN(saldo)) {
+        movements[movements.length - 1].balance = saldo
+      }
     } else if (line.startsWith("23") && movements.length > 0) {
       // Registro complementario: amplía el concepto del movimiento anterior
       const extraConcept = line.slice(4, 38).trim()
@@ -104,5 +106,6 @@ export function parseNorma43Movements(content: string): Norma43Movement[] {
       concept: movement.concept || "Sin concepto",
       reference: movement.reference,
       amount: movement.amount,
+      balance: movement.balance,
     }))
 }

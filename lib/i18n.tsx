@@ -50,8 +50,7 @@ const translations: Record<string, string> = {
   "Accounts Overview": "Resumen de cuentas",
   "Total balance across all accounts": "Saldo total de todas las cuentas",
   Checking: "Corriente",
-  Savings: "Ahorros",
-  Investment: "Inversión",
+  "Savings/Investment": "Ahorro/Inversión",
 
   // Modales de dinero
   Amount: "Importe",

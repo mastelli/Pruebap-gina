@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { toast } from "sonner"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -12,25 +12,40 @@ import { parseBankMovements } from "@/lib/bank-import"
 import { useTransactions } from "@/lib/transactions"
 
 const initialAccounts = [
-  { name: "Checking", balance: 7500 },
-  { name: "Savings", balance: 560000 },
-  { name: "Investment", balance: 5879000 },
+  { name: "Checking", balance: 0 },
+  { name: "Savings/Investment", balance: 0 },
 ]
 
+function formatEuros(value: number): string {
+  return value.toLocaleString("es-ES", { style: "currency", currency: "EUR" })
+}
+
 export function AccountsOverview() {
-  const [accounts, setAccounts] = useState(initialAccounts)
+  const [accounts] = useState(initialAccounts)
   const [isSendMoneyModalOpen, setIsSendMoneyModalOpen] = useState(false)
   const [isRequestMoneyModalOpen, setIsRequestMoneyModalOpen] = useState(false)
+  const [checkingBalance, setCheckingBalance] = useState<number | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const { t } = useLanguage()
   const { addBankMovements } = useTransactions()
 
+  useEffect(() => {
+    try {
+      const stored = window.localStorage.getItem("appCheckingBalance")
+      if (stored) {
+        const parsed = Number.parseFloat(stored)
+        if (!Number.isNaN(parsed)) {
+          setCheckingBalance(parsed)
+        }
+      }
+    } catch {
+      // storage unavailable
+    }
+  }, [])
+
   const handleSendMoney = (amount, fromAccount) => {
-    setAccounts(
-      accounts.map((account) =>
-        account.name === fromAccount ? { ...account, balance: account.balance - amount } : account,
-      ),
-    )
+    void amount
+    void fromAccount
   }
 
   const handleRequestMoney = (amount, contact) => {
@@ -48,6 +63,17 @@ export function AccountsOverview() {
       if (movements.length === 0) {
         toast.error(t("No expenses found in the file"))
         return
+      }
+
+      // El saldo posterior de la primera línea del archivo es el saldo actual de Corriente
+      const firstBalance = movements.find((movement) => typeof movement.balance === "number")?.balance
+      if (typeof firstBalance === "number") {
+        setCheckingBalance(firstBalance)
+        try {
+          window.localStorage.setItem("appCheckingBalance", String(firstBalance))
+        } catch {
+          // storage unavailable
+        }
       }
 
       addBankMovements(movements)
@@ -71,6 +97,9 @@ export function AccountsOverview() {
           {accounts.map((account) => (
             <div key={account.name} className="flex justify-between items-center">
               <span className="text-sm text-muted-foreground">{t(account.name)}</span>
+              {account.name === "Checking" && checkingBalance !== null && (
+                <span className="text-sm font-medium tabular-nums">{formatEuros(checkingBalance)}</span>
+              )}
             </div>
           ))}
         </div>
