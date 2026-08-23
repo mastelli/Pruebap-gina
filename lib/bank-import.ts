@@ -90,7 +90,7 @@ function parseCsvExpenses(content: string): BankExpense[] {
       )
       expenses.push({
         date: isoFromSpanishDate(dates[0]),
-        concept: conceptFields.join(" "),
+        concept: conceptFields.join(" ") || "Sin concepto",
         reference: "",
         amount,
       })

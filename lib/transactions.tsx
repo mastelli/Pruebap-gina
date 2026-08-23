@@ -64,15 +64,28 @@ export function TransactionsProvider({ children }: { children: React.ReactNode }
   }, [transactions, hydrated])
 
   const addBankExpenses = (expenses: BankExpenseInput[]) => {
-    setTransactions((prev) => [
-      ...expenses.map((expense, index) => ({
-        id: `bank-${Date.now()}-${index}`,
-        name: expense.concept,
-        amount: expense.amount,
-        date: expense.date || new Date().toISOString().slice(0, 10),
-      })),
-      ...prev,
-    ])
+    setTransactions((prev) => {
+      const existingKeys = new Set(
+        prev.map((transaction) => `${transaction.date}|${transaction.name}|${transaction.amount}`),
+      )
+
+      const fresh: Transaction[] = []
+      expenses.forEach((expense, index) => {
+        const transaction: Transaction = {
+          id: `bank-${Date.now()}-${index}`,
+          name: expense.concept || "Sin concepto",
+          amount: expense.amount,
+          date: expense.date || new Date().toISOString().slice(0, 10),
+        }
+        const key = `${transaction.date}|${transaction.name}|${transaction.amount}`
+        if (!existingKeys.has(key)) {
+          existingKeys.add(key)
+          fresh.push(transaction)
+        }
+      })
+
+      return [...fresh, ...prev]
+    })
   }
 
   return (
