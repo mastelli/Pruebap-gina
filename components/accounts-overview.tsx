@@ -22,7 +22,26 @@ export function AccountsOverview() {
 
   const now = new Date()
   const currentYear = `${now.getFullYear()}`
+  const currentMonth = String(now.getMonth() + 1).padStart(2, "0")
   const monthsElapsed = now.getMonth() + 1
+
+  const monthlyIncome = transactions
+    .filter(
+      (transaction) =>
+        transaction.amount > 0 &&
+        transaction.date.startsWith(currentYear) &&
+        transaction.date.slice(5, 7) === currentMonth,
+    )
+    .reduce((sum, transaction) => sum + transaction.amount, 0)
+
+  const monthlyExpenses = transactions
+    .filter(
+      (transaction) =>
+        transaction.amount < 0 &&
+        transaction.date.startsWith(currentYear) &&
+        transaction.date.slice(5, 7) === currentMonth,
+    )
+    .reduce((sum, transaction) => sum + Math.abs(transaction.amount), 0)
 
   const yearlyIncome = transactions
     .filter((transaction) => transaction.amount > 0 && transaction.date.startsWith(currentYear))
@@ -66,16 +85,16 @@ export function AccountsOverview() {
 
   return (
     <Card className="flex h-[390px] w-full flex-col overflow-hidden">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+      <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle>{t("Accounts Overview")}</CardTitle>
         <Wallet className="h-4 w-4 text-muted-foreground" />
       </CardHeader>
       <CardContent className="flex flex-1 flex-col">
         <div className="space-y-2">
           <div className="flex justify-between items-center">
-            <span className="text-sm text-muted-foreground">{t("Total Income")}</span>
-            <span className="text-sm font-medium tabular-nums text-green-600 dark:text-green-400">
-              {formatEuros(yearlyIncome)}
+            <span className="font-medium">{t("Total Income")}</span>
+            <span className="font-medium tabular-nums text-green-600 dark:text-green-400">
+              {formatEuros(monthlyIncome)}
             </span>
           </div>
           <div className="flex justify-between items-center">
@@ -83,9 +102,9 @@ export function AccountsOverview() {
             <span className="text-sm font-medium tabular-nums">{formatEuros(monthlyIncomeAverage)}</span>
           </div>
           <div className="flex justify-between items-center">
-            <span className="text-sm text-muted-foreground">{t("Total Expenses")}</span>
-            <span className="text-sm font-medium tabular-nums text-red-600 dark:text-red-400">
-              {formatEuros(yearlyExpenses)}
+            <span className="font-medium">{t("Total Expenses")}</span>
+            <span className="font-medium tabular-nums text-red-600 dark:text-red-400">
+              {formatEuros(monthlyExpenses)}
             </span>
           </div>
           <div className="flex justify-between items-center">
@@ -93,7 +112,7 @@ export function AccountsOverview() {
             <span className="text-sm font-medium tabular-nums">{formatEuros(monthlyExpenseAverage)}</span>
           </div>
           <div className="flex justify-between items-center">
-            <span className="text-sm text-muted-foreground">{t("Savings/Investment")}</span>
+            <span className="font-medium">{t("Savings/Investment")}</span>
           </div>
         </div>
         <div className="mt-auto space-y-2 pt-6">
