@@ -55,7 +55,7 @@ export default function TransactionsPage() {
               <SelectTrigger className="w-[180px]">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="max-h-[480px]">
                 {MONTHS.map((month, index) => (
                   <SelectItem key={month} value={String(index + 1).padStart(2, "0")}>
                     {t(month)}
