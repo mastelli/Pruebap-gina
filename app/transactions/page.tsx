@@ -2,13 +2,14 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Wallet } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Wallet, Trash2 } from "lucide-react"
 import { useLanguage } from "@/lib/i18n"
 import { useTransactions, sortByDateDesc } from "@/lib/transactions"
 
 export default function TransactionsPage() {
   const { t } = useLanguage()
-  const { transactions } = useTransactions()
+  const { transactions, removeTransaction } = useTransactions()
   const sorted = sortByDateDesc(transactions)
 
   return (
@@ -24,7 +25,7 @@ export default function TransactionsPage() {
           <div className="divide-y divide-border">
             {sorted.map((transaction) => (
               <div key={transaction.id} className="flex items-center justify-between gap-4 py-3">
-                <div>
+                <div className="min-w-0">
                   <p className="text-sm font-medium">{t(transaction.name)}</p>
                   <p className="text-xs text-muted-foreground">{transaction.date}</p>
                 </div>
@@ -45,6 +46,15 @@ export default function TransactionsPage() {
                       currency: "EUR",
                     })}
                   </span>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                    onClick={() => removeTransaction(transaction.id)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                    <span className="sr-only">{t("Delete")}</span>
+                  </Button>
                 </div>
               </div>
             ))}

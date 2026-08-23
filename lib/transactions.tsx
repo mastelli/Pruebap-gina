@@ -20,6 +20,7 @@ const DEFAULT_TRANSACTIONS: Transaction[] = []
 interface TransactionsContextValue {
   transactions: Transaction[]
   addBankExpenses: (expenses: BankExpenseInput[]) => void
+  removeTransaction: (id: string) => void
 }
 
 const TransactionsContext = createContext<TransactionsContextValue | null>(null)
@@ -88,8 +89,12 @@ export function TransactionsProvider({ children }: { children: React.ReactNode }
     })
   }
 
+  const removeTransaction = (id: string) => {
+    setTransactions((prev) => prev.filter((transaction) => transaction.id !== id))
+  }
+
   return (
-    <TransactionsContext.Provider value={{ transactions, addBankExpenses }}>
+    <TransactionsContext.Provider value={{ transactions, addBankExpenses, removeTransaction }}>
       {children}
     </TransactionsContext.Provider>
   )
