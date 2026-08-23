@@ -10,11 +10,6 @@ import { useLanguage } from "@/lib/i18n"
 import { parseBankMovements } from "@/lib/bank-import"
 import { useTransactions } from "@/lib/transactions"
 
-const accounts = [
-  { name: "Checking" },
-  { name: "Savings/Investment" },
-]
-
 function formatEuros(value: number): string {
   return value.toLocaleString("es-ES", { style: "currency", currency: "EUR" })
 }
@@ -23,7 +18,7 @@ export function AccountsOverview() {
   const [isAddTransactionModalOpen, setIsAddTransactionModalOpen] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const { t } = useLanguage()
-  const { addBankMovements, checkingBalance, setCheckingBalance, transactions } = useTransactions()
+  const { addBankMovements, setCheckingBalance, transactions } = useTransactions()
 
   const now = new Date()
   const currentYear = `${now.getFullYear()}`
@@ -77,14 +72,6 @@ export function AccountsOverview() {
       </CardHeader>
       <CardContent className="flex flex-1 flex-col">
         <div className="space-y-2">
-          {accounts.map((account) => (
-            <div key={account.name} className="flex justify-between items-center">
-              <span className="text-sm text-muted-foreground">{t(account.name)}</span>
-              {account.name === "Checking" && checkingBalance !== null && (
-                <span className="text-sm font-medium tabular-nums">{formatEuros(checkingBalance)}</span>
-              )}
-            </div>
-          ))}
           <div className="flex justify-between items-center">
             <span className="text-sm text-muted-foreground">{t("Total Income")}</span>
             <span className="text-sm font-medium tabular-nums text-green-600 dark:text-green-400">
@@ -104,6 +91,9 @@ export function AccountsOverview() {
           <div className="flex justify-between items-center">
             <span className="text-sm text-muted-foreground">{t("Average Expenses")}</span>
             <span className="text-sm font-medium tabular-nums">{formatEuros(monthlyExpenseAverage)}</span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span className="text-sm text-muted-foreground">{t("Savings/Investment")}</span>
           </div>
         </div>
         <div className="mt-auto space-y-2 pt-6">
