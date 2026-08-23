@@ -74,7 +74,7 @@ export function QuickBillPay() {
                       {t("Provider:")} {internetProvider}
                     </p>
                   )}
-                  {bill.name === "Water Bill" && waterProvider && (
+                  {bill.name === "Water Bill" && (
                     <p className="text-sm text-muted-foreground">
                       {t("Provider:")} {waterProvider}
                     </p>
