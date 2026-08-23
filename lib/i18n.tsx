@@ -32,6 +32,7 @@ const translations: Record<string, string> = {
   "Transaction added": "Transacción añadida",
   "Please enter a valid amount": "Introduce un importe válido",
   "Please select a date": "Selecciona una fecha",
+  "Monthly average": "Media mensual",
   Back: "Atrás",
   Continue: "Continuar",
   Close: "Cerrar",

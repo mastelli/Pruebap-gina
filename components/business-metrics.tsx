@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { TrendingUp, Users, DollarSign, ArrowRight } from "lucide-react"
 import { useLanguage } from "@/lib/i18n"
+import { useTransactions } from "@/lib/transactions"
 
 const metrics = [
   {
@@ -47,8 +48,24 @@ const statusColors = {
   Ahead: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
 }
 
+function formatEuros(value: number): string {
+  return value.toLocaleString("es-ES", { style: "currency", currency: "EUR" })
+}
+
 export function BusinessMetrics() {
   const { t } = useLanguage()
+  const { transactions } = useTransactions()
+
+  const now = new Date()
+  const currentYear = `${now.getFullYear()}`
+  const monthsElapsed = now.getMonth() + 1
+
+  const yearlyIncome = transactions
+    .filter((transaction) => transaction.amount > 0 && transaction.date.startsWith(currentYear))
+    .reduce((sum, transaction) => sum + transaction.amount, 0)
+
+  const monthlyAverage = yearlyIncome / monthsElapsed
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -65,24 +82,35 @@ export function BusinessMetrics() {
               <metric.icon className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <p className="text-xs text-muted-foreground">{t(metric.subtitle)}</p>
-              <div className="mt-2 space-y-2">
-                <div className="flex items-center text-xs">
-                  <span className={`px-2 py-1 rounded-full ${statusColors[metric.status]}`}>{t(metric.status)}</span>
+              {metric.id === 1 ? (
+                <div className="space-y-1">
+                  <p className="text-2xl font-bold tabular-nums">{formatEuros(yearlyIncome)}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {t("Monthly average")}: {formatEuros(monthlyAverage)}
+                  </p>
                 </div>
-                <div className="w-full bg-secondary rounded-full h-1.5">
-                  <div
-                    className="bg-primary h-1.5 rounded-full"
-                    style={{ width: `${Math.min(metric.progress, 100)}%` }}
-                  />
-                </div>
-                <div className="flex justify-end items-center text-sm">
-                  <span className="text-muted-foreground">
-                    {metric.progress}
-                    {t("% complete")}
-                  </span>
-                </div>
-              </div>
+              ) : (
+                <>
+                  <p className="text-xs text-muted-foreground">{t(metric.subtitle)}</p>
+                  <div className="mt-2 space-y-2">
+                    <div className="flex items-center text-xs">
+                      <span className={`px-2 py-1 rounded-full ${statusColors[metric.status]}`}>{t(metric.status)}</span>
+                    </div>
+                    <div className="w-full bg-secondary rounded-full h-1.5">
+                      <div
+                        className="bg-primary h-1.5 rounded-full"
+                        style={{ width: `${Math.min(metric.progress, 100)}%` }}
+                      />
+                    </div>
+                    <div className="flex justify-end items-center text-sm">
+                      <span className="text-muted-foreground">
+                        {metric.progress}
+                        {t("% complete")}
+                      </span>
+                    </div>
+                  </div>
+                </>
+              )}
             </CardContent>
           </Card>
         ))}

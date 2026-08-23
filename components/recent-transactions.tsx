@@ -16,7 +16,7 @@ export function RecentTransactions() {
       <CardHeader>
         <CardTitle className="text-lg font-medium">{t("Recent Transactions")}</CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="flex flex-1 flex-col">
         <div className="space-y-4">
           {recent.map((transaction) => (
             <div key={transaction.id} className="flex items-center justify-between gap-4">
@@ -43,7 +43,7 @@ export function RecentTransactions() {
             <p className="py-4 text-center text-sm text-muted-foreground">{t("No transactions yet")}</p>
           )}
         </div>
-        <Button className="w-full mt-4" variant="outline" asChild>
+        <Button className="w-full mt-auto" variant="outline" asChild>
           <Link href="/transactions">{t("View All Transactions")}</Link>
         </Button>
       </CardContent>
