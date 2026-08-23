@@ -113,20 +113,24 @@ function parseCsvMovements(content: string): BankMovement[] {
   return movements
 }
 
-function parseBankMovements(content: string): BankMovement[] {
-  if (looksLikeCsv(content)) {
-    const csvMovements = parseCsvMovements(content)
-    if (csvMovements.length > 0) {
-      return csvMovements
-    }
-  }
-  return parseNorma43Movements(content).map((movement) => ({
-    date: movement.date,
-    concept: movement.concept,
-    reference: movement.reference,
-    amount: movement.amount,
-    balance: movement.balance,
-  }))
-}
+// Recargas/traspasos de tarjeta Revolut: se descartan al importar
+const REVOLUT_TRANSFER_RE = /revolut\s*\*\*/i
 
-export { parseBankMovements }
+export function parseBankMovements(content: string): BankMovement[] {
+  let parsed: BankMovement[] = []
+
+  if (looksLikeCsv(content)) {
+    parsed = parseCsvMovements(content)
+  }
+  if (parsed.length === 0) {
+    parsed = parseNorma43Movements(content).map((movement) => ({
+      date: movement.date,
+      concept: movement.concept,
+      reference: movement.reference,
+      amount: movement.amount,
+      balance: movement.balance,
+    }))
+  }
+
+  return parsed.filter((movement) => !REVOLUT_TRANSFER_RE.test(movement.concept))
+}
