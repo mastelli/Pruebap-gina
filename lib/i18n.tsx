@@ -134,8 +134,16 @@ const translations: Record<string, string> = {
   "Due:": "Vence:",
   "No pending bills": "No hay recibos pendientes",
   "Electricity Bill": "Factura de electricidad",
-  "Internet Service": "Servicio de internet",
+  "Internet Service": "Factura de internet",
   "Card Payments": "Pagos con tarjeta",
+  "Invoices": "Facturas",
+  "Add Invoice": "Añadir Factura",
+  "Invoice type": "Tipo de factura",
+  "Internet Bill": "Factura de internet",
+  "Other": "Otros",
+  "Payment date": "Fecha de pago",
+  "No invoices yet": "Todavía no hay facturas",
+  "Invoice added": "Factura añadida",
   "Water Bill": "Factura de agua",
 
   // Extracto bancario (Norma 43)
