@@ -55,7 +55,7 @@ export function AccountsOverview() {
   }
 
   return (
-    <Card className="h-full w-full">
+    <Card className="h-full w-full min-h-[420px]">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium">{t("Accounts Overview")}</CardTitle>
         <Wallet className="h-4 w-4 text-muted-foreground" />
@@ -71,11 +71,11 @@ export function AccountsOverview() {
             </div>
           ))}
         </div>
-        <div className="mt-auto grid grid-cols-2 gap-2 pt-6">
-          <Button size="sm" onClick={() => fileInputRef.current?.click()}>
+        <div className="mt-auto space-y-2 pt-6">
+          <Button size="sm" className="w-full" onClick={() => fileInputRef.current?.click()}>
             <Upload className="mr-2 h-4 w-4" /> {t("Add bank statement")}
           </Button>
-          <Button size="sm" variant="outline" onClick={() => setIsAddTransactionModalOpen(true)}>
+          <Button size="sm" variant="outline" className="w-full" onClick={() => setIsAddTransactionModalOpen(true)}>
             <PlusCircle className="mr-2 h-4 w-4" /> {t("Add manual transaction")}
           </Button>
         </div>
