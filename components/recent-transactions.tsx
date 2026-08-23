@@ -9,7 +9,7 @@ import { useTransactions, sortByDateDesc } from "@/lib/transactions"
 export function RecentTransactions() {
   const { t } = useLanguage()
   const { transactions } = useTransactions()
-  const recent = sortByDateDesc(transactions).slice(0, 5)
+  const recent = sortByDateDesc(transactions).slice(0, 4)
 
   return (
     <Card>
@@ -19,11 +19,24 @@ export function RecentTransactions() {
       <CardContent>
         <div className="space-y-4">
           {recent.map((transaction) => (
-            <div key={transaction.id} className="flex items-center">
-              <div className="flex-1">
-                <p className="text-sm font-medium">{t(transaction.name)}</p>
+            <div key={transaction.id} className="flex items-center justify-between gap-4">
+              <div className="min-w-0">
+                <p className="text-sm font-medium truncate">{t(transaction.name)}</p>
                 <p className="text-xs text-muted-foreground">{transaction.date}</p>
               </div>
+              <span
+                className={`text-sm tabular-nums shrink-0 ${
+                  transaction.amount >= 0
+                    ? "text-green-600 dark:text-green-400"
+                    : "text-red-600 dark:text-red-400"
+                }`}
+              >
+                {transaction.amount >= 0 ? "+" : ""}
+                {transaction.amount.toLocaleString("es-ES", {
+                  style: "currency",
+                  currency: "EUR",
+                })}
+              </span>
             </div>
           ))}
           {recent.length === 0 && (
