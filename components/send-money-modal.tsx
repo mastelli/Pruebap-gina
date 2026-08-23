@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { CheckCircle2 } from "lucide-react"
+import { useLanguage } from "@/lib/i18n"
 
 const steps = ["Amount and Account", "Card Details", "OTP Verification", "Confirmation"]
 
@@ -16,6 +17,7 @@ export function SendMoneyModal({ isOpen, onClose, onSendMoney, accounts }) {
   const [selectedAccount, setSelectedAccount] = useState("")
   const [cardDetails, setCardDetails] = useState({ number: "", expiry: "", cvv: "" })
   const [otp, setOtp] = useState("")
+  const { t } = useLanguage()
 
   const handleContinue = () => {
     if (currentStep < steps.length - 1) {
@@ -32,25 +34,25 @@ export function SendMoneyModal({ isOpen, onClose, onSendMoney, accounts }) {
         return (
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="amount">Amount to Send</Label>
+              <Label htmlFor="amount">{t("Amount to Send")}</Label>
               <Input
                 id="amount"
                 type="number"
-                placeholder="Enter amount"
+                placeholder={t("Enter amount")}
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="account">From Account</Label>
+              <Label htmlFor="account">{t("From Account")}</Label>
               <Select onValueChange={setSelectedAccount} value={selectedAccount}>
                 <SelectTrigger id="account">
-                  <SelectValue placeholder="Select account" />
+                  <SelectValue placeholder={t("Select account")} />
                 </SelectTrigger>
                 <SelectContent>
                   {accounts.map((account) => (
                     <SelectItem key={account.name} value={account.name}>
-                      {account.name} (${account.balance.toFixed(2)})
+                      {t(account.name)} (${account.balance.toFixed(2)})
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -62,7 +64,7 @@ export function SendMoneyModal({ isOpen, onClose, onSendMoney, accounts }) {
         return (
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="cardNumber">Card Number</Label>
+              <Label htmlFor="cardNumber">{t("Card Number")}</Label>
               <Input
                 id="cardNumber"
                 placeholder="1234 5678 9012 3456"
@@ -72,7 +74,7 @@ export function SendMoneyModal({ isOpen, onClose, onSendMoney, accounts }) {
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="expiry">Expiry Date</Label>
+                <Label htmlFor="expiry">{t("Expiry Date")}</Label>
                 <Input
                   id="expiry"
                   placeholder="MM/YY"
@@ -95,17 +97,17 @@ export function SendMoneyModal({ isOpen, onClose, onSendMoney, accounts }) {
       case 2:
         return (
           <div className="space-y-4">
-            <p className="text-sm text-muted-foreground">Enter the OTP sent to your registered mobile number</p>
-            <Input placeholder="Enter OTP" value={otp} onChange={(e) => setOtp(e.target.value)} />
+            <p className="text-sm text-muted-foreground">{t("Enter the OTP sent to your registered mobile number")}</p>
+            <Input placeholder={t("Enter OTP")} value={otp} onChange={(e) => setOtp(e.target.value)} />
           </div>
         )
       case 3:
         return (
           <div className="text-center space-y-4">
             <CheckCircle2 className="mx-auto h-12 w-12 text-green-500" />
-            <p className="text-lg font-medium">Money Sent Successfully</p>
+            <p className="text-lg font-medium">{t("Money Sent Successfully")}</p>
             <p className="text-sm text-muted-foreground">
-              ${amount} has been sent from your {selectedAccount} account.
+              ${amount} {t("has been sent from your")} {t(selectedAccount)}.
             </p>
           </div>
         )
@@ -116,18 +118,18 @@ export function SendMoneyModal({ isOpen, onClose, onSendMoney, accounts }) {
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>{steps[currentStep]}</DialogTitle>
+          <DialogTitle>{t(steps[currentStep])}</DialogTitle>
         </DialogHeader>
         <div className="mt-4 space-y-4">
           {renderStepContent()}
           <div className="flex justify-between">
             {currentStep > 0 && currentStep < steps.length - 1 && (
               <Button variant="outline" onClick={() => setCurrentStep(currentStep - 1)}>
-                Back
+                {t("Back")}
               </Button>
             )}
             <Button onClick={handleContinue} className="ml-auto">
-              {currentStep === steps.length - 1 ? "Close" : "Continue"}
+              {currentStep === steps.length - 1 ? t("Close") : t("Continue")}
             </Button>
           </div>
         </div>

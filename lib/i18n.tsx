@@ -1,0 +1,404 @@
+"use client"
+
+import { createContext, useCallback, useContext, useEffect, useState } from "react"
+
+export type Language = "es" | "en"
+
+const translations: Record<string, string> = {
+  // Navegación y común
+  Dashboard: "Panel",
+  Analytics: "Analíticas",
+  Organization: "Organización",
+  Projects: "Proyectos",
+  Transactions: "Transacciones",
+  Invoices: "Facturas",
+  Payments: "Pagos",
+  Members: "Miembros",
+  Permissions: "Permisos",
+  Chat: "Chat",
+  Meetings: "Reuniones",
+  Settings: "Configuración",
+  Help: "Ayuda",
+  Home: "Inicio",
+  Profile: "Perfil",
+  "Log out": "Cerrar sesión",
+  Add: "Añadir",
+  Send: "Enviar",
+  Request: "Solicitar",
+  More: "Más",
+  Back: "Atrás",
+  Continue: "Continuar",
+  Close: "Cerrar",
+  Pay: "Pagar",
+  Download: "Descargar",
+  Print: "Imprimir",
+
+  // Notificaciones (campana)
+  Notifications: "Notificaciones",
+  "Close notifications": "Cerrar notificaciones",
+  "New Feature": "Nueva función",
+  "Check out our new budget tracking tool!": "¡Descubre nuestra nueva herramienta de seguimiento presupuestario!",
+  "Account Alert": "Alerta de cuenta",
+  "Unusual activity detected on your account.": "Se ha detectado actividad inusual en tu cuenta.",
+  "Payment Due": "Pago pendiente",
+  "Your credit card payment is due in 3 days.": "El pago de tu tarjeta de crédito vence en 3 días.",
+  "Investment Update": "Actualización de inversiones",
+  "Your investment portfolio has grown by 5% this month.": "Tu cartera de inversión ha crecido un 5% este mes.",
+  "New Offer": "Nueva oferta",
+  "You're eligible for a new savings account with higher interest!":
+    "¡Eres elegible para una nueva cuenta de ahorros con mayor interés!",
+
+  // Resumen de cuentas
+  "Accounts Overview": "Resumen de cuentas",
+  "Total balance across all accounts": "Saldo total de todas las cuentas",
+  Checking: "Corriente",
+  Savings: "Ahorros",
+  Investment: "Inversión",
+
+  // Modales de dinero
+  Amount: "Importe",
+  "Card Details": "Datos de la tarjeta",
+  "OTP Verification": "Verificación OTP",
+  Confirmation: "Confirmación",
+  "Amount and Account": "Importe y cuenta",
+  "Amount to Add": "Importe a añadir",
+  "Amount to Send": "Importe a enviar",
+  "Amount to Request": "Importe a solicitar",
+  "Enter amount": "Introduce el importe",
+  "Select Contact": "Seleccionar contacto",
+  "Enter Amount": "Introducir importe",
+  "Select a contact": "Selecciona un contacto",
+  "Contact Details:": "Datos del contacto:",
+  "Name:": "Nombre:",
+  "ID:": "ID:",
+  "Phone:": "Teléfono:",
+  "From Account": "Desde la cuenta",
+  "Select account": "Selecciona una cuenta",
+  "Card Number": "Número de tarjeta",
+  "Expiry Date": "Fecha de caducidad",
+  "Enter the OTP sent to your registered mobile number":
+    "Introduce el OTP enviado a tu número de móvil registrado",
+  "Enter OTP": "Introduce el OTP",
+  "Money Added Successfully": "Dinero añadido correctamente",
+  "has been added to your Checking account.": "se ha añadido a tu cuenta Corriente.",
+  "Money Sent Successfully": "Dinero enviado correctamente",
+  "has been sent from your": "se ha enviado desde tu",
+  "account.": ".",
+  "Money Request Sent": "Solicitud enviada",
+  "has been requested from": "se ha solicitado a",
+  "Payment Option": "Opción de pago",
+  "Pay in full": "Pagar el total",
+  "Pay in 4": "Pagar en 4 plazos",
+  "Payment Successful": "Pago realizado con éxito",
+  "Your payment of": "Tu pago de",
+  for: "para",
+  "has been processed successfully.": "se ha procesado correctamente.",
+
+  // Transacciones recientes
+  "Recent Transactions": "Transacciones recientes",
+  "View All Transactions": "Ver todas las transacciones",
+  "Amazon.com": "Amazon.com",
+  "Whole Foods Market": "Whole Foods Market",
+  "Netflix Subscription": "Suscripción de Netflix",
+  "Freelance Payment": "Pago freelance",
+  "Gas Station": "Gasolinera",
+
+  // Pago rápido de facturas
+  "Quick Bill Pay": "Pago rápido de facturas",
+  "Due:": "Vence:",
+  "No pending bills": "No hay facturas pendientes",
+  "Electricity Bill": "Factura de electricidad",
+  "Internet Service": "Servicio de internet",
+  "Credit Card Payment": "Pago de tarjeta de crédito",
+  "Water Bill": "Factura de agua",
+
+  // Métricas de negocio
+  "Business Metrics": "Métricas de negocio",
+  "View Details": "Ver detalles",
+  "Revenue Growth": "Crecimiento de ingresos",
+  "Monthly revenue target": "Objetivo mensual de ingresos",
+  "On Track": "En camino",
+  Behind: "Retrasado",
+  Ahead: "Por delante",
+  "Customer Acquisition": "Adquisición de clientes",
+  "New customers this quarter": "Nuevos clientes este trimestre",
+  "Average Order Value": "Valor medio de pedido",
+  "Target AOV for Q3": "Objetivo de TPM para el T3",
+  "% complete": "% completado",
+
+  // Analíticas
+  "Export Data": "Exportar datos",
+  Overview: "Vista general",
+  Reports: "Informes",
+  "Pick a date": "Elige una fecha",
+  "Dashboard Overview": "Vista general del panel",
+  "Compare to:": "Comparar con:",
+  "Select period": "Selecciona un período",
+  "Previous Month": "Mes anterior",
+  "Previous Quarter": "Trimestre anterior",
+  "Previous Year": "Año anterior",
+  Revenue: "Ingresos",
+  "Account Growth": "Crecimiento de cuentas",
+  "Top Products": "Productos principales",
+  "User Activity": "Actividad de usuarios",
+  "Detailed Analytics": "Analíticas detalladas",
+  "Last 7 Days": "Últimos 7 días",
+  "Last 30 Days": "Últimos 30 días",
+  "Last 90 Days": "Últimos 90 días",
+  "Last 12 Months": "Últimos 12 meses",
+  "Customer Segmentation": "Segmentación de clientes",
+  "High Value": "Alto valor",
+  "Medium Value": "Valor medio",
+  "Low Value": "Bajo valor",
+  "At Risk": "En riesgo",
+  Lost: "Perdido",
+  "Customer Retention Rate": "Tasa de retención de clientes",
+  "Channel Performance": "Rendimiento por canal",
+  Direct: "Directo",
+  "Organic Search": "Búsqueda orgánica",
+  "Paid Search": "Búsqueda de pago",
+  "Social Media": "Redes sociales",
+  Email: "Correo electrónico",
+  "Key Metrics": "Métricas clave",
+  "Customer Lifetime Value": "Valor de vida del cliente",
+  "Net Promoter Score": "Puntuación NPS",
+  "Customer Acquisition Cost": "Coste de adquisición de clientes",
+
+  // Informes
+  "Generate Report": "Generar informe",
+  Report: "Informe",
+  "Financial Summary": "Resumen financiero",
+  "Product Performance": "Rendimiento de productos",
+  "Risk Assessment": "Evaluación de riesgos",
+  "Marketing Campaign Analysis": "Análisis de campañas de marketing",
+  "Operational Efficiency": "Eficiencia operativa",
+  "Select report type": "Selecciona el tipo de informe",
+  Metric: "Métrica",
+  Value: "Valor",
+  "Total Revenue": "Ingresos totales",
+  "Net Profit": "Beneficio neto",
+  "Operating Expenses": "Gastos operativos",
+  "Gross Margin": "Margen bruto",
+  "Return on Investment": "Retorno de la inversión",
+  "New Customers": "Nuevos clientes",
+  "Conversion Rate": "Tasa de conversión",
+  "Churn Rate": "Tasa de cancelación",
+  "Financial Summary Report": "Informe de resumen financiero",
+  "Customer Acquisition Report": "Informe de adquisición de clientes",
+
+  // Preferencias de notificación (analíticas)
+  "Notification Preferences": "Preferencias de notificación",
+  "Security Alerts": "Alertas de seguridad",
+  "Performance Updates": "Actualizaciones de rendimiento",
+  "Market Trends": "Tendencias del mercado",
+  "Financial Reports": "Informes financieros",
+  "User Behavior": "Comportamiento de usuarios",
+  "Account Activity": "Actividad de la cuenta",
+  "Recent Notifications": "Notificaciones recientes",
+  "Unusual account activity detected": "Actividad inusual detectada en la cuenta",
+  "2 hours ago": "Hace 2 horas",
+  "1 day ago": "Hace 1 día",
+  "3 days ago": "Hace 3 días",
+  "5 days ago": "Hace 5 días",
+  "Your portfolio has grown by 5% this week": "Tu cartera ha crecido un 5% esta semana",
+  "New feature: Advanced analytics now available": "Nueva función: analíticas avanzadas ya disponibles",
+  "Monthly financial report is ready for review": "El informe financiero mensual está listo para revisión",
+  "View All Notifications": "Ver todas las notificaciones",
+
+  // Tarjetas de vista general
+  "+20.1% from last month": "+20,1% desde el mes pasado",
+  "+180.1% from last month": "+180,1% desde el mes pasado",
+  "+19% from last month": "+19% desde el mes pasado",
+  "+5.4% from last month": "+5,4% desde el mes pasado",
+  "Active Accounts": "Cuentas activas",
+  "Growth Rate": "Tasa de crecimiento",
+
+  // Productos principales
+  "Savings Account": "Cuenta de ahorros",
+  "Credit Card": "Tarjeta de crédito",
+  "Personal Loan": "Préstamo personal",
+  Mortgage: "Hipoteca",
+  "Investment Fund": "Fondo de inversión",
+
+  // Actividad de usuarios
+  "Logged in": "Ha iniciado sesión",
+  "Updated profile": "Actualizó su perfil",
+  "Made a transfer": "Realizó una transferencia",
+  "Opened new account": "Abrió una cuenta nueva",
+  "2 minutes ago": "Hace 2 minutos",
+  "10 minutes ago": "Hace 10 minutos",
+  "15 minutes ago": "Hace 15 minutos",
+  "30 minutes ago": "Hace 30 minutos",
+
+  // Crecimiento de cuentas
+  "New Accounts:": "Cuentas nuevas:",
+  "Total Accounts:": "Cuentas totales:",
+  Jan: "Ene",
+  Feb: "Feb",
+  Mar: "Mar",
+  Apr: "Abr",
+  May: "May",
+  Jun: "Jun",
+
+  // Configuración
+  Account: "Cuenta",
+  Security: "Seguridad",
+  Preferences: "Preferencias",
+  Privacy: "Privacidad",
+  Email: "Correo electrónico",
+  "Select Language": "Selecciona el idioma",
+  "Select Currency": "Selecciona la moneda",
+  "Select Date Format": "Selecciona el formato de fecha",
+  "Select Frequency": "Selecciona la frecuencia",
+
+  // Zonas horarias
+  "International Date Line West (UTC-12)": "Línea internacional de cambio de fecha oeste (UTC-12)",
+  "Samoa Standard Time (UTC-11)": "Hora estándar de Samoa (UTC-11)",
+  "Hawaii-Aleutian Standard Time (UTC-10)": "Hora estándar de Hawái-Aleutianas (UTC-10)",
+  "Alaska Standard Time (UTC-9)": "Hora estándar de Alaska (UTC-9)",
+  "Pacific Time (UTC-8)": "Hora del Pacífico (UTC-8)",
+  "Mountain Time (UTC-7)": "Hora de la Montaña (UTC-7)",
+  "Central Time (UTC-6)": "Hora Central (UTC-6)",
+  "Eastern Time (UTC-5)": "Hora del Este (UTC-5)",
+  "Atlantic Time (UTC-4)": "Hora del Atlántico (UTC-4)",
+  "Argentina Standard Time (UTC-3)": "Hora estándar de Argentina (UTC-3)",
+  "South Georgia Time (UTC-2)": "Hora de Georgia del Sur (UTC-2)",
+  "Azores Time (UTC-1)": "Hora de las Azores (UTC-1)",
+  "Greenwich Mean Time (UTC+0)": "Horario del Meridiano de Greenwich (UTC+0)",
+  "Central European Time (UTC+1)": "Hora Central Europea (UTC+1)",
+  "Eastern European Time (UTC+2)": "Hora de Europa Oriental (UTC+2)",
+  "Moscow Time (UTC+3)": "Hora de Moscú (UTC+3)",
+  "Gulf Standard Time (UTC+4)": "Hora estándar del Golfo (UTC+4)",
+  "Pakistan Standard Time (UTC+5)": "Hora estándar de Pakistán (UTC+5)",
+  "Indian Standard Time (UTC+5:30)": "Hora estándar de la India (UTC+5:30)",
+  "Bangladesh Standard Time (UTC+6)": "Hora estándar de Bangladés (UTC+6)",
+  "Indochina Time (UTC+7)": "Hora de Indochina (UTC+7)",
+  "China Standard Time (UTC+8)": "Hora estándar de China (UTC+8)",
+  "Japan Standard Time (UTC+9)": "Hora estándar de Japón (UTC+9)",
+  "Australian Eastern Standard Time (UTC+10)": "Hora estándar del Este de Australia (UTC+10)",
+  "Solomon Islands Time (UTC+11)": "Hora de las Islas Salomón (UTC+11)",
+  "New Zealand Standard Time (UTC+12)": "Hora estándar de Nueva Zelanda (UTC+12)",
+  "Account Settings": "Configuración de la cuenta",
+  "Manage your account information": "Gestiona la información de tu cuenta",
+  "Current Avatar": "Avatar actual",
+  "Choose a new avatar": "Elige un nuevo avatar",
+  "Or upload a custom avatar": "O sube un avatar personalizado",
+  "Full Name": "Nombre completo",
+  "Phone Number": "Número de teléfono",
+  Timezone: "Zona horaria",
+  "Select Timezone": "Selecciona la zona horaria",
+  "Save Account Settings": "Guardar configuración de cuenta",
+  "Security Settings": "Configuración de seguridad",
+  "Manage your account's security settings": "Gestiona la configuración de seguridad de tu cuenta",
+  "Current Password": "Contraseña actual",
+  "New Password": "Nueva contraseña",
+  "Confirm New Password": "Confirmar nueva contraseña",
+  "Enable Two-Factor Authentication": "Activar la autenticación de dos factores",
+  "Save Security Settings": "Guardar configuración de seguridad",
+  "Login History": "Historial de inicio de sesión",
+  "Recent login activities on your account": "Actividad reciente de inicio de sesión en tu cuenta",
+  "New York, USA": "Nueva York, EE.UU.",
+  "London, UK": "Londres, Reino Unido",
+  "Tokyo, Japan": "Tokio, Japón",
+  "Active Sessions": "Sesiones activas",
+  "Currently active sessions on your account": "Sesiones actualmente activas en tu cuenta",
+  Laptop: "Portátil",
+  Smartphone: "Móvil",
+  Tablet: "Tablet",
+  "Log Out All Other Sessions": "Cerrar todas las demás sesiones",
+  "Customize your dashboard experience": "Personaliza tu experiencia en el panel",
+  Language: "Idioma",
+  Currency: "Moneda",
+  "Date Format": "Formato de fecha",
+  "Font Size": "Tamaño de fuente",
+  Theme: "Tema",
+  Light: "Claro",
+  Dark: "Oscuro",
+  System: "Sistema",
+  "Dashboard Layout": "Diseño del panel",
+  Default: "Predeterminado",
+  Compact: "Compacto",
+  Expanded: "Ampliado",
+  "Save Preferences": "Guardar preferencias",
+  "Notification Settings": "Configuración de notificaciones",
+  "Manage how you receive notifications": "Gestiona cómo recibes las notificaciones",
+  "Notification Channels": "Canales de notificación",
+  "Email Notifications": "Notificaciones por correo electrónico",
+  "Push Notifications": "Notificaciones push",
+  "SMS Notifications": "Notificaciones SMS",
+  "Notification Types": "Tipos de notificación",
+  "New Features and Updates": "Novedades y actualizaciones",
+  "Marketing and Promotions": "Marketing y promociones",
+  "Notification Frequency": "Frecuencia de notificaciones",
+  "Real-time": "Tiempo real",
+  "Daily Digest": "Resumen diario",
+  "Weekly Summary": "Resumen semanal",
+  "Quiet Hours": "Horas de silencio",
+  to: "a",
+  "Save Notification Settings": "Guardar configuración de notificaciones",
+  "Privacy Settings": "Configuración de privacidad",
+  "Manage your privacy and data settings": "Gestiona tu privacidad y configuración de datos",
+  "Data Sharing": "Compartición de datos",
+  "Share analytics data": "Compartir datos de analíticas",
+  "Allow personalized ads": "Permitir anuncios personalizados",
+  "Account Visibility": "Visibilidad de la cuenta",
+  Public: "Público",
+  Private: "Privado",
+  "Data Retention": "Retención de datos",
+  "6 Months": "6 meses",
+  "1 Year": "1 año",
+  "2 Years": "2 años",
+  Indefinite: "Indefinido",
+  "Select Data Retention Period": "Selecciona el período de retención",
+  "Third-Party Integrations": "Integraciones de terceros",
+  "Connected: Google Analytics, Facebook Pixel": "Conectado: Google Analytics, Facebook Pixel",
+  "Manage Integrations": "Gestionar integraciones",
+  "Download Your Data": "Descarga tus datos",
+  "Delete My Account": "Eliminar mi cuenta",
+  "Save Privacy Settings": "Guardar configuración de privacidad",
+  "Account settings saved successfully": "Configuración de la cuenta guardada correctamente",
+  "Notification settings saved successfully": "Configuración de notificaciones guardada correctamente",
+  "Privacy settings saved successfully": "Configuración de privacidad guardada correctamente",
+}
+
+interface LanguageContextType {
+  lang: Language
+  setLang: (lang: Language) => void
+  t: (key: string) => string
+}
+
+const LanguageContext = createContext<LanguageContextType | undefined>(undefined)
+
+const STORAGE_KEY = "appLanguage"
+
+export function LanguageProvider({ children }: { children: React.ReactNode }) {
+  const [lang, setLangState] = useState<Language>("es")
+
+  useEffect(() => {
+    const saved = localStorage.getItem(STORAGE_KEY)
+    if (saved === "en" || saved === "es") {
+      setLangState(saved)
+    }
+  }, [])
+
+  useEffect(() => {
+    document.documentElement.lang = lang
+  }, [lang])
+
+  const setLang = useCallback((newLang: Language) => {
+    setLangState(newLang)
+    localStorage.setItem(STORAGE_KEY, newLang)
+  }, [])
+
+  const t = useCallback((key: string) => (lang === "en" ? key : translations[key] ?? key), [lang])
+
+  return <LanguageContext.Provider value={{ lang, setLang, t }}>{children}</LanguageContext.Provider>
+}
+
+export function useLanguage() {
+  const context = useContext(LanguageContext)
+  if (context === undefined) {
+    throw new Error("useLanguage must be used within a LanguageProvider")
+  }
+  return context
+}

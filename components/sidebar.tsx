@@ -23,6 +23,7 @@ import {
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip"
+import { useLanguage } from "@/lib/i18n"
 
 const navigation = [
   { name: "Dashboard", href: "/", icon: Home },
@@ -47,6 +48,7 @@ export function Sidebar() {
   const pathname = usePathname()
   const [isCollapsed, setIsCollapsed] = useState(false)
   const [isMobileOpen, setIsMobileOpen] = useState(false)
+  const { t } = useLanguage()
 
   const NavItem = ({ item, isBottom = false }) => (
     <Tooltip delayDuration={0}>
@@ -62,12 +64,12 @@ export function Sidebar() {
           )}
         >
           <item.icon className={cn("h-4 w-4", !isCollapsed && "mr-3")} />
-          {!isCollapsed && <span>{item.name}</span>}
+          {!isCollapsed && <span>{t(item.name)}</span>}
         </Link>
       </TooltipTrigger>
       {isCollapsed && (
         <TooltipContent side="right" className="flex items-center gap-4">
-          {item.name}
+          {t(item.name)}
         </TooltipContent>
       )}
     </Tooltip>

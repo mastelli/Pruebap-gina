@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Download, Printer } from "lucide-react"
+import { useLanguage } from "@/lib/i18n"
 
 const reportTypes = [
   "Financial Summary",
@@ -36,6 +37,7 @@ const dummyReportData = {
 
 export function ReportsTab() {
   const [selectedReport, setSelectedReport] = useState(reportTypes[0])
+  const { t } = useLanguage()
 
   const handleGenerateReport = () => {
     console.log(`Generating ${selectedReport} report...`)
@@ -53,40 +55,40 @@ export function ReportsTab() {
     <div className="space-y-4">
       <Card>
         <CardHeader>
-          <CardTitle className="text-xl font-semibold">Generate Report</CardTitle>
+          <CardTitle className="text-xl font-semibold">{t("Generate Report")}</CardTitle>
         </CardHeader>
         <CardContent className="flex items-center space-x-4">
           <Select value={selectedReport} onValueChange={setSelectedReport}>
             <SelectTrigger className="w-[240px]">
-              <SelectValue placeholder="Select report type" />
+              <SelectValue placeholder={t("Select report type")} />
             </SelectTrigger>
             <SelectContent>
               {reportTypes.map((type) => (
                 <SelectItem key={type} value={type}>
-                  {type}
+                  {t(type)}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
-          <Button onClick={handleGenerateReport}>Generate Report</Button>
+          <Button onClick={handleGenerateReport}>{t("Generate Report")}</Button>
         </CardContent>
       </Card>
       <Card>
         <CardHeader>
-          <CardTitle className="text-xl font-semibold">{selectedReport} Report</CardTitle>
+          <CardTitle className="text-xl font-semibold">{t(`${selectedReport} Report`)}</CardTitle>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Metric</TableHead>
-                <TableHead>Value</TableHead>
+                <TableHead>{t("Metric")}</TableHead>
+                <TableHead>{t("Value")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {dummyReportData[selectedReport]?.map((row) => (
                 <TableRow key={row.id}>
-                  <TableCell>{row.metric}</TableCell>
+                  <TableCell>{t(row.metric)}</TableCell>
                   <TableCell>{row.value}</TableCell>
                 </TableRow>
               ))}
@@ -95,11 +97,11 @@ export function ReportsTab() {
           <div className="flex justify-end space-x-2 mt-4">
             <Button variant="outline" onClick={handleDownloadReport}>
               <Download className="mr-2 h-4 w-4" />
-              Download
+              {t("Download")}
             </Button>
             <Button variant="outline" onClick={handlePrintReport}>
               <Printer className="mr-2 h-4 w-4" />
-              Print
+              {t("Print")}
             </Button>
           </div>
         </CardContent>

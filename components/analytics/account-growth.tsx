@@ -3,6 +3,7 @@
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip } from "recharts"
 import { Card, CardContent } from "@/components/ui/card"
 import { useTheme } from "next-themes"
+import { useLanguage } from "@/lib/i18n"
 
 const data = [
   { month: "Jan", newAccounts: 100, totalAccounts: 1000 },
@@ -15,15 +16,20 @@ const data = [
 
 export function AccountGrowth() {
   const { theme } = useTheme()
+  const { t } = useLanguage()
 
   const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
       return (
         <Card className="border-none shadow-lg">
           <CardContent className="p-2">
-            <p className="text-sm font-semibold">{label}</p>
-            <p className="text-sm text-muted-foreground">New Accounts: {payload[0].value}</p>
-            <p className="text-sm text-muted-foreground">Total Accounts: {payload[1].value}</p>
+            <p className="text-sm font-semibold">{t(label)}</p>
+            <p className="text-sm text-muted-foreground">
+              {t("New Accounts:")} {payload[0].value}
+            </p>
+            <p className="text-sm text-muted-foreground">
+              {t("Total Accounts:")} {payload[1].value}
+            </p>
           </CardContent>
         </Card>
       )
@@ -36,6 +42,7 @@ export function AccountGrowth() {
       <BarChart data={data}>
         <XAxis
           dataKey="month"
+          tickFormatter={(value) => t(value)}
           stroke={theme === "dark" ? "#888888" : "#333333"}
           fontSize={12}
           tickLine={false}

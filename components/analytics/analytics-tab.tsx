@@ -5,6 +5,7 @@ import { Bar, BarChart, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YA
 import { useTheme } from "next-themes"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useState } from "react"
+import { useLanguage } from "@/lib/i18n"
 
 const customerSegmentationData = [
   { segment: "High Value", count: 1200 },
@@ -34,32 +35,33 @@ const channelPerformanceData = [
 export function AnalyticsTab() {
   const { theme } = useTheme()
   const [timeFrame, setTimeFrame] = useState("last_30_days")
+  const { t } = useLanguage()
 
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <h3 className="text-2xl font-semibold">Detailed Analytics</h3>
+        <h3 className="text-2xl font-semibold">{t("Detailed Analytics")}</h3>
         <Select value={timeFrame} onValueChange={setTimeFrame}>
           <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Select time frame" />
+            <SelectValue placeholder={t("Last 30 Days")} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="last_7_days">Last 7 Days</SelectItem>
-            <SelectItem value="last_30_days">Last 30 Days</SelectItem>
-            <SelectItem value="last_90_days">Last 90 Days</SelectItem>
-            <SelectItem value="last_12_months">Last 12 Months</SelectItem>
+            <SelectItem value="last_7_days">{t("Last 7 Days")}</SelectItem>
+            <SelectItem value="last_30_days">{t("Last 30 Days")}</SelectItem>
+            <SelectItem value="last_90_days">{t("Last 90 Days")}</SelectItem>
+            <SelectItem value="last_12_months">{t("Last 12 Months")}</SelectItem>
           </SelectContent>
         </Select>
       </div>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
         <Card className="col-span-4">
           <CardHeader>
-            <CardTitle className="text-xl font-semibold">Customer Segmentation</CardTitle>
+            <CardTitle className="text-xl font-semibold">{t("Customer Segmentation")}</CardTitle>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={customerSegmentationData}>
-                <XAxis dataKey="segment" />
+                <XAxis dataKey="segment" tickFormatter={(value) => t(value)} />
                 <YAxis />
                 <Tooltip />
                 <Bar dataKey="count" fill={theme === "dark" ? "#adfa1d" : "#0ea5e9"} />
@@ -69,12 +71,12 @@ export function AnalyticsTab() {
         </Card>
         <Card className="col-span-3">
           <CardHeader>
-            <CardTitle className="text-xl font-semibold">Customer Retention Rate</CardTitle>
+            <CardTitle className="text-xl font-semibold">{t("Customer Retention Rate")}</CardTitle>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
               <LineChart data={retentionRateData}>
-                <XAxis dataKey="month" />
+                <XAxis dataKey="month" tickFormatter={(value) => t(value)} />
                 <YAxis />
                 <Tooltip />
                 <Line type="monotone" dataKey="rate" stroke={theme === "dark" ? "#adfa1d" : "#0ea5e9"} />
@@ -86,12 +88,12 @@ export function AnalyticsTab() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
         <Card className="col-span-4">
           <CardHeader>
-            <CardTitle className="text-xl font-semibold">Channel Performance</CardTitle>
+            <CardTitle className="text-xl font-semibold">{t("Channel Performance")}</CardTitle>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={channelPerformanceData}>
-                <XAxis dataKey="channel" />
+                <XAxis dataKey="channel" tickFormatter={(value) => t(value)} />
                 <YAxis yAxisId="left" />
                 <YAxis yAxisId="right" orientation="right" />
                 <Tooltip />
@@ -103,23 +105,23 @@ export function AnalyticsTab() {
         </Card>
         <Card className="col-span-3">
           <CardHeader>
-            <CardTitle className="text-xl font-semibold">Key Metrics</CardTitle>
+            <CardTitle className="text-xl font-semibold">{t("Key Metrics")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <p className="text-sm font-medium text-muted-foreground">Customer Lifetime Value</p>
+              <p className="text-sm font-medium text-muted-foreground">{t("Customer Lifetime Value")}</p>
               <p className="text-2xl font-bold">$1,250</p>
             </div>
             <div>
-              <p className="text-sm font-medium text-muted-foreground">Net Promoter Score</p>
+              <p className="text-sm font-medium text-muted-foreground">{t("Net Promoter Score")}</p>
               <p className="text-2xl font-bold">72</p>
             </div>
             <div>
-              <p className="text-sm font-medium text-muted-foreground">Customer Acquisition Cost</p>
+              <p className="text-sm font-medium text-muted-foreground">{t("Customer Acquisition Cost")}</p>
               <p className="text-2xl font-bold">$75</p>
             </div>
             <div>
-              <p className="text-sm font-medium text-muted-foreground">Average Order Value</p>
+              <p className="text-sm font-medium text-muted-foreground">{t("Average Order Value")}</p>
               <p className="text-2xl font-bold">$120</p>
             </div>
           </CardContent>

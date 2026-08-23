@@ -1,6 +1,9 @@
+"use client"
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { ArrowUpRight, ArrowDownRight } from "lucide-react"
+import { useLanguage } from "@/lib/i18n"
 
 const transactions = [
   { id: 1, name: "Amazon.com", amount: -129.99, date: "2023-07-15", type: "expense" },
@@ -11,17 +14,18 @@ const transactions = [
 ]
 
 export function RecentTransactions() {
+  const { t } = useLanguage()
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-lg font-medium">Recent Transactions</CardTitle>
+        <CardTitle className="text-lg font-medium">{t("Recent Transactions")}</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
           {transactions.slice(0, 3).map((transaction) => (
             <div key={transaction.id} className="flex items-center">
               <div className="flex-1">
-                <p className="text-sm font-medium">{transaction.name}</p>
+                <p className="text-sm font-medium">{t(transaction.name)}</p>
                 <p className="text-xs text-muted-foreground">{transaction.date}</p>
               </div>
               <div className="flex items-center">
@@ -44,7 +48,7 @@ export function RecentTransactions() {
           ))}
         </div>
         <Button className="w-full mt-4" variant="outline">
-          View All Transactions
+          {t("View All Transactions")}
         </Button>
       </CardContent>
     </Card>

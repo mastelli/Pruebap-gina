@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { CheckCircle2 } from "lucide-react"
+import { useLanguage } from "@/lib/i18n"
 
 const steps = ["Select Contact", "Enter Amount", "OTP Verification", "Confirmation"]
 
@@ -21,6 +22,7 @@ export function RequestMoneyModal({ isOpen, onClose, onRequestMoney }) {
   const [selectedContact, setSelectedContact] = useState(null)
   const [amount, setAmount] = useState("")
   const [otp, setOtp] = useState("")
+  const { t } = useLanguage()
 
   const handleContinue = () => {
     if (currentStep < steps.length - 1) {
@@ -36,10 +38,10 @@ export function RequestMoneyModal({ isOpen, onClose, onRequestMoney }) {
       case 0:
         return (
           <div className="space-y-4">
-            <Label htmlFor="contact">Select Contact</Label>
+            <Label htmlFor="contact">{t("Select Contact")}</Label>
             <Select onValueChange={(value) => setSelectedContact(contacts.find((c) => c.id === value))}>
               <SelectTrigger id="contact">
-                <SelectValue placeholder="Select a contact" />
+                <SelectValue placeholder={t("Select a contact")} />
               </SelectTrigger>
               <SelectContent>
                 {contacts.map((contact) => (
@@ -51,10 +53,16 @@ export function RequestMoneyModal({ isOpen, onClose, onRequestMoney }) {
             </Select>
             {selectedContact && (
               <div className="space-y-2">
-                <p className="text-sm font-medium">Contact Details:</p>
-                <p className="text-sm">Name: {selectedContact.name}</p>
-                <p className="text-sm">ID: {selectedContact.id}</p>
-                <p className="text-sm">Phone: {selectedContact.phoneNumber}</p>
+                <p className="text-sm font-medium">{t("Contact Details:")}</p>
+                <p className="text-sm">
+                  {t("Name:")} {selectedContact.name}
+                </p>
+                <p className="text-sm">
+                  {t("ID:")} {selectedContact.id}
+                </p>
+                <p className="text-sm">
+                  {t("Phone:")} {selectedContact.phoneNumber}
+                </p>
               </div>
             )}
           </div>
@@ -62,11 +70,11 @@ export function RequestMoneyModal({ isOpen, onClose, onRequestMoney }) {
       case 1:
         return (
           <div className="space-y-4">
-            <Label htmlFor="amount">Amount to Request</Label>
+            <Label htmlFor="amount">{t("Amount to Request")}</Label>
             <Input
               id="amount"
               type="number"
-              placeholder="Enter amount"
+              placeholder={t("Enter amount")}
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
             />
@@ -75,17 +83,17 @@ export function RequestMoneyModal({ isOpen, onClose, onRequestMoney }) {
       case 2:
         return (
           <div className="space-y-4">
-            <p className="text-sm text-muted-foreground">Enter the OTP sent to your registered mobile number</p>
-            <Input placeholder="Enter OTP" value={otp} onChange={(e) => setOtp(e.target.value)} />
+            <p className="text-sm text-muted-foreground">{t("Enter the OTP sent to your registered mobile number")}</p>
+            <Input placeholder={t("Enter OTP")} value={otp} onChange={(e) => setOtp(e.target.value)} />
           </div>
         )
       case 3:
         return (
           <div className="text-center space-y-4">
             <CheckCircle2 className="mx-auto h-12 w-12 text-green-500" />
-            <p className="text-lg font-medium">Money Request Sent</p>
+            <p className="text-lg font-medium">{t("Money Request Sent")}</p>
             <p className="text-sm text-muted-foreground">
-              ${amount} has been requested from {selectedContact.name}.
+              ${amount} {t("has been requested from")} {selectedContact.name}.
             </p>
           </div>
         )
@@ -96,18 +104,18 @@ export function RequestMoneyModal({ isOpen, onClose, onRequestMoney }) {
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>{steps[currentStep]}</DialogTitle>
+          <DialogTitle>{t(steps[currentStep])}</DialogTitle>
         </DialogHeader>
         <div className="mt-4 space-y-4">
           {renderStepContent()}
           <div className="flex justify-between">
             {currentStep > 0 && currentStep < steps.length - 1 && (
               <Button variant="outline" onClick={() => setCurrentStep(currentStep - 1)}>
-                Back
+                {t("Back")}
               </Button>
             )}
             <Button onClick={handleContinue} className="ml-auto">
-              {currentStep === steps.length - 1 ? "Close" : "Continue"}
+              {currentStep === steps.length - 1 ? t("Close") : t("Continue")}
             </Button>
           </div>
         </div>

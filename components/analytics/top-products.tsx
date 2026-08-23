@@ -1,4 +1,7 @@
+"use client"
+
 import { CheckCircle2 } from "lucide-react"
+import { useLanguage } from "@/lib/i18n"
 
 const topProducts = [
   { name: "Savings Account", revenue: "$1,200,000", growth: "+12%" },
@@ -9,13 +12,14 @@ const topProducts = [
 ]
 
 export function TopProducts() {
+  const { t } = useLanguage()
   return (
     <div className="space-y-8">
       {topProducts.map((product) => (
         <div key={product.name} className="flex items-center">
           <CheckCircle2 className="mr-2 h-4 w-4 text-muted-foreground" />
           <div className="ml-4 space-y-1">
-            <p className="text-sm font-medium leading-none">{product.name}</p>
+            <p className="text-sm font-medium leading-none">{t(product.name)}</p>
             <p className="text-sm text-muted-foreground">{product.revenue}</p>
           </div>
           <div className="ml-auto font-medium text-green-500">{product.growth}</div>

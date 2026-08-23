@@ -5,6 +5,7 @@ import { Bell, X, Info, AlertTriangle, CreditCard, TrendingUp, Gift } from "luci
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { useLanguage } from "@/lib/i18n"
 
 const notifications = [
   {
@@ -51,6 +52,7 @@ const notifications = [
 
 export function Notifications() {
   const [isOpen, setIsOpen] = useState(false)
+  const { t } = useLanguage()
 
   return (
     <div className="relative">
@@ -59,7 +61,7 @@ export function Notifications() {
         size="icon"
         className="relative"
         onClick={() => setIsOpen(!isOpen)}
-        aria-label="Notifications"
+        aria-label={t("Notifications")}
       >
         <Bell className="h-5 w-5" />
         <span className="absolute top-0 right-0 h-2 w-2 bg-red-500 rounded-full" />
@@ -67,8 +69,8 @@ export function Notifications() {
       {isOpen && (
         <Card className="absolute right-0 mt-2 w-96 z-50">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Notifications</CardTitle>
-            <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)} aria-label="Close notifications">
+            <CardTitle className="text-sm font-medium">{t("Notifications")}</CardTitle>
+            <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)} aria-label={t("Close notifications")}>
               <X className="h-4 w-4" />
             </Button>
           </CardHeader>
@@ -82,8 +84,8 @@ export function Notifications() {
                         <notification.icon className={`h-5 w-5 ${notification.color}`} />
                       </div>
                       <div className="flex-1 space-y-1">
-                        <p className="text-sm font-medium leading-none">{notification.title}</p>
-                        <p className="text-sm text-muted-foreground">{notification.message}</p>
+                        <p className="text-sm font-medium leading-none">{t(notification.title)}</p>
+                        <p className="text-sm text-muted-foreground">{t(notification.message)}</p>
                         <p className="text-xs text-muted-foreground">{notification.date}</p>
                       </div>
                     </div>

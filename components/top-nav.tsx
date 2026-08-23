@@ -1,5 +1,6 @@
 "use client"
 import { ThemeToggle } from "./theme-toggle"
+import { LanguageToggle } from "./language-toggle"
 import { Notifications } from "./notifications"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -14,12 +15,14 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
+import { useLanguage } from "@/lib/i18n"
 import React from "react"
 
 export function TopNav() {
   const pathname = usePathname()
   const pathSegments = pathname.split("/").filter(Boolean)
   const { settings } = useSettings()
+  const { t } = useLanguage()
 
   return (
     <header className="sticky top-0 z-40 border-b bg-background">
@@ -27,13 +30,13 @@ export function TopNav() {
         <div className="hidden md:block">
           <nav className="flex items-center space-x-2">
             <Link href="/" className="text-sm font-medium">
-              Home
+              {t("Home")}
             </Link>
             {pathSegments.map((segment, index) => (
               <React.Fragment key={segment}>
                 <span className="text-muted-foreground">/</span>
                 <Link href={`/${pathSegments.slice(0, index + 1).join("/")}`} className="text-sm font-medium">
-                  {segment.charAt(0).toUpperCase() + segment.slice(1)}
+                  {t(segment.charAt(0).toUpperCase() + segment.slice(1))}
                 </Link>
               </React.Fragment>
             ))}
@@ -42,6 +45,7 @@ export function TopNav() {
         <div className="flex items-center gap-4">
           <Notifications />
           <ThemeToggle />
+          <LanguageToggle />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="relative h-8 w-8 rounded-full">
@@ -65,12 +69,12 @@ export function TopNav() {
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
-                <Link href="/settings">Profile</Link>
+                <Link href="/settings">{t("Profile")}</Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
-                <Link href="/settings">Settings</Link>
+                <Link href="/settings">{t("Settings")}</Link>
               </DropdownMenuItem>
-              <DropdownMenuItem>Log out</DropdownMenuItem>
+              <DropdownMenuItem>{t("Log out")}</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

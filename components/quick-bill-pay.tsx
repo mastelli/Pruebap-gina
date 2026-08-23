@@ -4,6 +4,7 @@ import { useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { PaymentModal } from "./payment-modal"
+import { useLanguage } from "@/lib/i18n"
 
 const initialBills = [
   { id: 1, name: "Electricity Bill", amount: 85, dueDate: "2023-07-15" },
@@ -15,6 +16,7 @@ const initialBills = [
 export function QuickBillPay() {
   const [bills, setBills] = useState(initialBills)
   const [selectedBill, setSelectedBill] = useState(null)
+  const { t } = useLanguage()
 
   const handlePaymentSuccess = (paidBillId) => {
     setBills(bills.filter((bill) => bill.id !== paidBillId))
@@ -24,7 +26,7 @@ export function QuickBillPay() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Quick Bill Pay</CardTitle>
+        <CardTitle>{t("Quick Bill Pay")}</CardTitle>
       </CardHeader>
       <CardContent>
         {bills.length > 0 ? (
@@ -32,20 +34,22 @@ export function QuickBillPay() {
             {bills.map((bill) => (
               <div key={bill.id} className="flex items-center justify-between">
                 <div>
-                  <p className="font-medium">{bill.name}</p>
-                  <p className="text-sm text-muted-foreground">Due: {bill.dueDate}</p>
+                  <p className="font-medium">{t(bill.name)}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {t("Due:")} {bill.dueDate}
+                  </p>
                 </div>
                 <div className="flex items-center space-x-2">
                   <span className="font-bold">${bill.amount}</span>
                   <Button variant="outline" size="sm" onClick={() => setSelectedBill(bill)}>
-                    Pay
+                    {t("Pay")}
                   </Button>
                 </div>
               </div>
             ))}
           </div>
         ) : (
-          <p className="text-center text-muted-foreground">No pending bills</p>
+          <p className="text-center text-muted-foreground">{t("No pending bills")}</p>
         )}
       </CardContent>
       {selectedBill && (

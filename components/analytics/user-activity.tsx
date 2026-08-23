@@ -1,5 +1,8 @@
+"use client"
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Card, CardContent } from "@/components/ui/card"
+import { useLanguage } from "@/lib/i18n"
 
 const userActivities = [
   {
@@ -34,6 +37,7 @@ const userActivities = [
 ]
 
 export function UserActivity() {
+  const { t } = useLanguage()
   return (
     <div className="space-y-4">
       {userActivities.map((activity) => (
@@ -45,10 +49,10 @@ export function UserActivity() {
             </Avatar>
             <div className="ml-4 flex-1 space-y-1">
               <p className="text-sm font-medium leading-none">{activity.user}</p>
-              <p className="text-xs text-muted-foreground">{activity.action}</p>
+              <p className="text-xs text-muted-foreground">{t(activity.action)}</p>
             </div>
             <div className="ml-auto text-right">
-              <p className="text-xs text-muted-foreground">{activity.time}</p>
+              <p className="text-xs text-muted-foreground">{t(activity.time)}</p>
             </div>
           </CardContent>
         </Card>
