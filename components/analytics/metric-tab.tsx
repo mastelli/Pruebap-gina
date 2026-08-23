@@ -1,5 +1,6 @@
 "use client"
 
+import type { ReactNode } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Bar, BarChart, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
 import { useTheme } from "next-themes"
@@ -34,11 +35,13 @@ const channelPerformanceData = [
 
 interface MetricTabProps {
   titleKey: string
+  firstCardTitleKey?: string
+  firstCard?: ReactNode
 }
 
 // Plantilla comun para las pestanas de Ingresos, Gastos y Ahorro/Inversion;
 // cada seccion personalizara sus datos sobre esta misma estructura
-export function MetricTab({ titleKey }: MetricTabProps) {
+export function MetricTab({ titleKey, firstCardTitleKey, firstCard }: MetricTabProps) {
   const { theme } = useTheme()
   const [timeFrame, setTimeFrame] = useState("last_30_days")
   const { t } = useLanguage()
@@ -62,17 +65,21 @@ export function MetricTab({ titleKey }: MetricTabProps) {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
         <Card className="col-span-4">
           <CardHeader>
-            <CardTitle className="text-xl font-semibold">{t("Customer Segmentation")}</CardTitle>
+            <CardTitle className="text-xl font-semibold">
+              {t(firstCardTitleKey ?? "Customer Segmentation")}
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={customerSegmentationData}>
-                <XAxis dataKey="segment" tickFormatter={(value) => t(value)} />
-                <YAxis />
-                <Tooltip />
-                <Bar dataKey="count" fill={theme === "dark" ? "#adfa1d" : "#0ea5e9"} />
-              </BarChart>
-            </ResponsiveContainer>
+            {firstCard ?? (
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={customerSegmentationData}>
+                  <XAxis dataKey="segment" tickFormatter={(value) => t(value)} />
+                  <YAxis />
+                  <Tooltip />
+                  <Bar dataKey="count" fill={theme === "dark" ? "#adfa1d" : "#0ea5e9"} />
+                </BarChart>
+              </ResponsiveContainer>
+            )}
           </CardContent>
         </Card>
         <Card className="col-span-3">
