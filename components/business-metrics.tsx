@@ -2,7 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { TrendingUp, Users, DollarSign, Euro, ArrowRight } from "lucide-react"
+import { TrendingUp, CreditCard, DollarSign, Euro, ArrowRight } from "lucide-react"
 import Link from "next/link"
 import { useLanguage } from "@/lib/i18n"
 import { useTransactions } from "@/lib/transactions"
@@ -23,7 +23,7 @@ const metrics = [
     id: 2,
     title: "Customer Acquisition",
     subtitle: "New customers this quarter",
-    icon: Users,
+    icon: CreditCard,
     status: "Behind",
     progress: 60,
     target: 1000,
