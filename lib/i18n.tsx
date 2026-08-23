@@ -131,7 +131,7 @@ const translations: Record<string, string> = {
 
   // Pago rápido de facturas
   "Quick Bill Pay": "Recibos",
-  "Due:": "Vence:",
+  "Provider:": "Proveedor:",
   "No pending bills": "No hay recibos pendientes",
   "Electricity Bill": "Factura de electricidad",
   "Internet Service": "Factura de internet",

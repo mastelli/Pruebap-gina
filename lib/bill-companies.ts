@@ -1,40 +1,40 @@
-function normalize(text: string): string {
+﻿function normalize(text: string): string {
   return text
     .toLowerCase()
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
 }
 
-const ELECTRICITY_COMPANIES = [
+export const ELECTRICITY_COMPANIES = [
   "Endesa",
   "Iberdrola",
   "Naturgy",
   "EDP",
   "Repsol",
-  "Acciona Energía",
+  "Acciona EnergÃ­a",
   "TotalEnergies",
   "Holaluz",
   "Octopus Energy",
   "Podo",
   "Audax Renovables",
   "Factorenergia",
-  "Feníe Energía",
-  "Nexus Energía",
+  "FenÃ­e EnergÃ­a",
+  "Nexus EnergÃ­a",
   "Som Energia",
-  "Gana Energía",
-  "Aldro Energía",
+  "Gana EnergÃ­a",
+  "Aldro EnergÃ­a",
   "Wekiwi",
-  "Imagina Energía",
+  "Imagina EnergÃ­a",
   "BonpreuEsclat Energia",
 ]
 
-const INTERNET_COMPANIES = [
+export const INTERNET_COMPANIES = [
   "Movistar",
   "Orange",
   "Vodafone",
   "Digi",
   "Yoigo",
-  "MásMóvil",
+  "MÃ¡sMÃ³vil",
   "Jazztel",
   "Pepephone",
   "Simyo",
@@ -59,8 +59,8 @@ const INTERNET_COMPANIES = [
   "Wifibytes",
   "Lobster",
   "Sweno",
-  "Oléphone",
-  "Silbö Telecom",
+  "OlÃ©phone",
+  "SilbÃ¶ Telecom",
   "Wewi Mobile",
   "Xenet",
   "Amena",
@@ -81,7 +81,7 @@ const INTERNET_COMPANIES = [
   "LCRcom",
   "Nethits",
   "Procono",
-  "Telecable Andalucía",
+  "Telecable AndalucÃ­a",
   "Cableworld",
   "Mundo R",
   "Mundo Fibra",
@@ -93,11 +93,11 @@ const INTERNET_COMPANIES = [
   "Wireless Logic",
 ]
 
-const WATER_COMPANIES = [
+export const WATER_COMPANIES = [
   "Aqualia",
   "Canal de Isabel II",
   "Agbar",
-  "Aigües de Barcelona",
+  "AigÃ¼es de Barcelona",
   "Acciona Agua",
   "Global Omnium",
   "FACSA",
@@ -111,24 +111,24 @@ const WATER_COMPANIES = [
   "EMAYA",
   "EMACSA",
   "EMALCSA",
-  "Espina & Delfín",
+  "Espina & DelfÃ­n",
   "Aqlara",
   "Aguas de Valencia",
   "Aguas de Alicante",
   "Aguas de Murcia",
-  "Aguas de Córdoba",
-  "Aguas de Cádiz",
+  "Aguas de CÃ³rdoba",
+  "Aguas de CÃ¡diz",
   "Aguas de Huelva",
   "Aguas de Teruel",
   "Aguas de Zaragoza",
   "Consorcio de Aguas Bilbao Bizkaia",
-  "Consorci d’Aigües de Tarragona",
-  "Aguas del Añarbe",
+  "Consorci dâ€™AigÃ¼es de Tarragona",
+  "Aguas del AÃ±arbe",
   "Aguas de Valladolid",
   "Aguas de Burgos",
-  "Aguas de León",
-  "Aguas de Avilés",
-  "Aguas de Gijón",
+  "Aguas de LeÃ³n",
+  "Aguas de AvilÃ©s",
+  "Aguas de GijÃ³n",
   "Aguas de Oviedo",
   "Aguas de Santander",
   "Aguas de Torrelavega",
@@ -207,12 +207,12 @@ const SUBSCRIPTION_SERVICES = [
   "Financial Times",
   "The Economist",
   "The Guardian",
-  "El País",
+  "El PaÃ­s",
   "El Mundo",
   "La Vanguardia",
   "ABC",
-  "Expansión",
-  "Cinco Días",
+  "ExpansiÃ³n",
+  "Cinco DÃ­as",
   "Onda Cero",
   "Atresplayer Premium",
   "Mediaset Infinity",
@@ -221,7 +221,7 @@ const SUBSCRIPTION_SERVICES = [
   "Uber One",
   "Just Eat Plus",
   "Amazon Audible",
-  "Círculo de Lectores",
+  "CÃ­rculo de Lectores",
   "Casa del Libro",
   "Degusta Box",
   "Birchbox",
@@ -285,4 +285,29 @@ export function getMonthlyBillAmount(
         movement.date.startsWith(`${year}-${month}`) && matcher(movement.name),
     )
     .reduce((sum, movement) => sum + movement.amount, 0)
+}
+
+// Devuelve la compania detectada en el mes para una lista dada;
+// si hay varias, gana la del movimiento mas reciente
+export function getMonthlyBillProvider(
+  movements: DetectableMovement[],
+  year: string,
+  month: string,
+  companies: string[],
+): string | null {
+  let latest: { date: string; company: string } | null = null
+
+  for (const movement of movements) {
+    if (!movement.date.startsWith(`${year}-${month}`)) continue
+
+    const normalizedConcept = normalize(movement.name)
+    const company = companies.find(
+      (candidate) => normalizedConcept.includes(normalize(candidate)),
+    )
+    if (company && (!latest || movement.date >= latest.date)) {
+      latest = { date: movement.date, company }
+    }
+  }
+
+  return latest?.company ?? null
 }

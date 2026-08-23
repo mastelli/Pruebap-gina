@@ -4,18 +4,27 @@ import { useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useLanguage } from "@/lib/i18n"
 import { useTransactions } from "@/lib/transactions"
-import { getMonthlyBillAmount, isElectricityBill, isInternetBill, isWaterBill, isSubscription } from "@/lib/bill-companies"
+import {
+  getMonthlyBillAmount,
+  getMonthlyBillProvider,
+  isElectricityBill,
+  isInternetBill,
+  isWaterBill,
+  isSubscription,
+  ELECTRICITY_COMPANIES,
+  INTERNET_COMPANIES,
+  WATER_COMPANIES,
+} from "@/lib/bill-companies"
 
 interface Bill {
   id: number
   name: string
-  dueDate?: string
 }
 
 const initialBills: Bill[] = [
-  { id: 1, name: "Electricity Bill", dueDate: "2023-07-15" },
-  { id: 2, name: "Internet Service", dueDate: "2023-07-18" },
-  { id: 4, name: "Water Bill", dueDate: "2023-07-30" },
+  { id: 1, name: "Electricity Bill" },
+  { id: 2, name: "Internet Service" },
+  { id: 4, name: "Water Bill" },
   { id: 3, name: "Subscriptions" },
 ]
 
@@ -38,6 +47,11 @@ export function QuickBillPay() {
   // Suscripciones detectadas por nombre de servicio (Netflix, Spotify, etc.)
   const subscriptionsAmount = getMonthlyBillAmount(transactions, currentYear, currentMonth, isSubscription)
 
+  // Proveedor detectado para cada tipo de factura (p. ej. Movistar, Endesa)
+  const electricityProvider = getMonthlyBillProvider(transactions, currentYear, currentMonth, ELECTRICITY_COMPANIES)
+  const internetProvider = getMonthlyBillProvider(transactions, currentYear, currentMonth, INTERNET_COMPANIES)
+  const waterProvider = getMonthlyBillProvider(transactions, currentYear, currentMonth, WATER_COMPANIES)
+
   return (
     <Card className="flex h-[390px] w-full flex-col overflow-hidden">
       <CardHeader>
@@ -50,9 +64,19 @@ export function QuickBillPay() {
               <div key={bill.id} className="flex items-center justify-between">
                 <div>
                   <p className="font-medium">{t(bill.name)}</p>
-                  {bill.dueDate && (
+                  {bill.name === "Electricity Bill" && electricityProvider && (
                     <p className="text-sm text-muted-foreground">
-                      {t("Due:")} {bill.dueDate}
+                      {t("Provider:")} {electricityProvider}
+                    </p>
+                  )}
+                  {bill.name === "Internet Service" && internetProvider && (
+                    <p className="text-sm text-muted-foreground">
+                      {t("Provider:")} {internetProvider}
+                    </p>
+                  )}
+                  {bill.name === "Water Bill" && waterProvider && (
+                    <p className="text-sm text-muted-foreground">
+                      {t("Provider:")} {waterProvider}
                     </p>
                   )}
                 </div>
