@@ -11,6 +11,17 @@ export interface BankMovement {
 const SPANISH_DATE_RE = /^\d{1,2}\/\d{1,2}\/\d{4}(?:\s+\d{1,2}:\d{2}(?::\d{2})?)?$/
 const NUMERIC_RE = /^[-+]?\d[\d.,]*\s?€?$/
 
+// Campos de cabecera: se eliminan aunque aparezcan mezclados con datos
+// (algunos bancos pegan la cabecera y la primera fila en la misma línea)
+const HEADER_FIELDS = new Set([
+  "Cantidades expresadas en euros",
+  "Fecha",
+  "Fecha valor",
+  "Concepto",
+  "Importe",
+  "Saldo Posterior",
+])
+
 function parseEuropeanNumber(raw: string): number {
   let value = raw.trim().replace(/[€\s]/g, "")
   if (!value) return Number.NaN
@@ -52,21 +63,9 @@ function parseCsvMovements(content: string): BankMovement[] {
     let fields = line
       .split(";")
       .map((field) => field.trim())
-      .filter((field) => field !== "")
+      .filter((field) => field !== "" && !HEADER_FIELDS.has(field))
 
     if (fields.length < 3) continue
-    if (
-      fields.some(
-        (field) =>
-          field === "Fecha" ||
-          field === "Fecha valor" ||
-          field === "Concepto" ||
-          field === "Importe" ||
-          field === "Saldo Posterior",
-      )
-    ) {
-      continue
-    }
 
     // Extraer las fechas del principio (fecha y opcionalmente fecha valor)
     const dates: string[] = []
