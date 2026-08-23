@@ -3,9 +3,7 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { DateRangePicker } from "@/components/date-range-picker"
 import { OverviewTab } from "@/components/analytics/overview-tab"
-import { AnalyticsTab } from "@/components/analytics/analytics-tab"
-import { ReportsTab } from "@/components/analytics/reports-tab"
-import { NotificationsTab } from "@/components/analytics/notifications-tab"
+import { MetricTab } from "@/components/analytics/metric-tab"
 import { Button } from "@/components/ui/button"
 import { Download } from "lucide-react"
 import { useLanguage } from "@/lib/i18n"
@@ -32,21 +30,21 @@ export default function AnalyticsPage() {
       <Tabs defaultValue="overview" className="space-y-4">
         <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="overview">{t("Overview")}</TabsTrigger>
-          <TabsTrigger value="analytics">{t("Analytics")}</TabsTrigger>
-          <TabsTrigger value="reports">{t("Reports")}</TabsTrigger>
-          <TabsTrigger value="notifications">{t("Notifications")}</TabsTrigger>
+          <TabsTrigger value="income">{t("Revenue")}</TabsTrigger>
+          <TabsTrigger value="expenses">{t("Expenses")}</TabsTrigger>
+          <TabsTrigger value="savings">{t("Savings/Investment")}</TabsTrigger>
         </TabsList>
         <TabsContent value="overview" className="space-y-4">
           <OverviewTab />
         </TabsContent>
-        <TabsContent value="analytics" className="space-y-4">
-          <AnalyticsTab />
+        <TabsContent value="income" className="space-y-4">
+          <MetricTab titleKey="Revenue" />
         </TabsContent>
-        <TabsContent value="reports" className="space-y-4">
-          <ReportsTab />
+        <TabsContent value="expenses" className="space-y-4">
+          <MetricTab titleKey="Expenses" />
         </TabsContent>
-        <TabsContent value="notifications" className="space-y-4">
-          <NotificationsTab />
+        <TabsContent value="savings" className="space-y-4">
+          <MetricTab titleKey="Savings/Investment" />
         </TabsContent>
       </Tabs>
     </div>

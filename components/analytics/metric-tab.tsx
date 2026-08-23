@@ -32,7 +32,13 @@ const channelPerformanceData = [
   { channel: "Email", acquisitions: 900, revenue: 30000 },
 ]
 
-export function AnalyticsTab() {
+interface MetricTabProps {
+  titleKey: string
+}
+
+// Plantilla comun para las pestanas de Ingresos, Gastos y Ahorro/Inversion;
+// cada seccion personalizara sus datos sobre esta misma estructura
+export function MetricTab({ titleKey }: MetricTabProps) {
   const { theme } = useTheme()
   const [timeFrame, setTimeFrame] = useState("last_30_days")
   const { t } = useLanguage()
@@ -40,7 +46,7 @@ export function AnalyticsTab() {
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <h3 className="text-2xl font-semibold">{t("Detailed Analytics")}</h3>
+        <h3 className="text-2xl font-semibold">{t(titleKey)}</h3>
         <Select value={timeFrame} onValueChange={setTimeFrame}>
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder={t("Last 30 Days")} />
@@ -130,4 +136,3 @@ export function AnalyticsTab() {
     </div>
   )
 }
-
