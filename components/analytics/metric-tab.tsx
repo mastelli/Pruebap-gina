@@ -41,6 +41,7 @@ interface MetricTabProps {
   secondCard?: ReactNode
   thirdCardTitleKey?: string
   thirdCard?: ReactNode
+  metricsCard?: ReactNode
 }
 
 // Plantilla comun para las pestanas de Ingresos, Gastos y Ahorro/Inversion;
@@ -53,6 +54,7 @@ export function MetricTab({
   secondCard,
   thirdCardTitleKey,
   thirdCard,
+  metricsCard,
 }: MetricTabProps) {
   const { theme } = useTheme()
   const [timeFrame, setTimeFrame] = useState("last_30_days")
@@ -140,24 +142,26 @@ export function MetricTab({
           <CardHeader>
             <CardTitle className="text-xl font-semibold">{t("Key Metrics")}</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <p className="text-sm font-medium text-muted-foreground">{t("Customer Lifetime Value")}</p>
-              <p className="text-2xl font-bold">$1,250</p>
-            </div>
-            <div>
-              <p className="text-sm font-medium text-muted-foreground">{t("Net Promoter Score")}</p>
-              <p className="text-2xl font-bold">72</p>
-            </div>
-            <div>
-              <p className="text-sm font-medium text-muted-foreground">{t("Customer Acquisition Cost")}</p>
-              <p className="text-2xl font-bold">$75</p>
-            </div>
-            <div>
-              <p className="text-sm font-medium text-muted-foreground">{t("Average Order Value")}</p>
-              <p className="text-2xl font-bold">$120</p>
-            </div>
-          </CardContent>
+          {metricsCard ?? (
+            <CardContent className="space-y-4">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">{t("Customer Lifetime Value")}</p>
+                <p className="text-2xl font-bold">$1,250</p>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">{t("Net Promoter Score")}</p>
+                <p className="text-2xl font-bold">72</p>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">{t("Customer Acquisition Cost")}</p>
+                <p className="text-2xl font-bold">$75</p>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">{t("Average Order Value")}</p>
+                <p className="text-2xl font-bold">$120</p>
+              </div>
+            </CardContent>
+          )}
         </Card>
       </div>
     </div>

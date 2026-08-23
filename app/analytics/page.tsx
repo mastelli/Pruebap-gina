@@ -6,6 +6,7 @@ import { OverviewTab } from "@/components/analytics/overview-tab"
 import { MetricTab } from "@/components/analytics/metric-tab"
 import { IncomeCategoriesChart } from "@/components/analytics/income-breakdown"
 import { IncomeHistory } from "@/components/analytics/income-history"
+import { IncomeMetrics } from "@/components/analytics/income-metrics"
 import { Button } from "@/components/ui/button"
 import { Download } from "lucide-react"
 import { useLanguage } from "@/lib/i18n"
@@ -48,6 +49,7 @@ export default function AnalyticsPage() {
             secondCard={<IncomeHistory />}
             thirdCardTitleKey="Annual Breakdown"
             thirdCard={<IncomeCategoriesChart scope="year" />}
+            metricsCard={<IncomeMetrics />}
           />
         </TabsContent>
         <TabsContent value="expenses" className="space-y-4">
