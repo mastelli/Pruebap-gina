@@ -150,6 +150,11 @@ const translations: Record<string, string> = {
   "Could not save the file": "No se pudo guardar el archivo",
   "Download invoice": "Descargar factura",
   "File not found": "Archivo no encontrado",
+  "Write a message": "Escribe un mensaje",
+  "No messages yet": "Todavía no hay mensajes",
+  "Notes": "Notas",
+  "Add a note": "Añade una nota",
+  "No notes yet": "Todavía no hay notas",
   "Water Bill": "Factura de agua",
 
   // Extracto bancario (Norma 43)
