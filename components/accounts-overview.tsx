@@ -72,10 +72,10 @@ export function AccountsOverview() {
           ))}
         </div>
         <div className="mt-auto space-y-2 pt-6">
-          <Button size="sm" className="w-full" onClick={() => fileInputRef.current?.click()}>
+          <Button className="w-full h-10" onClick={() => fileInputRef.current?.click()}>
             <Upload className="mr-2 h-4 w-4" /> {t("Add bank statement")}
           </Button>
-          <Button size="sm" variant="outline" className="w-full" onClick={() => setIsAddTransactionModalOpen(true)}>
+          <Button variant="outline" className="w-full h-10" onClick={() => setIsAddTransactionModalOpen(true)}>
             <PlusCircle className="mr-2 h-4 w-4" /> {t("Add manual transaction")}
           </Button>
         </div>
