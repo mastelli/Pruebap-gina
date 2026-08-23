@@ -39,7 +39,13 @@ export function IncomeCategoriesChart({ scope }: IncomeCategoriesChartProps) {
       <BarChart data={data}>
         <XAxis dataKey="label" />
         <YAxis />
-        <Tooltip formatter={(value) => formatEuros(Number(value))} cursor={{ fill: "rgba(0,0,0,0.05)" }} />
+        <Tooltip
+          formatter={(value) => formatEuros(Number(value))}
+          cursor={{ fill: "rgba(0,0,0,0.05)" }}
+          contentStyle={{ backgroundColor: "#ffffff", border: "1px solid #e5e7eb", borderRadius: 8 }}
+          labelStyle={{ color: "#000000", fontWeight: 600 }}
+          itemStyle={{ color: "#000000" }}
+        />
         <Bar dataKey="total" radius={[4, 4, 0, 0]}>
           {data.map((entry, index) => (
             <Cell key={entry.label} fill={BAR_COLORS[index % BAR_COLORS.length]} />

@@ -55,7 +55,13 @@ export function IncomeHistory() {
       <BarChart data={data}>
         <XAxis dataKey="month" tick={{ fontSize: 11 }} interval={0} angle={-35} textAnchor="end" height={50} />
         <YAxis />
-        <Tooltip formatter={(value) => formatEuros(Number(value))} cursor={{ fill: "rgba(0,0,0,0.05)" }} />
+        <Tooltip
+          formatter={(value) => formatEuros(Number(value))}
+          cursor={{ fill: "rgba(0,0,0,0.05)" }}
+          contentStyle={{ backgroundColor: "#ffffff", border: "1px solid #e5e7eb", borderRadius: 8 }}
+          labelStyle={{ color: "#000000", fontWeight: 600 }}
+          itemStyle={{ color: "#000000" }}
+        />
         <Legend />
         <Bar dataKey="salary" name={t("Salary")} stackId="income" fill={STACK_COLORS.salary} />
         <Bar dataKey="transfers" name={t("Transfers")} stackId="income" fill={STACK_COLORS.transfers} />
