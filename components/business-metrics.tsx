@@ -2,7 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { TrendingUp, Users, DollarSign, ArrowRight } from "lucide-react"
+import { TrendingUp, Users, DollarSign, Euro, ArrowRight } from "lucide-react"
 import Link from "next/link"
 import { useLanguage } from "@/lib/i18n"
 import { useTransactions } from "@/lib/transactions"
@@ -54,7 +54,7 @@ function formatEuros(value: number): string {
 }
 
 export function BusinessMetrics() {
-  const { t } = useLanguage()
+  const { t, lang } = useLanguage()
   const { transactions } = useTransactions()
 
   const now = new Date()
@@ -87,7 +87,17 @@ export function BusinessMetrics() {
           <Card key={metric.id}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">{t(metric.title)}</CardTitle>
-              <metric.icon className="h-4 w-4 text-muted-foreground" />
+              {metric.id === 1 ? (
+                lang === "es" ? (
+                  <Euro className="h-4 w-4 text-muted-foreground" />
+                ) : (
+                  <DollarSign className="h-4 w-4 text-muted-foreground" />
+                )
+              ) : metric.id === 3 ? (
+                <TrendingUp className="h-4 w-4 text-muted-foreground" />
+              ) : (
+                <metric.icon className="h-4 w-4 text-muted-foreground" />
+              )}
             </CardHeader>
             <CardContent>
               {metric.id === 1 ? (
