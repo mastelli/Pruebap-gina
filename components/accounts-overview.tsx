@@ -55,7 +55,7 @@ export function AccountsOverview() {
   }
 
   return (
-    <Card className="h-[390px] w-full">
+    <Card className="flex h-[390px] w-full flex-col overflow-hidden">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium">{t("Accounts Overview")}</CardTitle>
         <Wallet className="h-4 w-4 text-muted-foreground" />

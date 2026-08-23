@@ -12,7 +12,7 @@ export function RecentTransactions() {
   const recent = sortByDateDesc(transactions).slice(0, 4)
 
   return (
-    <Card className="h-[390px] w-full">
+    <Card className="flex h-[390px] w-full flex-col overflow-hidden">
       <CardHeader>
         <CardTitle className="text-lg font-medium">{t("Recent Transactions")}</CardTitle>
       </CardHeader>

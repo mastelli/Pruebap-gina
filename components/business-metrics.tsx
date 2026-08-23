@@ -64,7 +64,12 @@ export function BusinessMetrics() {
     .filter((transaction) => transaction.amount > 0 && transaction.date.startsWith(currentYear))
     .reduce((sum, transaction) => sum + transaction.amount, 0)
 
+  const yearlyExpenses = transactions
+    .filter((transaction) => transaction.amount < 0 && transaction.date.startsWith(currentYear))
+    .reduce((sum, transaction) => sum + Math.abs(transaction.amount), 0)
+
   const monthlyAverage = yearlyIncome / monthsElapsed
+  const monthlyExpenseAverage = yearlyExpenses / monthsElapsed
 
   return (
     <div className="space-y-4">
@@ -87,6 +92,13 @@ export function BusinessMetrics() {
                   <p className="text-2xl font-bold tabular-nums">{formatEuros(yearlyIncome)}</p>
                   <p className="text-xs text-muted-foreground">
                     {t("Monthly average")}: {formatEuros(monthlyAverage)}
+                  </p>
+                </div>
+              ) : metric.id === 2 ? (
+                <div className="space-y-1">
+                  <p className="text-2xl font-bold tabular-nums">{formatEuros(yearlyExpenses)}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {t("Monthly average")}: {formatEuros(monthlyExpenseAverage)}
                   </p>
                 </div>
               ) : (
