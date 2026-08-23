@@ -144,6 +144,12 @@ const translations: Record<string, string> = {
   "Payment date": "Fecha de pago",
   "No invoices yet": "Todavía no hay facturas",
   "Invoice added": "Factura añadida",
+  "Import file (.pdf)": "Importar archivo (.pdf)",
+  "File required in .pdf format": "Archivo necesario en formato .pdf",
+  "Only PDF files are allowed": "Solo se permiten archivos .pdf",
+  "Could not save the file": "No se pudo guardar el archivo",
+  "Download invoice": "Descargar factura",
+  "File not found": "Archivo no encontrado",
   "Water Bill": "Factura de agua",
 
   // Extracto bancario (Norma 43)
