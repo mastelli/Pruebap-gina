@@ -135,7 +135,7 @@ const translations: Record<string, string> = {
   "No pending bills": "No hay recibos pendientes",
   "Electricity Bill": "Factura de electricidad",
   "Internet Service": "Servicio de internet",
-  "Credit Card Payment": "Pago de tarjeta de crédito",
+  "Card Payments": "Pagos con tarjeta",
   "Water Bill": "Factura de agua",
 
   // Extracto bancario (Norma 43)
