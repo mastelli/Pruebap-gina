@@ -1,17 +1,18 @@
 "use client"
 
-import { useTheme } from "next-themes"
-import { Bar, BarChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
+import { Bar, BarChart, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
 import { useLanguage } from "@/lib/i18n"
 import { useTransactions } from "@/lib/transactions"
 import { getIncomeBreakdown } from "@/lib/income"
+
+// Tonos pastel de verde, uno por categoria
+const BAR_COLORS = ["#a5d6a7", "#81c784", "#66bb6a"]
 
 function formatEuros(value: number): string {
   return value.toLocaleString("es-ES", { style: "currency", currency: "EUR" })
 }
 
 export function IncomeBreakdown() {
-  const { theme } = useTheme()
   const { t } = useLanguage()
   const { transactions } = useTransactions()
 
@@ -30,7 +31,11 @@ export function IncomeBreakdown() {
         <XAxis dataKey="label" />
         <YAxis />
         <Tooltip formatter={(value) => formatEuros(Number(value))} cursor={{ fill: "rgba(0,0,0,0.05)" }} />
-        <Bar dataKey="total" fill={theme === "dark" ? "#adfa1d" : "#0ea5e9"} radius={[4, 4, 0, 0]} />
+        <Bar dataKey="total" radius={[4, 4, 0, 0]}>
+          {data.map((entry, index) => (
+            <Cell key={entry.label} fill={BAR_COLORS[index % BAR_COLORS.length]} />
+          ))}
+        </Bar>
       </BarChart>
     </ResponsiveContainer>
   )
