@@ -4,7 +4,7 @@ import { useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useLanguage } from "@/lib/i18n"
 import { useTransactions } from "@/lib/transactions"
-import { getMonthlyBillAmount, isElectricityBill, isInternetBill, isWaterBill } from "@/lib/bill-companies"
+import { getMonthlyBillAmount, isElectricityBill, isInternetBill, isWaterBill, isSubscription } from "@/lib/bill-companies"
 
 interface Bill {
   id: number
@@ -16,7 +16,7 @@ const initialBills: Bill[] = [
   { id: 1, name: "Electricity Bill", dueDate: "2023-07-15" },
   { id: 2, name: "Internet Service", dueDate: "2023-07-18" },
   { id: 4, name: "Water Bill", dueDate: "2023-07-30" },
-  { id: 3, name: "Card Payments" },
+  { id: 3, name: "Subscriptions" },
 ]
 
 function formatEuros(value: number): string {
@@ -35,17 +35,8 @@ export function QuickBillPay() {
   const internetAmount = getMonthlyBillAmount(transactions, currentYear, currentMonth, isInternetBill)
   const waterAmount = getMonthlyBillAmount(transactions, currentYear, currentMonth, isWaterBill)
 
-  // Gastos del mes excluyendo las facturas ya desglosadas (luz, agua e internet)
-  const cardPaymentsAmount = transactions
-    .filter(
-      (transaction) =>
-        transaction.date.startsWith(`${currentYear}-${currentMonth}`) &&
-        transaction.amount < 0 &&
-        !isElectricityBill(transaction.name) &&
-        !isInternetBill(transaction.name) &&
-        !isWaterBill(transaction.name),
-    )
-    .reduce((sum, transaction) => sum + transaction.amount, 0)
+  // Suscripciones detectadas por nombre de servicio (Netflix, Spotify, etc.)
+  const subscriptionsAmount = getMonthlyBillAmount(transactions, currentYear, currentMonth, isSubscription)
 
   return (
     <Card className="flex h-[390px] w-full flex-col overflow-hidden">
@@ -80,9 +71,9 @@ export function QuickBillPay() {
                     {formatEuros(waterAmount)}
                   </span>
                 )}
-                {bill.name === "Card Payments" && cardPaymentsAmount !== 0 && (
+                {bill.name === "Subscriptions" && (
                   <span className="text-sm font-medium tabular-nums text-red-600 dark:text-red-400">
-                    {formatEuros(cardPaymentsAmount)}
+                    {formatEuros(subscriptionsAmount)}
                   </span>
                 )}
               </div>

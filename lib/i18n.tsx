@@ -135,7 +135,7 @@ const translations: Record<string, string> = {
   "No pending bills": "No hay recibos pendientes",
   "Electricity Bill": "Factura de electricidad",
   "Internet Service": "Factura de internet",
-  "Card Payments": "Pagos con tarjeta",
+  "Subscriptions": "Suscripciones",
   "Invoices": "Facturas",
   "Add Invoice": "Añadir Factura",
   "Invoice type": "Tipo de factura",
