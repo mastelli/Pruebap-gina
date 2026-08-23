@@ -54,6 +54,9 @@ export function AccountsOverview() {
   const monthlyIncomeAverage = yearlyIncome / monthsElapsed
   const monthlyExpenseAverage = yearlyExpenses / monthsElapsed
 
+  // Ahorro/Inversion del mes: lo que queda de ingresos menos gastos
+  const monthlySavings = monthlyIncome - monthlyExpenses
+
   const handleFileChange = async (event) => {
     const file = event.target.files?.[0]
     if (!file) return
@@ -113,6 +116,17 @@ export function AccountsOverview() {
           </div>
           <div className="flex justify-between items-center">
             <span className="font-medium">{t("Savings/Investment")}</span>
+            <span
+              className={`font-medium tabular-nums ${
+                monthlySavings > 0
+                  ? "text-green-600 dark:text-green-400"
+                  : monthlySavings < 0
+                    ? "text-red-600 dark:text-red-400"
+                    : ""
+              }`}
+            >
+              {formatEuros(monthlySavings)}
+            </span>
           </div>
         </div>
         <div className="mt-auto space-y-2 pt-6">

@@ -75,7 +75,7 @@ export function QuickBillPay() {
                     {formatEuros(internetAmount)}
                   </span>
                 )}
-                {bill.name === "Water Bill" && waterAmount !== 0 && (
+                {bill.name === "Water Bill" && (
                   <span className="text-sm font-medium tabular-nums text-red-600 dark:text-red-400">
                     {formatEuros(waterAmount)}
                   </span>
