@@ -153,9 +153,10 @@ const translations: Record<string, string> = {
   "Error reading the file": "Error al leer el archivo",
 
   // Métricas de negocio
-  "Business Metrics": "Desglose",
+  "Breakdown": "Desglose",
+  "Expenses": "Gastos",
   "View Details": "Ver detalles",
-  "Revenue Growth": "Ingresos",
+  "Revenue": "Ingresos",
   "Monthly revenue target": "Objetivo mensual de ingresos",
   "On Track": "En camino",
   Behind: "Retrasado",

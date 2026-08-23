@@ -10,7 +10,7 @@ import { useTransactions } from "@/lib/transactions"
 const metrics = [
   {
     id: 1,
-    title: "Revenue Growth",
+    title: "Revenue",
     subtitle: "Monthly revenue target",
     icon: TrendingUp,
     status: "On Track",
@@ -21,7 +21,7 @@ const metrics = [
   },
   {
     id: 2,
-    title: "Customer Acquisition",
+    title: "Expenses",
     subtitle: "New customers this quarter",
     icon: CreditCard,
     status: "Behind",
@@ -32,7 +32,7 @@ const metrics = [
   },
   {
     id: 3,
-    title: "Average Order Value",
+    title: "Savings/Investment",
     subtitle: "Target AOV for Q3",
     icon: DollarSign,
     status: "Ahead",
@@ -75,7 +75,7 @@ export function BusinessMetrics() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold">{t("Business Metrics")}</h2>
+        <h2 className="text-lg font-semibold">{t("Breakdown")}</h2>
         <Button variant="outline" size="sm" asChild>
           <Link href="/analytics">
             {t("View Details")} <ArrowRight className="ml-2 h-4 w-4" />
