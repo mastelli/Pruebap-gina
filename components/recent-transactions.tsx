@@ -14,7 +14,7 @@ export function RecentTransactions() {
   return (
     <Card className="flex h-[390px] w-full flex-col overflow-hidden">
       <CardHeader>
-        <CardTitle className="text-lg font-medium">{t("Recent Transactions")}</CardTitle>
+        <CardTitle>{t("Recent Transactions")}</CardTitle>
       </CardHeader>
       <CardContent className="flex flex-1 flex-col">
         <div className="space-y-4">
