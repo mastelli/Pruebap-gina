@@ -113,13 +113,71 @@ function parseCsvMovements(content: string): BankMovement[] {
   return movements
 }
 
+function looksLikeRevolut(content: string): boolean {
+  const head = content.slice(0, 2000)
+  return head.includes("Fecha de inicio") && head.includes("Saldo")
+}
+
+// Fechas tipo "2026-08-02 22:07:29"
+const ISO_DATE_RE = /^\d{4}-\d{2}-\d{2}(?:[ T]\d{2}:\d{2}(?::\d{2})?)?$/
+
+function parseRevolutMovements(content: string): BankMovement[] {
+  const movements: BankMovement[] = []
+
+  for (const rawLine of content.split(/\r?\n/)) {
+    const line = rawLine.trim()
+    if (!line) continue
+
+    const fields = line.split(",").map((field) => field.trim())
+    if (fields.length < 6) continue
+
+    // Localizar las dos primeras fechas (fecha de inicio y fecha de finalización);
+    // la descripción queda entre ellas y los últimos cinco campos son
+    // Importe, Comisión, Divisa, State y Saldo (así tolera cabeceras pegadas,
+    // comas dentro de la descripción y columnas extra)
+    let startDateIdx = fields.findIndex((field) => ISO_DATE_RE.test(field))
+    if (startDateIdx === -1) continue
+
+    let endDateIdx = startDateIdx + 1
+    if (endDateIdx < fields.length && ISO_DATE_RE.test(fields[endDateIdx])) {
+      endDateIdx += 1
+    }
+
+    const rest = fields.slice(endDateIdx)
+    if (rest.length < 5) continue
+
+    const tail = rest.slice(-5)
+    const amountValue = Number.parseFloat(tail[0])
+    const feeValue = tail[1] === "" ? 0 : Number.parseFloat(tail[1])
+    const balanceValue = Number.parseFloat(tail[4])
+
+    if (Number.isNaN(amountValue) || Number.isNaN(balanceValue)) continue
+
+    const conceptFields = rest.slice(0, rest.length - 5)
+
+    movements.push({
+      date: fields[startDateIdx].slice(0, 10),
+      concept: conceptFields.join(" ").trim() || "Sin concepto",
+      reference: "",
+      // La comision siempre es un cargo adicional al importe
+      amount: Number.isNaN(feeValue) ? amountValue : amountValue - Math.abs(feeValue),
+      balance: balanceValue,
+    })
+  }
+
+  return movements
+}
+
 // Recargas/traspasos de tarjeta Revolut: se descartan al importar
 const REVOLUT_TRANSFER_RE = /revolut\s*\*\*/i
 
 export function parseBankMovements(content: string): BankMovement[] {
   let parsed: BankMovement[] = []
 
-  if (looksLikeCsv(content)) {
+  if (looksLikeRevolut(content)) {
+    parsed = parseRevolutMovements(content)
+  }
+  if (parsed.length === 0 && looksLikeCsv(content)) {
     parsed = parseCsvMovements(content)
   }
   if (parsed.length === 0) {
