@@ -4,16 +4,15 @@ import { useEffect, useRef, useState } from "react"
 import { toast } from "sonner"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Wallet, Upload, Send, CreditCard, MoreHorizontal } from "lucide-react"
-import { SendMoneyModal } from "./send-money-modal"
-import { RequestMoneyModal } from "./request-money-modal"
+import { Wallet, Upload, PlusCircle } from "lucide-react"
+import { AddTransactionModal } from "./add-transaction-modal"
 import { useLanguage } from "@/lib/i18n"
 import { parseBankMovements } from "@/lib/bank-import"
 import { useTransactions } from "@/lib/transactions"
 
-const initialAccounts = [
-  { name: "Checking", balance: 0 },
-  { name: "Savings/Investment", balance: 0 },
+const accounts = [
+  { name: "Checking" },
+  { name: "Savings/Investment" },
 ]
 
 function formatEuros(value: number): string {
@@ -21,9 +20,7 @@ function formatEuros(value: number): string {
 }
 
 export function AccountsOverview() {
-  const [accounts] = useState(initialAccounts)
-  const [isSendMoneyModalOpen, setIsSendMoneyModalOpen] = useState(false)
-  const [isRequestMoneyModalOpen, setIsRequestMoneyModalOpen] = useState(false)
+  const [isAddTransactionModalOpen, setIsAddTransactionModalOpen] = useState(false)
   const [checkingBalance, setCheckingBalance] = useState<number | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const { t } = useLanguage()
@@ -42,15 +39,6 @@ export function AccountsOverview() {
       // storage unavailable
     }
   }, [])
-
-  const handleSendMoney = (amount, fromAccount) => {
-    void amount
-    void fromAccount
-  }
-
-  const handleRequestMoney = (amount, contact) => {
-    console.log(`Requested $${amount} from ${contact.name}`)
-  }
 
   const handleFileChange = async (event) => {
     const file = event.target.files?.[0]
@@ -103,18 +91,12 @@ export function AccountsOverview() {
             </div>
           ))}
         </div>
-        <div className="mt-4 grid grid-cols-2 gap-2">
-          <Button size="sm" className="col-span-2" onClick={() => fileInputRef.current?.click()}>
+        <div className="mt-4 space-y-2">
+          <Button size="sm" className="w-full" onClick={() => fileInputRef.current?.click()}>
             <Upload className="mr-2 h-4 w-4" /> {t("Add bank statement")}
           </Button>
-          <Button size="sm" onClick={() => setIsSendMoneyModalOpen(true)}>
-            <Send className="mr-2 h-4 w-4" /> {t("Send")}
-          </Button>
-          <Button size="sm" onClick={() => setIsRequestMoneyModalOpen(true)}>
-            <CreditCard className="mr-2 h-4 w-4" /> {t("Request")}
-          </Button>
-          <Button size="sm" variant="outline">
-            <MoreHorizontal className="mr-2 h-4 w-4" /> {t("More")}
+          <Button size="sm" variant="outline" className="w-full" onClick={() => setIsAddTransactionModalOpen(true)}>
+            <PlusCircle className="mr-2 h-4 w-4" /> {t("Add manual transaction")}
           </Button>
         </div>
         <input
@@ -125,17 +107,7 @@ export function AccountsOverview() {
           onChange={handleFileChange}
         />
       </CardContent>
-      <SendMoneyModal
-        isOpen={isSendMoneyModalOpen}
-        onClose={() => setIsSendMoneyModalOpen(false)}
-        onSendMoney={handleSendMoney}
-        accounts={accounts}
-      />
-      <RequestMoneyModal
-        isOpen={isRequestMoneyModalOpen}
-        onClose={() => setIsRequestMoneyModalOpen(false)}
-        onRequestMoney={handleRequestMoney}
-      />
+      <AddTransactionModal isOpen={isAddTransactionModalOpen} onClose={() => setIsAddTransactionModalOpen(false)} />
     </Card>
   )
 }
