@@ -39,6 +39,8 @@ interface MetricTabProps {
   firstCard?: ReactNode
   secondCardTitleKey?: string
   secondCard?: ReactNode
+  thirdCardTitleKey?: string
+  thirdCard?: ReactNode
 }
 
 // Plantilla comun para las pestanas de Ingresos, Gastos y Ahorro/Inversion;
@@ -49,6 +51,8 @@ export function MetricTab({
   firstCard,
   secondCardTitleKey,
   secondCard,
+  thirdCardTitleKey,
+  thirdCard,
 }: MetricTabProps) {
   const { theme } = useTheme()
   const [timeFrame, setTimeFrame] = useState("last_30_days")
@@ -113,19 +117,23 @@ export function MetricTab({
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
         <Card className="col-span-4">
           <CardHeader>
-            <CardTitle className="text-xl font-semibold">{t("Channel Performance")}</CardTitle>
+            <CardTitle className="text-xl font-semibold">
+              {t(thirdCardTitleKey ?? "Channel Performance")}
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={channelPerformanceData}>
-                <XAxis dataKey="channel" tickFormatter={(value) => t(value)} />
-                <YAxis yAxisId="left" />
-                <YAxis yAxisId="right" orientation="right" />
-                <Tooltip />
-                <Bar yAxisId="left" dataKey="acquisitions" fill={theme === "dark" ? "#adfa1d" : "#0ea5e9"} />
-                <Bar yAxisId="right" dataKey="revenue" fill={theme === "dark" ? "#1e40af" : "#3b82f6"} />
-              </BarChart>
-            </ResponsiveContainer>
+            {thirdCard ?? (
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={channelPerformanceData}>
+                  <XAxis dataKey="channel" tickFormatter={(value) => t(value)} />
+                  <YAxis yAxisId="left" />
+                  <YAxis yAxisId="right" orientation="right" />
+                  <Tooltip />
+                  <Bar yAxisId="left" dataKey="acquisitions" fill={theme === "dark" ? "#adfa1d" : "#0ea5e9"} />
+                  <Bar yAxisId="right" dataKey="revenue" fill={theme === "dark" ? "#1e40af" : "#3b82f6"} />
+                </BarChart>
+              </ResponsiveContainer>
+            )}
           </CardContent>
         </Card>
         <Card className="col-span-3">

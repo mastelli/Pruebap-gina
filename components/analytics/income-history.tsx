@@ -1,8 +1,9 @@
 "use client"
 
-import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
+import { Bar, BarChart, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
 import { useLanguage } from "@/lib/i18n"
 import { useTransactions } from "@/lib/transactions"
+import { getIncomeBreakdown } from "@/lib/income"
 
 const MONTHS = [
   "January",
@@ -19,11 +20,18 @@ const MONTHS = [
   "December",
 ]
 
+// Mismos colores que en Desglose de ingresos
+const STACK_COLORS = {
+  salary: "#66bb6a",
+  transfers: "#43a047",
+  bizum: "#2e7d32",
+}
+
 function formatEuros(value: number): string {
   return value.toLocaleString("es-ES", { style: "currency", currency: "EUR" })
 }
 
-// Evolucion de los ingresos totales mes a mes durante el ano en curso
+// Columnas apiladas por mes con nomina, transferencias y bizum
 export function IncomeHistory() {
   const { t } = useLanguage()
   const { transactions } = useTransactions()
@@ -32,26 +40,27 @@ export function IncomeHistory() {
 
   const data = MONTHS.map((month, index) => {
     const monthKey = String(index + 1).padStart(2, "0")
-    const total = transactions
-      .filter(
-        (transaction) =>
-          transaction.amount > 0 &&
-          transaction.date.startsWith(`${currentYear}-${monthKey}`),
-      )
-      .reduce((sum, transaction) => sum + transaction.amount, 0)
+    const totals = getIncomeBreakdown(transactions, `${currentYear}-${monthKey}`)
 
-    return { month: t(month), total }
+    return {
+      month: t(month),
+      salary: totals.salary,
+      transfers: totals.transfers,
+      bizum: totals.bizum,
+    }
   })
 
   return (
     <ResponsiveContainer width="100%" height={300}>
-      <LineChart data={data}>
-        <CartesianGrid strokeDasharray="3 3" />
-        <XAxis dataKey="month" tickFormatter={(value) => t(value)} tick={{ fontSize: 11 }} interval={0} angle={-35} textAnchor="end" height={50} />
+      <BarChart data={data}>
+        <XAxis dataKey="month" tick={{ fontSize: 11 }} interval={0} angle={-35} textAnchor="end" height={50} />
         <YAxis />
-        <Tooltip formatter={(value) => formatEuros(Number(value))} />
-        <Line type="monotone" dataKey="total" stroke="#2e7d32" strokeWidth={2} dot={{ r: 3 }} />
-      </LineChart>
+        <Tooltip formatter={(value) => formatEuros(Number(value))} cursor={{ fill: "rgba(0,0,0,0.05)" }} />
+        <Legend />
+        <Bar dataKey="salary" name={t("Salary")} stackId="income" fill={STACK_COLORS.salary} />
+        <Bar dataKey="transfers" name={t("Transfers")} stackId="income" fill={STACK_COLORS.transfers} />
+        <Bar dataKey="bizum" name={t("Bizum")} stackId="income" fill={STACK_COLORS.bizum} radius={[4, 4, 0, 0]} />
+      </BarChart>
     </ResponsiveContainer>
   )
 }

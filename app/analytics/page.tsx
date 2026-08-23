@@ -4,7 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { DateRangePicker } from "@/components/date-range-picker"
 import { OverviewTab } from "@/components/analytics/overview-tab"
 import { MetricTab } from "@/components/analytics/metric-tab"
-import { IncomeBreakdown } from "@/components/analytics/income-breakdown"
+import { IncomeCategoriesChart } from "@/components/analytics/income-breakdown"
 import { IncomeHistory } from "@/components/analytics/income-history"
 import { Button } from "@/components/ui/button"
 import { Download } from "lucide-react"
@@ -43,9 +43,11 @@ export default function AnalyticsPage() {
           <MetricTab
             titleKey="Revenue"
             firstCardTitleKey="Income Breakdown"
-            firstCard={<IncomeBreakdown />}
+            firstCard={<IncomeCategoriesChart scope="month" />}
             secondCardTitleKey="History"
             secondCard={<IncomeHistory />}
+            thirdCardTitleKey="Annual Breakdown"
+            thirdCard={<IncomeCategoriesChart scope="year" />}
           />
         </TabsContent>
         <TabsContent value="expenses" className="space-y-4">

@@ -12,12 +12,21 @@ function formatEuros(value: number): string {
   return value.toLocaleString("es-ES", { style: "currency", currency: "EUR" })
 }
 
-export function IncomeBreakdown() {
+interface IncomeCategoriesChartProps {
+  scope: "month" | "year"
+}
+
+export function IncomeCategoriesChart({ scope }: IncomeCategoriesChartProps) {
   const { t } = useLanguage()
   const { transactions } = useTransactions()
 
-  const currentYear = `${new Date().getFullYear()}`
-  const { salary, transfers, bizum } = getIncomeBreakdown(transactions, currentYear)
+  const now = new Date()
+  const year = `${now.getFullYear()}`
+  const month = String(now.getMonth() + 1).padStart(2, "0")
+  const { salary, transfers, bizum } = getIncomeBreakdown(
+    transactions,
+    scope === "month" ? `${year}-${month}` : year,
+  )
 
   const data = [
     { label: "Salary", total: salary },
