@@ -19,13 +19,17 @@ const DEFAULT_TRANSACTIONS: Transaction[] = []
 
 interface TransactionsContextValue {
   transactions: Transaction[]
-  addBankMovements: (movements: BankMovementInput[]) => void
+  checkingBalance: number | null
+  addBankMovements: (movements: BankMovementInput[]) => number
+  updateCheckingBalance: (delta: number) => void
+  setCheckingBalance: (value: number) => void
   removeTransaction: (id: string) => void
 }
 
 const TransactionsContext = createContext<TransactionsContextValue | null>(null)
 
 const STORAGE_KEY = "appTransactions"
+const BALANCE_STORAGE_KEY = "appCheckingBalance"
 
 function sortByDateDesc(transactions: Transaction[]): Transaction[] {
   return [...transactions].sort((a, b) => b.date.localeCompare(a.date))
@@ -33,6 +37,7 @@ function sortByDateDesc(transactions: Transaction[]): Transaction[] {
 
 export function TransactionsProvider({ children }: { children: React.ReactNode }) {
   const [transactions, setTransactions] = useState<Transaction[]>(DEFAULT_TRANSACTIONS)
+  const [checkingBalance, setCheckingBalanceState] = useState<number | null>(null)
   const [hydrated, setHydrated] = useState(false)
 
   useEffect(() => {
@@ -49,6 +54,14 @@ export function TransactionsProvider({ children }: { children: React.ReactNode }
           }
         }
       }
+
+      const storedBalance = window.localStorage.getItem(BALANCE_STORAGE_KEY)
+      if (storedBalance !== null) {
+        const parsedBalance = Number.parseFloat(storedBalance)
+        if (!Number.isNaN(parsedBalance)) {
+          setCheckingBalanceState(parsedBalance)
+        }
+      }
     } catch {
       // ignore corrupted storage
     }
@@ -59,12 +72,16 @@ export function TransactionsProvider({ children }: { children: React.ReactNode }
     if (!hydrated) return
     try {
       window.localStorage.setItem(STORAGE_KEY, JSON.stringify(transactions))
+      if (checkingBalance !== null) {
+        window.localStorage.setItem(BALANCE_STORAGE_KEY, String(checkingBalance))
+      }
     } catch {
       // storage unavailable
     }
-  }, [transactions, hydrated])
+  }, [transactions, checkingBalance, hydrated])
 
-  const addBankMovements = (movements: BankMovementInput[]) => {
+  const addBankMovements = (movements: BankMovementInput[]): number => {
+    let added = 0
     setTransactions((prev) => {
       const existingKeys = new Set(
         prev.map((transaction) => `${transaction.date}|${transaction.name}|${transaction.amount}`),
@@ -85,8 +102,18 @@ export function TransactionsProvider({ children }: { children: React.ReactNode }
         }
       })
 
+      added = fresh.length
       return [...fresh, ...prev]
     })
+    return added
+  }
+
+  const updateCheckingBalance = (delta: number) => {
+    setCheckingBalanceState((prev) => (prev ?? 0) + delta)
+  }
+
+  const setCheckingBalance = (value: number) => {
+    setCheckingBalanceState(value)
   }
 
   const removeTransaction = (id: string) => {
@@ -94,7 +121,16 @@ export function TransactionsProvider({ children }: { children: React.ReactNode }
   }
 
   return (
-    <TransactionsContext.Provider value={{ transactions, addBankMovements, removeTransaction }}>
+    <TransactionsContext.Provider
+      value={{
+        transactions,
+        checkingBalance,
+        addBankMovements,
+        updateCheckingBalance,
+        setCheckingBalance,
+        removeTransaction,
+      }}
+    >
       {children}
     </TransactionsContext.Provider>
   )

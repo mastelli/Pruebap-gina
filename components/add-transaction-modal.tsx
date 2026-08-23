@@ -36,7 +36,7 @@ const EMPTY_FORM = {
 
 export function AddTransactionModal({ isOpen, onClose }: AddTransactionModalProps) {
   const { t } = useLanguage()
-  const { addBankMovements } = useTransactions()
+  const { addBankMovements, updateCheckingBalance } = useTransactions()
 
   const [form, setForm] = useState(EMPTY_FORM)
 
@@ -65,8 +65,12 @@ export function AddTransactionModal({ isOpen, onClose }: AddTransactionModalProp
       amount: form.type === "expense" ? -value : value,
     }
 
-    addBankMovements([movement])
-    toast.success(t("Transaction added"))
+    const added = addBankMovements([movement])
+    if (added > 0) {
+      // El gasto resta del saldo de Corriente; el ingreso suma
+      updateCheckingBalance(movement.amount)
+      toast.success(t("Transaction added"))
+    }
     onClose()
   }
 

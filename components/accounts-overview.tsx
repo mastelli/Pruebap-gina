@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useRef, useState } from "react"
 import { toast } from "sonner"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -21,24 +21,9 @@ function formatEuros(value: number): string {
 
 export function AccountsOverview() {
   const [isAddTransactionModalOpen, setIsAddTransactionModalOpen] = useState(false)
-  const [checkingBalance, setCheckingBalance] = useState<number | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const { t } = useLanguage()
-  const { addBankMovements } = useTransactions()
-
-  useEffect(() => {
-    try {
-      const stored = window.localStorage.getItem("appCheckingBalance")
-      if (stored) {
-        const parsed = Number.parseFloat(stored)
-        if (!Number.isNaN(parsed)) {
-          setCheckingBalance(parsed)
-        }
-      }
-    } catch {
-      // storage unavailable
-    }
-  }, [])
+  const { addBankMovements, checkingBalance, setCheckingBalance } = useTransactions()
 
   const handleFileChange = async (event) => {
     const file = event.target.files?.[0]
@@ -57,11 +42,6 @@ export function AccountsOverview() {
       const firstBalance = movements.find((movement) => typeof movement.balance === "number")?.balance
       if (typeof firstBalance === "number") {
         setCheckingBalance(firstBalance)
-        try {
-          window.localStorage.setItem("appCheckingBalance", String(firstBalance))
-        } catch {
-          // storage unavailable
-        }
       }
 
       addBankMovements(movements)
