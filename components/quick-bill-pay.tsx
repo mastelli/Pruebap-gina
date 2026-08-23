@@ -9,7 +9,6 @@ import { getMonthlyBillAmount, isElectricityBill, isInternetBill } from "@/lib/b
 const initialBills = [
   { id: 1, name: "Electricity Bill", dueDate: "2023-07-15" },
   { id: 2, name: "Internet Service", dueDate: "2023-07-18" },
-  { id: 3, name: "Credit Card Payment", dueDate: "2023-07-25" },
   { id: 4, name: "Water Bill", dueDate: "2023-07-30" },
 ]
 
