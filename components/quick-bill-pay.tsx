@@ -16,7 +16,7 @@ export function QuickBillPay() {
   const { t } = useLanguage()
 
   return (
-    <Card>
+    <Card className="h-full w-full">
       <CardHeader>
         <CardTitle>{t("Quick Bill Pay")}</CardTitle>
       </CardHeader>
