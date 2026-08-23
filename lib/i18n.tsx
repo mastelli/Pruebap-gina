@@ -104,25 +104,31 @@ const translations: Record<string, string> = {
   "Gas Station": "Gasolinera",
 
   // Pago rápido de facturas
-  "Quick Bill Pay": "Pago rápido de facturas",
+  "Quick Bill Pay": "Recibos",
   "Due:": "Vence:",
-  "No pending bills": "No hay facturas pendientes",
+  "No pending bills": "No hay recibos pendientes",
   "Electricity Bill": "Factura de electricidad",
   "Internet Service": "Servicio de internet",
   "Credit Card Payment": "Pago de tarjeta de crédito",
   "Water Bill": "Factura de agua",
 
+  // Extracto bancario (Norma 43)
+  "Add bank statement": "Añadir extracto del banco",
+  "expenses imported": "gastos importados",
+  "No expenses found in the file": "No se han encontrado gastos en el archivo",
+  "Error reading the file": "Error al leer el archivo",
+
   // Métricas de negocio
-  "Business Metrics": "Métricas de negocio",
+  "Business Metrics": "Desglose",
   "View Details": "Ver detalles",
-  "Revenue Growth": "Crecimiento de ingresos",
+  "Revenue Growth": "Ingresos",
   "Monthly revenue target": "Objetivo mensual de ingresos",
   "On Track": "En camino",
   Behind: "Retrasado",
   Ahead: "Por delante",
-  "Customer Acquisition": "Adquisición de clientes",
+  "Customer Acquisition": "Gastos",
   "New customers this quarter": "Nuevos clientes este trimestre",
-  "Average Order Value": "Valor medio de pedido",
+  "Average Order Value": "Ahorro/Inversión",
   "Target AOV for Q3": "Objetivo de TPM para el T3",
   "% complete": "% completado",
 
@@ -184,7 +190,7 @@ const translations: Record<string, string> = {
   "Conversion Rate": "Tasa de conversión",
   "Churn Rate": "Tasa de cancelación",
   "Financial Summary Report": "Informe de resumen financiero",
-  "Customer Acquisition Report": "Informe de adquisición de clientes",
+  "Customer Acquisition Report": "Informe de gastos",
 
   // Preferencias de notificación (analíticas)
   "Notification Preferences": "Preferencias de notificación",

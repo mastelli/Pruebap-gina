@@ -67,11 +67,8 @@ export function BusinessMetrics() {
             <CardContent>
               <p className="text-xs text-muted-foreground">{t(metric.subtitle)}</p>
               <div className="mt-2 space-y-2">
-                <div className="flex items-center justify-between text-xs">
+                <div className="flex items-center text-xs">
                   <span className={`px-2 py-1 rounded-full ${statusColors[metric.status]}`}>{t(metric.status)}</span>
-                  <span className="text-muted-foreground">
-                    {metric.current} / {metric.target} {metric.unit}
-                  </span>
                 </div>
                 <div className="w-full bg-secondary rounded-full h-1.5">
                   <div
@@ -79,11 +76,7 @@ export function BusinessMetrics() {
                     style={{ width: `${Math.min(metric.progress, 100)}%` }}
                   />
                 </div>
-                <div className="flex justify-between items-center text-sm">
-                  <span className="font-medium">
-                    {metric.unit}
-                    {metric.target.toLocaleString()}
-                  </span>
+                <div className="flex justify-end items-center text-sm">
                   <span className="text-muted-foreground">
                     {metric.progress}
                     {t("% complete")}

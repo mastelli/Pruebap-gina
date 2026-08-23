@@ -2,7 +2,6 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { ArrowUpRight, ArrowDownRight } from "lucide-react"
 import { useLanguage } from "@/lib/i18n"
 
 const transactions = [
@@ -27,22 +26,6 @@ export function RecentTransactions() {
               <div className="flex-1">
                 <p className="text-sm font-medium">{t(transaction.name)}</p>
                 <p className="text-xs text-muted-foreground">{transaction.date}</p>
-              </div>
-              <div className="flex items-center">
-                <span
-                  className={`text-sm font-medium ${
-                    transaction.type === "income"
-                      ? "text-green-600 dark:text-green-400"
-                      : "text-red-600 dark:text-red-400"
-                  }`}
-                >
-                  {transaction.type === "income" ? "+" : "-"}${Math.abs(transaction.amount).toFixed(2)}
-                </span>
-                {transaction.type === "income" ? (
-                  <ArrowUpRight className="h-4 w-4 text-green-600 dark:text-green-400 ml-1" />
-                ) : (
-                  <ArrowDownRight className="h-4 w-4 text-red-600 dark:text-red-400 ml-1" />
-                )}
               </div>
             </div>
           ))}

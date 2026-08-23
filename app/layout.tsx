@@ -5,6 +5,7 @@ import { LanguageProvider } from "@/lib/i18n"
 import { Sidebar } from "@/components/sidebar"
 import { TopNav } from "@/components/top-nav"
 import { TooltipProvider } from "@/components/ui/tooltip"
+import { Toaster } from "@/components/ui/sonner"
 import { SettingsProvider } from "@/contexts/settings-context"
 import type React from "react"
 
@@ -40,6 +41,7 @@ export default function RootLayout({
               </TooltipProvider>
             </SettingsProvider>
           </LanguageProvider>
+          <Toaster />
         </ThemeProvider>
       </body>
     </html>
