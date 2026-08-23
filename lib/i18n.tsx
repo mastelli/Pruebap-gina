@@ -403,6 +403,12 @@ const LanguageContext = createContext<LanguageContextType | undefined>(undefined
 
 const STORAGE_KEY = "appLanguage"
 
+// Permite traducir a ingles textos que entran en castellano
+// (p. ej. nombres guardados como "Sin concepto")
+const spanishToEnglish = Object.fromEntries(
+  Object.entries(translations).map(([english, spanish]) => [spanish, english]),
+)
+
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
   const [lang, setLangState] = useState<Language>("es")
 
@@ -422,7 +428,11 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem(STORAGE_KEY, newLang)
   }, [])
 
-  const t = useCallback((key: string) => (lang === "en" ? key : translations[key] ?? key), [lang])
+  const t = useCallback(
+    (key: string) =>
+      lang === "es" ? translations[key] ?? key : spanishToEnglish[key] ?? key,
+    [lang],
+  )
 
   return <LanguageContext.Provider value={{ lang, setLang, t }}>{children}</LanguageContext.Provider>
 }
