@@ -4,7 +4,7 @@ import { useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useLanguage } from "@/lib/i18n"
 import { useTransactions } from "@/lib/transactions"
-import { getMonthlyElectricityAmount } from "@/lib/electricity"
+import { getMonthlyBillAmount, isElectricityBill, isInternetBill } from "@/lib/bill-companies"
 
 const initialBills = [
   { id: 1, name: "Electricity Bill", dueDate: "2023-07-15" },
@@ -23,11 +23,10 @@ export function QuickBillPay() {
   const { transactions } = useTransactions()
 
   const now = new Date()
-  const electricityAmount = getMonthlyElectricityAmount(
-    transactions,
-    `${now.getFullYear()}`,
-    String(now.getMonth() + 1).padStart(2, "0"),
-  )
+  const currentYear = `${now.getFullYear()}`
+  const currentMonth = String(now.getMonth() + 1).padStart(2, "0")
+  const electricityAmount = getMonthlyBillAmount(transactions, currentYear, currentMonth, isElectricityBill)
+  const internetAmount = getMonthlyBillAmount(transactions, currentYear, currentMonth, isInternetBill)
 
   return (
     <Card className="flex h-[390px] w-full flex-col overflow-hidden">
@@ -48,6 +47,11 @@ export function QuickBillPay() {
                 {bill.name === "Electricity Bill" && electricityAmount !== 0 && (
                   <span className="text-sm font-medium tabular-nums text-red-600 dark:text-red-400">
                     {formatEuros(electricityAmount)}
+                  </span>
+                )}
+                {bill.name === "Internet Service" && internetAmount !== 0 && (
+                  <span className="text-sm font-medium tabular-nums text-red-600 dark:text-red-400">
+                    {formatEuros(internetAmount)}
                   </span>
                 )}
               </div>
