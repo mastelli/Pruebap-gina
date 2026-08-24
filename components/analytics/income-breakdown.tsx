@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts"
 import { useLanguage } from "@/lib/i18n"
@@ -93,14 +93,14 @@ export function IncomeCategoriesChart({ scope = "month", month }: IncomeCategori
 
   if (data.length === 0) {
     return (
-      <div className="flex h-[340px] items-center justify-center text-sm text-muted-foreground">
+      <div className="flex h-[400px] items-center justify-center text-sm text-muted-foreground">
         {t("No transactions yet")}
       </div>
     )
   }
 
   return (
-    <ResponsiveContainer width="100%" height={340}>
+    <ResponsiveContainer width="100%" height={400}>
       <PieChart>
         <Pie
           data={data}
