@@ -11,7 +11,7 @@ export function ExpenseList() {
   const expenses = sortByDateDesc(transactions.filter((transaction) => transaction.amount < 0))
 
   return (
-    <div className="max-h-[300px] overflow-y-auto px-2">
+    <div className="px-2">
       <div className="divide-y divide-border">
         {expenses.map((transaction) => (
           <div key={transaction.id} className="flex items-center justify-between gap-4 py-3">
