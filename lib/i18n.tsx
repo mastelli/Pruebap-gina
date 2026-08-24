@@ -194,7 +194,6 @@ const translations: Record<string, string> = {
   "Last updated": "Última actualización",
   "No assets imported yet": "Todavía no has importado ningún activo",
   Refresh: "Actualizar",
-  Cash: "Efectivo",
   "Quotes may be delayed up to 15 minutes":
     "Las cotizaciones pueden ir con un retardo de hasta 15 minutos",
   "Total Salary": "Total Nómina",
