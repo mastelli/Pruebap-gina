@@ -95,7 +95,7 @@ function AnalyticsContent() {
                 </div>
                 <Card className="flex flex-col">
                   <CardHeader>
-                    <CardTitle className="text-xl font-semibold">{t("Expense Types")}</CardTitle>
+                    <CardTitle className="text-xl font-semibold">{t("Budget")}</CardTitle>
                   </CardHeader>
                   <CardContent className="pb-6">
                     <ExpenseTypes />

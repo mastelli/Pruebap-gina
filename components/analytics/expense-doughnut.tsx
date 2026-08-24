@@ -24,11 +24,13 @@ export function ExpenseDoughnut({ month }: { month: string }) {
     totals[getCategoryFor(transaction)] += Math.abs(transaction.amount)
   }
 
-  const data = EXPENSE_CATEGORY_DEFS.filter((def) => totals[def.key] > 0).map((def) => ({
-    label: t(def.key),
-    total: totals[def.key],
-    color: def.color,
-  }))
+  const data = EXPENSE_CATEGORY_DEFS.filter((def) => totals[def.key] > 0)
+    .map((def) => ({
+      label: t(def.key),
+      total: totals[def.key],
+      color: def.color,
+    }))
+    .sort((a, b) => a.label.localeCompare(b.label, "es"))
 
   if (data.length === 0) {
     return (

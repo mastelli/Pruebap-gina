@@ -91,7 +91,7 @@ export default function TransactionsPage() {
               const options =
                 transaction.amount >= 0
                   ? INCOME_CATEGORIES
-                  : EXPENSE_CATEGORY_DEFS.map((def) => def.key)
+                  : EXPENSE_CATEGORY_DEFS.map((def) => def.key).sort((a, b) => t(a).localeCompare(t(b), "es"))
               return (
                 <div key={transaction.id} className="flex items-center justify-between gap-4 py-3">
                   <div className="min-w-0">

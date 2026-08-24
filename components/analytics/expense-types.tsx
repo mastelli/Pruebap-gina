@@ -51,9 +51,11 @@ export function ExpenseTypes() {
     spentByCategory[getCategoryFor(transaction)] += Math.abs(transaction.amount)
   }
 
+  const sortedDefs = [...EXPENSE_CATEGORY_DEFS].sort((a, b) => t(a.key).localeCompare(t(b.key), "es"))
+
   return (
     <div className="max-h-[820px] space-y-4 overflow-y-auto px-2">
-      {EXPENSE_CATEGORY_DEFS.map((def) => {
+      {sortedDefs.map((def) => {
         const spent = spentByCategory[def.key]
         const budget = budgets[def.key] ?? 0
         const ratio = budget > 0 ? Math.min(100, (spent / budget) * 100) : 0
