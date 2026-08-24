@@ -9,11 +9,16 @@ import { useLanguage } from "@/lib/i18n"
 const PORTFOLIO_STORAGE_KEY = "appPortfolio"
 const PRICES_STORAGE_KEY = "appPortfolioPrices"
 const PRICE_TTL = 5 * 1000
-// Sondeo agresivo solo como respaldo si el streaming no esta disponible;
-// con streaming activo un sondeo suave mantiene todo sincronizado
+// Sondeo agresivo solo como respaldo si no hay streaming; con streaming se
+// sondea unicamente lo que lleva demasiado tiempo sin recibir ticks
 const FALLBACK_POLL_MS = 3 * 1000
-const LIVE_SYNC_MS = 60 * 1000
+const STALE_CHECK_MS = 5 * 1000
+const STALE_TICK_MS = 20 * 1000
 const STREAM_FLUSH_MS = 500
+
+// Clave gratuita de finnhub.io (opcional): anade redundancia en tiempo real
+// para valores de EEUU. Configurar como variable de entorno en Vercel.
+const FINNHUB_KEY = process.env.NEXT_PUBLIC_FINNHUB_API_KEY
 
 interface Asset {
   id: string
@@ -31,6 +36,8 @@ interface PriceInfo {
   previousClose?: number | null
   currency?: string
   marketOpen?: boolean
+  sessionStart?: number
+  sessionEnd?: number
   fetchedAt?: number
 }
 
@@ -132,6 +139,14 @@ function formatSigned(value: number, decimals = 2): string {
   })}`
 }
 
+function formatSessionTime(epochSeconds: number): string {
+  return new Date(epochSeconds * 1000).toLocaleTimeString("es-ES", {
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZone: "Europe/Madrid",
+  })
+}
+
 // --- Streaming en vivo (mismo websocket que usa la web de Yahoo Finance) ---
 
 function readVarint(bytes: Uint8Array, pos: number): [number, number] {
@@ -195,11 +210,16 @@ export function PortfolioPanel() {
   const [loading, setLoading] = useState(false)
   const [lastUpdated, setLastUpdated] = useState<number | null>(null)
   const [streaming, setStreaming] = useState(false)
+  const [fhConnected, setFhConnected] = useState(false)
+  const [nowTs, setNowTs] = useState(() => Date.now())
   const fileInputRef = useRef<HTMLInputElement>(null)
   const wsRef = useRef<WebSocket | null>(null)
+  const fhRef = useRef<WebSocket | null>(null)
   const symbolsRef = useRef<string[]>([])
   const isinBySymbolRef = useRef<Map<string, string>>(new Map())
   const tickBufferRef = useRef<Record<string, StreamTick>>({})
+  const lastTickRef = useRef<Record<string, number>>({})
+  const pricesRef = useRef<PriceMap>({})
 
   useEffect(() => {
     try {
@@ -216,10 +236,21 @@ export function PortfolioPanel() {
     return () => {
       try {
         wsRef.current?.close()
+        fhRef.current?.close()
       } catch {
-        // ya cerrado
+        // ya cerrados
       }
     }
+  }, [])
+
+  useEffect(() => {
+    pricesRef.current = prices
+  }, [prices])
+
+  // Reloj de segundo en segundo para las etiquetas de estado
+  useEffect(() => {
+    const id = setInterval(() => setNowTs(Date.now()), 1000)
+    return () => clearInterval(id)
   }, [])
 
   const persistAssets = (next: Asset[]) => {
@@ -300,8 +331,7 @@ export function PortfolioPanel() {
     symbolsRef.current = symbols
   }, [assets, prices])
 
-  // Conexion al streamer: se suscribe en cuanto hay simbolos resueltos y
-  // re-suscribe cuando cambia la lista
+  // Conexion al streamer de Yahoo: suscribe en cuanto hay simbolos resueltos
   useEffect(() => {
     const symbols = symbolsRef.current
     if (symbols.length === 0) return
@@ -355,12 +385,77 @@ export function PortfolioPanel() {
     }
   }, [assets, prices])
 
+  // Socket opcional de Finnhub para redundancia en valores de EEUU
+  useEffect(() => {
+    if (!FINNHUB_KEY) return
+    let disposed = false
+
+    const connect = () => {
+      if (disposed) return
+      const usSymbols = symbolsRef.current.filter((symbol) => /^[A-Z]{1,10}$/.test(symbol))
+      if (usSymbols.length === 0) return
+
+      const socket = new WebSocket(`wss://ws.finnhub.io?token=${FINNHUB_KEY}`)
+      fhRef.current = socket
+
+      socket.onopen = () => {
+        if (disposed) {
+          socket.close()
+          return
+        }
+        setFhConnected(true)
+        for (const symbol of usSymbols) {
+          socket.send(JSON.stringify({ type: "subscribe", symbol }))
+        }
+      }
+      socket.onmessage = (event) => {
+        try {
+          const message = JSON.parse(event.data) as {
+            type?: string
+            data?: Array<{ s?: string; p?: number }>
+          }
+          if (message.type !== "trade" || !Array.isArray(message.data)) return
+          for (const trade of message.data) {
+            const isin = trade.s ? isinBySymbolRef.current.get(trade.s) : undefined
+            if (!isin || typeof trade.p !== "number") continue
+            tickBufferRef.current[isin] = { price: trade.p }
+          }
+        } catch {
+          // mensaje ilegible
+        }
+      }
+      socket.onclose = () => {
+        if (fhRef.current === socket) fhRef.current = null
+        setFhConnected(Boolean(wsRef.current))
+        setTimeout(connect, 10000)
+      }
+      socket.onerror = () => {
+        try {
+          socket.close()
+        } catch {
+          // ya cerrado
+        }
+      }
+    }
+
+    connect()
+    return () => {
+      disposed = true
+      try {
+        fhRef.current?.close()
+      } catch {
+        // ya cerrado
+      }
+    }
+  }, [assets])
+
   // Vuelca los ticks recibidos al estado cada medio segundo
   useEffect(() => {
     const id = setInterval(() => {
       const buffer = tickBufferRef.current
       if (Object.keys(buffer).length === 0) return
       tickBufferRef.current = {}
+      const now = Date.now()
       setPrices((prev) => {
         const next = { ...prev }
         for (const [isin, tick] of Object.entries(buffer)) {
@@ -368,34 +463,47 @@ export function PortfolioPanel() {
           if (!current) continue
           const previousClose =
             current.previousClose ??
-            (tick.price !== undefined && tick.change !== undefined
-              ? tick.price - tick.change
-              : null)
+            (tick.price !== undefined && tick.change !== undefined ? tick.price - tick.change : null)
           next[isin] = {
             ...current,
             price: tick.price,
             previousClose,
-            fetchedAt: Date.now(),
+            fetchedAt: now,
           }
         }
         return next
       })
-      setLastUpdated(Date.now())
+      for (const isin of Object.keys(buffer)) lastTickRef.current[isin] = now
+      setLastUpdated(now)
     }, STREAM_FLUSH_MS)
     return () => clearInterval(id)
   }, [])
 
-  // Respaldo: sondeo agresivo sin streaming, sincronizacion suave con el
+  // Respaldo: sondeo completo sin streaming; con streaming solo los
+  // activos con mercado abierto que llevan demasiado sin ticks
   useEffect(() => {
     if (assets.length === 0) return
     const id = setInterval(
       () => {
-        if (!document.hidden) void refreshPrices(assets, !streaming)
+        if (document.hidden) return
+        if (!streaming && !fhConnected) {
+          void refreshPrices(assets, true)
+          return
+        }
+        const now = Date.now()
+        const stale = assets.filter((asset) => {
+          const info = pricesRef.current[asset.isin]
+          if (!info?.symbol) return true
+          if (info.marketOpen === false) return false
+          const lastTick = lastTickRef.current[asset.isin]
+          return !lastTick || now - lastTick > STALE_TICK_MS
+        })
+        if (stale.length > 0) void refreshPrices(stale, true)
       },
-      streaming ? LIVE_SYNC_MS : FALLBACK_POLL_MS,
+      streaming || fhConnected ? STALE_CHECK_MS : FALLBACK_POLL_MS,
     )
     return () => clearInterval(id)
-  }, [assets, refreshPrices, streaming])
+  }, [assets, refreshPrices, streaming, fhConnected])
 
   const handleFile = async (file: File) => {
     const text = await file.text()
@@ -412,12 +520,34 @@ export function PortfolioPanel() {
 
   const removeAsset = (id: string) => persistAssets(assets.filter((asset) => asset.id !== id))
 
+  const statusFor = (asset: Asset): { live?: boolean; text: string } | null => {
+    const info = prices[asset.isin]
+    if (!info?.symbol || info.marketOpen === undefined) return null
+
+    if (info.marketOpen) {
+      const lastTick = lastTickRef.current[asset.isin]
+      if (lastTick) {
+        const seconds = Math.max(1, Math.round((nowTs - lastTick) / 1000))
+        if (seconds < 60) return { live: true, text: `${t("Live")} · ${seconds}s` }
+      }
+      return { text: t("No trades") }
+    }
+
+    if (
+      typeof info.sessionStart === "number" &&
+      Math.floor(nowTs / 1000) < info.sessionStart
+    ) {
+      return { text: `${t("Market closed")} · ${t("Opens at")} ${formatSessionTime(info.sessionStart)}` }
+    }
+    return { text: t("Market closed") }
+  }
+
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0">
         <CardTitle className="flex items-center gap-2 text-xl font-semibold">
           {t("Investment Portfolio")}
-          {streaming && (
+          {(streaming || fhConnected) && (
             <span className="flex items-center gap-1 rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700 dark:bg-green-950 dark:text-green-400">
               <span className="h-2 w-2 animate-pulse rounded-full bg-green-500" />
               {t("Live")}
@@ -468,6 +598,7 @@ export function PortfolioPanel() {
               <tbody>
                 {assets.map((asset) => {
                   const info = prices[asset.isin]
+                  const status = statusFor(asset)
                   // Si el ISIN no resuelve en Yahoo usamos el precio del propio csv
                   const fallback =
                     asset.csvPrice !== undefined
@@ -497,7 +628,23 @@ export function PortfolioPanel() {
                   const totalBase = marketClosed ? (prevClose as number) : price
                   return (
                     <tr key={asset.id} className="border-b border-border">
-                      <td className="py-3 pr-4 font-medium">{t(asset.product)}</td>
+                      <td className="py-3 pr-4">
+                        <div className="font-medium">{t(asset.product)}</div>
+                        {status && (
+                          <div
+                            className={`text-xs ${
+                              status.live
+                                ? "flex items-center gap-1 text-green-600 dark:text-green-400"
+                                : "text-muted-foreground"
+                            }`}
+                          >
+                            {status.live && (
+                              <span className="inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-green-500" />
+                            )}
+                            {status.text}
+                          </div>
+                        )}
+                      </td>
                       <td className="py-3 pr-4 tabular-nums text-muted-foreground">{asset.isin}</td>
                       <td className="py-3 pr-4 text-right tabular-nums">
                         {asset.quantity.toLocaleString("es-ES")}
@@ -507,7 +654,11 @@ export function PortfolioPanel() {
                       </td>
                       <td
                         className={`py-3 pr-4 text-right tabular-nums ${
-                          !marketClosed && dayPct !== null && dayPct < 0 ? "text-red-600 dark:text-red-400" : dayPct !== null && !marketClosed ? "text-green-600 dark:text-green-400" : ""
+                          marketClosed || dayPct === null
+                            ? ""
+                            : dayPct >= 0
+                              ? "text-green-600 dark:text-green-400"
+                              : "text-red-600 dark:text-red-400"
                         }`}
                       >
                         {marketClosed
@@ -538,7 +689,9 @@ export function PortfolioPanel() {
               </tbody>
             </table>
             <p className="mt-2 text-xs text-muted-foreground">
-              {streaming ? t("Real-time streaming quotes") : t("Quotes may be delayed up to 15 minutes")}
+              {streaming || fhConnected
+                ? t("Real-time streaming quotes")
+                : t("Quotes may be delayed up to 15 minutes")}
               {lastUpdated
                 ? ` · ${t("Last updated")} ${new Date(lastUpdated).toLocaleTimeString("es-ES", {
                     hour: "2-digit",

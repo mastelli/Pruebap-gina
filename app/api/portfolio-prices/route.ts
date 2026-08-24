@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server"
+﻿import { NextRequest, NextResponse } from "next/server"
 
 export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
@@ -13,6 +13,8 @@ interface Quote {
   previousClose: number | null
   currency: string
   marketOpen?: boolean
+  sessionStart?: number
+  sessionEnd?: number
 }
 
 interface SymbolInfo {
@@ -62,14 +64,18 @@ async function resolveSymbolCandidates(isin: string, name?: string): Promise<str
   return symbols
 }
 
-// Sesion regular activa segun el calendario del mercado
-function marketOpenFromMeta(meta: {
+// Estado y horario de la sesion regular segun el calendario del mercado
+function sessionFromMeta(meta: {
   currentTradingPeriod?: { regular?: { start?: number; end?: number } }
-}): boolean | undefined {
+}): { marketOpen?: boolean; sessionStart?: number; sessionEnd?: number } {
   const regular = meta?.currentTradingPeriod?.regular
-  if (typeof regular?.start !== "number" || typeof regular?.end !== "number") return undefined
+  if (typeof regular?.start !== "number" || typeof regular?.end !== "number") return {}
   const now = Math.floor(Date.now() / 1000)
-  return now >= regular.start && now < regular.end
+  return {
+    marketOpen: now >= regular.start && now < regular.end,
+    sessionStart: regular.start,
+    sessionEnd: regular.end,
+  }
 }
 
 async function getChartQuote(symbol: string): Promise<Quote | null> {
@@ -86,12 +92,15 @@ async function getChartQuote(symbol: string): Promise<Quote | null> {
       : typeof meta.previousClose === "number"
         ? meta.previousClose
         : null
+  const session = sessionFromMeta(meta)
   return {
     symbol: meta.symbol ?? symbol,
     price: meta.regularMarketPrice,
     previousClose,
     currency: meta.currency ?? "",
-    marketOpen: marketOpenFromMeta(meta),
+    marketOpen: session.marketOpen,
+    sessionStart: session.sessionStart,
+    sessionEnd: session.sessionEnd,
   }
 }
 
@@ -141,12 +150,15 @@ async function getBatchQuotes(symbols: string[]): Promise<Map<string, Quote>> {
           : typeof meta.previousClose === "number"
             ? meta.previousClose
             : null
+      const session = sessionFromMeta(meta)
       out.set(item.symbol, {
         symbol: meta.symbol ?? item.symbol,
         price: meta.regularMarketPrice,
         previousClose,
         currency: meta.currency ?? "",
-        marketOpen: marketOpenFromMeta(meta),
+        marketOpen: session.marketOpen,
+        sessionStart: session.sessionStart,
+        sessionEnd: session.sessionEnd,
       })
     }
   } catch {
