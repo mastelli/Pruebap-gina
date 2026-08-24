@@ -58,8 +58,8 @@ function AnalyticsContent() {
             firstCard={(month) => <IncomeCategoriesChart scope="month" month={month} />}
             secondCardTitleKey="History"
             secondCard={<IncomeHistory />}
-            thirdCardTitleKey="Annual Breakdown"
-            thirdCard={<IncomeList />}
+            thirdCardTitleKey="Movements"
+            thirdCard={(month) => <IncomeList month={month} />}
             metricsCard={<IncomeMetrics />}
           />
         </TabsContent>

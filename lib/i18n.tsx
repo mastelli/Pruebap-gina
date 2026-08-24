@@ -156,6 +156,7 @@ const translations: Record<string, string> = {
   "Bizum": "Bizum",
   "History": "Historial",
   "Annual Breakdown": "Desglose anual",
+  Movements: "Movimientos",
   Totals: "Totales",
   "Expense Breakdown": "Desglose de gastos",
   "Expense Types": "Tipos de gasto",

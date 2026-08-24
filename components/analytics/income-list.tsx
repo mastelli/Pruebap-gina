@@ -4,11 +4,15 @@ import { Badge } from "@/components/ui/badge"
 import { useLanguage } from "@/lib/i18n"
 import { useTransactions, sortByDateDesc } from "@/lib/transactions"
 
-export function IncomeList() {
+export function IncomeList({ month }: { month: string }) {
   const { t } = useLanguage()
   const { transactions } = useTransactions()
 
-  const incomes = sortByDateDesc(transactions.filter((transaction) => transaction.amount > 0))
+  const year = `${new Date().getFullYear()}`
+  const prefix = `${year}-${month}`
+  const incomes = sortByDateDesc(
+    transactions.filter((transaction) => transaction.amount > 0 && transaction.date.startsWith(prefix)),
+  )
 
   return (
     <div className="max-h-[300px] overflow-y-auto px-2">

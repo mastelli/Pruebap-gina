@@ -60,7 +60,7 @@ interface MetricTabProps {
   secondCardTitleKey?: string
   secondCard?: ReactNode
   thirdCardTitleKey?: string
-  thirdCard?: ReactNode
+  thirdCard?: ReactNode | ((month: string) => ReactNode)
   metricsTitleKey?: string
   metricsCard?: ReactNode
 }
@@ -155,17 +155,21 @@ export function MetricTab({
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                {thirdCard ?? (
-                  <ResponsiveContainer width="100%" height={300}>
-                    <BarChart data={channelPerformanceData}>
-                      <XAxis dataKey="channel" tickFormatter={(value) => t(value)} />
-                      <YAxis yAxisId="left" />
-                      <YAxis yAxisId="right" orientation="right" />
-                      <Tooltip />
-                      <Bar yAxisId="left" dataKey="acquisitions" fill={theme === "dark" ? "#adfa1d" : "#0ea5e9"} />
-                      <Bar yAxisId="right" dataKey="revenue" fill={theme === "dark" ? "#1e40af" : "#3b82f6"} />
-                    </BarChart>
-                  </ResponsiveContainer>
+                {typeof thirdCard === "function" ? (
+                  thirdCard(selectedMonth)
+                ) : (
+                  thirdCard ?? (
+                    <ResponsiveContainer width="100%" height={300}>
+                      <BarChart data={channelPerformanceData}>
+                        <XAxis dataKey="channel" tickFormatter={(value) => t(value)} />
+                        <YAxis yAxisId="left" />
+                        <YAxis yAxisId="right" orientation="right" />
+                        <Tooltip />
+                        <Bar yAxisId="left" dataKey="acquisitions" fill={theme === "dark" ? "#adfa1d" : "#0ea5e9"} />
+                        <Bar yAxisId="right" dataKey="revenue" fill={theme === "dark" ? "#1e40af" : "#3b82f6"} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  )
                 )}
               </CardContent>
             </Card>
