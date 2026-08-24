@@ -106,18 +106,18 @@ export function parsePortfolioCsv(text: string): Asset[] {
   return assets
 }
 
-function formatMoney(value: number, currency?: string): string {
+function formatMoney(value: number, currency?: string, decimals = 2): string {
   const formatted = value.toLocaleString("es-ES", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals,
   })
   return currency && currency !== "EUR" ? `${formatted} ${currency}` : `${formatted} €`
 }
 
-function formatSigned(value: number): string {
+function formatSigned(value: number, decimals = 2): string {
   return `${value >= 0 ? "+" : ""}${value.toLocaleString("es-ES", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals,
   })}`
 }
 
@@ -271,6 +271,7 @@ export function PortfolioPanel() {
                   <th className="py-2 pr-4 text-right font-medium">{t("Quantity")}</th>
                   <th className="py-2 pr-4 text-right font-medium">{t("Price")}</th>
                   <th className="py-2 pr-4 text-right font-medium">{t("Day +/-")}</th>
+                  <th className="py-2 pr-4 text-right font-medium">{t("Total")}</th>
                   <th className="py-2" aria-label={t("Delete")} />
                 </tr>
               </thead>
@@ -294,6 +295,9 @@ export function PortfolioPanel() {
                     dayChange !== null && prevClose !== null && prevClose !== 0
                       ? (dayChange / prevClose) * 100
                       : null
+                  // Precios por debajo de 10 con 4 decimales, el resto con 2
+                  const decimals =
+                    price !== undefined && Math.abs(price) < 10 ? 4 : 2
                   return (
                     <tr key={asset.id} className="border-b border-border">
                       <td className="py-3 pr-4 font-medium">{t(asset.product)}</td>
@@ -302,7 +306,7 @@ export function PortfolioPanel() {
                         {asset.quantity.toLocaleString("es-ES")}
                       </td>
                       <td className="py-3 pr-4 text-right tabular-nums">
-                        {price !== undefined ? formatMoney(price, displayCurrency) : "—"}
+                        {price !== undefined ? formatMoney(price, displayCurrency, decimals) : "—"}
                       </td>
                       <td
                         className={`py-3 pr-4 text-right tabular-nums ${
@@ -311,7 +315,12 @@ export function PortfolioPanel() {
                       >
                         {dayChange === null || dayPct === null
                           ? "—"
-                          : `${formatSigned(dayChange)} (${formatSigned(dayPct)}%)`}
+                          : `${formatSigned(dayChange, decimals)} (${formatSigned(dayPct)}%)`}
+                      </td>
+                      <td className="py-3 pr-4 text-right tabular-nums">
+                        {price !== undefined
+                          ? formatMoney(price * asset.quantity, displayCurrency, decimals)
+                          : "—"}
                       </td>
                       <td className="py-3 text-right">
                         <Button

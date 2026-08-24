@@ -190,6 +190,7 @@ const translations: Record<string, string> = {
   ISIN: "ISIN",
   Quantity: "Cantidad",
   Price: "Precio",
+  Total: "Total",
   "Day +/-": "Día +/-",
   "Last updated": "Última actualización",
   "No assets imported yet": "Todavía no has importado ningún activo",
