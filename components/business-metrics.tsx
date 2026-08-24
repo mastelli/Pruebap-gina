@@ -9,8 +9,14 @@ function formatEuros(value: number): string {
   return value.toLocaleString("es-ES", { style: "currency", currency: "EUR" })
 }
 
-const linkClasses =
-  "flex items-center justify-between gap-3 rounded-xl border border-[#ef9a9a] bg-[#ffcdd2] p-4 text-[#7f1d1d] shadow-sm transition-colors hover:bg-[#f8b9c0]"
+const linkClassesByTab: Record<string, string> = {
+  income:
+    "flex items-center justify-between gap-3 rounded-xl border border-[#a5d6a7] bg-[#c8e6c9] p-4 text-[#1b5e20] shadow-sm transition-colors hover:bg-[#aedcb1]",
+  expenses:
+    "flex items-center justify-between gap-3 rounded-xl border border-[#ef9a9a] bg-[#ffcdd2] p-4 text-[#7f1d1d] shadow-sm transition-colors hover:bg-[#f8b9c0]",
+  savings:
+    "flex items-center justify-between gap-3 rounded-xl border border-[#90caf9] bg-[#bbdefb] p-4 text-[#0d47a1] shadow-sm transition-colors hover:bg-[#a5d2f7]",
+}
 
 export function BusinessMetrics() {
   const { t } = useLanguage()
@@ -34,18 +40,21 @@ export function BusinessMetrics() {
   const cards = [
     {
       href: "/analytics?tab=income",
+      tab: "income",
       titleKey: "Revenue",
       value: formatEuros(yearlyIncome),
       sub: `${t("Monthly average")}: ${formatEuros(monthlyAverage)}`,
     },
     {
       href: "/analytics?tab=expenses",
+      tab: "expenses",
       titleKey: "Expenses",
       value: formatEuros(yearlyExpenses),
       sub: `${t("Monthly average")}: ${formatEuros(monthlyExpenseAverage)}`,
     },
     {
       href: "/analytics?tab=savings",
+      tab: "savings",
       titleKey: "Savings/Investment",
       value: formatEuros(0),
       sub: null,
@@ -57,7 +66,7 @@ export function BusinessMetrics() {
       <h2 className="text-lg font-semibold">{t("Breakdown")}</h2>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {cards.map((card) => (
-          <Link key={card.href} href={card.href} className={linkClasses}>
+          <Link key={card.href} href={card.href} className={linkClassesByTab[card.tab]}>
             <div className="space-y-1">
               <p className="text-sm font-medium">{t(card.titleKey)}</p>
               <p className="text-2xl font-bold tabular-nums">{card.value}</p>
