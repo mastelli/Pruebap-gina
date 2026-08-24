@@ -3,7 +3,7 @@
 import { Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts"
 import { useLanguage } from "@/lib/i18n"
 import { useTransactions } from "@/lib/transactions"
-import { classifyTransaction, EXPENSE_CATEGORIES, CATEGORY_COLORS } from "@/lib/categories"
+import { classifyTransaction, EXPENSE_CATEGORY_DEFS } from "@/lib/categories"
 
 function formatEuros(value: number): string {
   return value.toLocaleString("es-ES", { style: "currency", currency: "EUR" })
@@ -18,24 +18,25 @@ export function ExpenseDoughnut({ month }: { month: string }) {
   const prefix = `${now.getFullYear()}-${month}`
 
   const totals: Record<string, number> = {}
-  for (const category of EXPENSE_CATEGORIES) totals[category] = 0
+  for (const def of EXPENSE_CATEGORY_DEFS) totals[def.key] = 0
   for (const transaction of transactions) {
     if (transaction.amount >= 0 || !transaction.date.startsWith(prefix)) continue
     totals[classifyTransaction(transaction)] += Math.abs(transaction.amount)
   }
 
-  const data = EXPENSE_CATEGORIES.map((category) => ({
-    label:
-      category === "Other"
-        ? t("Other Expenses")
-        : category === "Electricity"
-          ? t("Electricity")
-          : category === "Water"
-            ? t("Water")
-            : t(category),
-    total: totals[category],
-    color: CATEGORY_COLORS[category],
+  const data = EXPENSE_CATEGORY_DEFS.filter((def) => totals[def.key] > 0).map((def) => ({
+    label: t(def.key),
+    total: totals[def.key],
+    color: def.color,
   }))
+
+  if (data.length === 0) {
+    return (
+      <div className="flex h-[300px] items-center justify-center">
+        <p className="text-sm text-muted-foreground">{t("No transactions yet")}</p>
+      </div>
+    )
+  }
 
   return (
     <ResponsiveContainer width="100%" height={300}>

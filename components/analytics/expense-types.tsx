@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import { Input } from "@/components/ui/input"
 import { useLanguage } from "@/lib/i18n"
 import { useTransactions } from "@/lib/transactions"
-import { classifyTransaction, EXPENSE_CATEGORIES } from "@/lib/categories"
+import { classifyTransaction, EXPENSE_CATEGORY_DEFS } from "@/lib/categories"
 
 const BUDGETS_STORAGE_KEY = "appExpenseBudgets"
 
@@ -45,22 +45,22 @@ export function ExpenseTypes() {
   const prefix = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`
 
   const spentByCategory: Record<string, number> = {}
-  for (const category of EXPENSE_CATEGORIES) spentByCategory[category] = 0
+  for (const def of EXPENSE_CATEGORY_DEFS) spentByCategory[def.key] = 0
   for (const transaction of transactions) {
     if (transaction.amount >= 0 || !transaction.date.startsWith(prefix)) continue
     spentByCategory[classifyTransaction(transaction)] += Math.abs(transaction.amount)
   }
 
   return (
-    <div className="max-h-[300px] space-y-4 overflow-y-auto pr-1">
-      {EXPENSE_CATEGORIES.map((category) => {
-        const spent = spentByCategory[category]
-        const budget = budgets[category] ?? 0
+    <div className="max-h-[300px] space-y-4 overflow-y-auto px-2">
+      {EXPENSE_CATEGORY_DEFS.map((def) => {
+        const spent = spentByCategory[def.key]
+        const budget = budgets[def.key] ?? 0
         const ratio = budget > 0 ? Math.min(100, (spent / budget) * 100) : 0
         return (
-          <div key={category} className="space-y-1">
+          <div key={def.key} className="space-y-1">
             <div className="flex items-center justify-between gap-3">
-              <p className="text-sm font-medium">{t(category === "Other" ? "Other Expenses" : category)}</p>
+              <p className="text-sm font-medium">{t(def.key)}</p>
               <div className="flex items-center gap-2">
                 <Input
                   type="number"
@@ -69,7 +69,7 @@ export function ExpenseTypes() {
                   placeholder={t("Budget")}
                   className="h-8 w-28 text-right"
                   value={budget > 0 ? budget : ""}
-                  onChange={(event) => saveBudget(category, Number(event.target.value) || 0)}
+                  onChange={(event) => saveBudget(def.key, Number(event.target.value) || 0)}
                 />
               </div>
             </div>

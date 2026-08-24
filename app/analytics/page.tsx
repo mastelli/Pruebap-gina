@@ -13,7 +13,7 @@ import { IncomeList } from "@/components/analytics/income-list"
 import { ExpenseDoughnut } from "@/components/analytics/expense-doughnut"
 import { ExpenseTypes } from "@/components/analytics/expense-types"
 import { ExpenseList } from "@/components/analytics/expense-list"
-import { AllTransactionsHistory } from "@/components/analytics/all-transactions-history"
+import { ExpenseHistory } from "@/components/analytics/expense-history"
 import { Button } from "@/components/ui/button"
 import { Download } from "lucide-react"
 import { useLanguage } from "@/lib/i18n"
@@ -69,7 +69,7 @@ function AnalyticsContent() {
             secondCardTitleKey="Expense Types"
             secondCard={<ExpenseTypes />}
             thirdCardTitleKey="History"
-            thirdCard={<AllTransactionsHistory />}
+            thirdCard={<ExpenseHistory />}
             metricsTitleKey="Expense Movements"
             metricsCard={<ExpenseList />}
           />
