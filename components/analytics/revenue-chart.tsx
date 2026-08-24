@@ -187,7 +187,7 @@ export function RevenueChart() {
           dataKey="difference"
           name={t("Difference")}
           stroke={theme === "dark" ? "#6d4c41" : "#3e2723"}
-          strokeWidth={2}
+          strokeWidth={4}
           dot={{ r: 3 }}
         />
         <Line
@@ -196,7 +196,7 @@ export function RevenueChart() {
           dataKey="investment"
           name={t("Total Investment")}
           stroke={theme === "dark" ? "#60a5fa" : "#1d4ed8"}
-          strokeWidth={2}
+          strokeWidth={4}
           dot={{ r: 3 }}
           connectNulls
         />
