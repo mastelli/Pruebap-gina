@@ -16,6 +16,13 @@ interface Asset {
   isin: string
   quantity: number
   purchasePrice: number
+  currency?: string
+  eurValue?: number
+}
+
+interface PortfolioData {
+  assets: Asset[]
+  cash: number
 }
 
 interface PriceInfo {
@@ -28,6 +35,9 @@ interface PriceInfo {
 
 type PriceMap = Record<string, PriceInfo>
 
+// Formato del csv del broker (por posicion):
+// Producto, ISIN, Cantidad, Precio de compra, Moneda, Valor local, Valor en EUR
+
 function normalizeHeader(header: string): string {
   return header
     .trim()
@@ -38,7 +48,7 @@ function normalizeHeader(header: string): string {
 }
 
 function parseNumber(raw: string): number {
-  let value = raw.trim().replace(/[€$%\s]/g, "")
+  let value = (raw ?? "").trim().replace(/[€$%\s]/g, "")
   if (/,\d{1,4}$/.test(value)) {
     value = value.replace(/\./g, "").replace(",", ".")
   } else {
@@ -48,42 +58,71 @@ function parseNumber(raw: string): number {
   return Number.isFinite(parsed) ? parsed : NaN
 }
 
-// Acepta ; o , como separador y cabeceras flexibles en espanol o ingles
-function parsePortfolioCsv(text: string): Asset[] {
+// Divide una linea respetando campos entre comillas (nombres con comas)
+function splitCsvLine(line: string, delimiter: string): string[] {
+  const cells: string[] = []
+  let current = ""
+  let inQuotes = false
+  for (let i = 0; i < line.length; i++) {
+    const char = line[i]
+    if (char === '"') {
+      if (inQuotes && line[i + 1] === '"') {
+        current += '"'
+        i++
+      } else {
+        inQuotes = !inQuotes
+      }
+    } else if (char === delimiter && !inQuotes) {
+      cells.push(current)
+      current = ""
+    } else {
+      current += char
+    }
+  }
+  cells.push(current)
+  return cells.map((cell) => cell.trim().replace(/^"|"$/g, ""))
+}
+
+function parsePortfolioCsv(text: string): PortfolioData {
   const lines = text.split(/\r?\n/).filter((line) => line.trim().length > 0)
-  if (lines.length < 2) return []
+  if (lines.length < 2) return { assets: [], cash: 0 }
 
-  const delimiter = (lines[0].match(/;/g)?.length ?? 0) >= (lines[0].match(/,/g)?.length ?? 0) ? ";" : ","
-  const headers = lines[0].split(delimiter).map(normalizeHeader)
+  const firstLine = lines[0]
+  const delimiter =
+    (firstLine.match(/;/g)?.length ?? 0) > (firstLine.match(/,/g)?.length ?? 0) ? ";" : ","
 
-  const findIndex = (candidates: string[]) =>
-    headers.findIndex((header) => candidates.some((candidate) => header.includes(candidate)))
+  const assets: Asset[] = []
+  let cash = 0
 
-  const productIdx = findIndex(["producto", "product", "nombre", "name", "descripcion"])
-  const isinIdx = headers.findIndex((header) => header === "isin")
-  const quantityIdx = findIndex(["cantidad", "participaciones", "acciones", "quantity", "shares"])
-  const priceIdx = findIndex(["preciocompra", "purchaseprice", "precio"])
+  for (const line of lines.slice(1)) {
+    const cells = splitCsvLine(line, delimiter)
+    const isin = (cells[1] ?? "").trim().toUpperCase()
 
-  if (isinIdx === -1 || quantityIdx === -1 || priceIdx === -1) return []
+    if (!/^[A-Z]{2}[A-Z0-9]{9}\d$/.test(isin)) {
+      // Linea sin ISIN: efectivo del broker
+      const candidate = parseNumber(cells[6] ?? cells[5] ?? "")
+      if (Number.isFinite(candidate)) cash += candidate
+      continue
+    }
 
-  return lines
-    .slice(1)
-    .map((line, index) => {
-      const cells = line.split(delimiter)
-      const isin = (cells[isinIdx] ?? "").trim().toUpperCase()
-      if (!/^[A-Z]{2}[A-Z0-9]{9}\d$/.test(isin)) return null
-      const quantity = parseNumber(cells[quantityIdx] ?? "")
-      const purchasePrice = parseNumber(cells[priceIdx] ?? "")
-      if (!Number.isFinite(quantity) || !Number.isFinite(purchasePrice)) return null
-      return {
-        id: `${isin}-${Date.now()}-${index}`,
-        product: (cells[productIdx] ?? "").trim() || isin,
-        isin,
-        quantity,
-        purchasePrice,
-      } satisfies Asset
+    const quantity = parseNumber(cells[2] ?? "")
+    const purchasePrice = parseNumber(cells[3] ?? "")
+    if (!Number.isFinite(quantity) || !Number.isFinite(purchasePrice)) continue
+
+    const eurValue = parseNumber(cells[6] ?? cells[5] ?? "")
+
+    assets.push({
+      id: `${isin}-${Date.now()}-${assets.length}`,
+      product: (cells[0] ?? "").trim() || isin,
+      isin,
+      quantity,
+      purchasePrice,
+      currency: (cells[4] ?? "").trim().toUpperCase() || undefined,
+      eurValue: Number.isFinite(eurValue) ? eurValue : undefined,
     })
-    .filter((asset): asset is Asset => asset !== null)
+  }
+
+  return { assets, cash }
 }
 
 function formatMoney(value: number, currency?: string): string {
@@ -96,7 +135,7 @@ function formatMoney(value: number, currency?: string): string {
 
 export function PortfolioPanel() {
   const { t } = useLanguage()
-  const [assets, setAssets] = useState<Asset[]>([])
+  const [data, setData] = useState<PortfolioData>({ assets: [], cash: 0 })
   const [prices, setPrices] = useState<PriceMap>({})
   const [loading, setLoading] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -104,7 +143,14 @@ export function PortfolioPanel() {
   useEffect(() => {
     try {
       const raw = window.localStorage.getItem(PORTFOLIO_STORAGE_KEY)
-      if (raw) setAssets(JSON.parse(raw) as Asset[])
+      if (raw) {
+        const parsed = JSON.parse(raw) as PortfolioData | Asset[]
+        if (Array.isArray(parsed)) {
+          setData({ assets: parsed, cash: 0 })
+        } else {
+          setData({ assets: parsed.assets ?? [], cash: parsed.cash ?? 0 })
+        }
+      }
       const rawPrices = window.localStorage.getItem(PRICES_STORAGE_KEY)
       if (rawPrices) setPrices(JSON.parse(rawPrices) as PriceMap)
     } catch {
@@ -112,8 +158,8 @@ export function PortfolioPanel() {
     }
   }, [])
 
-  const persistAssets = (next: Asset[]) => {
-    setAssets(next)
+  const persistAssets = (next: PortfolioData) => {
+    setData(next)
     try {
       window.localStorage.setItem(PORTFOLIO_STORAGE_KEY, JSON.stringify(next))
     } catch {
@@ -138,7 +184,7 @@ export function PortfolioPanel() {
         return !entry?.price || Date.now() - Number(entry.fetchedAt ?? 0) > PRICE_TTL
       })
 
-      let merged = { ...cached }
+      const merged = { ...cached }
       if (pending.length > 0) {
         const res = await fetch("/api/portfolio-prices", {
           method: "POST",
@@ -166,32 +212,32 @@ export function PortfolioPanel() {
   }, [])
 
   useEffect(() => {
-    if (assets.length > 0) void refreshPrices(assets)
+    if (data.assets.length > 0) void refreshPrices(data.assets)
     // solo al montar o al cambiar el numero de activos
-  }, [assets.length, refreshPrices]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [data.assets.length, refreshPrices]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleFile = async (file: File) => {
     const text = await file.text()
     const parsed = parsePortfolioCsv(text)
-    if (parsed.length === 0) return
+    if (parsed.assets.length === 0 && parsed.cash === 0) return
 
     // anade los nuevos sustituyendo los que repiten ISIN
     const byIsin = new Map<string, Asset>()
-    for (const asset of [...assets, ...parsed]) byIsin.set(asset.isin, asset)
-    const next = Array.from(byIsin.values())
-    persistAssets(next)
-    void refreshPrices(next)
+    for (const asset of [...data.assets, ...parsed.assets]) byIsin.set(asset.isin, asset)
+    persistAssets({ assets: Array.from(byIsin.values()), cash: parsed.cash })
+    void refreshPrices(Array.from(byIsin.values()))
   }
 
-  const removeAsset = (id: string) => persistAssets(assets.filter((asset) => asset.id !== id))
+  const removeAsset = (id: string) =>
+    persistAssets({ ...data, assets: data.assets.filter((asset) => asset.id !== id) })
 
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0">
         <CardTitle className="text-xl font-semibold">{t("Investment Portfolio")}</CardTitle>
         <div className="flex items-center gap-2">
-          {assets.length > 0 && (
-            <Button variant="outline" size="sm" onClick={() => void refreshPrices(assets)} disabled={loading}>
+          {data.assets.length > 0 && (
+            <Button variant="outline" size="sm" onClick={() => void refreshPrices(data.assets)} disabled={loading}>
               <RefreshCw className={`mr-2 h-4 w-4 ${loading ? "animate-spin" : ""}`} />
               {t("Refresh")}
             </Button>
@@ -214,7 +260,13 @@ export function PortfolioPanel() {
         </div>
       </CardHeader>
       <CardContent>
-        {assets.length === 0 ? (
+        {data.cash > 0 && (
+          <p className="mb-2 text-sm">
+            <span className="font-medium">{t("Cash")}:</span>{" "}
+            <span className="tabular-nums">{formatMoney(data.cash)}</span>
+          </p>
+        )}
+        {data.assets.length === 0 ? (
           <p className="py-8 text-center text-sm text-muted-foreground">{t("No assets imported yet")}</p>
         ) : (
           <div className="overflow-x-auto">
@@ -232,12 +284,17 @@ export function PortfolioPanel() {
                 </tr>
               </thead>
               <tbody>
-                {assets.map((asset) => {
+                {data.assets.map((asset) => {
                   const info = prices[asset.isin]
-                  const price = info?.price
+                  // Si el ISIN no resuelve en Yahoo usamos el valor en EUR del csv
+                  const fallbackPrice =
+                    asset.eurValue !== undefined && asset.quantity !== 0
+                      ? asset.eurValue / asset.quantity
+                      : undefined
+                  const price = info?.price ?? fallbackPrice
                   const prevClose = info?.previousClose ?? null
                   const dayPct =
-                    price !== undefined && prevClose !== null && prevClose !== undefined && prevClose !== 0
+                    price !== undefined && prevClose !== null && prevClose !== 0
                       ? ((price - prevClose) / prevClose) * 100
                       : null
                   const gpPct =
@@ -252,10 +309,10 @@ export function PortfolioPanel() {
                         {asset.quantity.toLocaleString("es-ES")}
                       </td>
                       <td className="py-3 pr-4 text-right tabular-nums">
-                        {formatMoney(asset.purchasePrice, info?.currency)}
+                        {formatMoney(asset.purchasePrice, asset.currency)}
                       </td>
                       <td className="py-3 pr-4 text-right tabular-nums">
-                        {price !== undefined ? formatMoney(price, info?.currency) : "—"}
+                        {price !== undefined ? formatMoney(price, asset.currency) : "—"}
                       </td>
                       <td
                         className={`py-3 pr-4 text-right tabular-nums ${
