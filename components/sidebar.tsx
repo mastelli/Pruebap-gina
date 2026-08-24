@@ -90,20 +90,21 @@ export function Sidebar() {
           )}
         >
           <div className="border-b border-border">
-            <div className={cn("flex h-16 items-center gap-2 px-4", isCollapsed && "justify-center px-2")}>
-              {isCollapsed ? (
-                <Link href="/" className="flex items-center justify-center font-semibold">
-                  <span className="text-lg">MIR</span>
-                </Link>
-              ) : (
-                <Link href="/" className="flex items-center font-semibold">
-                  <span className="text-lg">Make It Right</span>
-                </Link>
+            <div
+              className={cn(
+                "flex min-h-16 items-center gap-2 px-4 py-2",
+                isCollapsed && "flex-col justify-center px-2",
               )}
+            >
+              <Link href="/" className="flex items-center justify-center font-semibold">
+                <span className={cn("leading-tight", isCollapsed ? "text-center text-xs" : "text-lg")}>
+                  Make It Right
+                </span>
+              </Link>
               <Button
                 variant="ghost"
                 size="sm"
-                className={cn("ml-auto h-8 w-8 shrink-0", isCollapsed && "ml-0")}
+                className={cn("h-8 w-8 shrink-0", !isCollapsed && "ml-auto")}
                 onClick={() => setIsCollapsed(!isCollapsed)}
               >
                 <ChevronLeft className={cn("h-4 w-4 transition-transform", isCollapsed && "rotate-180")} />
