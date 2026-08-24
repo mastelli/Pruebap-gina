@@ -54,7 +54,7 @@ export function ExpenseTypes() {
   const sortedDefs = [...EXPENSE_CATEGORY_DEFS].sort((a, b) => t(a.key).localeCompare(t(b.key), "es"))
 
   return (
-    <div className="max-h-[820px] space-y-4 overflow-y-auto px-2">
+    <div className="space-y-4 px-2">
       {sortedDefs.map((def) => {
         const spent = spentByCategory[def.key]
         const budget = budgets[def.key] ?? 0
