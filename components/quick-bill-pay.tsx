@@ -64,28 +64,23 @@ export function QuickBillPay() {
               <div key={bill.id} className="flex items-center justify-between">
                 <div>
                   <p className="font-medium">{t(bill.name)}</p>
-                  {bill.name === "Electricity Bill" && electricityProvider && (
+                  {(bill.name === "Electricity Bill" || bill.name === "Internet Service" || bill.name === "Water Bill") && (
                     <p className="text-sm text-muted-foreground">
-                      {t("Provider:")} {electricityProvider}
-                    </p>
-                  )}
-                  {bill.name === "Internet Service" && internetProvider && (
-                    <p className="text-sm text-muted-foreground">
-                      {t("Provider:")} {internetProvider}
-                    </p>
-                  )}
-                  {bill.name === "Water Bill" && (
-                    <p className="text-sm text-muted-foreground">
-                      {t("Provider:")} {waterProvider}
+                      {t("Provider:")}{" "}
+                      {bill.name === "Electricity Bill"
+                        ? electricityProvider
+                        : bill.name === "Internet Service"
+                          ? internetProvider
+                          : waterProvider}
                     </p>
                   )}
                 </div>
-                {bill.name === "Electricity Bill" && electricityAmount !== 0 && (
+                {bill.name === "Electricity Bill" && (
                   <span className="text-sm font-medium tabular-nums text-red-600 dark:text-red-400">
                     {formatEuros(electricityAmount)}
                   </span>
                 )}
-                {bill.name === "Internet Service" && internetAmount !== 0 && (
+                {bill.name === "Internet Service" && (
                   <span className="text-sm font-medium tabular-nums text-red-600 dark:text-red-400">
                     {formatEuros(internetAmount)}
                   </span>

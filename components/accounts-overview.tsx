@@ -4,7 +4,7 @@ import { useRef, useState } from "react"
 import { toast } from "sonner"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Wallet, Upload, PlusCircle } from "lucide-react"
+import { Upload, PlusCircle } from "lucide-react"
 import { AddTransactionModal } from "./add-transaction-modal"
 import { useLanguage } from "@/lib/i18n"
 import { parseBankMovements } from "@/lib/bank-import"
@@ -88,9 +88,8 @@ export function AccountsOverview() {
 
   return (
     <Card className="flex h-[390px] w-full flex-col overflow-hidden">
-      <CardHeader className="flex flex-row items-center justify-between">
+      <CardHeader>
         <CardTitle>{t("Accounts Overview")}</CardTitle>
-        <Wallet className="h-4 w-4 text-muted-foreground" />
       </CardHeader>
       <CardContent className="flex flex-1 flex-col">
         <div className="space-y-2">
