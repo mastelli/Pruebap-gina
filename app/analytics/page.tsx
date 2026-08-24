@@ -3,6 +3,7 @@
 import { Suspense, useState } from "react"
 import { useSearchParams } from "next/navigation"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { DateRangePicker } from "@/components/date-range-picker"
 import { OverviewTab } from "@/components/analytics/overview-tab"
 import { MetricTab } from "@/components/analytics/metric-tab"
@@ -64,14 +65,44 @@ function AnalyticsContent() {
         <TabsContent value="expenses" className="space-y-4">
           <MetricTab
             titleKey="Expenses"
-            firstCardTitleKey="Expense Breakdown"
-            firstCard={(month) => <ExpenseDoughnut month={month} />}
-            secondCardTitleKey="Expense Types"
-            secondCard={<ExpenseTypes />}
-            thirdCardTitleKey="History"
-            thirdCard={<ExpenseHistory />}
-            metricsTitleKey="Expense Movements"
-            metricsCard={<ExpenseList />}
+            customBody={(month) => (
+              <div className="grid gap-4 lg:grid-cols-2 items-start">
+                <div className="space-y-4">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-xl font-semibold">{t("Expense Breakdown")}</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <ExpenseDoughnut month={month} />
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-xl font-semibold">{t("History")}</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <ExpenseHistory />
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-xl font-semibold">{t("Expense Movements")}</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <ExpenseList />
+                    </CardContent>
+                  </Card>
+                </div>
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-xl font-semibold">{t("Expense Types")}</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ExpenseTypes />
+                  </CardContent>
+                </Card>
+              </div>
+            )}
           />
         </TabsContent>
         <TabsContent value="savings" className="space-y-4">

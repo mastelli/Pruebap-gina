@@ -54,6 +54,7 @@ function getCurrentMonth(): string {
 
 interface MetricTabProps {
   titleKey: string
+  customBody?: (month: string) => ReactNode
   firstCardTitleKey?: string
   firstCard?: (month: string) => ReactNode
   secondCardTitleKey?: string
@@ -65,9 +66,11 @@ interface MetricTabProps {
 }
 
 // Plantilla comun para las pestanas de Ingresos, Gastos y Ahorro/Inversion;
-// cada seccion personalizara sus datos sobre esta misma estructura
+// cada seccion personalizara sus datos sobre esta misma estructura.
+// customBody sustituye las cuatro ventanas por un layout a medida
 export function MetricTab({
   titleKey,
+  customBody,
   firstCardTitleKey,
   firstCard,
   secondCardTitleKey,
@@ -98,96 +101,102 @@ export function MetricTab({
           </SelectContent>
         </Select>
       </div>
-      <div className="grid gap-4 md:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-xl font-semibold">
-              {t(firstCardTitleKey ?? "Customer Segmentation")}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {firstCard ? (
-              firstCard(selectedMonth)
-            ) : (
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={customerSegmentationData}>
-                  <XAxis dataKey="segment" tickFormatter={(value) => t(value)} />
-                  <YAxis />
-                  <Tooltip />
-                  <Bar dataKey="count" fill={theme === "dark" ? "#adfa1d" : "#0ea5e9"} />
-                </BarChart>
-              </ResponsiveContainer>
-            )}
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-xl font-semibold">
-              {t(secondCardTitleKey ?? "Customer Retention Rate")}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {secondCard ?? (
-              <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={retentionRateData}>
-                  <XAxis dataKey="month" tickFormatter={(value) => t(value)} />
-                  <YAxis />
-                  <Tooltip />
-                  <Line type="monotone" dataKey="rate" stroke={theme === "dark" ? "#adfa1d" : "#0ea5e9"} />
-                </LineChart>
-              </ResponsiveContainer>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-      <div className="grid gap-4 md:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-xl font-semibold">
-              {t(thirdCardTitleKey ?? "Channel Performance")}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {thirdCard ?? (
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={channelPerformanceData}>
-                  <XAxis dataKey="channel" tickFormatter={(value) => t(value)} />
-                  <YAxis yAxisId="left" />
-                  <YAxis yAxisId="right" orientation="right" />
-                  <Tooltip />
-                  <Bar yAxisId="left" dataKey="acquisitions" fill={theme === "dark" ? "#adfa1d" : "#0ea5e9"} />
-                  <Bar yAxisId="right" dataKey="revenue" fill={theme === "dark" ? "#1e40af" : "#3b82f6"} />
-                </BarChart>
-              </ResponsiveContainer>
-            )}
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-xl font-semibold">{t(metricsTitleKey ?? "Key Metrics")}</CardTitle>
-          </CardHeader>
-          {metricsCard ?? (
-            <CardContent className="space-y-4">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">{t("Customer Lifetime Value")}</p>
-                <p className="text-2xl font-bold">$1,250</p>
-              </div>
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">{t("Net Promoter Score")}</p>
-                <p className="text-2xl font-bold">72</p>
-              </div>
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">{t("Customer Acquisition Cost")}</p>
-                <p className="text-2xl font-bold">$75</p>
-              </div>
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">{t("Average Order Value")}</p>
-                <p className="text-2xl font-bold">$120</p>
-              </div>
-            </CardContent>
-          )}
-        </Card>
-      </div>
+      {customBody ? (
+        customBody(selectedMonth)
+      ) : (
+        <>
+          <div className="grid gap-4 md:grid-cols-2">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-xl font-semibold">
+                  {t(firstCardTitleKey ?? "Customer Segmentation")}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {firstCard ? (
+                  firstCard(selectedMonth)
+                ) : (
+                  <ResponsiveContainer width="100%" height={300}>
+                    <BarChart data={customerSegmentationData}>
+                      <XAxis dataKey="segment" tickFormatter={(value) => t(value)} />
+                      <YAxis />
+                      <Tooltip />
+                      <Bar dataKey="count" fill={theme === "dark" ? "#adfa1d" : "#0ea5e9"} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                )}
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-xl font-semibold">
+                  {t(secondCardTitleKey ?? "Customer Retention Rate")}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {secondCard ?? (
+                  <ResponsiveContainer width="100%" height={300}>
+                    <LineChart data={retentionRateData}>
+                      <XAxis dataKey="month" tickFormatter={(value) => t(value)} />
+                      <YAxis />
+                      <Tooltip />
+                      <Line type="monotone" dataKey="rate" stroke={theme === "dark" ? "#adfa1d" : "#0ea5e9"} />
+                    </LineChart>
+                  </ResponsiveContainer>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+          <div className="grid gap-4 md:grid-cols-2">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-xl font-semibold">
+                  {t(thirdCardTitleKey ?? "Channel Performance")}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {thirdCard ?? (
+                  <ResponsiveContainer width="100%" height={300}>
+                    <BarChart data={channelPerformanceData}>
+                      <XAxis dataKey="channel" tickFormatter={(value) => t(value)} />
+                      <YAxis yAxisId="left" />
+                      <YAxis yAxisId="right" orientation="right" />
+                      <Tooltip />
+                      <Bar yAxisId="left" dataKey="acquisitions" fill={theme === "dark" ? "#adfa1d" : "#0ea5e9"} />
+                      <Bar yAxisId="right" dataKey="revenue" fill={theme === "dark" ? "#1e40af" : "#3b82f6"} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                )}
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-xl font-semibold">{t(metricsTitleKey ?? "Key Metrics")}</CardTitle>
+              </CardHeader>
+              {metricsCard ?? (
+                <CardContent className="space-y-4">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">{t("Customer Lifetime Value")}</p>
+                    <p className="text-2xl font-bold">$1,250</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">{t("Net Promoter Score")}</p>
+                    <p className="text-2xl font-bold">72</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">{t("Customer Acquisition Cost")}</p>
+                    <p className="text-2xl font-bold">$75</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">{t("Average Order Value")}</p>
+                    <p className="text-2xl font-bold">$120</p>
+                  </div>
+                </CardContent>
+              )}
+            </Card>
+          </div>
+        </>
+      )}
     </div>
   )
 }
