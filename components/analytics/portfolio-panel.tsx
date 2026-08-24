@@ -291,14 +291,23 @@ export function PortfolioPanel() {
                     asset.eurValue !== undefined && asset.quantity !== 0
                       ? asset.eurValue / asset.quantity
                       : undefined
+                  const usingFallback = info?.price === undefined && fallbackPrice !== undefined
                   const price = info?.price ?? fallbackPrice
+                  // el respaldo del csv esta en EUR, no en la moneda local del activo
+                  const displayCurrency = usingFallback ? "EUR" : asset.currency
                   const prevClose = info?.previousClose ?? null
                   const dayPct =
                     price !== undefined && prevClose !== null && prevClose !== 0
                       ? ((price - prevClose) / prevClose) * 100
                       : null
+                  const sameCurrency =
+                    !usingFallback ||
+                    !asset.currency ||
+                    asset.currency === "EUR"
                   const gpPct =
-                    price !== undefined && asset.purchasePrice !== 0
+                    price !== undefined &&
+                    asset.purchasePrice !== 0 &&
+                    sameCurrency
                       ? ((price - asset.purchasePrice) / asset.purchasePrice) * 100
                       : null
                   return (
@@ -312,7 +321,7 @@ export function PortfolioPanel() {
                         {formatMoney(asset.purchasePrice, asset.currency)}
                       </td>
                       <td className="py-3 pr-4 text-right tabular-nums">
-                        {price !== undefined ? formatMoney(price, asset.currency) : "—"}
+                        {price !== undefined ? formatMoney(price, displayCurrency) : "—"}
                       </td>
                       <td
                         className={`py-3 pr-4 text-right tabular-nums ${
