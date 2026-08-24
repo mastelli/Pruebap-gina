@@ -81,14 +81,21 @@ export function Sidebar() {
         </button>
         <div
           className={cn(
-            "fixed inset-y-0 z-20 flex flex-col bg-[#C1B6A3] transition-all duration-300 ease-in-out dark:bg-background lg:static",
+            // En movil es un cajon deslizante; en escritorio queda fijo
+            // arriba para que la marca siga visible al hacer scroll
+            "fixed inset-y-0 z-20 flex flex-col bg-[#C1B6A3] transition-all duration-300 ease-in-out dark:bg-background",
+            "lg:sticky lg:top-0 lg:bottom-auto lg:h-screen lg:self-start",
             isCollapsed ? "w-[72px]" : "w-72",
             isMobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
           )}
         >
           <div className="border-b border-border">
             <div className={cn("flex h-16 items-center gap-2 px-4", isCollapsed && "justify-center px-2")}>
-              {!isCollapsed && (
+              {isCollapsed ? (
+                <Link href="/" className="flex items-center justify-center font-semibold">
+                  <span className="text-lg">MIR</span>
+                </Link>
+              ) : (
                 <Link href="/" className="flex items-center font-semibold">
                   <span className="text-lg">Make It Right</span>
                 </Link>
@@ -96,7 +103,7 @@ export function Sidebar() {
               <Button
                 variant="ghost"
                 size="sm"
-                className={cn("ml-auto h-8 w-8", isCollapsed && "ml-0")}
+                className={cn("ml-auto h-8 w-8 shrink-0", isCollapsed && "ml-0")}
                 onClick={() => setIsCollapsed(!isCollapsed)}
               >
                 <ChevronLeft className={cn("h-4 w-4 transition-transform", isCollapsed && "rotate-180")} />
