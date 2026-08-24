@@ -15,6 +15,7 @@ interface Quote {
   marketOpen?: boolean
   sessionStart?: number
   sessionEnd?: number
+  quoteTime?: number
 }
 
 interface SymbolInfo {
@@ -101,6 +102,7 @@ async function getChartQuote(symbol: string): Promise<Quote | null> {
     marketOpen: session.marketOpen,
     sessionStart: session.sessionStart,
     sessionEnd: session.sessionEnd,
+    quoteTime: typeof meta.regularMarketTime === "number" ? meta.regularMarketTime : undefined,
   }
 }
 
@@ -159,6 +161,7 @@ async function getBatchQuotes(symbols: string[]): Promise<Map<string, Quote>> {
         marketOpen: session.marketOpen,
         sessionStart: session.sessionStart,
         sessionEnd: session.sessionEnd,
+        quoteTime: typeof meta.regularMarketTime === "number" ? meta.regularMarketTime : undefined,
       })
     }
   } catch {

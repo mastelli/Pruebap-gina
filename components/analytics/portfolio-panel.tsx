@@ -38,6 +38,7 @@ interface PriceInfo {
   marketOpen?: boolean
   sessionStart?: number
   sessionEnd?: number
+  quoteTime?: number
   fetchedAt?: number
 }
 
@@ -207,8 +208,8 @@ export function PortfolioPanel() {
   const { t } = useLanguage()
   const [assets, setAssets] = useState<Asset[]>([])
   const [prices, setPrices] = useState<PriceMap>({})
-  const [loading, setLoading] = useState(false)
   const [lastUpdated, setLastUpdated] = useState<number | null>(null)
+  const [refreshing, setRefreshing] = useState(false)
   const [streaming, setStreaming] = useState(false)
   const [fhConnected, setFhConnected] = useState(false)
   const [nowTs, setNowTs] = useState(() => Date.now())
@@ -264,7 +265,6 @@ export function PortfolioPanel() {
 
   const refreshPrices = useCallback(async (list: Asset[], force = false) => {
     if (list.length === 0) return
-    setLoading(true)
     try {
       let cached: PriceMap = {}
       try {
@@ -294,8 +294,26 @@ export function PortfolioPanel() {
         })
         const json = await res.json()
         const results = (json?.results ?? {}) as Record<string, PriceInfo | null>
-        for (const [isin, info] of Object.entries(results)) {
-          merged[isin] = info ? { ...info, fetchedAt: Date.now() } : merged[isin]
+        for (const [isin, quote] of Object.entries(results)) {
+          if (!quote) continue
+          const existing = merged[isin]
+          // Un tick del streaming mas reciente que la cotizacion REST (los
+          // datos de Yahoo pueden ir retrasados ~15 min) tiene prioridad
+          const tickTs = lastTickRef.current[isin] ?? 0
+          const quoteTs = typeof quote.quoteTime === "number" ? quote.quoteTime : Math.floor(Date.now() / 1000)
+          if (existing?.price !== undefined && tickTs > quoteTs) {
+            merged[isin] = {
+              ...existing,
+              symbol: quote.symbol ?? existing.symbol,
+              currency: quote.currency || existing.currency,
+              marketOpen: quote.marketOpen,
+              sessionStart: quote.sessionStart,
+              sessionEnd: quote.sessionEnd,
+              fetchedAt: Date.now(),
+            }
+          } else {
+            merged[isin] = { ...quote, fetchedAt: Date.now() }
+          }
         }
       }
 
@@ -307,7 +325,7 @@ export function PortfolioPanel() {
         // almacenamiento no disponible
       }
     } finally {
-      setLoading(false)
+      // sin indicador global: el boton solo reacciona a su propio clic
     }
   }, [])
 
@@ -468,6 +486,7 @@ export function PortfolioPanel() {
             ...current,
             price: tick.price,
             previousClose,
+            quoteTime: Math.floor(now / 1000),
             fetchedAt: now,
           }
         }
@@ -556,8 +575,17 @@ export function PortfolioPanel() {
         </CardTitle>
         <div className="flex items-center gap-2">
           {assets.length > 0 && (
-            <Button variant="outline" size="sm" onClick={() => void refreshPrices(assets, true)} disabled={loading}>
-              <RefreshCw className={`mr-2 h-4 w-4 ${loading ? "animate-spin" : ""}`} />
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={refreshing}
+              onClick={() => {
+                // hard reload de datos: fuerza la consulta ignorando cachés
+                setRefreshing(true)
+                void refreshPrices(assets, true).finally(() => setRefreshing(false))
+              }}
+            >
+              <RefreshCw className={`mr-2 h-4 w-4 ${refreshing ? "animate-spin" : ""}`} />
               {t("Refresh")}
             </Button>
           )}
