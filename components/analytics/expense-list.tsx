@@ -3,6 +3,7 @@
 import { Badge } from "@/components/ui/badge"
 import { useLanguage } from "@/lib/i18n"
 import { useTransactions, sortByDateDesc } from "@/lib/transactions"
+import { getCategoryFor } from "@/lib/categories"
 
 export function ExpenseList({ month }: { month: string }) {
   const { t } = useLanguage()
@@ -25,7 +26,7 @@ export function ExpenseList({ month }: { month: string }) {
               <p className="text-xs text-muted-foreground">{transaction.date}</p>
             </div>
             <div className="flex items-center gap-4">
-              <Badge variant="secondary">{t("Expense")}</Badge>
+              <Badge variant="secondary">{t(getCategoryFor(transaction))}</Badge>
               <span className="text-sm tabular-nums text-red-600 dark:text-red-400">
                 {transaction.amount.toLocaleString("es-ES", {
                   style: "currency",
