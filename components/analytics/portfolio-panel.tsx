@@ -128,12 +128,21 @@ export function parsePortfolioCsv(text: string): Asset[] {
   return assets
 }
 
+const CURRENCY_SYMBOLS: Record<string, string> = {
+  USD: "$",
+  GBP: "£",
+  JPY: "¥",
+  CHF: "₣",
+}
+
 function formatMoney(value: number, currency?: string, decimals = 2): string {
   const formatted = value.toLocaleString("es-ES", {
     minimumFractionDigits: decimals,
     maximumFractionDigits: decimals,
   })
-  return currency && currency !== "EUR" ? `${formatted} ${currency}` : `${formatted} €`
+  if (!currency || currency === "EUR") return `${formatted} €`
+  const symbol = CURRENCY_SYMBOLS[currency]
+  return symbol ? `${formatted} ${symbol}` : `${formatted} ${currency}`
 }
 
 function formatSigned(value: number, decimals = 2): string {
@@ -719,7 +728,7 @@ export function PortfolioPanel() {
                       </td>
                       <td className="py-3 pr-4 text-right tabular-nums">
                         {totalBase !== undefined
-                          ? formatMoney(totalBase * asset.quantity, displayCurrency, decimals)
+                          ? formatMoney(totalBase * asset.quantity, displayCurrency, 2)
                           : "—"}
                       </td>
                       <td className="py-3 text-right">

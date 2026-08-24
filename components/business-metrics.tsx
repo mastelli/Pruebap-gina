@@ -4,6 +4,7 @@ import { ArrowRight } from "lucide-react"
 import Link from "next/link"
 import { useLanguage } from "@/lib/i18n"
 import { useTransactions } from "@/lib/transactions"
+import { PortfolioTotal } from "@/components/portfolio-total"
 
 function formatEuros(value: number): string {
   return value.toLocaleString("es-ES", { style: "currency", currency: "EUR" })
@@ -56,7 +57,7 @@ export function BusinessMetrics() {
       href: "/analytics?tab=savings",
       tab: "savings",
       titleKey: "Savings/Investment",
-      value: formatEuros(0),
+      value: <PortfolioTotal />,
       sub: null,
     },
   ]

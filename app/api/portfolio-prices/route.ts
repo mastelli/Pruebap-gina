@@ -172,9 +172,17 @@ async function getBatchQuotes(symbols: string[]): Promise<Map<string, Quote>> {
 
 export async function POST(request: NextRequest) {
   let assets: Array<{ isin?: string; name?: string }> = []
+  let currencies: string[] = []
   try {
     const body = await request.json()
     assets = Array.isArray(body?.assets) ? body.assets : []
+    currencies = Array.isArray(body?.currencies)
+      ? Array.from(
+          new Set(
+            body.currencies.map((c: unknown) => String(c).trim().toUpperCase()).filter(Boolean),
+          ),
+        )
+      : []
   } catch {
     return NextResponse.json({ error: "invalid body" }, { status: 400 })
   }
@@ -202,8 +210,10 @@ export async function POST(request: NextRequest) {
     if (info) resolved.set(isin, info)
   }
 
-  // 2) una sola llamada para obtenerlos todos
-  const batch = await getBatchQuotes(Array.from(resolved.values()).map((info) => info.symbol))
+  // 2) una sola llamada para cotizaciones y divisas (p. ej. USDEUR=X)
+  const symbols = Array.from(resolved.values()).map((info) => info.symbol)
+  const fxSymbols = currencies.filter((c) => c !== "EUR").map((c) => `${c}EUR=X`)
+  const batch = await getBatchQuotes([...symbols, ...fxSymbols])
 
   // 3) cualquier simbolo que falte en el lote se consulta individualmente
   for (const [isin, info] of resolved) {
@@ -218,5 +228,12 @@ export async function POST(request: NextRequest) {
     results[isin] = quote
   }
 
-  return NextResponse.json({ results })
+  // 4) tipos de cambio frente al euro
+  const fx: Record<string, number> = {}
+  for (const currency of currencies) {
+    const rate = batch.get(`${currency}EUR=X`)?.price
+    if (typeof rate === "number") fx[currency] = rate
+  }
+
+  return NextResponse.json({ results, fx })
 }
