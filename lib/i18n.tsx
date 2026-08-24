@@ -7,7 +7,7 @@ export type Language = "es" | "en"
 const translations: Record<string, string> = {
   // Navegación y común
   Dashboard: "Inicio",
-  Analytics: "Analíticas",
+  Analytics: "Análisis",
   Transactions: "Transacciones",
   Invoices: "Facturas",
   Payments: "Pagos",
