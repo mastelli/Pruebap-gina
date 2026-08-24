@@ -8,8 +8,8 @@ import { useLanguage } from "@/lib/i18n"
 
 const PORTFOLIO_STORAGE_KEY = "appPortfolio"
 const PRICES_STORAGE_KEY = "appPortfolioPrices"
-const PRICE_TTL = 30 * 1000
-const REFRESH_MS = 30 * 1000
+const PRICE_TTL = 5 * 1000
+const REFRESH_MS = 6 * 1000
 
 interface Asset {
   id: string
