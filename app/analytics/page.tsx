@@ -15,6 +15,7 @@ import { ExpenseDoughnut } from "@/components/analytics/expense-doughnut"
 import { ExpenseTypes } from "@/components/analytics/expense-types"
 import { ExpenseList } from "@/components/analytics/expense-list"
 import { ExpenseHistory } from "@/components/analytics/expense-history"
+import { PortfolioPanel } from "@/components/analytics/portfolio-panel"
 import { Button } from "@/components/ui/button"
 import { Download } from "lucide-react"
 import { useLanguage } from "@/lib/i18n"
@@ -106,6 +107,7 @@ function AnalyticsContent() {
           />
         </TabsContent>
         <TabsContent value="savings" className="space-y-4">
+          <PortfolioPanel />
           <MetricTab titleKey="Savings/Investment" />
         </TabsContent>
       </Tabs>
