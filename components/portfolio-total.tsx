@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react"
 
 const PORTFOLIO_STORAGE_KEY = "appPortfolio"
 const PRICES_STORAGE_KEY = "appPortfolioPrices"
+const HISTORY_STORAGE_KEY = "appPortfolioHistory"
 const REFRESH_MS = 30 * 1000
 
 interface StoredAsset {
@@ -19,9 +20,18 @@ interface PriceInfo {
   currency?: string
 }
 
-// Suma de los totales de la cartera en euros, con conversion de divisa
-export function PortfolioTotal() {
+function monthKey(offsetMonths = 0): string {
+  const date = new Date()
+  date.setDate(1)
+  date.setMonth(date.getMonth() + offsetMonths)
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`
+}
+
+// Cartera total en euros; guarda ademas un historico mensual en
+// localStorage para poder calcular la variacion respecto al mes pasado
+export function usePortfolioEurTotal(): { total: number | null; momPct: number | null } {
   const [total, setTotal] = useState<number | null>(null)
+  const [momPct, setMomPct] = useState<number | null>(null)
 
   const computeTotal = useCallback(async () => {
     try {
@@ -84,6 +94,21 @@ export function PortfolioTotal() {
         }
       }
       setTotal(sum)
+
+      // historico mensual: guarda el valor de este mes y compara con el anterior
+      try {
+        const key = monthKey()
+        const prevKey = monthKey(-1)
+        let history: Record<string, number> = {}
+        const rawHistory = window.localStorage.getItem(HISTORY_STORAGE_KEY)
+        if (rawHistory) history = JSON.parse(rawHistory) as Record<string, number>
+        history[key] = sum
+        window.localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(history))
+        const prevValue = history[prevKey]
+        setMomPct(prevValue && prevValue > 0 ? ((sum - prevValue) / prevValue) * 100 : null)
+      } catch {
+        // almacenamiento no disponible
+      }
     } catch {
       // almacenamiento no disponible o respuesta invalida
     }
@@ -94,6 +119,13 @@ export function PortfolioTotal() {
     const id = setInterval(() => void computeTotal(), REFRESH_MS)
     return () => clearInterval(id)
   }, [computeTotal])
+
+  return { total, momPct }
+}
+
+// Suma de los totales de la cartera en euros, con conversion de divisa
+export function PortfolioTotal() {
+  const { total } = usePortfolioEurTotal()
 
   const formatted =
     total === null

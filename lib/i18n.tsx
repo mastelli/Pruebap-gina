@@ -72,9 +72,9 @@ const translations: Record<string, string> = {
   "Total balance across all accounts": "Saldo total de todas las cuentas",
   Checking: "Corriente",
   "Savings/Investment": "Ahorro/Inversión",
-  "Total Income": "Ingresos",
+  "Total Income": "Total ingresos",
   "Average Income": "Media Ingresos",
-  "Total Expenses": "Gastos",
+  "Total Expenses": "Total gastos",
   "Average Expenses": "Media Gastos",
 
   // Modales de dinero
@@ -157,6 +157,9 @@ const translations: Record<string, string> = {
   "History": "Historial",
   "Annual Breakdown": "Desglose anual",
   Movements: "Movimientos",
+  "Monthly Remainder": "Resto mensual",
+  "Total Investment": "Total inversión",
+  "from last month": "desde el mes pasado",
   Totals: "Totales",
   "Expense Breakdown": "Desglose de gastos",
   "Expense Types": "Tipos de gasto",

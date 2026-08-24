@@ -34,7 +34,7 @@ export function OverviewTab() {
         </div>
       </div>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <OverviewCards comparisonPeriod={comparisonPeriod} />
+        <OverviewCards />
       </div>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7 mt-4">
         <Card className="col-span-4">
