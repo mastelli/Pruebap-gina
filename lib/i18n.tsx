@@ -8,7 +8,7 @@ const translations: Record<string, string> = {
   // Navegación y común
   Dashboard: "Inicio",
   Analytics: "Análisis",
-  Transactions: "Transacciones",
+  Transactions: "Movimientos",
   Invoices: "Facturas",
   Payments: "Pagos",
   Members: "Miembros",
@@ -118,8 +118,8 @@ const translations: Record<string, string> = {
 
   // Transacciones recientes
   "Recent Transactions": "Transacciones recientes",
-  "View All Transactions": "Ver todas las transacciones",
-  "All Transactions": "Todas las transacciones",
+  "View All Transactions": "Ver todos los movimientos",
+  "All Transactions": "Todos los movimientos",
   "Income": "Ingreso",
   "Expense": "Gasto",
   "No transactions yet": "Aún no hay transacciones",
