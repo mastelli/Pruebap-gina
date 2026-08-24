@@ -12,6 +12,7 @@ interface Quote {
   price: number
   previousClose: number | null
   currency: string
+  marketOpen?: boolean
 }
 
 interface SymbolInfo {
@@ -61,6 +62,16 @@ async function resolveSymbolCandidates(isin: string, name?: string): Promise<str
   return symbols
 }
 
+// Sesion regular activa segun el calendario del mercado
+function marketOpenFromMeta(meta: {
+  currentTradingPeriod?: { regular?: { start?: number; end?: number } }
+}): boolean | undefined {
+  const regular = meta?.currentTradingPeriod?.regular
+  if (typeof regular?.start !== "number" || typeof regular?.end !== "number") return undefined
+  const now = Math.floor(Date.now() / 1000)
+  return now >= regular.start && now < regular.end
+}
+
 async function getChartQuote(symbol: string): Promise<Quote | null> {
   const res = await fetch(
     `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=1d&range=5d`,
@@ -80,6 +91,7 @@ async function getChartQuote(symbol: string): Promise<Quote | null> {
     price: meta.regularMarketPrice,
     previousClose,
     currency: meta.currency ?? "",
+    marketOpen: marketOpenFromMeta(meta),
   }
 }
 
@@ -134,6 +146,7 @@ async function getBatchQuotes(symbols: string[]): Promise<Map<string, Quote>> {
         price: meta.regularMarketPrice,
         previousClose,
         currency: meta.currency ?? "",
+        marketOpen: marketOpenFromMeta(meta),
       })
     }
   } catch {

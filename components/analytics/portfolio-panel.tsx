@@ -30,6 +30,7 @@ interface PriceInfo {
   price?: number
   previousClose?: number | null
   currency?: string
+  marketOpen?: boolean
   fetchedAt?: number
 }
 
@@ -484,9 +485,16 @@ export function PortfolioPanel() {
                     dayChange !== null && prevClose !== null && prevClose !== 0
                       ? (dayChange / prevClose) * 100
                       : null
+                  // Mercado cerrado: sin precio ni variacion, total con el cierre anterior
+                  const marketClosed =
+                    info?.marketOpen === false &&
+                    typeof info?.price === "number" &&
+                    prevClose !== null
                   // Precios por debajo de 10 con 4 decimales, el resto con 2
+                  const refPrice = marketClosed ? (prevClose as number) : price
                   const decimals =
-                    price !== undefined && Math.abs(price) < 10 ? 4 : 2
+                    refPrice !== undefined && Math.abs(refPrice) < 10 ? 4 : 2
+                  const totalBase = marketClosed ? (prevClose as number) : price
                   return (
                     <tr key={asset.id} className="border-b border-border">
                       <td className="py-3 pr-4 font-medium">{t(asset.product)}</td>
@@ -495,20 +503,22 @@ export function PortfolioPanel() {
                         {asset.quantity.toLocaleString("es-ES")}
                       </td>
                       <td className="py-3 pr-4 text-right tabular-nums">
-                        {price !== undefined ? formatMoney(price, displayCurrency, decimals) : "—"}
+                        {marketClosed ? "-" : price !== undefined ? formatMoney(price, displayCurrency, decimals) : "—"}
                       </td>
                       <td
                         className={`py-3 pr-4 text-right tabular-nums ${
-                          dayPct === null ? "" : dayPct >= 0 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"
+                          !marketClosed && dayPct !== null && dayPct < 0 ? "text-red-600 dark:text-red-400" : dayPct !== null && !marketClosed ? "text-green-600 dark:text-green-400" : ""
                         }`}
                       >
-                        {dayChange === null || dayPct === null
-                          ? "—"
-                          : `${formatSigned(dayChange, decimals)} (${formatSigned(dayPct)}%)`}
+                        {marketClosed
+                          ? "-"
+                          : dayChange === null || dayPct === null
+                            ? "—"
+                            : `${formatSigned(dayChange, decimals)} (${formatSigned(dayPct)}%)`}
                       </td>
                       <td className="py-3 pr-4 text-right tabular-nums">
-                        {price !== undefined
-                          ? formatMoney(price * asset.quantity, displayCurrency, decimals)
+                        {totalBase !== undefined
+                          ? formatMoney(totalBase * asset.quantity, displayCurrency, decimals)
                           : "—"}
                       </td>
                       <td className="py-3 text-right">
