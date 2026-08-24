@@ -144,7 +144,7 @@ export function RevenueChart() {
           type="monotone"
           dataKey="remainder"
           name={t("Monthly Remainder")}
-          stroke={theme === "dark" ? "#adfa1d" : "#0ea5e9"}
+          stroke={theme === "dark" ? "#22c55e" : "#16a34a"}
           strokeWidth={2}
           dot={false}
         />
@@ -155,7 +155,7 @@ export function RevenueChart() {
           name={t("Total Investment")}
           stroke={theme === "dark" ? "#60a5fa" : "#1d4ed8"}
           strokeWidth={2}
-          dot={false}
+          dot={{ r: 3 }}
           connectNulls
         />
       </LineChart>
