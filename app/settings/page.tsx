@@ -11,33 +11,19 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Slider } from "@/components/ui/slider"
 import { Checkbox } from "@/components/ui/checkbox"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { UserAvatar } from "@/components/user-avatar"
 import { Laptop, Smartphone, Tablet } from "lucide-react"
 import { useState } from "react"
 import { toast } from "sonner"
 import { useLanguage, type Language } from "@/lib/i18n"
 
-const defaultAvatars = [
-  "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/9439775.jpg-4JVJWOjPksd3DtnBYJXoWHA5lc1DU9.jpeg",
-  "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/375238645_11475210.jpg-lU8bOe6TLt5Rv51hgjg8NT8PsDBmvN.jpeg",
-  "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/375238208_11475222.jpg-poEIzVHAGiIfMFQ7EiF8PUG1u0Zkzz.jpeg",
-  "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/dd.jpg-4MCwPC2Bec6Ume26Yo1kao3CnONxDg.jpeg",
-  "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/9334178.jpg-Y74tW6XFO68g7N36SE5MSNDNVKLQ08.jpeg",
-  "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/5295.jpg-fLw0wGGZp8wuTzU5dnyfjZDwAHN98a.jpeg",
-  "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/9720029.jpg-Yf9h2a3kT7rYyCb648iLIeHThq5wEy.jpeg",
-  "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/27470341_7294795.jpg-XE0zf7R8tk4rfA1vm4fAHeZ1QoVEOo.jpeg",
-  "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/799.jpg-0tEi4Xvg5YsFoGoQfQc698q4Dygl1S.jpeg",
-  "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/9334228.jpg-eOsHCkvVrVAwcPHKYSs5sQwVKsqWpC.jpeg",
-]
-
 export default function SettingsPage() {
   const { settings, updateSettings, updateNotificationSettings, updatePrivacySettings } = useSettings()
-  const [selectedAvatar, setSelectedAvatar] = useState(settings.avatar)
   const { t, lang, setLang } = useLanguage()
 
   const handleSaveAccount = () => {
     updateSettings({
-      avatar: selectedAvatar,
+      avatar: settings.avatar,
       fullName: settings.fullName,
       email: settings.email,
       phone: settings.phone,
@@ -78,35 +64,11 @@ export default function SettingsPage() {
               <div className="space-y-4">
                 <Label>{t("Current Avatar")}</Label>
                 <div className="flex items-center space-x-4">
-                  <Avatar className="h-20 w-20">
-                    <AvatarImage src={selectedAvatar} alt={settings.fullName} />
-                    <AvatarFallback>
-                      {settings.fullName
-                        .split(" ")
-                        .map((n) => n[0])
-                        .join("")}
-                    </AvatarFallback>
-                  </Avatar>
+                  <UserAvatar name={settings.fullName} className="h-20 w-20 text-xl" />
                 </div>
-                <Label>{t("Choose a new avatar")}</Label>
-                <div className="flex gap-4 overflow-x-auto pb-2">
-                  {defaultAvatars.map((avatar, index) => (
-                    <Avatar
-                      key={index}
-                      className={`h-20 w-20 rounded-lg cursor-pointer hover:ring-2 hover:ring-primary shrink-0 ${
-                        selectedAvatar === avatar ? "ring-2 ring-primary" : ""
-                      }`}
-                      onClick={() => setSelectedAvatar(avatar)}
-                    >
-                      <AvatarImage src={avatar} alt={`Avatar ${index + 1}`} className="object-cover" />
-                      <AvatarFallback>{index + 1}</AvatarFallback>
-                    </Avatar>
-                  ))}
-                </div>
-                <div>
-                  <Label htmlFor="custom-avatar">{t("Or upload a custom avatar")}</Label>
-                  <Input id="custom-avatar" type="file" accept="image/*" className="mt-1" />
-                </div>
+                <p className="text-sm text-muted-foreground">
+                  {t("Your avatar shows the initials of your name with an automatic color")}
+                </p>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="full-name">{t("Full Name")}</Label>

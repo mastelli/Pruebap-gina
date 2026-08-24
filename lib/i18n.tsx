@@ -413,6 +413,8 @@ const translations: Record<string, string> = {
   "Account Settings": "Configuración de la cuenta",
   "Manage your account information": "Gestiona la información de tu cuenta",
   "Current Avatar": "Avatar actual",
+  "Your avatar shows the initials of your name with an automatic color":
+    "Tu avatar muestra las iniciales de tu nombre con un color automático",
   "Choose a new avatar": "Elige un nuevo avatar",
   "Or upload a custom avatar": "O sube un avatar personalizado",
   "Full Name": "Nombre completo",
