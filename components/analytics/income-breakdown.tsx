@@ -40,8 +40,8 @@ export function IncomeCategoriesChart({ scope = "month", month }: IncomeCategori
     .map((row) => ({ ...row, label: t(row.label) }))
     .filter((row) => row.total > 0)
 
-  // Etiqueta exterior en dos lineas: categoria e importe con linea que
-  // senala la porcion correspondiente
+  // Etiqueta exterior en dos lineas con linea de senalacion propia:
+  // categoria e importe, mas separadas del borde de la porcion
   const renderLabel = ({
     cx,
     cy,
@@ -60,47 +60,58 @@ export function IncomeCategoriesChart({ scope = "month", month }: IncomeCategori
     payload?: { color?: string }
   }) => {
     const angle = -(midAngle ?? 0) * RADIAN
-    const x = (cx ?? 0) + ((outerRadius ?? 0) + 10) * Math.cos(angle)
-    const y = (cy ?? 0) + ((outerRadius ?? 0) + 10) * Math.sin(angle)
-    const anchor = Math.cos(angle) >= 0 ? "start" : "end"
+    const cos = Math.cos(angle)
+    const sin = Math.sin(angle)
+    const startR = (outerRadius ?? 0) + 10
+    const endR = (outerRadius ?? 0) + 26
+    const sx = (cx ?? 0) + startR * cos
+    const sy = (cy ?? 0) + startR * sin
+    const ex = (cx ?? 0) + endR * cos
+    const ey = (cy ?? 0) + endR * sin
+    const anchor = cos >= 0 ? "start" : "end"
+    const tx = ex + (cos >= 0 ? 8 : -8)
     return (
-      <text x={x} y={y} textAnchor={anchor} dominantBaseline="central">
-        <tspan x={x} dy={-7} fill="#78909c" fontSize={10} fontWeight={500}>
-          {name}
-        </tspan>
-        <tspan
-          x={x}
-          dy={13}
-          fill={payload?.color ?? "#37474f"}
-          fontSize={12}
-          fontWeight={700}
-        >
-          {formatEuros(Number(value))}
-        </tspan>
-      </text>
+      <g>
+        <line x1={sx} y1={sy} x2={ex} y2={ey} stroke="#b0bec5" strokeWidth={1} />
+        <text x={tx} y={ey} textAnchor={anchor} dominantBaseline="central">
+          <tspan x={tx} dy={-7} fill="#78909c" fontSize={10} fontWeight={500}>
+            {name}
+          </tspan>
+          <tspan
+            x={tx}
+            dy={13}
+            fill={payload?.color ?? "#37474f"}
+            fontSize={12}
+            fontWeight={700}
+          >
+            {formatEuros(Number(value))}
+          </tspan>
+        </text>
+      </g>
     )
   }
 
   if (data.length === 0) {
     return (
-      <div className="flex h-[300px] items-center justify-center text-sm text-muted-foreground">
+      <div className="flex h-[340px] items-center justify-center text-sm text-muted-foreground">
         {t("No transactions yet")}
       </div>
     )
   }
 
   return (
-    <ResponsiveContainer width="100%" height={300}>
+    <ResponsiveContainer width="100%" height={340}>
       <PieChart>
         <Pie
           data={data}
           dataKey="total"
           nameKey="label"
-          innerRadius={45}
-          outerRadius={72}
+          innerRadius={54}
+          outerRadius={86}
           paddingAngle={2}
+          cy="50%"
           label={renderLabel}
-          labelLine={{ stroke: "#b0bec5", strokeWidth: 1 }}
+          labelLine={false}
         >
           {data.map((entry) => (
             <Cell key={entry.label} fill={entry.color} />
