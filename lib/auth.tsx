@@ -18,7 +18,21 @@ interface AccountRecord {
   hash: string
   name?: string
   surname?: string
-  age?: number
+  birthDate?: string
+}
+
+// edad a partir de la fecha de nacimiento (YYYY-MM-DD); null si es invalida
+export function ageFromBirthDate(birthDate: string): number | null {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(birthDate)) return null
+  const birth = new Date(`${birthDate}T00:00:00`)
+  if (Number.isNaN(birth.getTime()) || birth > new Date()) return null
+  const now = new Date()
+  let age = now.getFullYear() - birth.getFullYear()
+  const beforeBirthday =
+    now.getMonth() < birth.getMonth() ||
+    (now.getMonth() === birth.getMonth() && now.getDate() < birth.getDate())
+  if (beforeBirthday) age -= 1
+  return age >= 0 && age <= 120 ? age : null
 }
 
 type Accounts = Record<string, AccountRecord>
@@ -66,7 +80,7 @@ export function storageSetItem(base: string, value: string): void {
 interface RegisterDetails {
   name: string
   surname: string
-  age: number
+  birthDate: string
 }
 
 interface AuthContextValue {
@@ -121,7 +135,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const normalized = candidateEmail.trim().toLowerCase()
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalized)) return "Invalid email"
       if (!details.name.trim() || !details.surname.trim()) return "Please enter your name and surname"
-      if (!Number.isFinite(details.age) || details.age < 1 || details.age > 120) return "Enter a valid age"
+      const age = ageFromBirthDate(details.birthDate)
+      if (age === null) return "Enter a valid age"
       if (password.length < 4) return "Password must be at least 4 characters"
       let accounts: Accounts = {}
       try {
@@ -138,7 +153,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         hash,
         name: details.name.trim(),
         surname: details.surname.trim(),
-        age: Math.round(details.age),
+        birthDate: details.birthDate,
       }
       window.localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(accounts))
 
@@ -153,6 +168,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             ...storedSettings,
             fullName: `${details.name.trim()} ${details.surname.trim()}`,
             email: normalized,
+            birthDate: details.birthDate,
           }),
         )
       } catch {

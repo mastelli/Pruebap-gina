@@ -18,7 +18,7 @@ export function AuthScreen() {
   const [mode, setMode] = useState<"login" | "register">("login")
   const [nameValue, setNameValue] = useState("")
   const [surnameValue, setSurnameValue] = useState("")
-  const [ageValue, setAgeValue] = useState("")
+  const [birthDateValue, setBirthDateValue] = useState("")
   const [emailValue, setEmailValue] = useState("")
   const [passwordValue, setPasswordValue] = useState("")
   const [confirmValue, setConfirmValue] = useState("")
@@ -39,7 +39,7 @@ export function AuthScreen() {
         : await register(emailValue, passwordValue, {
             name: nameValue,
             surname: surnameValue,
-            age: Number(ageValue),
+            birthDate: birthDateValue,
           })
     if (result) setError(result)
     setBusy(false)
@@ -93,15 +93,14 @@ export function AuthScreen() {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="auth-age">{t("Age")}</Label>
+                  <Label htmlFor="auth-birthdate">{t("Date of Birth")}</Label>
                   <Input
-                    id="auth-age"
-                    type="number"
-                    min={1}
-                    max={120}
+                    id="auth-birthdate"
+                    type="date"
                     required
-                    value={ageValue}
-                    onChange={(event) => setAgeValue(event.target.value)}
+                    max={new Date().toISOString().slice(0, 10)}
+                    value={birthDateValue}
+                    onChange={(event) => setBirthDateValue(event.target.value)}
                   />
                 </div>
               </>

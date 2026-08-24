@@ -177,6 +177,7 @@ const translations: Record<string, string> = {
   "First name": "Nombre",
   Surname: "Apellidos",
   Age: "Edad",
+  "Date of Birth": "Fecha de nacimiento",
   "Confirm password": "Confirmar contraseña",
   "Passwords do not match": "Las contraseñas no coinciden",
   "Please enter your name and surname": "Introduce tu nombre y apellidos",

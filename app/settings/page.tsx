@@ -12,6 +12,7 @@ import { Slider } from "@/components/ui/slider"
 import { Checkbox } from "@/components/ui/checkbox"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { UserAvatar } from "@/components/user-avatar"
+import { ageFromBirthDate } from "@/lib/auth"
 import { Laptop, Smartphone, Tablet } from "lucide-react"
 import { useState } from "react"
 import { toast } from "sonner"
@@ -26,7 +27,7 @@ export default function SettingsPage() {
       avatar: settings.avatar,
       fullName: settings.fullName,
       email: settings.email,
-      phone: settings.phone,
+      birthDate: settings.birthDate ?? "",
       timezone: settings.timezone,
     })
     toast.success(t("Account settings saved successfully"))
@@ -88,13 +89,19 @@ export default function SettingsPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="phone">{t("Phone Number")}</Label>
+                <Label htmlFor="birth-date">{t("Date of Birth")}</Label>
                 <Input
-                  id="phone"
-                  type="tel"
-                  value={settings.phone}
-                  onChange={(e) => updateSettings({ phone: e.target.value })}
+                  id="birth-date"
+                  type="date"
+                  value={settings.birthDate ?? ""}
+                  onChange={(e) => updateSettings({ birthDate: e.target.value })}
                 />
+                <p className="text-sm text-muted-foreground">
+                  {t("Age")}:{" "}
+                  {ageFromBirthDate(settings.birthDate ?? "") !== null
+                    ? ageFromBirthDate(settings.birthDate!)
+                    : "—"}
+                </p>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="timezone">{t("Timezone")}</Label>
