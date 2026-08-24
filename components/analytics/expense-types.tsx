@@ -14,6 +14,28 @@ function formatEuros(value: number): string {
   return value.toLocaleString("es-ES", { style: "currency", currency: "EUR" })
 }
 
+// Puntos de anclaje del tono de la barra segun el exceso sobre el
+// presupuesto (gasto/presupuesto): verde al llegar al limite,
+// verdoso-amarillo al +10%, naranja al +25% y rojo a partir del +40%
+const OVER_HUE_STOPS: Array<[number, number]> = [
+  [1.0, 120],
+  [1.1, 85],
+  [1.25, 38],
+  [1.4, 0],
+]
+
+function overBudgetHue(ratio: number): number {
+  if (ratio <= OVER_HUE_STOPS[0][0]) return OVER_HUE_STOPS[0][1]
+  for (let i = 1; i < OVER_HUE_STOPS.length; i++) {
+    const [r1, h1] = OVER_HUE_STOPS[i]
+    if (ratio <= r1) {
+      const [r0, h0] = OVER_HUE_STOPS[i - 1]
+      return h0 + ((h1 - h0) * (ratio - r0)) / (r1 - r0)
+    }
+  }
+  return 0
+}
+
 // Tipos de gasto del mes seleccionado con su presupuesto editable por tipo
 export function ExpenseTypes({ month }: { month: string }) {
   const { t } = useLanguage()
@@ -83,12 +105,10 @@ export function ExpenseTypes({ month }: { month: string }) {
                 <div
                   className={`h-1.5 rounded-full ${spent >= budget ? "" : "bg-primary"}`}
                   style={{
-                    // Verde al agotar el presupuesto y gradualmente mas rojo
-                    // cuanto mayor sea el exceso (rojo pleno al duplicarlo)
+                    // Color segun exceso: verde al limite y degradado
+                    // amarillo -> naranja -> rojo conforme crece el exceso
                     ...(spent >= budget
-                      ? {
-                          backgroundColor: `hsl(${Math.max(0, Math.min(120, 120 * (2 - spent / budget)))} 72% 42%)`,
-                        }
+                      ? { backgroundColor: `hsl(${overBudgetHue(spent / budget)} 72% 42%)` }
                       : {}),
                     width: `${ratio}%`,
                   }}
