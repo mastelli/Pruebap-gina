@@ -1,7 +1,16 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
+import {
+  Bar,
+  ComposedChart,
+  Legend,
+  Line,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts"
 import { Card, CardContent } from "@/components/ui/card"
 import { useTheme } from "next-themes"
 import { useLanguage } from "@/lib/i18n"
@@ -28,7 +37,9 @@ const HISTORY_STORAGE_KEY = "appPortfolioHistory"
 
 interface ChartPoint {
   month: string
-  remainder: number | null
+  income: number | null
+  expenses: number | null
+  difference: number | null
   investment: number | null
 }
 
@@ -40,9 +51,9 @@ function formatEuros(value: number): string {
   })
 }
 
-// Resto mensual (ingresos - gastos) de cada mes del ano en curso junto
-// con la evolucion de la inversion total (historico guardado por el
-// dashboard; los meses sin instantanea quedan sin punto)
+// Resumen mensual del ano en curso: columnas de ingresos y gastos de cada
+// mes, linea naranja con la diferencia (ingresos - gastos) y linea azul
+// con la evolucion de la inversion total
 export function RevenueChart() {
   const { theme } = useTheme()
   const { t } = useLanguage()
@@ -73,15 +84,30 @@ export function RevenueChart() {
       if (transaction.amount > 0) income += transaction.amount
       else expenses += -transaction.amount
     }
-    const key = prefix
     const isCurrentMonth = m === lastMonthIndex
     const investment =
-      investmentHistory[key] ?? (isCurrentMonth && investmentNow !== null ? investmentNow : null)
+      investmentHistory[prefix] ??
+      (isCurrentMonth && investmentNow !== null ? investmentNow : null)
     data.push({
       month: t(MONTHS[m]).slice(0, 3),
-      remainder: income - expenses,
+      income,
+      expenses,
+      difference: income - expenses,
       investment,
     })
+  }
+
+  const tooltipLabelFor = (dataKey?: string | number): string => {
+    switch (dataKey) {
+      case "income":
+        return t("Total Income")
+      case "expenses":
+        return t("Total Expenses")
+      case "difference":
+        return t("Difference")
+      default:
+        return t("Total Investment")
+    }
   }
 
   const CustomTooltip = ({
@@ -100,8 +126,7 @@ export function RevenueChart() {
             <p className="text-sm font-semibold">{label}</p>
             {payload.map((entry) => (
               <p key={String(entry.dataKey)} className="text-sm text-muted-foreground">
-                {t(entry.dataKey === "remainder" ? "Monthly Remainder" : "Total Investment")}:{" "}
-                {formatEuros(Number(entry.value))}
+                {tooltipLabelFor(entry.dataKey)}: {formatEuros(Number(entry.value))}
               </p>
             ))}
           </CardContent>
@@ -113,7 +138,7 @@ export function RevenueChart() {
 
   return (
     <ResponsiveContainer width="100%" height={350}>
-      <LineChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+      <ComposedChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
         <XAxis
           dataKey="month"
           stroke={theme === "dark" ? "#888888" : "#333333"}
@@ -138,16 +163,32 @@ export function RevenueChart() {
           axisLine={false}
           tickFormatter={(value) => formatEuros(value)}
         />
-        <Tooltip content={<CustomTooltip />} />
+        <Tooltip content={<CustomTooltip />} cursor={{ fill: "rgba(128,128,128,0.08)" }} />
         <Legend />
+        <Bar
+          yAxisId="left"
+          dataKey="income"
+          name={t("Total Income")}
+          fill={theme === "dark" ? "#22c55e" : "#16a34a"}
+          maxBarSize={28}
+          radius={[3, 3, 0, 0]}
+        />
+        <Bar
+          yAxisId="left"
+          dataKey="expenses"
+          name={t("Total Expenses")}
+          fill={theme === "dark" ? "#f87171" : "#dc2626"}
+          maxBarSize={28}
+          radius={[3, 3, 0, 0]}
+        />
         <Line
           yAxisId="left"
           type="monotone"
-          dataKey="remainder"
-          name={t("Monthly Remainder")}
-          stroke={theme === "dark" ? "#22c55e" : "#16a34a"}
+          dataKey="difference"
+          name={t("Difference")}
+          stroke={theme === "dark" ? "#fb923c" : "#ea580c"}
           strokeWidth={2}
-          dot={false}
+          dot={{ r: 3 }}
         />
         <Line
           yAxisId="right"
@@ -159,7 +200,7 @@ export function RevenueChart() {
           dot={{ r: 3 }}
           connectNulls
         />
-      </LineChart>
+      </ComposedChart>
     </ResponsiveContainer>
   )
 }
