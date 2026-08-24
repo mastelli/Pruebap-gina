@@ -1,5 +1,6 @@
 "use client"
 
+import { CardContent } from "@/components/ui/card"
 import { useLanguage } from "@/lib/i18n"
 import { useTransactions } from "@/lib/transactions"
 import { getIncomeBreakdown } from "@/lib/income"
