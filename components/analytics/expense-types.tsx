@@ -81,8 +81,17 @@ export function ExpenseTypes({ month }: { month: string }) {
             {budget > 0 && (
               <div className="w-full h-1.5 rounded-full bg-secondary">
                 <div
-                  className={`h-1.5 rounded-full ${ratio >= 100 ? "bg-red-600" : "bg-primary"}`}
-                  style={{ width: `${ratio}%` }}
+                  className={`h-1.5 rounded-full ${spent >= budget ? "" : "bg-primary"}`}
+                  style={{
+                    // Verde al agotar el presupuesto y gradualmente mas rojo
+                    // cuanto mayor sea el exceso (rojo pleno al duplicarlo)
+                    ...(spent >= budget
+                      ? {
+                          backgroundColor: `hsl(${Math.max(0, Math.min(120, 120 * (2 - spent / budget)))} 72% 42%)`,
+                        }
+                      : {}),
+                    width: `${ratio}%`,
+                  }}
                 />
               </div>
             )}
