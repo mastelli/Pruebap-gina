@@ -56,6 +56,7 @@ interface MetricTabProps {
   titleKey: string
   customBody?: (month: string) => ReactNode
   firstCardTitleKey?: string
+  firstCardAction?: ReactNode | ((month: string) => ReactNode)
   firstCard?: (month: string) => ReactNode
   secondCardTitleKey?: string
   secondCard?: ReactNode
@@ -72,6 +73,7 @@ export function MetricTab({
   titleKey,
   customBody,
   firstCardTitleKey,
+  firstCardAction,
   firstCard,
   secondCardTitleKey,
   secondCard,
@@ -107,10 +109,11 @@ export function MetricTab({
         <>
           <div className="grid gap-4 md:grid-cols-2">
             <Card>
-              <CardHeader>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0">
                 <CardTitle className="text-xl font-semibold">
                   {t(firstCardTitleKey ?? "Customer Segmentation")}
                 </CardTitle>
+                {typeof firstCardAction === "function" ? firstCardAction(selectedMonth) : firstCardAction}
               </CardHeader>
               <CardContent>
                 {firstCard ? (

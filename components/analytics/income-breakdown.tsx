@@ -93,14 +93,14 @@ export function IncomeCategoriesChart({ scope = "month", month }: IncomeCategori
 
   if (data.length === 0) {
     return (
-      <div className="flex h-[400px] items-center justify-center text-sm text-muted-foreground">
+      <div className="flex h-[300px] items-center justify-center text-sm text-muted-foreground">
         {t("No transactions yet")}
       </div>
     )
   }
 
   return (
-    <ResponsiveContainer width="100%" height={400}>
+    <ResponsiveContainer width="100%" height={300}>
       <PieChart>
         <Pie
           data={data}
@@ -125,5 +125,22 @@ export function IncomeCategoriesChart({ scope = "month", month }: IncomeCategori
         />
       </PieChart>
     </ResponsiveContainer>
+  )
+}
+
+// Total de ingresos del mes seleccionado, mostrado en la cabecera
+export function IncomeTotal({ month }: { month: string }) {
+  const { t } = useLanguage()
+  const { transactions } = useTransactions()
+
+  const year = `${new Date().getFullYear()}`
+  const { salary, transfers, bizum } = getIncomeBreakdown(transactions, `${year}-${month}`)
+  const total = salary + transfers + bizum
+
+  return (
+    <div className="text-right">
+      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{t("Total")}</p>
+      <p className="text-lg font-bold tabular-nums">{formatEuros(total)}</p>
+    </div>
   )
 }

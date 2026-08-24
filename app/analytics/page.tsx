@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { DateRangePicker } from "@/components/date-range-picker"
 import { OverviewTab } from "@/components/analytics/overview-tab"
 import { MetricTab } from "@/components/analytics/metric-tab"
-import { IncomeCategoriesChart } from "@/components/analytics/income-breakdown"
+import { IncomeCategoriesChart, IncomeTotal } from "@/components/analytics/income-breakdown"
 import { IncomeHistory } from "@/components/analytics/income-history"
 import { IncomeMetrics } from "@/components/analytics/income-metrics"
 import { IncomeList } from "@/components/analytics/income-list"
@@ -55,6 +55,7 @@ function AnalyticsContent() {
           <MetricTab
             titleKey="Revenue"
             firstCardTitleKey="Income Breakdown"
+            firstCardAction={(month) => <IncomeTotal month={month} />}
             firstCard={(month) => <IncomeCategoriesChart scope="month" month={month} />}
             secondCardTitleKey="History"
             secondCard={<IncomeHistory />}
