@@ -66,8 +66,8 @@ function AnalyticsContent() {
           <MetricTab
             titleKey="Expenses"
             customBody={(month) => (
-              <div className="grid gap-4 lg:grid-cols-2 items-start">
-                <div className="space-y-4">
+              <div className="grid gap-4 lg:grid-cols-2 items-stretch">
+                <div className="flex flex-col gap-4">
                   <Card>
                     <CardHeader>
                       <CardTitle className="text-xl font-semibold">{t("Expense Breakdown")}</CardTitle>
@@ -84,20 +84,20 @@ function AnalyticsContent() {
                       <ExpenseHistory />
                     </CardContent>
                   </Card>
-                  <Card>
+                  <Card className="flex flex-1 flex-col">
                     <CardHeader>
                       <CardTitle className="text-xl font-semibold">{t("Expense Movements")}</CardTitle>
                     </CardHeader>
-                    <CardContent>
-                      <ExpenseList />
+                    <CardContent className="flex-1 overflow-hidden pb-6">
+                      <ExpenseList month={month} />
                     </CardContent>
                   </Card>
                 </div>
-                <Card>
+                <Card className="flex flex-col">
                   <CardHeader>
                     <CardTitle className="text-xl font-semibold">{t("Expense Types")}</CardTitle>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="pb-6">
                     <ExpenseTypes />
                   </CardContent>
                 </Card>

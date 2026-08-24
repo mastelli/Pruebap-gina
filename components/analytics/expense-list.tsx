@@ -4,14 +4,19 @@ import { Badge } from "@/components/ui/badge"
 import { useLanguage } from "@/lib/i18n"
 import { useTransactions, sortByDateDesc } from "@/lib/transactions"
 
-export function ExpenseList() {
+export function ExpenseList({ month }: { month: string }) {
   const { t } = useLanguage()
   const { transactions } = useTransactions()
 
-  const expenses = sortByDateDesc(transactions.filter((transaction) => transaction.amount < 0))
+  const now = new Date()
+  const prefix = `${now.getFullYear()}-${month}`
+
+  const expenses = sortByDateDesc(
+    transactions.filter((transaction) => transaction.amount < 0 && transaction.date.startsWith(prefix)),
+  )
 
   return (
-    <div className="px-2">
+    <div className="h-full overflow-y-auto px-2">
       <div className="divide-y divide-border">
         {expenses.map((transaction) => (
           <div key={transaction.id} className="flex items-center justify-between gap-4 py-3">
