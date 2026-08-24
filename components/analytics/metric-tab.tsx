@@ -33,10 +33,29 @@ const channelPerformanceData = [
   { channel: "Email", acquisitions: 900, revenue: 30000 },
 ]
 
+const MONTHS = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+]
+
+function getCurrentMonth(): string {
+  return String(new Date().getMonth() + 1).padStart(2, "0")
+}
+
 interface MetricTabProps {
   titleKey: string
   firstCardTitleKey?: string
-  firstCard?: ReactNode
+  firstCard?: (month: string) => ReactNode
   secondCardTitleKey?: string
   secondCard?: ReactNode
   thirdCardTitleKey?: string
@@ -57,22 +76,23 @@ export function MetricTab({
   metricsCard,
 }: MetricTabProps) {
   const { theme } = useTheme()
-  const [timeFrame, setTimeFrame] = useState("last_30_days")
+  const [selectedMonth, setSelectedMonth] = useState(getCurrentMonth)
   const { t } = useLanguage()
 
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h3 className="text-2xl font-semibold">{t(titleKey)}</h3>
-        <Select value={timeFrame} onValueChange={setTimeFrame}>
+        <Select value={selectedMonth} onValueChange={setSelectedMonth}>
           <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder={t("Last 30 Days")} />
+            <SelectValue />
           </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="last_7_days">{t("Last 7 Days")}</SelectItem>
-            <SelectItem value="last_30_days">{t("Last 30 Days")}</SelectItem>
-            <SelectItem value="last_90_days">{t("Last 90 Days")}</SelectItem>
-            <SelectItem value="last_12_months">{t("Last 12 Months")}</SelectItem>
+          <SelectContent className="max-h-[480px]">
+            {MONTHS.map((month, index) => (
+              <SelectItem key={month} value={String(index + 1).padStart(2, "0")}>
+                {t(month)}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </div>
@@ -84,7 +104,9 @@ export function MetricTab({
             </CardTitle>
           </CardHeader>
           <CardContent>
-            {firstCard ?? (
+            {firstCard ? (
+              firstCard(selectedMonth)
+            ) : (
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={customerSegmentationData}>
                   <XAxis dataKey="segment" tickFormatter={(value) => t(value)} />

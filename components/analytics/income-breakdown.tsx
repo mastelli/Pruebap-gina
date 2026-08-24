@@ -14,18 +14,20 @@ function formatEuros(value: number): string {
 
 interface IncomeCategoriesChartProps {
   scope: "month" | "year"
+  month?: string
 }
 
-export function IncomeCategoriesChart({ scope }: IncomeCategoriesChartProps) {
+export function IncomeCategoriesChart({ scope, month }: IncomeCategoriesChartProps) {
   const { t } = useLanguage()
   const { transactions } = useTransactions()
 
   const now = new Date()
   const year = `${now.getFullYear()}`
-  const month = String(now.getMonth() + 1).padStart(2, "0")
+  const currentMonth = String(now.getMonth() + 1).padStart(2, "0")
+  const selectedMonth = month ?? currentMonth
   const { salary, transfers, bizum } = getIncomeBreakdown(
     transactions,
-    scope === "month" ? `${year}-${month}` : year,
+    scope === "month" ? `${year}-${selectedMonth}` : year,
   )
 
   const data = [

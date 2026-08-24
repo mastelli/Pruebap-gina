@@ -53,6 +53,24 @@ function formatEuros(value: number): string {
   return value.toLocaleString("es-ES", { style: "currency", currency: "EUR" })
 }
 
+const tabLinks: Record<number, { href: string; className: string }> = {
+  1: {
+    href: "/analytics?tab=income",
+    className:
+      "bg-[#c8e6c9] hover:bg-[#aedcb1] text-[#1b5e20]",
+  },
+  2: {
+    href: "/analytics?tab=expenses",
+    className:
+      "bg-[#ffcdd2] hover:bg-[#f8b9c0] text-[#7f1d1d]",
+  },
+  3: {
+    href: "/analytics?tab=savings",
+    className:
+      "bg-[#bbdefb] hover:bg-[#a5d2f7] text-[#0d47a1]",
+  },
+}
+
 export function BusinessMetrics() {
   const { t, lang } = useLanguage()
   const { transactions } = useTransactions()
@@ -136,6 +154,11 @@ export function BusinessMetrics() {
                   </div>
                 </>
               )}
+              <Button variant="ghost" size="sm" asChild className={`mt-3 w-full ${tabLinks[metric.id].className}`}>
+                <Link href={tabLinks[metric.id].href}>
+                  {t("View Details")} <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
+              </Button>
             </CardContent>
           </Card>
         ))}

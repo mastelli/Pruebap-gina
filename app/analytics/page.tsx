@@ -1,5 +1,7 @@
 "use client"
 
+import { Suspense, useState } from "react"
+import { useSearchParams } from "next/navigation"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { DateRangePicker } from "@/components/date-range-picker"
 import { OverviewTab } from "@/components/analytics/overview-tab"
@@ -11,12 +13,14 @@ import { Button } from "@/components/ui/button"
 import { Download } from "lucide-react"
 import { useLanguage } from "@/lib/i18n"
 
-export default function AnalyticsPage() {
+function AnalyticsContent() {
   const handleExportData = () => {
     // Implement export functionality here
     console.log("Exporting data...")
   }
   const { t } = useLanguage()
+  const searchParams = useSearchParams()
+  const [tab, setTab] = useState(searchParams.get("tab") ?? "overview")
 
   return (
     <div className="flex-1 space-y-4 p-8 pt-6">
@@ -30,7 +34,7 @@ export default function AnalyticsPage() {
           </Button>
         </div>
       </div>
-      <Tabs defaultValue="overview" className="space-y-4">
+      <Tabs value={tab} onValueChange={setTab} className="space-y-4">
         <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="overview">{t("Overview")}</TabsTrigger>
           <TabsTrigger value="income">{t("Revenue")}</TabsTrigger>
@@ -44,7 +48,7 @@ export default function AnalyticsPage() {
           <MetricTab
             titleKey="Revenue"
             firstCardTitleKey="Income Breakdown"
-            firstCard={<IncomeCategoriesChart scope="month" />}
+            firstCard={(month) => <IncomeCategoriesChart scope="month" month={month} />}
             secondCardTitleKey="History"
             secondCard={<IncomeHistory />}
             thirdCardTitleKey="Annual Breakdown"
@@ -63,3 +67,10 @@ export default function AnalyticsPage() {
   )
 }
 
+export default function AnalyticsPage() {
+  return (
+    <Suspense fallback={null}>
+      <AnalyticsContent />
+    </Suspense>
+  )
+}
