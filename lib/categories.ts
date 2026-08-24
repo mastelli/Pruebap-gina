@@ -38,3 +38,15 @@ export const EXPENSE_CATEGORIES: TransactionCategory[] = [
   "Subscriptions",
   "Other",
 ]
+
+// Verdes para ingresos; rojos/morado/gris para tipos de gasto
+export const CATEGORY_COLORS = {
+  Salary: "#66bb6a",
+  Transfers: "#43a047",
+  Bizum: "#2e7d32",
+  Electricity: "#ef5350",
+  Internet: "#e53935",
+  Water: "#ff8a65",
+  Subscriptions: "#ba68c8",
+  Other: "#90a4ae",
+}

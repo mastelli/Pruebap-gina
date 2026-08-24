@@ -157,6 +157,7 @@ const translations: Record<string, string> = {
   "History": "Historial",
   "Annual Breakdown": "Desglose anual",
   Totals: "Totales",
+  "Expense Breakdown": "Desglose de gastos",
   "Expense Types": "Tipos de gasto",
   "Expense Movements": "Movimientos de gastos",
   Budget: "Presupuesto",

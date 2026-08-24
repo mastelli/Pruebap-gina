@@ -9,8 +9,11 @@ import { MetricTab } from "@/components/analytics/metric-tab"
 import { IncomeCategoriesChart } from "@/components/analytics/income-breakdown"
 import { IncomeHistory } from "@/components/analytics/income-history"
 import { IncomeMetrics } from "@/components/analytics/income-metrics"
+import { IncomeList } from "@/components/analytics/income-list"
+import { ExpenseDoughnut } from "@/components/analytics/expense-doughnut"
 import { ExpenseTypes } from "@/components/analytics/expense-types"
 import { ExpenseList } from "@/components/analytics/expense-list"
+import { AllTransactionsHistory } from "@/components/analytics/all-transactions-history"
 import { Button } from "@/components/ui/button"
 import { Download } from "lucide-react"
 import { useLanguage } from "@/lib/i18n"
@@ -49,20 +52,27 @@ function AnalyticsContent() {
         <TabsContent value="income" className="space-y-4">
           <MetricTab
             titleKey="Revenue"
-            totalsTitleKey="Totals"
-            totalsCard={<IncomeMetrics />}
             firstCardTitleKey="Income Breakdown"
             firstCard={(month) => <IncomeCategoriesChart scope="month" month={month} />}
-            secondCardTitleKey="Expense Types"
-            secondCard={<ExpenseTypes />}
-            thirdCardTitleKey="History"
-            thirdCard={<IncomeHistory />}
-            metricsTitleKey="Expense Movements"
-            metricsCard={<ExpenseList />}
+            secondCardTitleKey="History"
+            secondCard={<IncomeHistory />}
+            thirdCardTitleKey="Annual Breakdown"
+            thirdCard={<IncomeList />}
+            metricsCard={<IncomeMetrics />}
           />
         </TabsContent>
         <TabsContent value="expenses" className="space-y-4">
-          <MetricTab titleKey="Expenses" />
+          <MetricTab
+            titleKey="Expenses"
+            firstCardTitleKey="Expense Breakdown"
+            firstCard={(month) => <ExpenseDoughnut month={month} />}
+            secondCardTitleKey="Expense Types"
+            secondCard={<ExpenseTypes />}
+            thirdCardTitleKey="History"
+            thirdCard={<AllTransactionsHistory />}
+            metricsTitleKey="Expense Movements"
+            metricsCard={<ExpenseList />}
+          />
         </TabsContent>
         <TabsContent value="savings" className="space-y-4">
           <MetricTab titleKey="Savings/Investment" />

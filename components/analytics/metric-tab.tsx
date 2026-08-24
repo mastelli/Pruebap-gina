@@ -54,8 +54,6 @@ function getCurrentMonth(): string {
 
 interface MetricTabProps {
   titleKey: string
-  totalsTitleKey?: string
-  totalsCard?: ReactNode
   firstCardTitleKey?: string
   firstCard?: (month: string) => ReactNode
   secondCardTitleKey?: string
@@ -70,8 +68,6 @@ interface MetricTabProps {
 // cada seccion personalizara sus datos sobre esta misma estructura
 export function MetricTab({
   titleKey,
-  totalsTitleKey,
-  totalsCard,
   firstCardTitleKey,
   firstCard,
   secondCardTitleKey,
@@ -102,14 +98,6 @@ export function MetricTab({
           </SelectContent>
         </Select>
       </div>
-      {totalsCard && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-xl font-semibold">{t(totalsTitleKey ?? "Totals")}</CardTitle>
-          </CardHeader>
-          <CardContent>{totalsCard}</CardContent>
-        </Card>
-      )}
       <div className="grid gap-4 md:grid-cols-2">
         <Card>
           <CardHeader>
