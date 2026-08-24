@@ -33,14 +33,15 @@ export function IncomeCategoriesChart({ scope = "month", month }: IncomeCategori
   )
 
   const data = [
-    { label: "Salary", total: salary },
-    { label: "Transfers", total: transfers },
-    { label: "Bizum", total: bizum },
+    { label: "Salary", total: salary, color: SLICE_COLORS[0] },
+    { label: "Transfers", total: transfers, color: SLICE_COLORS[1] },
+    { label: "Bizum", total: bizum, color: SLICE_COLORS[2] },
   ]
     .map((row) => ({ ...row, label: t(row.label) }))
     .filter((row) => row.total > 0)
 
-  // Etiqueta exterior con linea senalando la porcion: "Nómina: 1.234,56 €"
+  // Etiqueta exterior en dos lineas: categoria e importe con linea que
+  // senala la porcion correspondiente
   const renderLabel = ({
     cx,
     cy,
@@ -48,6 +49,7 @@ export function IncomeCategoriesChart({ scope = "month", month }: IncomeCategori
     outerRadius,
     name,
     value,
+    payload,
   }: {
     cx?: number
     cy?: number
@@ -55,21 +57,26 @@ export function IncomeCategoriesChart({ scope = "month", month }: IncomeCategori
     outerRadius?: number
     name?: string
     value?: number
+    payload?: { color?: string }
   }) => {
     const angle = -(midAngle ?? 0) * RADIAN
-    const x = (cx ?? 0) + ((outerRadius ?? 0) + 12) * Math.cos(angle)
-    const y = (cy ?? 0) + ((outerRadius ?? 0) + 12) * Math.sin(angle)
+    const x = (cx ?? 0) + ((outerRadius ?? 0) + 10) * Math.cos(angle)
+    const y = (cy ?? 0) + ((outerRadius ?? 0) + 10) * Math.sin(angle)
+    const anchor = Math.cos(angle) >= 0 ? "start" : "end"
     return (
-      <text
-        x={x}
-        y={y}
-        fill="#455a64"
-        fontSize={11}
-        fontWeight={600}
-        textAnchor={Math.cos(angle) >= 0 ? "start" : "end"}
-        dominantBaseline="central"
-      >
-        {`${name}: ${formatEuros(Number(value))}`}
+      <text x={x} y={y} textAnchor={anchor} dominantBaseline="central">
+        <tspan x={x} dy={-7} fill="#78909c" fontSize={10} fontWeight={500}>
+          {name}
+        </tspan>
+        <tspan
+          x={x}
+          dy={13}
+          fill={payload?.color ?? "#37474f"}
+          fontSize={12}
+          fontWeight={700}
+        >
+          {formatEuros(Number(value))}
+        </tspan>
       </text>
     )
   }
@@ -90,13 +97,13 @@ export function IncomeCategoriesChart({ scope = "month", month }: IncomeCategori
           dataKey="total"
           nameKey="label"
           innerRadius={45}
-          outerRadius={75}
+          outerRadius={72}
           paddingAngle={2}
           label={renderLabel}
-          labelLine={{ stroke: "#90a4ae", strokeWidth: 1 }}
+          labelLine={{ stroke: "#b0bec5", strokeWidth: 1 }}
         >
-          {data.map((entry, index) => (
-            <Cell key={entry.label} fill={SLICE_COLORS[index % SLICE_COLORS.length]} />
+          {data.map((entry) => (
+            <Cell key={entry.label} fill={entry.color} />
           ))}
         </Pie>
         <Tooltip

@@ -15,7 +15,7 @@ export function IncomeList({ month }: { month: string }) {
   )
 
   return (
-    <div className="max-h-[300px] overflow-y-auto px-2">
+    <div className="h-[184px] overflow-y-auto px-2">
       <div className="divide-y divide-border">
         {incomes.map((transaction) => (
           <div key={transaction.id} className="flex items-center justify-between gap-4 py-3">

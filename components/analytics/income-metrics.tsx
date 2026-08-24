@@ -19,27 +19,35 @@ export function IncomeMetrics() {
   const total = salary + transfers + bizum
 
   return (
-    <CardContent>
-      <div className="grid grid-cols-2 gap-x-6 gap-y-5">
+    <CardContent className="flex h-[184px] items-center">
+      <div className="grid w-full grid-cols-2 gap-3">
         {/* arriba izquierda */}
-        <div>
-          <p className="text-sm font-medium text-muted-foreground">{t("Total Revenue")}</p>
-          <p className="text-xl font-bold tabular-nums">{formatEuros(total)}</p>
+        <div className="rounded-lg bg-secondary/60 p-3 text-center">
+          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            {t("Total Revenue")}
+          </p>
+          <p className="mt-1 text-xl font-bold tabular-nums">{formatEuros(total)}</p>
         </div>
         {/* arriba derecha */}
-        <div className="text-right">
-          <p className="text-sm font-medium text-muted-foreground">{t("Total Transfers")}</p>
-          <p className="text-xl font-bold tabular-nums">{formatEuros(transfers)}</p>
+        <div className="rounded-lg bg-secondary/60 p-3 text-center">
+          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            {t("Total Transfers")}
+          </p>
+          <p className="mt-1 text-xl font-bold tabular-nums">{formatEuros(transfers)}</p>
         </div>
         {/* abajo izquierda */}
-        <div>
-          <p className="text-sm font-medium text-muted-foreground">{t("Total Salary")}</p>
-          <p className="text-xl font-bold tabular-nums">{formatEuros(salary)}</p>
+        <div className="rounded-lg bg-secondary/60 p-3 text-center">
+          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            {t("Total Salary")}
+          </p>
+          <p className="mt-1 text-xl font-bold tabular-nums">{formatEuros(salary)}</p>
         </div>
         {/* abajo derecha */}
-        <div className="text-right">
-          <p className="text-sm font-medium text-muted-foreground">{t("Total Bizums")}</p>
-          <p className="text-xl font-bold tabular-nums">{formatEuros(bizum)}</p>
+        <div className="rounded-lg bg-secondary/60 p-3 text-center">
+          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            {t("Total Bizums")}
+          </p>
+          <p className="mt-1 text-xl font-bold tabular-nums">{formatEuros(bizum)}</p>
         </div>
       </div>
     </CardContent>
