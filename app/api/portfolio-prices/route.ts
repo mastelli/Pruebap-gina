@@ -5,7 +5,7 @@ export const dynamic = "force-dynamic"
 
 // Cotaciones de Yahoo Finance (retardo ~15 min en algunos mercados)
 const UA = { "User-Agent": "Mozilla/5.0" }
-const QUOTE_TTL = 10 * 60 * 1000
+const QUOTE_TTL = 30 * 1000
 
 interface Quote {
   symbol: string

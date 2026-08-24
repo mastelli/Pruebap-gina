@@ -8,15 +8,16 @@ import { useLanguage } from "@/lib/i18n"
 
 const PORTFOLIO_STORAGE_KEY = "appPortfolio"
 const PRICES_STORAGE_KEY = "appPortfolioPrices"
-const PRICE_TTL = 10 * 60 * 1000
+const PRICE_TTL = 30 * 1000
+const REFRESH_MS = 30 * 1000
 
 interface Asset {
   id: string
   product: string
   isin: string
   quantity: number
-  purchasePrice: number
   currency?: string
+  csvPrice?: number
   eurValue?: number
 }
 
@@ -106,18 +107,17 @@ function parsePortfolioCsv(text: string): PortfolioData {
     }
 
     const quantity = parseNumber(cells[2] ?? "")
-    const purchasePrice = parseNumber(cells[3] ?? "")
-    if (!Number.isFinite(quantity) || !Number.isFinite(purchasePrice)) continue
-
+    const csvPrice = parseNumber(cells[3] ?? "")
     const eurValue = parseNumber(cells[6] ?? cells[5] ?? "")
+    if (!Number.isFinite(quantity) || (!Number.isFinite(csvPrice) && !Number.isFinite(eurValue))) continue
 
     assets.push({
       id: `${isin}-${Date.now()}-${assets.length}`,
       product: (cells[0] ?? "").trim() || isin,
       isin,
       quantity,
-      purchasePrice,
       currency: (cells[4] ?? "").trim().toUpperCase() || undefined,
+      csvPrice: Number.isFinite(csvPrice) ? csvPrice : undefined,
       eurValue: Number.isFinite(eurValue) ? eurValue : undefined,
     })
   }
@@ -138,6 +138,7 @@ export function PortfolioPanel() {
   const [data, setData] = useState<PortfolioData>({ assets: [], cash: 0 })
   const [prices, setPrices] = useState<PriceMap>({})
   const [loading, setLoading] = useState(false)
+  const [lastUpdated, setLastUpdated] = useState<number | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -167,7 +168,7 @@ export function PortfolioPanel() {
     }
   }
 
-  const refreshPrices = useCallback(async (list: Asset[]) => {
+  const refreshPrices = useCallback(async (list: Asset[], force = false) => {
     if (list.length === 0) return
     setLoading(true)
     try {
@@ -179,13 +180,17 @@ export function PortfolioPanel() {
         cached = {}
       }
 
-      const pending = list.filter((asset) => {
-        const entry = cached[asset.isin]
-        return !entry?.price || Date.now() - Number(entry.fetchedAt ?? 0) > PRICE_TTL
-      })
+      const pending = force
+        ? list
+        : list.filter((asset) => {
+            const entry = cached[asset.isin]
+            return !entry?.price || Date.now() - Number(entry.fetchedAt ?? 0) > PRICE_TTL
+          })
 
       const merged = { ...cached }
+      let fetched = false
       if (pending.length > 0) {
+        fetched = true
         const res = await fetch("/api/portfolio-prices", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -201,6 +206,7 @@ export function PortfolioPanel() {
       }
 
       setPrices(merged)
+      if (fetched) setLastUpdated(Date.now())
       try {
         window.localStorage.setItem(PRICES_STORAGE_KEY, JSON.stringify(merged))
       } catch {
@@ -215,6 +221,15 @@ export function PortfolioPanel() {
     if (data.assets.length > 0) void refreshPrices(data.assets)
     // solo al montar o al cambiar el numero de activos
   }, [data.assets.length, refreshPrices]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Actualizacion automatica periodica mientras la pestana este visible
+  useEffect(() => {
+    if (data.assets.length === 0) return
+    const id = setInterval(() => {
+      if (!document.hidden) void refreshPrices(data.assets, true)
+    }, REFRESH_MS)
+    return () => clearInterval(id)
+  }, [data.assets, refreshPrices])
 
   const handleFile = async (file: File) => {
     const text = await file.text()
@@ -237,7 +252,7 @@ export function PortfolioPanel() {
         <CardTitle className="text-xl font-semibold">{t("Investment Portfolio")}</CardTitle>
         <div className="flex items-center gap-2">
           {data.assets.length > 0 && (
-            <Button variant="outline" size="sm" onClick={() => void refreshPrices(data.assets)} disabled={loading}>
+            <Button variant="outline" size="sm" onClick={() => void refreshPrices(data.assets, true)} disabled={loading}>
               <RefreshCw className={`mr-2 h-4 w-4 ${loading ? "animate-spin" : ""}`} />
               {t("Refresh")}
             </Button>
@@ -276,39 +291,27 @@ export function PortfolioPanel() {
                   <th className="py-2 pr-4 font-medium">{t("Product")}</th>
                   <th className="py-2 pr-4 font-medium">ISIN</th>
                   <th className="py-2 pr-4 text-right font-medium">{t("Quantity")}</th>
-                  <th className="py-2 pr-4 text-right font-medium">{t("Purchase Price")}</th>
-                  <th className="py-2 pr-4 text-right font-medium">{t("Price Today")}</th>
+                  <th className="py-2 pr-4 text-right font-medium">{t("Price")}</th>
                   <th className="py-2 pr-4 text-right font-medium">{t("Day +/-")}</th>
-                  <th className="py-2 pr-4 text-right font-medium">{t("Potential G/P")}</th>
                   <th className="py-2" aria-label={t("Delete")} />
                 </tr>
               </thead>
               <tbody>
                 {data.assets.map((asset) => {
                   const info = prices[asset.isin]
-                  // Si el ISIN no resuelve en Yahoo usamos el valor en EUR del csv
-                  const fallbackPrice =
-                    asset.eurValue !== undefined && asset.quantity !== 0
-                      ? asset.eurValue / asset.quantity
-                      : undefined
-                  const usingFallback = info?.price === undefined && fallbackPrice !== undefined
-                  const price = info?.price ?? fallbackPrice
-                  // el respaldo del csv esta en EUR, no en la moneda local del activo
-                  const displayCurrency = usingFallback ? "EUR" : asset.currency
+                  // Si el ISIN no resuelve en Yahoo usamos el precio del propio csv
+                  const fallback =
+                    asset.csvPrice !== undefined
+                      ? { price: asset.csvPrice, currency: asset.currency }
+                      : asset.eurValue !== undefined && asset.quantity !== 0
+                        ? { price: asset.eurValue / asset.quantity, currency: "EUR" }
+                        : undefined
+                  const price = info?.price ?? fallback?.price
+                  const displayCurrency = info?.currency ?? fallback?.currency
                   const prevClose = info?.previousClose ?? null
                   const dayPct =
                     price !== undefined && prevClose !== null && prevClose !== 0
                       ? ((price - prevClose) / prevClose) * 100
-                      : null
-                  const sameCurrency =
-                    !usingFallback ||
-                    !asset.currency ||
-                    asset.currency === "EUR"
-                  const gpPct =
-                    price !== undefined &&
-                    asset.purchasePrice !== 0 &&
-                    sameCurrency
-                      ? ((price - asset.purchasePrice) / asset.purchasePrice) * 100
                       : null
                   return (
                     <tr key={asset.id} className="border-b border-border">
@@ -316,9 +319,6 @@ export function PortfolioPanel() {
                       <td className="py-3 pr-4 tabular-nums text-muted-foreground">{asset.isin}</td>
                       <td className="py-3 pr-4 text-right tabular-nums">
                         {asset.quantity.toLocaleString("es-ES")}
-                      </td>
-                      <td className="py-3 pr-4 text-right tabular-nums">
-                        {formatMoney(asset.purchasePrice, asset.currency)}
                       </td>
                       <td className="py-3 pr-4 text-right tabular-nums">
                         {price !== undefined ? formatMoney(price, displayCurrency) : "—"}
@@ -331,18 +331,6 @@ export function PortfolioPanel() {
                         {dayPct === null
                           ? "—"
                           : `${dayPct >= 0 ? "+" : ""}${dayPct.toLocaleString("es-ES", {
-                              minimumFractionDigits: 2,
-                              maximumFractionDigits: 2,
-                            })}%`}
-                      </td>
-                      <td
-                        className={`py-3 pr-4 text-right tabular-nums ${
-                          gpPct === null ? "" : gpPct >= 0 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"
-                        }`}
-                      >
-                        {gpPct === null
-                          ? "—"
-                          : `${gpPct >= 0 ? "+" : ""}${gpPct.toLocaleString("es-ES", {
                               minimumFractionDigits: 2,
                               maximumFractionDigits: 2,
                             })}%`}
@@ -363,7 +351,15 @@ export function PortfolioPanel() {
                 })}
               </tbody>
             </table>
-            <p className="mt-2 text-xs text-muted-foreground">{t("Quotes may be delayed up to 15 minutes")}</p>
+            <p className="mt-2 text-xs text-muted-foreground">
+              {t("Quotes may be delayed up to 15 minutes")}
+              {lastUpdated
+                ? ` · ${t("Last updated")} ${new Date(lastUpdated).toLocaleTimeString("es-ES", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}`
+                : ""}
+            </p>
           </div>
         )}
       </CardContent>
