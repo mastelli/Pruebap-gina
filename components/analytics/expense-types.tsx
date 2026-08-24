@@ -14,8 +14,8 @@ function formatEuros(value: number): string {
   return value.toLocaleString("es-ES", { style: "currency", currency: "EUR" })
 }
 
-// Tipos de gasto del mes con su presupuesto editable por tipo
-export function ExpenseTypes() {
+// Tipos de gasto del mes seleccionado con su presupuesto editable por tipo
+export function ExpenseTypes({ month }: { month: string }) {
   const { t } = useLanguage()
   const { transactions } = useTransactions()
   const [budgets, setBudgets] = useState<Budgets>({})
@@ -42,7 +42,7 @@ export function ExpenseTypes() {
   }
 
   const now = new Date()
-  const prefix = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`
+  const prefix = `${now.getFullYear()}-${month}`
 
   const spentByCategory: Record<string, number> = {}
   for (const def of EXPENSE_CATEGORY_DEFS) spentByCategory[def.key] = 0

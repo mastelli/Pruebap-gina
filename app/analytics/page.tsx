@@ -88,7 +88,7 @@ function AnalyticsContent() {
                     <CardHeader>
                       <CardTitle className="text-xl font-semibold">{t("Expense Movements")}</CardTitle>
                     </CardHeader>
-                    <CardContent className="flex-1 overflow-hidden pb-6">
+                    <CardContent className="flex-1 overflow-hidden">
                       <ExpenseList month={month} />
                     </CardContent>
                   </Card>
@@ -97,8 +97,8 @@ function AnalyticsContent() {
                   <CardHeader>
                     <CardTitle className="text-xl font-semibold">{t("Budget")}</CardTitle>
                   </CardHeader>
-                  <CardContent className="pb-6">
-                    <ExpenseTypes />
+                  <CardContent className="pb-2">
+                    <ExpenseTypes month={month} />
                   </CardContent>
                 </Card>
               </div>
