@@ -1,6 +1,6 @@
 "use client"
 
-import { ResponsiveContainer, Scatter, ScatterChart, Tooltip, XAxis, YAxis } from "recharts"
+import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
 import { useLanguage } from "@/lib/i18n"
 import { useTransactions } from "@/lib/transactions"
 
@@ -23,7 +23,7 @@ function formatEuros(value: number): string {
   return value.toLocaleString("es-ES", { style: "currency", currency: "EUR" })
 }
 
-// Puntos con la suma mensual de gastos a lo largo del ano
+// Linea con puntos marcando la suma mensual de gastos a lo largo del ano
 export function ExpenseHistory() {
   const { t } = useLanguage()
   const { transactions } = useTransactions()
@@ -36,31 +36,30 @@ export function ExpenseHistory() {
       .filter((transaction) => transaction.amount < 0 && transaction.date.startsWith(prefix))
       .reduce((sum, transaction) => sum + Math.abs(transaction.amount), 0)
 
-    return { monthIndex: index + 1, total }
+    return { month: t(month), total }
   })
 
   return (
     <ResponsiveContainer width="100%" height={300}>
-      <ScatterChart>
-        <XAxis
-          type="number"
-          dataKey="monthIndex"
-          domain={[1, 12]}
-          ticks={[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]}
-          tickFormatter={(value) => t(MONTHS[value - 1]).slice(0, 3)}
-          tick={{ fontSize: 11 }}
-        />
+      <LineChart data={data}>
+        <XAxis dataKey="month" tick={{ fontSize: 11 }} interval={0} angle={-35} textAnchor="end" height={50} />
         <YAxis />
         <Tooltip
-          cursor={{ strokeDasharray: "4 4" }}
           formatter={(value) => formatEuros(Number(value))}
-          labelFormatter={() => ""}
+          cursor={{ strokeDasharray: "4 4" }}
           contentStyle={{ backgroundColor: "#ffffff", border: "1px solid #e5e7eb", borderRadius: 8 }}
           labelStyle={{ color: "#000000", fontWeight: 600 }}
           itemStyle={{ color: "#000000" }}
         />
-        <Scatter data={data} dataKey="total" name={t("Expenses")} fill="#e53935" />
-      </ScatterChart>
+        <Line
+          type="monotone"
+          dataKey="total"
+          name={t("Expenses")}
+          stroke="#e53935"
+          strokeWidth={2}
+          dot={{ r: 4, fill: "#e53935" }}
+        />
+      </LineChart>
     </ResponsiveContainer>
   )
 }
