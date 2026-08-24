@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import {
   createContext,
@@ -12,20 +12,6 @@ import {
 
 const ACCOUNTS_KEY = "appAccounts"
 const SESSION_KEY = "appSession"
-
-// claves de datos que se aíslan por cuenta; si existen sin sufijo de una
-// instalación anterior, se copian a la nueva cuenta la primera vez
-const ISOLATED_KEYS = [
-  "appTransactions",
-  "appCheckingBalance",
-  "appCategoryOverrides",
-  "appExpenseBudgets",
-  "appPortfolio",
-  "appPortfolioPrices",
-  "appPortfolioHistory",
-  "appInvoices",
-  "userSettings",
-]
 
 interface AccountRecord {
   salt: string
@@ -52,7 +38,7 @@ function randomSalt(): string {
     .join("")
 }
 
-// correo de la sesion activa; solo se rellena tras validar la contraseña
+// correo de la sesion activa; solo se rellena tras validar la contraseÃ±a
 let sessionEmail: string | null = null
 
 // clave de almacenamiento aislada por cuenta; los componentes deben usar
@@ -74,17 +60,6 @@ export function storageSetItem(base: string, value: string): void {
     window.localStorage.setItem(accountStorageKey(base), value)
   } catch {
     // almacenamiento no disponible
-  }
-}
-
-// copia los datos antiguos (sin sufijo) a la cuenta recien abierta si esta
-// aun no tiene datos propios
-function migrateLegacyData(email: string): void {
-  for (const base of ISOLATED_KEYS) {
-    const namespaced = `${base}::${email}`
-    if (window.localStorage.getItem(namespaced) !== null) continue
-    const legacy = window.localStorage.getItem(base)
-    if (legacy !== null) window.localStorage.setItem(namespaced, legacy)
   }
 }
 
@@ -137,7 +112,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (hash !== record.hash) return "Incorrect password"
     sessionEmail = normalized
     window.localStorage.setItem(SESSION_KEY, normalized)
-    migrateLegacyData(normalized)
     setEmail(normalized)
     return null
   }, [])
@@ -187,7 +161,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       sessionEmail = normalized
       window.localStorage.setItem(SESSION_KEY, normalized)
-      migrateLegacyData(normalized)
       setEmail(normalized)
       return null
     },
