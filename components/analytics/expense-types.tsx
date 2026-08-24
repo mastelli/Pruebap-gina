@@ -52,7 +52,7 @@ export function ExpenseTypes() {
   }
 
   return (
-    <div className="space-y-4 px-2">
+    <div className="max-h-[840px] space-y-4 overflow-y-auto px-2">
       {EXPENSE_CATEGORY_DEFS.map((def) => {
         const spent = spentByCategory[def.key]
         const budget = budgets[def.key] ?? 0
