@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useEffect, useState } from "react"
 import {
@@ -137,7 +137,7 @@ export function RevenueChart() {
   }
 
   return (
-    <ResponsiveContainer width="100%" height={350}>
+    <ResponsiveContainer width="100%" height={290}>
       <ComposedChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
         <XAxis
           dataKey="month"
@@ -186,7 +186,7 @@ export function RevenueChart() {
           type="monotone"
           dataKey="difference"
           name={t("Difference")}
-          stroke={theme === "dark" ? "#bcaaa4" : "#8d6e63"}
+          stroke={theme === "dark" ? "#a1887f" : "#5d4037"}
           strokeWidth={2}
           dot={{ r: 3 }}
         />
