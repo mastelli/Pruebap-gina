@@ -84,11 +84,11 @@ function AnalyticsContent() {
                       <ExpenseHistory />
                     </CardContent>
                   </Card>
-                  <Card className="flex flex-1 flex-col">
+                  <Card className="flex min-h-0 flex-1 flex-col">
                     <CardHeader>
                       <CardTitle className="text-xl font-semibold">{t("Expense Movements")}</CardTitle>
                     </CardHeader>
-                    <CardContent className="flex-1 overflow-hidden">
+                    <CardContent className="min-h-0 flex-1 overflow-hidden">
                       <ExpenseList month={month} />
                     </CardContent>
                   </Card>
