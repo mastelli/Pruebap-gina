@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Upload, Trash2, RefreshCw } from "lucide-react"
 import { useLanguage } from "@/lib/i18n"
 import { storageGetItem, storageSetItem } from "@/lib/auth"
+import { exchangeFromSymbol } from "@/lib/exchanges"
 
 const PORTFOLIO_STORAGE_KEY = "appPortfolio"
 const PRICES_STORAGE_KEY = "appPortfolioPrices"
@@ -648,6 +649,7 @@ export function PortfolioPanel() {
                 <tr className="border-b border-border text-left">
                   <th className="py-2 pr-4 font-medium">{t("Product")}</th>
                   <th className="py-2 pr-4 font-medium">ISIN</th>
+                  <th className="py-2 pr-4 font-medium">{t("Exchange")}</th>
                   <th className="py-2 pr-4 text-right font-medium">{t("Quantity")}</th>
                   <th className="py-2 pr-4 text-right font-medium">{t("Price")}</th>
                   <th className="py-2 pr-4 text-right font-medium">{t("Day +/-")}</th>
@@ -706,6 +708,9 @@ export function PortfolioPanel() {
                         )}
                       </td>
                       <td className="py-3 pr-4 tabular-nums text-muted-foreground">{asset.isin}</td>
+                      <td className="whitespace-nowrap py-3 pr-4 text-muted-foreground">
+                        {info?.symbol ? exchangeFromSymbol(info.symbol) || "—" : "—"}
+                      </td>
                       <td className="py-3 pr-4 text-right tabular-nums">
                         {asset.quantity.toLocaleString("es-ES")}
                       </td>

@@ -216,6 +216,7 @@ const translations: Record<string, string> = {
   "Import Portfolio": "Importar portfolio",
   Product: "Producto",
   ISIN: "ISIN",
+  Exchange: "Bolsa",
   Quantity: "Cantidad",
   Price: "Precio",
   Total: "Total",
