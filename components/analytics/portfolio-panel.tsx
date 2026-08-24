@@ -9,7 +9,11 @@ import { useLanguage } from "@/lib/i18n"
 const PORTFOLIO_STORAGE_KEY = "appPortfolio"
 const PRICES_STORAGE_KEY = "appPortfolioPrices"
 const PRICE_TTL = 5 * 1000
-const REFRESH_MS = 6 * 1000
+// Sondeo agresivo solo como respaldo si el streaming no esta disponible;
+// con streaming activo un sondeo suave mantiene todo sincronizado
+const FALLBACK_POLL_MS = 3 * 1000
+const LIVE_SYNC_MS = 60 * 1000
+const STREAM_FLUSH_MS = 500
 
 interface Asset {
   id: string
@@ -30,6 +34,12 @@ interface PriceInfo {
 }
 
 type PriceMap = Record<string, PriceInfo>
+
+interface StreamTick {
+  price?: number
+  change?: number
+  changePercent?: number
+}
 
 // Formato del csv del broker (por posicion):
 // Producto, ISIN, Cantidad, Precio actual, Moneda, Valor local total, Valor EUR total
@@ -121,13 +131,74 @@ function formatSigned(value: number, decimals = 2): string {
   })}`
 }
 
+// --- Streaming en vivo (mismo websocket que usa la web de Yahoo Finance) ---
+
+function readVarint(bytes: Uint8Array, pos: number): [number, number] {
+  let result = 0
+  let shift = 0
+  while (pos < bytes.length) {
+    const byte = bytes[pos++]
+    result += (byte & 0x7f) * Math.pow(2, shift)
+    shift += 7
+    if (!(byte & 0x80)) break
+  }
+  return [result, pos]
+}
+
+// Decodifica el mensaje PricingData (proto) del streamer de Yahoo:
+// 1 id(string) 2 price(float32) 8 changePercent(float32) 12 change(float32) ...
+function decodePricingData(bytes: Uint8Array): StreamTick & { id?: string } {
+  const out: StreamTick & { id?: string } = {}
+  let pos = 0
+  const td = new TextDecoder()
+  while (pos < bytes.length) {
+    let tag: number
+    ;[tag, pos] = readVarint(bytes, pos)
+    const field = tag >>> 3
+    const wire = tag & 7
+    if (field === 1 || field === 4 || field === 5 || field === 13) {
+      let len: number
+      ;[len, pos] = readVarint(bytes, pos)
+      const str = td.decode(bytes.subarray(pos, pos + len))
+      pos += len
+      if (field === 1) out.id = str
+    } else if (field === 2 || field === 8 || field === 12) {
+      const view = new DataView(bytes.buffer, bytes.byteOffset + pos, 4)
+      const value = view.getFloat32(0, true)
+      pos += 4
+      if (field === 2) out.price = value
+      else if (field === 8) out.changePercent = value
+      else out.change = value
+    } else if (wire === 0) {
+      let v: number
+      ;[v, pos] = readVarint(bytes, pos)
+    } else if (wire === 2) {
+      let len: number
+      ;[len, pos] = readVarint(bytes, pos)
+      pos += len
+    } else if (wire === 5) {
+      pos += 4
+    } else if (wire === 1) {
+      pos += 8
+    } else {
+      break
+    }
+  }
+  return out
+}
+
 export function PortfolioPanel() {
   const { t } = useLanguage()
   const [assets, setAssets] = useState<Asset[]>([])
   const [prices, setPrices] = useState<PriceMap>({})
   const [loading, setLoading] = useState(false)
   const [lastUpdated, setLastUpdated] = useState<number | null>(null)
+  const [streaming, setStreaming] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const wsRef = useRef<WebSocket | null>(null)
+  const symbolsRef = useRef<string[]>([])
+  const isinBySymbolRef = useRef<Map<string, string>>(new Map())
+  const tickBufferRef = useRef<Record<string, StreamTick>>({})
 
   useEffect(() => {
     try {
@@ -140,6 +211,13 @@ export function PortfolioPanel() {
       if (rawPrices) setPrices(JSON.parse(rawPrices) as PriceMap)
     } catch {
       // almacenamiento no disponible
+    }
+    return () => {
+      try {
+        wsRef.current?.close()
+      } catch {
+        // ya cerrado
+      }
     }
   }, [])
 
@@ -206,14 +284,117 @@ export function PortfolioPanel() {
     // solo al montar o al cambiar el numero de activos
   }, [assets.length, refreshPrices]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Actualizacion automatica periodica mientras la pestana este visible
+  // Mapa simbolo -> ISIN para traducir los ticks del streaming
+  useEffect(() => {
+    const map = new Map<string, string>()
+    const symbols: string[] = []
+    for (const asset of assets) {
+      const symbol = prices[asset.isin]?.symbol
+      if (symbol) {
+        map.set(symbol, asset.isin)
+        if (!symbols.includes(symbol)) symbols.push(symbol)
+      }
+    }
+    isinBySymbolRef.current = map
+    symbolsRef.current = symbols
+  }, [assets, prices])
+
+  // Conexion al streamer: se suscribe en cuanto hay simbolos resueltos y
+  // re-suscribe cuando cambia la lista
+  useEffect(() => {
+    const symbols = symbolsRef.current
+    if (symbols.length === 0) return
+
+    const ws = wsRef.current
+    if (ws && ws.readyState === WebSocket.OPEN) {
+      ws.send(JSON.stringify({ subscribe: symbols }))
+      return
+    }
+    if (ws && ws.readyState === WebSocket.CONNECTING) return
+
+    const socket = new WebSocket("wss://streamer.finance.yahoo.com/")
+    wsRef.current = socket
+
+    socket.onopen = () => {
+      setStreaming(true)
+      try {
+        socket.send(JSON.stringify({ subscribe: symbolsRef.current }))
+      } catch {
+        // suscripcion fallida, seguimos con el sondeo
+      }
+    }
+    socket.onmessage = (event) => {
+      try {
+        const payload =
+          typeof event.data === "string" && event.data.trim().startsWith("{")
+            ? (JSON.parse(event.data).stream as string)
+            : (event.data as string)
+        if (!payload) return
+        const binary = atob(payload)
+        const bytes = new Uint8Array(binary.length)
+        for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i)
+        const tick = decodePricingData(bytes)
+        const isin = tick.id ? isinBySymbolRef.current.get(tick.id) : undefined
+        if (!isin || tick.price === undefined) return
+        tickBufferRef.current[isin] = { price: tick.price, change: tick.change, changePercent: tick.changePercent }
+      } catch {
+        // mensaje ilegible, lo ignoramos
+      }
+    }
+    socket.onclose = () => {
+      setStreaming(false)
+      if (wsRef.current === socket) wsRef.current = null
+    }
+    socket.onerror = () => {
+      try {
+        socket.close()
+      } catch {
+        // ya cerrado
+      }
+    }
+  }, [assets, prices])
+
+  // Vuelca los ticks recibidos al estado cada medio segundo
+  useEffect(() => {
+    const id = setInterval(() => {
+      const buffer = tickBufferRef.current
+      if (Object.keys(buffer).length === 0) return
+      tickBufferRef.current = {}
+      setPrices((prev) => {
+        const next = { ...prev }
+        for (const [isin, tick] of Object.entries(buffer)) {
+          const current = next[isin]
+          if (!current) continue
+          const previousClose =
+            current.previousClose ??
+            (tick.price !== undefined && tick.change !== undefined
+              ? tick.price - tick.change
+              : null)
+          next[isin] = {
+            ...current,
+            price: tick.price,
+            previousClose,
+            fetchedAt: Date.now(),
+          }
+        }
+        return next
+      })
+      setLastUpdated(Date.now())
+    }, STREAM_FLUSH_MS)
+    return () => clearInterval(id)
+  }, [])
+
+  // Respaldo: sondeo agresivo sin streaming, sincronizacion suave con el
   useEffect(() => {
     if (assets.length === 0) return
-    const id = setInterval(() => {
-      if (!document.hidden) void refreshPrices(assets, true)
-    }, REFRESH_MS)
+    const id = setInterval(
+      () => {
+        if (!document.hidden) void refreshPrices(assets, !streaming)
+      },
+      streaming ? LIVE_SYNC_MS : FALLBACK_POLL_MS,
+    )
     return () => clearInterval(id)
-  }, [assets, refreshPrices])
+  }, [assets, refreshPrices, streaming])
 
   const handleFile = async (file: File) => {
     const text = await file.text()
@@ -233,7 +414,15 @@ export function PortfolioPanel() {
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0">
-        <CardTitle className="text-xl font-semibold">{t("Investment Portfolio")}</CardTitle>
+        <CardTitle className="flex items-center gap-2 text-xl font-semibold">
+          {t("Investment Portfolio")}
+          {streaming && (
+            <span className="flex items-center gap-1 rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700 dark:bg-green-950 dark:text-green-400">
+              <span className="h-2 w-2 animate-pulse rounded-full bg-green-500" />
+              {t("Live")}
+            </span>
+          )}
+        </CardTitle>
         <div className="flex items-center gap-2">
           {assets.length > 0 && (
             <Button variant="outline" size="sm" onClick={() => void refreshPrices(assets, true)} disabled={loading}>
@@ -339,7 +528,7 @@ export function PortfolioPanel() {
               </tbody>
             </table>
             <p className="mt-2 text-xs text-muted-foreground">
-              {t("Quotes may be delayed up to 15 minutes")}
+              {streaming ? t("Real-time streaming quotes") : t("Quotes may be delayed up to 15 minutes")}
               {lastUpdated
                 ? ` · ${t("Last updated")} ${new Date(lastUpdated).toLocaleTimeString("es-ES", {
                     hour: "2-digit",
