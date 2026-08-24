@@ -72,9 +72,9 @@ export function IncomeCategoriesChart({ scope = "month", month }: IncomeCategori
     const tx = ex + (cos >= 0 ? 8 : -8)
     return (
       <g>
-        <line x1={sx} y1={sy} x2={ex} y2={ey} stroke="#b0bec5" strokeWidth={1} />
+        <line x1={sx} y1={sy} x2={ex} y2={ey} stroke="#78909c" strokeWidth={1} />
         <text x={tx} y={ey} textAnchor={anchor} dominantBaseline="central">
-          <tspan x={tx} dy={-7} fill="#78909c" fontSize={10} fontWeight={500}>
+          <tspan x={tx} dy={-7} fill="#455a64" fontSize={10} fontWeight={500}>
             {name}
           </tspan>
           <tspan
