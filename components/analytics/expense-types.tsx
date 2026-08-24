@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { Input } from "@/components/ui/input"
 import { useLanguage } from "@/lib/i18n"
 import { useTransactions } from "@/lib/transactions"
+import { storageGetItem, storageSetItem } from "@/lib/auth"
 import { getCategoryFor, EXPENSE_CATEGORY_DEFS } from "@/lib/categories"
 
 const BUDGETS_STORAGE_KEY = "appExpenseBudgets"
@@ -44,7 +45,7 @@ export function ExpenseTypes({ month }: { month: string }) {
 
   useEffect(() => {
     try {
-      const raw = window.localStorage.getItem(BUDGETS_STORAGE_KEY)
+      const raw = storageGetItem(BUDGETS_STORAGE_KEY)
       if (raw) setBudgets(JSON.parse(raw) as Budgets)
     } catch {
       // almacenamiento no disponible
@@ -55,7 +56,7 @@ export function ExpenseTypes({ month }: { month: string }) {
     setBudgets((prev) => {
       const next = { ...prev, [category]: value }
       try {
-        window.localStorage.setItem(BUDGETS_STORAGE_KEY, JSON.stringify(next))
+        storageSetItem(BUDGETS_STORAGE_KEY, JSON.stringify(next))
       } catch {
         // almacenamiento no disponible
       }

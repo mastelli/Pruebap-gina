@@ -7,6 +7,7 @@ import { useTheme } from "next-themes"
 import { useLanguage } from "@/lib/i18n"
 import { useTransactions } from "@/lib/transactions"
 import { usePortfolioEurTotal } from "@/components/portfolio-total"
+import { storageGetItem } from "@/lib/auth"
 
 const MONTHS = [
   "January",
@@ -51,7 +52,7 @@ export function RevenueChart() {
 
   useEffect(() => {
     try {
-      const raw = window.localStorage.getItem(HISTORY_STORAGE_KEY)
+      const raw = storageGetItem(HISTORY_STORAGE_KEY)
       if (raw) setInvestmentHistory(JSON.parse(raw) as Record<string, number>)
     } catch {
       // almacenamiento no disponible

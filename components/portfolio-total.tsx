@@ -1,6 +1,7 @@
 "use client"
 
 import { useCallback, useEffect, useState } from "react"
+import { storageGetItem, storageSetItem } from "@/lib/auth"
 
 const PORTFOLIO_STORAGE_KEY = "appPortfolio"
 const PRICES_STORAGE_KEY = "appPortfolioPrices"
@@ -35,7 +36,7 @@ export function usePortfolioEurTotal(): { total: number | null; momPct: number |
 
   const computeTotal = useCallback(async () => {
     try {
-      const rawAssets = window.localStorage.getItem(PORTFOLIO_STORAGE_KEY)
+      const rawAssets = storageGetItem(PORTFOLIO_STORAGE_KEY)
       if (!rawAssets) {
         setTotal(0)
         return
@@ -45,7 +46,7 @@ export function usePortfolioEurTotal(): { total: number | null; momPct: number |
 
       let rawPrices: Record<string, PriceInfo> = {}
       try {
-        const rawPricesJson = window.localStorage.getItem(PRICES_STORAGE_KEY)
+        const rawPricesJson = storageGetItem(PRICES_STORAGE_KEY)
         if (rawPricesJson) rawPrices = JSON.parse(rawPricesJson) as Record<string, PriceInfo>
       } catch {
         rawPrices = {}
@@ -100,10 +101,10 @@ export function usePortfolioEurTotal(): { total: number | null; momPct: number |
         const key = monthKey()
         const prevKey = monthKey(-1)
         let history: Record<string, number> = {}
-        const rawHistory = window.localStorage.getItem(HISTORY_STORAGE_KEY)
+        const rawHistory = storageGetItem(HISTORY_STORAGE_KEY)
         if (rawHistory) history = JSON.parse(rawHistory) as Record<string, number>
         history[key] = sum
-        window.localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(history))
+        storageSetItem(HISTORY_STORAGE_KEY, JSON.stringify(history))
         const prevValue = history[prevKey]
         setMomPct(prevValue && prevValue > 0 ? ((sum - prevValue) / prevValue) * 100 : null)
       } catch {

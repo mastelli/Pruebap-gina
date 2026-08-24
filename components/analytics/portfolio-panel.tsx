@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Upload, Trash2, RefreshCw } from "lucide-react"
 import { useLanguage } from "@/lib/i18n"
+import { storageGetItem, storageSetItem } from "@/lib/auth"
 
 const PORTFOLIO_STORAGE_KEY = "appPortfolio"
 const PRICES_STORAGE_KEY = "appPortfolioPrices"
@@ -245,12 +246,12 @@ export function PortfolioPanel() {
 
   useEffect(() => {
     try {
-      const raw = window.localStorage.getItem(PORTFOLIO_STORAGE_KEY)
+      const raw = storageGetItem(PORTFOLIO_STORAGE_KEY)
       if (raw) {
         const parsed = JSON.parse(raw) as Asset[] | { assets?: Asset[] }
         setAssets(Array.isArray(parsed) ? parsed : parsed.assets ?? [])
       }
-      const rawPrices = window.localStorage.getItem(PRICES_STORAGE_KEY)
+      const rawPrices = storageGetItem(PRICES_STORAGE_KEY)
       if (rawPrices) setPrices(JSON.parse(rawPrices) as PriceMap)
     } catch {
       // almacenamiento no disponible
@@ -278,7 +279,7 @@ export function PortfolioPanel() {
   const persistAssets = (next: Asset[]) => {
     setAssets(next)
     try {
-      window.localStorage.setItem(PORTFOLIO_STORAGE_KEY, JSON.stringify(next))
+      storageSetItem(PORTFOLIO_STORAGE_KEY, JSON.stringify(next))
     } catch {
       // almacenamiento no disponible
     }
@@ -289,7 +290,7 @@ export function PortfolioPanel() {
     try {
       let cached: PriceMap = {}
       try {
-        const raw = window.localStorage.getItem(PRICES_STORAGE_KEY)
+        const raw = storageGetItem(PRICES_STORAGE_KEY)
         if (raw) cached = JSON.parse(raw) as PriceMap
       } catch {
         cached = {}
@@ -341,7 +342,7 @@ export function PortfolioPanel() {
       setPrices(merged)
       if (fetched) setLastUpdated(Date.now())
       try {
-        window.localStorage.setItem(PRICES_STORAGE_KEY, JSON.stringify(merged))
+        storageSetItem(PRICES_STORAGE_KEY, JSON.stringify(merged))
       } catch {
         // almacenamiento no disponible
       }

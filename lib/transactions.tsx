@@ -1,6 +1,7 @@
 "use client"
 
 import { createContext, useContext, useEffect, useState } from "react"
+import { storageGetItem, storageSetItem } from "@/lib/auth"
 
 export interface Transaction {
   id: string
@@ -42,7 +43,7 @@ export function TransactionsProvider({ children }: { children: React.ReactNode }
 
   useEffect(() => {
     try {
-      const stored = window.localStorage.getItem(STORAGE_KEY)
+      const stored = storageGetItem(STORAGE_KEY)
       if (stored) {
         const parsed = JSON.parse(stored)
         if (Array.isArray(parsed)) {
@@ -55,7 +56,7 @@ export function TransactionsProvider({ children }: { children: React.ReactNode }
         }
       }
 
-      const storedBalance = window.localStorage.getItem(BALANCE_STORAGE_KEY)
+      const storedBalance = storageGetItem(BALANCE_STORAGE_KEY)
       if (storedBalance !== null) {
         const parsedBalance = Number.parseFloat(storedBalance)
         if (!Number.isNaN(parsedBalance)) {
@@ -71,9 +72,9 @@ export function TransactionsProvider({ children }: { children: React.ReactNode }
   useEffect(() => {
     if (!hydrated) return
     try {
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(transactions))
+      storageSetItem(STORAGE_KEY, JSON.stringify(transactions))
       if (checkingBalance !== null) {
-        window.localStorage.setItem(BALANCE_STORAGE_KEY, String(checkingBalance))
+        storageSetItem(BALANCE_STORAGE_KEY, String(checkingBalance))
       }
     } catch {
       // storage unavailable

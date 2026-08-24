@@ -1,6 +1,7 @@
 import { isElectricityBill, isInternetBill, isWaterBill, isSubscription } from "./bill-companies"
 import { normalize } from "./bill-companies"
 import { SALARY_KEYWORDS, TRANSFER_KEYWORDS } from "./income"
+import { accountStorageKey } from "./auth"
 
 export type TransactionCategory =
   | "Salary"
@@ -288,19 +289,24 @@ const BIZUM_RE = /bizum/i
 
 export const INCOME_CATEGORIES: TransactionCategory[] = ["Salary", "Transfers", "Bizum"]
 
-// Modificaciones manuales del tipo por movimiento (persistidas)
+// Modificaciones manuales del tipo por movimiento (persistidas y
+// aisladas por cuenta de usuario)
 const OVERRIDES_STORAGE_KEY = "appCategoryOverrides"
 type CategoryOverrides = Record<string, TransactionCategory>
 
 let cachedOverrides: CategoryOverrides | null = null
+let cachedStorageKey: string | null = null
 
 function loadOverrides(): CategoryOverrides {
-  if (cachedOverrides) return cachedOverrides
+  const storageKey = accountStorageKey(OVERRIDES_STORAGE_KEY)
+  if (cachedOverrides && cachedStorageKey === storageKey) return cachedOverrides
   try {
-    const raw = window.localStorage.getItem(OVERRIDES_STORAGE_KEY)
+    const raw = window.localStorage.getItem(storageKey)
     cachedOverrides = raw ? (JSON.parse(raw) as CategoryOverrides) : {}
+    cachedStorageKey = storageKey
   } catch {
     cachedOverrides = {}
+    cachedStorageKey = storageKey
   }
   return cachedOverrides
 }
@@ -312,7 +318,7 @@ export function getStoredCategory(id: string): TransactionCategory | undefined {
 export function storeCategory(id: string, category: TransactionCategory) {
   cachedOverrides = { ...loadOverrides(), [id]: category }
   try {
-    window.localStorage.setItem(OVERRIDES_STORAGE_KEY, JSON.stringify(cachedOverrides))
+    window.localStorage.setItem(cachedStorageKey ?? accountStorageKey(OVERRIDES_STORAGE_KEY), JSON.stringify(cachedOverrides))
   } catch {
     // almacenamiento no disponible
   }

@@ -15,10 +15,12 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { useLanguage } from "@/lib/i18n"
+import { useAuth } from "@/lib/auth"
 
 export function TopNav() {
   const { settings } = useSettings()
   const { t } = useLanguage()
+  const { logout, email } = useAuth()
 
   return (
     <header className="sticky top-0 z-40 border-b bg-[#C1B6A3] dark:bg-background">
@@ -45,7 +47,7 @@ export function TopNav() {
               <DropdownMenuLabel className="font-normal">
                 <div className="flex flex-col space-y-1">
                   <p className="text-sm font-medium leading-none">{settings.fullName}</p>
-                  <p className="text-xs leading-none text-muted-foreground">{settings.email}</p>
+                  <p className="text-xs leading-none text-muted-foreground">{email ?? settings.email}</p>
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
@@ -55,7 +57,7 @@ export function TopNav() {
               <DropdownMenuItem asChild>
                 <Link href="/settings">{t("Settings")}</Link>
               </DropdownMenuItem>
-              <DropdownMenuItem>{t("Log out")}</DropdownMenuItem>
+              <DropdownMenuItem onClick={logout}>{t("Log out")}</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

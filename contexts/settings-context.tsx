@@ -1,6 +1,7 @@
 "use client"
 
 import { createContext, useContext, useEffect, useState } from "react"
+import { storageGetItem, storageSetItem } from "@/lib/auth"
 
 export interface UserSettings {
   avatar: string
@@ -77,7 +78,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
   const [settings, setSettings] = useState<UserSettings>(() => {
     // Try to load settings from localStorage during initialization
     if (typeof window !== "undefined") {
-      const savedSettings = localStorage.getItem("userSettings")
+      const savedSettings = storageGetItem("userSettings")
       if (savedSettings) {
         return JSON.parse(savedSettings)
       }
@@ -87,7 +88,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
 
   // Save settings to localStorage whenever they change
   useEffect(() => {
-    localStorage.setItem("userSettings", JSON.stringify(settings))
+    storageSetItem("userSettings", JSON.stringify(settings))
   }, [settings])
 
   const updateSettings = (newSettings: Partial<UserSettings>) => {

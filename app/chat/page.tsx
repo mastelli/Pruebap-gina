@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Send, StickyNote, Trash2, MessageSquare, Plus } from "lucide-react"
 import { useLanguage } from "@/lib/i18n"
+import { storageGetItem, storageSetItem } from "@/lib/auth"
 
 interface ChatMessage {
   id: string
@@ -24,7 +25,7 @@ const NOTES_KEY = "appChatNotes"
 function load<T>(key: string): T[] {
   if (typeof window === "undefined") return []
   try {
-    const stored = localStorage.getItem(key)
+    const stored = storageGetItem(key)
     return stored ? JSON.parse(stored) : []
   } catch {
     return []
@@ -33,7 +34,7 @@ function load<T>(key: string): T[] {
 
 function save<T>(key: string, value: T[]): void {
   try {
-    localStorage.setItem(key, JSON.stringify(value))
+    storageSetItem(key, JSON.stringify(value))
   } catch {
     // almacenamiento no disponible
   }

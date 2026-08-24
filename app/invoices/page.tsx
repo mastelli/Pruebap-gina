@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
+import { storageGetItem, storageSetItem } from "@/lib/auth"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -99,7 +100,7 @@ async function deleteInvoiceFile(id: string): Promise<void> {
 function loadInvoices(): Invoice[] {
   if (typeof window === "undefined") return []
   try {
-    const stored = localStorage.getItem(STORAGE_KEY)
+    const stored = storageGetItem(STORAGE_KEY)
     return stored ? JSON.parse(stored) : []
   } catch {
     return []
@@ -124,7 +125,7 @@ export default function InvoicesPage() {
 
   useEffect(() => {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(invoices))
+      storageSetItem(STORAGE_KEY, JSON.stringify(invoices))
     } catch {
       // almacenamiento no disponible
     }
