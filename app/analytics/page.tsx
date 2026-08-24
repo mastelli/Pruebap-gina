@@ -11,7 +11,7 @@ import { IncomeCategoriesChart, IncomeTotal } from "@/components/analytics/incom
 import { IncomeHistory } from "@/components/analytics/income-history"
 import { IncomeMetrics } from "@/components/analytics/income-metrics"
 import { IncomeList } from "@/components/analytics/income-list"
-import { ExpenseDoughnut } from "@/components/analytics/expense-doughnut"
+import { ExpenseDoughnut, ExpenseTotal } from "@/components/analytics/expense-doughnut"
 import { ExpenseTypes } from "@/components/analytics/expense-types"
 import { ExpenseList } from "@/components/analytics/expense-list"
 import { ExpenseHistory } from "@/components/analytics/expense-history"
@@ -71,8 +71,9 @@ function AnalyticsContent() {
               <div className="grid gap-4 lg:grid-cols-2 items-stretch">
                 <div className="flex flex-col gap-4">
                   <Card>
-                    <CardHeader>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0">
                       <CardTitle className="text-xl font-semibold">{t("Expense Breakdown")}</CardTitle>
+                      <ExpenseTotal month={month} />
                     </CardHeader>
                     <CardContent>
                       <ExpenseDoughnut month={month} />
