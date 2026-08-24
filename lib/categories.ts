@@ -1,7 +1,18 @@
 import { isElectricityBill, isInternetBill, isWaterBill, isSubscription } from "./bill-companies"
 import { normalize } from "./bill-companies"
-import { SALARY_KEYWORDS, TRANSFER_KEYWORDS } from "./income"
 import { accountStorageKey } from "./auth"
+
+// Palabras clave de nomina y transferencia (sin acentos; el nombre se
+// normaliza antes de comparar)
+export const SALARY_KEYWORDS = [
+  "nomina",
+  "salario",
+  "sueldo",
+  "retribucion",
+  "remuneracion",
+]
+
+export const TRANSFER_KEYWORDS = ["transferencia", "traf"]
 
 export type TransactionCategory =
   | "Salary"

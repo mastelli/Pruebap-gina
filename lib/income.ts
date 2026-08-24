@@ -1,16 +1,10 @@
-import { normalize, type DetectableMovement } from "./bill-companies"
+import type { DetectableMovement } from "./bill-companies"
+import { getCategoryFor } from "./categories"
 
-// Palabras clave de nomina (sin acentos; el concepto se normaliza antes)
-export const SALARY_KEYWORDS = [
-  "nomina",
-  "salario",
-  "sueldo",
-  "retribucion",
-  "remuneracion",
-]
-
-// Transferencias: "Transferencia", "TRAF. DE:", etc.
-export const TRANSFER_KEYWORDS = ["transferencia", "traf"]
+// Movimiento con identificador, necesario para consultar su tipo manual
+export interface IdentifiableMovement extends DetectableMovement {
+  id: string
+}
 
 export interface IncomeBreakdownTotals {
   salary: number
@@ -18,10 +12,12 @@ export interface IncomeBreakdownTotals {
   bizum: number
 }
 
-// Clasifica los ingresos del ano en nomina, transferencia o bizum;
-// un ingreso que no sea nomina ni transferencia se considera bizum
+// Reparte los ingresos del periodo en nomina, transferencia o bizum
+// usando el tipo efectivo de cada movimiento (manual si el usuario lo
+// cambio en Transacciones, automatico si no), de forma que las
+// analiticas reflejan siempre las ediciones del usuario
 export function getIncomeBreakdown(
-  movements: DetectableMovement[],
+  movements: IdentifiableMovement[],
   yearPrefix: string,
 ): IncomeBreakdownTotals {
   const totals: IncomeBreakdownTotals = {
@@ -33,10 +29,10 @@ export function getIncomeBreakdown(
   for (const movement of movements) {
     if (movement.amount <= 0 || !movement.date.startsWith(yearPrefix)) continue
 
-    const concept = normalize(movement.name)
-    if (SALARY_KEYWORDS.some((keyword) => concept.includes(keyword))) {
+    const category = getCategoryFor(movement)
+    if (category === "Salary") {
       totals.salary += movement.amount
-    } else if (TRANSFER_KEYWORDS.some((keyword) => concept.includes(keyword))) {
+    } else if (category === "Transfers") {
       totals.transfers += movement.amount
     } else {
       totals.bizum += movement.amount
