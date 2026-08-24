@@ -1,9 +1,8 @@
 "use client"
 
-import { Bar, BarChart, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
+import { ResponsiveContainer, Scatter, ScatterChart, Tooltip, XAxis, YAxis } from "recharts"
 import { useLanguage } from "@/lib/i18n"
 import { useTransactions } from "@/lib/transactions"
-import { getCategoryFor, EXPENSE_CATEGORY_DEFS } from "@/lib/categories"
 
 const MONTHS = [
   "January",
@@ -24,7 +23,7 @@ function formatEuros(value: number): string {
   return value.toLocaleString("es-ES", { style: "currency", currency: "EUR" })
 }
 
-// Columnas apiladas por mes con el gasto del ano repartido por tipo
+// Puntos con la suma mensual de gastos a lo largo del ano
 export function ExpenseHistory() {
   const { t } = useLanguage()
   const { transactions } = useTransactions()
@@ -32,48 +31,36 @@ export function ExpenseHistory() {
   const currentYear = `${new Date().getFullYear()}`
 
   const data = MONTHS.map((month, index) => {
-    const monthKey = String(index + 1).padStart(2, "0")
-    const prefix = `${currentYear}-${monthKey}`
-    const totals: Record<string, number> = {}
-    for (const def of EXPENSE_CATEGORY_DEFS) totals[def.key] = 0
+    const prefix = `${currentYear}-${String(index + 1).padStart(2, "0")}`
+    const total = transactions
+      .filter((transaction) => transaction.amount < 0 && transaction.date.startsWith(prefix))
+      .reduce((sum, transaction) => sum + Math.abs(transaction.amount), 0)
 
-    for (const transaction of transactions) {
-      if (transaction.amount >= 0 || !transaction.date.startsWith(prefix)) continue
-      totals[getCategoryFor(transaction)] += Math.abs(transaction.amount)
-    }
-
-    return { month: t(month), ...totals }
+    return { monthIndex: index + 1, total }
   })
-
-  // Solo mostrar series con algun gasto en el ano para no saturar la leyenda
-  const activeDefs = EXPENSE_CATEGORY_DEFS.filter((def) =>
-    data.some((row) => row[def.key] > 0),
-  )
 
   return (
     <ResponsiveContainer width="100%" height={300}>
-      <BarChart data={data}>
-        <XAxis dataKey="month" tick={{ fontSize: 11 }} interval={0} angle={-35} textAnchor="end" height={50} />
+      <ScatterChart>
+        <XAxis
+          type="number"
+          dataKey="monthIndex"
+          domain={[1, 12]}
+          ticks={[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]}
+          tickFormatter={(value) => t(MONTHS[value - 1]).slice(0, 3)}
+          tick={{ fontSize: 11 }}
+        />
         <YAxis />
         <Tooltip
+          cursor={{ strokeDasharray: "4 4" }}
           formatter={(value) => formatEuros(Number(value))}
-          cursor={{ fill: "rgba(0,0,0,0.05)" }}
+          labelFormatter={() => ""}
           contentStyle={{ backgroundColor: "#ffffff", border: "1px solid #e5e7eb", borderRadius: 8 }}
           labelStyle={{ color: "#000000", fontWeight: 600 }}
           itemStyle={{ color: "#000000" }}
         />
-        <Legend />
-        {activeDefs.map((def, index) => (
-          <Bar
-            key={def.key}
-            dataKey={def.key}
-            name={t(def.key)}
-            stackId="expenses"
-            fill={def.color}
-            radius={index === activeDefs.length - 1 ? [4, 4, 0, 0] : undefined}
-          />
-        ))}
-      </BarChart>
+        <Scatter data={data} dataKey="total" name={t("Expenses")} fill="#e53935" />
+      </ScatterChart>
     </ResponsiveContainer>
   )
 }
