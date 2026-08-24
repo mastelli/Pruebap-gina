@@ -372,7 +372,6 @@ const translations: Record<string, string> = {
   Feb: "Feb",
   Mar: "Mar",
   Apr: "Abr",
-  May: "May",
   Jun: "Jun",
 
   // Configuración
