@@ -1,78 +1,19 @@
 "use client"
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { TrendingUp, CreditCard, DollarSign, Euro, ArrowRight } from "lucide-react"
+import { ArrowRight } from "lucide-react"
 import Link from "next/link"
 import { useLanguage } from "@/lib/i18n"
 import { useTransactions } from "@/lib/transactions"
-
-const metrics = [
-  {
-    id: 1,
-    title: "Revenue",
-    subtitle: "Monthly revenue target",
-    icon: TrendingUp,
-    status: "On Track",
-    progress: 75,
-    target: 100000,
-    current: 75000,
-    unit: "$",
-  },
-  {
-    id: 2,
-    title: "Expenses",
-    subtitle: "New customers this quarter",
-    icon: CreditCard,
-    status: "Behind",
-    progress: 60,
-    target: 1000,
-    current: 600,
-    unit: "",
-  },
-  {
-    id: 3,
-    title: "Savings/Investment",
-    subtitle: "Target AOV for Q3",
-    icon: DollarSign,
-    status: "Ahead",
-    progress: 110,
-    target: 150,
-    current: 165,
-    unit: "$",
-  },
-]
-
-const statusColors = {
-  "On Track": "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
-  Behind: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200",
-  Ahead: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
-}
 
 function formatEuros(value: number): string {
   return value.toLocaleString("es-ES", { style: "currency", currency: "EUR" })
 }
 
-const tabLinks: Record<number, { href: string; className: string }> = {
-  1: {
-    href: "/analytics?tab=income",
-    className:
-      "bg-[#c8e6c9] hover:bg-[#aedcb1] text-[#1b5e20]",
-  },
-  2: {
-    href: "/analytics?tab=expenses",
-    className:
-      "bg-[#ffcdd2] hover:bg-[#f8b9c0] text-[#7f1d1d]",
-  },
-  3: {
-    href: "/analytics?tab=savings",
-    className:
-      "bg-[#bbdefb] hover:bg-[#a5d2f7] text-[#0d47a1]",
-  },
-}
+const linkClasses =
+  "flex items-center justify-between gap-3 rounded-xl border border-[#ef9a9a] bg-[#ffcdd2] p-4 text-[#7f1d1d] shadow-sm transition-colors hover:bg-[#f8b9c0]"
 
 export function BusinessMetrics() {
-  const { t, lang } = useLanguage()
+  const { t } = useLanguage()
   const { transactions } = useTransactions()
 
   const now = new Date()
@@ -90,70 +31,42 @@ export function BusinessMetrics() {
   const monthlyAverage = yearlyIncome / monthsElapsed
   const monthlyExpenseAverage = yearlyExpenses / monthsElapsed
 
+  const cards = [
+    {
+      href: "/analytics?tab=income",
+      titleKey: "Revenue",
+      value: formatEuros(yearlyIncome),
+      sub: `${t("Monthly average")}: ${formatEuros(monthlyAverage)}`,
+    },
+    {
+      href: "/analytics?tab=expenses",
+      titleKey: "Expenses",
+      value: formatEuros(yearlyExpenses),
+      sub: `${t("Monthly average")}: ${formatEuros(monthlyExpenseAverage)}`,
+    },
+    {
+      href: "/analytics?tab=savings",
+      titleKey: "Savings/Investment",
+      value: formatEuros(0),
+      sub: null,
+    },
+  ]
+
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold">{t("Breakdown")}</h2>
-        <Button variant="outline" size="sm" asChild>
-          <Link href="/analytics">
-            {t("View Details")} <ArrowRight className="ml-2 h-4 w-4" />
-          </Link>
-        </Button>
-      </div>
+      <h2 className="text-lg font-semibold">{t("Breakdown")}</h2>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {metrics.map((metric) => (
-          <Card key={metric.id}>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">{t(metric.title)}</CardTitle>
-              {metric.id === 1 ? (
-                lang === "es" ? (
-                  <Euro className="h-4 w-4 text-muted-foreground" />
-                ) : (
-                  <DollarSign className="h-4 w-4 text-muted-foreground" />
-                )
-              ) : metric.id === 3 ? (
-                <TrendingUp className="h-4 w-4 text-muted-foreground" />
-              ) : (
-                <metric.icon className="h-4 w-4 text-muted-foreground" />
-              )}
-            </CardHeader>
-            <CardContent>
-              {metric.id === 1 ? (
-                <div className="space-y-1">
-                  <p className="text-2xl font-bold tabular-nums">{formatEuros(yearlyIncome)}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {t("Monthly average")}: {formatEuros(monthlyAverage)}
-                  </p>
-                </div>
-              ) : metric.id === 2 ? (
-                <div className="space-y-1">
-                  <p className="text-2xl font-bold tabular-nums">{formatEuros(yearlyExpenses)}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {t("Monthly average")}: {formatEuros(monthlyExpenseAverage)}
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-1">
-                  <p className="text-2xl font-bold tabular-nums">{formatEuros(0)}</p>
-                </div>
-              )}
-              <div className="mt-3 flex justify-end">
-                <Button
-                  size="icon"
-                  asChild
-                  className={`h-8 w-8 rounded-md ${tabLinks[metric.id].className}`}
-                >
-                  <Link href={tabLinks[metric.id].href}>
-                    <ArrowRight className="h-4 w-4" />
-                    <span className="sr-only">{t("View Details")}</span>
-                  </Link>
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+        {cards.map((card) => (
+          <Link key={card.href} href={card.href} className={linkClasses}>
+            <div className="space-y-1">
+              <p className="text-sm font-medium">{t(card.titleKey)}</p>
+              <p className="text-2xl font-bold tabular-nums">{card.value}</p>
+              {card.sub && <p className="text-xs opacity-80">{card.sub}</p>}
+            </div>
+            <ArrowRight className="h-5 w-5 shrink-0" />
+          </Link>
         ))}
       </div>
     </div>
   )
 }
-
