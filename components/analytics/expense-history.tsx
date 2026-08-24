@@ -3,7 +3,7 @@
 import { Bar, BarChart, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
 import { useLanguage } from "@/lib/i18n"
 import { useTransactions } from "@/lib/transactions"
-import { classifyTransaction, EXPENSE_CATEGORY_DEFS } from "@/lib/categories"
+import { getCategoryFor, EXPENSE_CATEGORY_DEFS } from "@/lib/categories"
 
 const MONTHS = [
   "January",
@@ -39,7 +39,7 @@ export function ExpenseHistory() {
 
     for (const transaction of transactions) {
       if (transaction.amount >= 0 || !transaction.date.startsWith(prefix)) continue
-      totals[classifyTransaction(transaction)] += Math.abs(transaction.amount)
+      totals[getCategoryFor(transaction)] += Math.abs(transaction.amount)
     }
 
     return { month: t(month), ...totals }

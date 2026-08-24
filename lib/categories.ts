@@ -280,6 +280,43 @@ export const EXPENSE_CATEGORY_DEFS: ExpenseCategoryDef[] = [
 
 const BIZUM_RE = /bizum/i
 
+export const INCOME_CATEGORIES: TransactionCategory[] = ["Salary", "Transfers", "Bizum"]
+
+// Modificaciones manuales del tipo por movimiento (persistidas)
+const OVERRIDES_STORAGE_KEY = "appCategoryOverrides"
+type CategoryOverrides = Record<string, TransactionCategory>
+
+let cachedOverrides: CategoryOverrides | null = null
+
+function loadOverrides(): CategoryOverrides {
+  if (cachedOverrides) return cachedOverrides
+  try {
+    const raw = window.localStorage.getItem(OVERRIDES_STORAGE_KEY)
+    cachedOverrides = raw ? (JSON.parse(raw) as CategoryOverrides) : {}
+  } catch {
+    cachedOverrides = {}
+  }
+  return cachedOverrides
+}
+
+export function getStoredCategory(id: string): TransactionCategory | undefined {
+  return loadOverrides()[id]
+}
+
+export function storeCategory(id: string, category: TransactionCategory) {
+  cachedOverrides = { ...loadOverrides(), [id]: category }
+  try {
+    window.localStorage.setItem(OVERRIDES_STORAGE_KEY, JSON.stringify(cachedOverrides))
+  } catch {
+    // almacenamiento no disponible
+  }
+}
+
+// Tipo efectivo de un movimiento: manual si existe, automatico si no
+export function getCategoryFor(transaction: { id: string; name: string; amount: number }): TransactionCategory {
+  return getStoredCategory(transaction.id) ?? classifyTransaction(transaction)
+}
+
 // Clasifica cualquier movimiento en una de las categorias del dashboard
 export function classifyTransaction(transaction: { name: string; amount: number }): TransactionCategory {
   const name = transaction.name.toLowerCase()

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import { Input } from "@/components/ui/input"
 import { useLanguage } from "@/lib/i18n"
 import { useTransactions } from "@/lib/transactions"
-import { classifyTransaction, EXPENSE_CATEGORY_DEFS } from "@/lib/categories"
+import { getCategoryFor, EXPENSE_CATEGORY_DEFS } from "@/lib/categories"
 
 const BUDGETS_STORAGE_KEY = "appExpenseBudgets"
 
@@ -48,7 +48,7 @@ export function ExpenseTypes() {
   for (const def of EXPENSE_CATEGORY_DEFS) spentByCategory[def.key] = 0
   for (const transaction of transactions) {
     if (transaction.amount >= 0 || !transaction.date.startsWith(prefix)) continue
-    spentByCategory[classifyTransaction(transaction)] += Math.abs(transaction.amount)
+    spentByCategory[getCategoryFor(transaction)] += Math.abs(transaction.amount)
   }
 
   return (
