@@ -16,19 +16,31 @@ export function AuthScreen() {
   const { t } = useLanguage()
 
   const [mode, setMode] = useState<"login" | "register">("login")
+  const [nameValue, setNameValue] = useState("")
+  const [surnameValue, setSurnameValue] = useState("")
+  const [ageValue, setAgeValue] = useState("")
   const [emailValue, setEmailValue] = useState("")
   const [passwordValue, setPasswordValue] = useState("")
+  const [confirmValue, setConfirmValue] = useState("")
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault()
+    if (mode === "register" && passwordValue !== confirmValue) {
+      setError("Passwords do not match")
+      return
+    }
     setBusy(true)
     setError(null)
     const result =
       mode === "login"
         ? await login(emailValue, passwordValue)
-        : await register(emailValue, passwordValue)
+        : await register(emailValue, passwordValue, {
+            name: nameValue,
+            surname: surnameValue,
+            age: Number(ageValue),
+          })
     if (result) setError(result)
     setBusy(false)
   }
@@ -37,6 +49,7 @@ export function AuthScreen() {
     setMode(mode === "login" ? "register" : "login")
     setError(null)
     setPasswordValue("")
+    setConfirmValue("")
   }
 
   return (
@@ -57,6 +70,42 @@ export function AuthScreen() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
+            {mode === "register" && (
+              <>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-2">
+                    <Label htmlFor="auth-name">{t("First name")}</Label>
+                    <Input
+                      id="auth-name"
+                      required
+                      value={nameValue}
+                      onChange={(event) => setNameValue(event.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="auth-surname">{t("Surname")}</Label>
+                    <Input
+                      id="auth-surname"
+                      required
+                      value={surnameValue}
+                      onChange={(event) => setSurnameValue(event.target.value)}
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="auth-age">{t("Age")}</Label>
+                  <Input
+                    id="auth-age"
+                    type="number"
+                    min={1}
+                    max={120}
+                    required
+                    value={ageValue}
+                    onChange={(event) => setAgeValue(event.target.value)}
+                  />
+                </div>
+              </>
+            )}
             <div className="space-y-2">
               <Label htmlFor="auth-email">{t("Email")}</Label>
               <Input
@@ -80,6 +129,19 @@ export function AuthScreen() {
                 onChange={(event) => setPasswordValue(event.target.value)}
               />
             </div>
+            {mode === "register" && (
+              <div className="space-y-2">
+                <Label htmlFor="auth-confirm">{t("Confirm password")}</Label>
+                <Input
+                  id="auth-confirm"
+                  type="password"
+                  autoComplete="new-password"
+                  required
+                  value={confirmValue}
+                  onChange={(event) => setConfirmValue(event.target.value)}
+                />
+              </div>
+            )}
             {error && <p className="text-sm font-medium text-red-600">{t(error)}</p>}
             <Button type="submit" className="w-full" disabled={busy}>
               {busy ? "…" : mode === "login" ? t("Sign in") : t("Create account")}

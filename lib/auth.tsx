@@ -30,6 +30,9 @@ const ISOLATED_KEYS = [
 interface AccountRecord {
   salt: string
   hash: string
+  name?: string
+  surname?: string
+  age?: number
 }
 
 type Accounts = Record<string, AccountRecord>
@@ -85,11 +88,17 @@ function migrateLegacyData(email: string): void {
   }
 }
 
+interface RegisterDetails {
+  name: string
+  surname: string
+  age: number
+}
+
 interface AuthContextValue {
   email: string | null
   ready: boolean
   login: (email: string, password: string) => Promise<string | null>
-  register: (email: string, password: string) => Promise<string | null>
+  register: (email: string, password: string, details: RegisterDetails) => Promise<string | null>
   logout: () => void
 }
 
@@ -133,28 +142,57 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return null
   }, [])
 
-  const register = useCallback(async (candidateEmail: string, password: string): Promise<string | null> => {
-    const normalized = candidateEmail.trim().toLowerCase()
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalized)) return "Invalid email"
-    if (password.length < 4) return "Password must be at least 4 characters"
-    let accounts: Accounts = {}
-    try {
-      const raw = window.localStorage.getItem(ACCOUNTS_KEY)
-      if (raw) accounts = JSON.parse(raw) as Accounts
-    } catch {
-      accounts = {}
-    }
-    if (accounts[normalized]) return "This account already exists"
-    const salt = randomSalt()
-    const hash = await sha256(`${salt}:${password}`)
-    accounts[normalized] = { salt, hash }
-    window.localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(accounts))
-    sessionEmail = normalized
-    window.localStorage.setItem(SESSION_KEY, normalized)
-    migrateLegacyData(normalized)
-    setEmail(normalized)
-    return null
-  }, [])
+  const register = useCallback(
+    async (candidateEmail: string, password: string, details: RegisterDetails): Promise<string | null> => {
+      const normalized = candidateEmail.trim().toLowerCase()
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalized)) return "Invalid email"
+      if (!details.name.trim() || !details.surname.trim()) return "Please enter your name and surname"
+      if (!Number.isFinite(details.age) || details.age < 1 || details.age > 120) return "Enter a valid age"
+      if (password.length < 4) return "Password must be at least 4 characters"
+      let accounts: Accounts = {}
+      try {
+        const raw = window.localStorage.getItem(ACCOUNTS_KEY)
+        if (raw) accounts = JSON.parse(raw) as Accounts
+      } catch {
+        accounts = {}
+      }
+      if (accounts[normalized]) return "This account already exists"
+      const salt = randomSalt()
+      const hash = await sha256(`${salt}:${password}`)
+      accounts[normalized] = {
+        salt,
+        hash,
+        name: details.name.trim(),
+        surname: details.surname.trim(),
+        age: Math.round(details.age),
+      }
+      window.localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(accounts))
+
+      // rellena el perfil con el nombre indicado en el registro
+      try {
+        let storedSettings: Record<string, unknown> = {}
+        const rawSettings = storageGetItem("userSettings")
+        if (rawSettings) storedSettings = JSON.parse(rawSettings) as Record<string, unknown>
+        storageSetItem(
+          "userSettings",
+          JSON.stringify({
+            ...storedSettings,
+            fullName: `${details.name.trim()} ${details.surname.trim()}`,
+            email: normalized,
+          }),
+        )
+      } catch {
+        // ajustes no disponibles
+      }
+
+      sessionEmail = normalized
+      window.localStorage.setItem(SESSION_KEY, normalized)
+      migrateLegacyData(normalized)
+      setEmail(normalized)
+      return null
+    },
+    [],
+  )
 
   const logout = useCallback(() => {
     sessionEmail = null
