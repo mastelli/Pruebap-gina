@@ -39,6 +39,8 @@ interface PriceInfo {
   sessionStart?: number
   sessionEnd?: number
   quoteTime?: number
+  // Hora del ultimo tick de streaming recibido (epoch ms)
+  tickAt?: number
   fetchedAt?: number
 }
 
@@ -48,6 +50,7 @@ interface StreamTick {
   price?: number
   change?: number
   changePercent?: number
+  time?: number
 }
 
 // Formato del csv del broker (por posicion):
@@ -162,8 +165,13 @@ function readVarint(bytes: Uint8Array, pos: number): [number, number] {
   return [result, pos]
 }
 
+function zigzagDecode(value: number): number {
+  return value % 2 === 1 ? -((value + 1) / 2) : value / 2
+}
+
 // Decodifica el mensaje PricingData (proto) del streamer de Yahoo:
-// 1 id(string) 2 price(float32) 8 changePercent(float32) 12 change(float32) ...
+// 1 id(string) 2 price(float32) 3 time(sint64 epoch ms) 8 changePercent(float32)
+// 12 change(float32) ...
 function decodePricingData(bytes: Uint8Array): StreamTick & { id?: string } {
   const out: StreamTick & { id?: string } = {}
   let pos = 0
@@ -186,6 +194,10 @@ function decodePricingData(bytes: Uint8Array): StreamTick & { id?: string } {
       if (field === 2) out.price = value
       else if (field === 8) out.changePercent = value
       else out.change = value
+    } else if (field === 3) {
+      let raw: number
+      ;[raw, pos] = readVarint(bytes, pos)
+      out.time = zigzagDecode(raw)
     } else if (wire === 0) {
       let v: number
       ;[v, pos] = readVarint(bytes, pos)
@@ -297,11 +309,11 @@ export function PortfolioPanel() {
         for (const [isin, quote] of Object.entries(results)) {
           if (!quote) continue
           const existing = merged[isin]
-          // Un tick del streaming mas reciente que la cotizacion REST (los
-          // datos de Yahoo pueden ir retrasados ~15 min) tiene prioridad
-          const tickTs = lastTickRef.current[isin] ?? 0
-          const quoteTs = typeof quote.quoteTime === "number" ? quote.quoteTime : Math.floor(Date.now() / 1000)
-          if (existing?.price !== undefined && tickTs > quoteTs) {
+          // La cotizacion REST solo sustituye al streaming si es mas reciente
+          // que el ultimo tick recibido (el feed de Yahoo puede ir retrasado)
+          const quoteMs = typeof quote.quoteTime === "number" ? quote.quoteTime * 1000 : Date.now()
+          const tickMs = existing?.tickAt ?? 0
+          if (existing?.price !== undefined && tickMs > quoteMs) {
             merged[isin] = {
               ...existing,
               symbol: quote.symbol ?? existing.symbol,
@@ -385,7 +397,12 @@ export function PortfolioPanel() {
         const tick = decodePricingData(bytes)
         const isin = tick.id ? isinBySymbolRef.current.get(tick.id) : undefined
         if (!isin || tick.price === undefined) return
-        tickBufferRef.current[isin] = { price: tick.price, change: tick.change, changePercent: tick.changePercent }
+        tickBufferRef.current[isin] = {
+          price: tick.price,
+          change: tick.change,
+          changePercent: tick.changePercent,
+          time: tick.time,
+        }
       } catch {
         // mensaje ilegible, lo ignoramos
       }
@@ -430,13 +447,16 @@ export function PortfolioPanel() {
         try {
           const message = JSON.parse(event.data) as {
             type?: string
-            data?: Array<{ s?: string; p?: number }>
+            data?: Array<{ s?: string; p?: number; t?: number }>
           }
           if (message.type !== "trade" || !Array.isArray(message.data)) return
           for (const trade of message.data) {
             const isin = trade.s ? isinBySymbolRef.current.get(trade.s) : undefined
             if (!isin || typeof trade.p !== "number") continue
-            tickBufferRef.current[isin] = { price: trade.p }
+            tickBufferRef.current[isin] = {
+              price: trade.p,
+              time: typeof trade.t === "number" ? trade.t : undefined,
+            }
           }
         } catch {
           // mensaje ilegible
@@ -482,11 +502,13 @@ export function PortfolioPanel() {
           const previousClose =
             current.previousClose ??
             (tick.price !== undefined && tick.change !== undefined ? tick.price - tick.change : null)
+          const tickAt = Math.max(current.tickAt ?? 0, tick.time ?? now)
           next[isin] = {
             ...current,
             price: tick.price,
             previousClose,
-            quoteTime: Math.floor(now / 1000),
+            quoteTime: Math.floor(tickAt / 1000),
+            tickAt,
             fetchedAt: now,
           }
         }
