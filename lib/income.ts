@@ -1,7 +1,7 @@
 import { normalize, type DetectableMovement } from "./bill-companies"
 
 // Palabras clave de nomina (sin acentos; el concepto se normaliza antes)
-const SALARY_KEYWORDS = [
+export const SALARY_KEYWORDS = [
   "nomina",
   "salario",
   "sueldo",
@@ -10,7 +10,7 @@ const SALARY_KEYWORDS = [
 ]
 
 // Transferencias: "Transferencia", "TRAF. DE:", etc.
-const TRANSFER_KEYWORDS = ["transferencia", "traf"]
+export const TRANSFER_KEYWORDS = ["transferencia", "traf"]
 
 export interface IncomeBreakdownTotals {
   salary: number

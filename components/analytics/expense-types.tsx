@@ -1,0 +1,92 @@
+"use client"
+
+import { useEffect, useState } from "react"
+import { Input } from "@/components/ui/input"
+import { useLanguage } from "@/lib/i18n"
+import { useTransactions } from "@/lib/transactions"
+import { classifyTransaction, EXPENSE_CATEGORIES } from "@/lib/categories"
+
+const BUDGETS_STORAGE_KEY = "appExpenseBudgets"
+
+type Budgets = Record<string, number>
+
+function formatEuros(value: number): string {
+  return value.toLocaleString("es-ES", { style: "currency", currency: "EUR" })
+}
+
+// Tipos de gasto del mes con su presupuesto editable por tipo
+export function ExpenseTypes() {
+  const { t } = useLanguage()
+  const { transactions } = useTransactions()
+  const [budgets, setBudgets] = useState<Budgets>({})
+
+  useEffect(() => {
+    try {
+      const raw = window.localStorage.getItem(BUDGETS_STORAGE_KEY)
+      if (raw) setBudgets(JSON.parse(raw) as Budgets)
+    } catch {
+      // almacenamiento no disponible
+    }
+  }, [])
+
+  const saveBudget = (category: string, value: number) => {
+    setBudgets((prev) => {
+      const next = { ...prev, [category]: value }
+      try {
+        window.localStorage.setItem(BUDGETS_STORAGE_KEY, JSON.stringify(next))
+      } catch {
+        // almacenamiento no disponible
+      }
+      return next
+    })
+  }
+
+  const now = new Date()
+  const prefix = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`
+
+  const spentByCategory: Record<string, number> = {}
+  for (const category of EXPENSE_CATEGORIES) spentByCategory[category] = 0
+  for (const transaction of transactions) {
+    if (transaction.amount >= 0 || !transaction.date.startsWith(prefix)) continue
+    spentByCategory[classifyTransaction(transaction)] += Math.abs(transaction.amount)
+  }
+
+  return (
+    <div className="max-h-[300px] space-y-4 overflow-y-auto pr-1">
+      {EXPENSE_CATEGORIES.map((category) => {
+        const spent = spentByCategory[category]
+        const budget = budgets[category] ?? 0
+        const ratio = budget > 0 ? Math.min(100, (spent / budget) * 100) : 0
+        return (
+          <div key={category} className="space-y-1">
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-sm font-medium">{t(category === "Other" ? "Other Expenses" : category)}</p>
+              <div className="flex items-center gap-2">
+                <Input
+                  type="number"
+                  min={0}
+                  step="0.01"
+                  placeholder={t("Budget")}
+                  className="h-8 w-28 text-right"
+                  value={budget > 0 ? budget : ""}
+                  onChange={(event) => saveBudget(category, Number(event.target.value) || 0)}
+                />
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              {t("Spent")}: {formatEuros(spent)}
+            </p>
+            {budget > 0 && (
+              <div className="w-full h-1.5 rounded-full bg-secondary">
+                <div
+                  className={`h-1.5 rounded-full ${ratio >= 100 ? "bg-red-600" : "bg-primary"}`}
+                  style={{ width: `${ratio}%` }}
+                />
+              </div>
+            )}
+          </div>
+        )
+      })}
+    </div>
+  )
+}
