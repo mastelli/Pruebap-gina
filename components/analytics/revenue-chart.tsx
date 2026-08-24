@@ -169,7 +169,7 @@ export function RevenueChart() {
           yAxisId="left"
           dataKey="income"
           name={t("Total Income")}
-          fill={theme === "dark" ? "#22c55e" : "#16a34a"}
+          fill={theme === "dark" ? "#81c784" : "#a5d6a7"}
           maxBarSize={28}
           radius={[3, 3, 0, 0]}
         />
@@ -177,7 +177,7 @@ export function RevenueChart() {
           yAxisId="left"
           dataKey="expenses"
           name={t("Total Expenses")}
-          fill={theme === "dark" ? "#f87171" : "#dc2626"}
+          fill={theme === "dark" ? "#e57373" : "#ef9a9a"}
           maxBarSize={28}
           radius={[3, 3, 0, 0]}
         />
@@ -186,7 +186,7 @@ export function RevenueChart() {
           type="monotone"
           dataKey="difference"
           name={t("Difference")}
-          stroke={theme === "dark" ? "#fb923c" : "#ea580c"}
+          stroke={theme === "dark" ? "#bcaaa4" : "#8d6e63"}
           strokeWidth={2}
           dot={{ r: 3 }}
         />
