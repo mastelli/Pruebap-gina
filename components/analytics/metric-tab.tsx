@@ -96,8 +96,8 @@ export function MetricTab({
           </SelectContent>
         </Select>
       </div>
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-        <Card className="col-span-4">
+      <div className="grid gap-4 md:grid-cols-2">
+        <Card>
           <CardHeader>
             <CardTitle className="text-xl font-semibold">
               {t(firstCardTitleKey ?? "Customer Segmentation")}
@@ -118,7 +118,7 @@ export function MetricTab({
             )}
           </CardContent>
         </Card>
-        <Card className="col-span-3">
+        <Card>
           <CardHeader>
             <CardTitle className="text-xl font-semibold">
               {t(secondCardTitleKey ?? "Customer Retention Rate")}
@@ -138,8 +138,8 @@ export function MetricTab({
           </CardContent>
         </Card>
       </div>
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-        <Card className="col-span-4">
+      <div className="grid gap-4 md:grid-cols-2">
+        <Card>
           <CardHeader>
             <CardTitle className="text-xl font-semibold">
               {t(thirdCardTitleKey ?? "Channel Performance")}
@@ -160,7 +160,7 @@ export function MetricTab({
             )}
           </CardContent>
         </Card>
-        <Card className="col-span-3">
+        <Card>
           <CardHeader>
             <CardTitle className="text-xl font-semibold">{t("Key Metrics")}</CardTitle>
           </CardHeader>

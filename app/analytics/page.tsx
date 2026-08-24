@@ -9,6 +9,7 @@ import { MetricTab } from "@/components/analytics/metric-tab"
 import { IncomeCategoriesChart } from "@/components/analytics/income-breakdown"
 import { IncomeHistory } from "@/components/analytics/income-history"
 import { IncomeMetrics } from "@/components/analytics/income-metrics"
+import { IncomeList } from "@/components/analytics/income-list"
 import { Button } from "@/components/ui/button"
 import { Download } from "lucide-react"
 import { useLanguage } from "@/lib/i18n"
@@ -52,7 +53,7 @@ function AnalyticsContent() {
             secondCardTitleKey="History"
             secondCard={<IncomeHistory />}
             thirdCardTitleKey="Annual Breakdown"
-            thirdCard={<IncomeCategoriesChart scope="year" />}
+            thirdCard={<IncomeList />}
             metricsCard={<IncomeMetrics />}
           />
         </TabsContent>
