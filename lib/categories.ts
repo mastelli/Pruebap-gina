@@ -27,6 +27,7 @@ export type TransactionCategory =
   | "Gifts"
   | "Pets"
   | "Sport"
+  | "ATM"
   | "Other"
 
 export interface ExpenseCategoryDef {
@@ -61,6 +62,11 @@ export const EXPENSE_CATEGORY_DEFS: ExpenseCategoryDef[] = [
     key: "Rent/Mortgage",
     color: "#7e57c2",
     keywords: ["alquiler", "hipoteca", "inmueble", "inmobiliaria"],
+  },
+  {
+    key: "ATM",
+    color: "#b58900",
+    keywords: ["cajero", "retirada", "extraccion", "atm"],
   },
   {
     key: "Insurance",

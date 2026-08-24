@@ -183,6 +183,7 @@ const translations: Record<string, string> = {
   Gifts: "Regalos",
   Pets: "Mascota",
   Sport: "Deporte",
+  ATM: "Cajero",
   "Total Salary": "Total Nómina",
   "Total Transfers": "Total Transferencias",
   "Total Bizums": "Total Bizums",
