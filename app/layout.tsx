@@ -15,7 +15,7 @@ const inter = Inter({ subsets: ["latin"] })
 export const metadata = {
   title: "Make It Right Dashboard",
   description: "A modern, responsive financial dashboard",
-    generator: 'v0.app'
+  generator: 'v0.app'
 }
 
 export default function RootLayout({
@@ -29,15 +29,15 @@ export default function RootLayout({
         <ClerkProvider>
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
             <LanguageProvider>
-              <TooltipProvider delayDuration={0}>
-                <SettingsProvider>
-                  <TransactionsProvider>
+              <SettingsProvider>
+                <TransactionsProvider>
+                  <TooltipProvider delayDuration={0}>
                     <AppShell>{children}</AppShell>
-                  </TransactionsProvider>
-                </SettingsProvider>
-              </TooltipProvider>
+                  </TooltipProvider>
+                </TransactionsProvider>
+              </SettingsProvider>
+              <Toaster />
             </LanguageProvider>
-            <Toaster />
           </ThemeProvider>
         </ClerkProvider>
       </body>
