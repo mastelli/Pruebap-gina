@@ -1,24 +1,16 @@
-import type { NextRequest } from "next/server"
-import { NextResponse } from "next/server"
+import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server"
 
-export async function middleware(request: NextRequest) {
-  try {
-    const { clerkMiddleware, createRouteMatcher } = await import("@clerk/nextjs/server")
-    const isPublicRoute = createRouteMatcher([
-      "/sign-in(.*)",
-      "/sign-up(.*)",
-      "/api(.*)",
-    ])
-    const handler = clerkMiddleware(async (auth, request) => {
-      if (!isPublicRoute(request)) {
-        await auth.protect()
-      }
-    })
-    return (handler as unknown as (req: NextRequest) => Promise<NextResponse>)(request)
-  } catch {
-    return NextResponse.next()
+const isPublicRoute = createRouteMatcher([
+  "/sign-in(.*)",
+  "/sign-up(.*)",
+  "/api(.*)",
+])
+
+export default clerkMiddleware(async (auth, request) => {
+  if (!isPublicRoute(request)) {
+    await auth.protect()
   }
-}
+})
 
 export const config = {
   matcher: [
