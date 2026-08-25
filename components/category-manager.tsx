@@ -10,7 +10,8 @@ import {
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Settings, Plus, Trash2, EyeOff, Eye, Palette } from "lucide-react"
+import { Switch } from "@/components/ui/switch"
+import { Settings, Plus, Trash2, Palette } from "lucide-react"
 import { useLanguage } from "@/lib/i18n"
 import {
   getAllExpenseCategories,
@@ -19,7 +20,6 @@ import {
   toggleCategoryHidden,
   isCategoryHidden,
   EXPENSE_CATEGORY_DEFS,
-  type ExpenseCategoryDef,
 } from "@/lib/categories"
 
 const PRESET_COLORS = [
@@ -68,47 +68,38 @@ export function CategoryManager({ trigger, onChange }: { trigger?: React.ReactNo
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="max-w-md max-h-[80vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{t("Categories")}</DialogTitle>
         </DialogHeader>
-        <div className="space-y-2">
-          {categories.map((cat) => (
-            <div key={cat.key} className="flex items-center justify-between gap-2 py-2 px-3 rounded-lg border">
-              <div className="flex items-center gap-3">
+        <div className="grid grid-cols-4 gap-2">
+          {categories.map((cat) => {
+            const hidden = isCategoryHidden(cat.key)
+            return (
+              <div key={cat.key} className="flex flex-col items-center gap-1.5 p-2 rounded-lg border text-center">
                 <span className="h-4 w-4 rounded-full shrink-0" style={{ backgroundColor: cat.color }} />
-                <span className="text-sm font-medium">{t(cat.key)}</span>
-                {isBuiltin(cat.key) && (
-                  <span className="text-xs text-muted-foreground">({t("Default")})</span>
-                )}
-              </div>
-              <div className="flex items-center gap-1">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-7 w-7"
-                  onClick={() => handleToggleHidden(cat.key)}
-                  title={isCategoryHidden(cat.key) ? t("Show") : t("Hide")}
-                >
-                  {isCategoryHidden(cat.key)
-                    ? <EyeOff className="h-3.5 w-3.5" />
-                    : <Eye className="h-3.5 w-3.5" />
-                  }
-                </Button>
+                <span className={`text-xs font-medium leading-tight ${hidden ? "text-foreground/40" : ""}`}>
+                  {t(cat.key)}
+                </span>
+                <Switch
+                  checked={!hidden}
+                  onCheckedChange={() => handleToggleHidden(cat.key)}
+                  className={hidden ? "data-[state=unchecked]:bg-red-500" : "data-[state=checked]:bg-green-500"}
+                />
                 {!isBuiltin(cat.key) && (
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-7 w-7 text-destructive hover:text-destructive"
+                    className="h-5 w-5 text-destructive hover:text-destructive"
                     onClick={() => handleRemove(cat.key)}
                     title={t("Delete")}
                   >
-                    <Trash2 className="h-3.5 w-3.5" />
+                    <Trash2 className="h-3 w-3" />
                   </Button>
                 )}
               </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
 
         {showAdd ? (
