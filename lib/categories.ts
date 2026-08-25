@@ -188,10 +188,18 @@ export function removeCustomCategory(key: string) {
 }
 
 // Returns all expense categories (builtin + custom), excluding hidden ones
+// Used by transactions page filter and analytics charts
 export function getAllExpenseCategories(): ExpenseCategoryDef[] {
   const hidden = loadHiddenCategories()
   const custom = loadCustomCategories()
   return [...BUILTIN_EXPENSE_CATEGORIES, ...custom].filter((c) => !hidden.includes(c.key))
+}
+
+// Returns all expense categories including hidden ones
+// Used by the category manager dialog so hidden ones still appear (with toggle)
+export function getAllExpenseCategoriesIncludingHidden(): ExpenseCategoryDef[] {
+  const custom = loadCustomCategories()
+  return [...BUILTIN_EXPENSE_CATEGORIES, ...custom]
 }
 
 // For backwards compat: export as EXPENSE_CATEGORY_DEFS (always returns all including hidden, for classification)

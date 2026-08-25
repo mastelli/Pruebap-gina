@@ -14,7 +14,7 @@ import { Switch } from "@/components/ui/switch"
 import { Settings, Plus, Trash2, Palette } from "lucide-react"
 import { useLanguage } from "@/lib/i18n"
 import {
-  getAllExpenseCategories,
+  getAllExpenseCategoriesIncludingHidden,
   addCustomCategory,
   removeCustomCategory,
   toggleCategoryHidden,
@@ -37,7 +37,7 @@ export function CategoryManager({ trigger, onChange }: { trigger?: React.ReactNo
   const [newColor, setNewColor] = useState(PRESET_COLORS[0])
   const [showAdd, setShowAdd] = useState(false)
 
-  const categories = getAllExpenseCategories()
+  const categories = getAllExpenseCategoriesIncludingHidden()
   const isBuiltin = (key: string) => EXPENSE_CATEGORY_DEFS.some((d) => d.key === key)
 
   const handleAdd = () => {
