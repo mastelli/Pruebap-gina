@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import {
   Dialog,
   DialogContent,
@@ -37,8 +37,27 @@ export function CategoryManager({ trigger, onChange }: { trigger?: React.ReactNo
   const [newColor, setNewColor] = useState(PRESET_COLORS[0])
   const [showAdd, setShowAdd] = useState(false)
 
+  // Staged hidden state — toggles update this, not localStorage directly
+  const [hiddenState, setHiddenState] = useState<Record<string, boolean>>({})
+  const [initialized, setInitialized] = useState(false)
+
   const categories = getAllExpenseCategoriesIncludingHidden()
   const isBuiltin = (key: string) => EXPENSE_CATEGORY_DEFS.some((d) => d.key === key)
+
+  // Initialize staged state when dialog opens
+  useEffect(() => {
+    if (open && !initialized) {
+      const state: Record<string, boolean> = {}
+      for (const cat of categories) {
+        state[cat.key] = isCategoryHidden(cat.key)
+      }
+      setHiddenState(state)
+      setInitialized(true)
+    }
+    if (!open) {
+      setInitialized(false)
+    }
+  }, [open, initialized, categories])
 
   const handleAdd = () => {
     if (!newName.trim()) return
@@ -54,9 +73,20 @@ export function CategoryManager({ trigger, onChange }: { trigger?: React.ReactNo
     onChange?.()
   }
 
-  const handleToggleHidden = (key: string) => {
-    toggleCategoryHidden(key)
+  const handleToggleStaged = (key: string) => {
+    setHiddenState((prev) => ({ ...prev, [key]: !prev[key] }))
+  }
+
+  const handleSave = () => {
+    for (const cat of categories) {
+      const wasHidden = isCategoryHidden(cat.key)
+      const wantHidden = hiddenState[cat.key] ?? false
+      if (wasHidden !== wantHidden) {
+        toggleCategoryHidden(cat.key)
+      }
+    }
     onChange?.()
+    setOpen(false)
   }
 
   return (
@@ -74,7 +104,7 @@ export function CategoryManager({ trigger, onChange }: { trigger?: React.ReactNo
         </DialogHeader>
         <div className="grid grid-cols-4 gap-2">
           {categories.map((cat) => {
-            const hidden = isCategoryHidden(cat.key)
+            const hidden = hiddenState[cat.key] ?? false
             return (
               <div key={cat.key} className="flex flex-col items-center gap-1.5 p-2 rounded-lg border text-center">
                 <span className="h-4 w-4 rounded-full shrink-0" style={{ backgroundColor: cat.color }} />
@@ -83,7 +113,7 @@ export function CategoryManager({ trigger, onChange }: { trigger?: React.ReactNo
                 </span>
                 <Switch
                   checked={!hidden}
-                  onCheckedChange={() => handleToggleHidden(cat.key)}
+                  onCheckedChange={() => handleToggleStaged(cat.key)}
                   className={hidden ? "data-[state=unchecked]:bg-red-500" : "data-[state=checked]:bg-green-500"}
                 />
                 {!isBuiltin(cat.key) && (
@@ -141,6 +171,12 @@ export function CategoryManager({ trigger, onChange }: { trigger?: React.ReactNo
             {t("Add category")}
           </Button>
         )}
+
+        <div className="mt-4 flex justify-end">
+          <Button size="sm" onClick={handleSave}>
+            {t("Save")}
+          </Button>
+        </div>
       </DialogContent>
     </Dialog>
   )

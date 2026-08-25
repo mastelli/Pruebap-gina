@@ -88,7 +88,10 @@ export function storeCategory(id: string, category: TransactionCategory) {
 
 // Tipo efectivo de un movimiento: manual si existe, automatico si no
 export function getCategoryFor(transaction: { id: string; name: string; amount: number }): TransactionCategory {
-  return getStoredCategory(transaction.id) ?? classifyTransaction(transaction)
+  const manual = getStoredCategory(transaction.id)
+  if (manual && !isCategoryHidden(manual)) return manual
+  const auto = classifyTransaction(transaction)
+  return isCategoryHidden(auto) ? "Other" : auto
 }
 
 // Clasifica cualquier movimiento en una de las categorias del dashboard
@@ -168,6 +171,24 @@ export function toggleCategoryHidden(key: string) {
   const hidden = loadHiddenCategories()
   const next = hidden.includes(key) ? hidden.filter((k) => k !== key) : [...hidden, key]
   saveHiddenCategories(next)
+  // When hiding a category, clear manual overrides for that category
+  // so those transactions fall back to auto-classification → "Other"
+  if (!hidden.includes(key)) {
+    const overrides = loadOverrides()
+    let changed = false
+    for (const [txId, cat] of Object.entries(overrides)) {
+      if (cat === key) {
+        delete overrides[txId]
+        changed = true
+      }
+    }
+    if (changed) {
+      cachedOverrides = overrides
+      try {
+        writeStorage(OVERRIDES_STORAGE_KEY, JSON.stringify(overrides))
+      } catch {}
+    }
+  }
 }
 
 export function addCustomCategory(cat: CustomCategoryDef) {

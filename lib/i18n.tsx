@@ -28,6 +28,7 @@ const translations: Record<string, string> = {
   Show: "Mostrar",
   Hide: "Ocultar",
   Add: "Añadir",
+  Save: "Guardar",
   Send: "Enviar",
   Request: "Solicitar",
   More: "Más",
