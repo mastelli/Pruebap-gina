@@ -1,6 +1,7 @@
 ﻿"use client"
 
 import { createContext, useContext, useEffect, useRef } from "react"
+import { cloudGet, cloudGetAll, cloudSet, cloudSetBatch } from "./cloud-storage"
 
 export function ageFromBirthDate(birthDate: string): number | null {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(birthDate)) return null
@@ -48,11 +49,13 @@ export function storageGetItem(base: string): string | null {
 export function storageSetItem(base: string, value: string): void {
   if (!currentUserId) return
   try {
-    window.localStorage.setItem(accountStorageKey(base), value)
+    const key = accountStorageKey(base)
+    window.localStorage.setItem(key, value)
+    // Background sync to Supabase (fire and forget)
+    cloudSet(key, JSON.parse(value)).catch(() => {})
   } catch {}
 }
 
-// Read from localStorage with userId prefix, falling back to unprefixed key
 export function readStorage(base: string): string | null {
   try {
     const prefixed = currentUserId ? `${base}::${currentUserId}` : null
@@ -66,11 +69,13 @@ export function readStorage(base: string): string | null {
   }
 }
 
-// Write to localStorage with userId prefix
 export function writeStorage(base: string, value: string): void {
   if (!currentUserId) return
   try {
-    window.localStorage.setItem(accountStorageKey(base), value)
+    const key = accountStorageKey(base)
+    window.localStorage.setItem(key, value)
+    // Background sync to Supabase (fire and forget)
+    cloudSet(key, JSON.parse(value)).catch(() => {})
   } catch {}
 }
 
@@ -90,7 +95,8 @@ const MIGRATE_KEYS = [
   "appHiddenCategories",
 ]
 
-function migrateIfNeeded(userId: string) {
+// Migrate unprefixed localStorage → prefixed (for existing users before Clerk)
+function migrateLocalStorageKeys(userId: string) {
   try {
     for (const key of MIGRATE_KEYS) {
       const prefixedKey = `${key}::${userId}`
@@ -98,6 +104,21 @@ function migrateIfNeeded(userId: string) {
       const old = window.localStorage.getItem(key)
       if (old !== null) {
         window.localStorage.setItem(prefixedKey, old)
+      }
+    }
+  } catch {}
+}
+
+// Pull all data from Supabase → localStorage (runs on login)
+async function syncFromCloud(userId: string) {
+  try {
+    const allData = await cloudGetAll()
+    if (!allData || Object.keys(allData).length === 0) return
+    for (const [key, value] of Object.entries(allData)) {
+      // key format: "appTransactions::user_xxx"
+      // Only sync if we don't already have it locally
+      if (window.localStorage.getItem(key) === null && value !== null) {
+        window.localStorage.setItem(key, typeof value === "string" ? value : JSON.stringify(value))
       }
     }
   } catch {}
@@ -128,21 +149,27 @@ export function useAuth() {
 export function AuthProvider({ children, value }: { children: React.ReactNode; value: AuthState }) {
   const prevUserIdRef = useRef<string | null>(null)
 
-  // Set currentUserId SYNCHRONOUSLY during render so that any child
-  // component calling storageGetItem in its own mount/useEffect will
-  // already see the correct userId (no race condition).
+  // Set currentUserId SYNCHRONOUSLY during render
   if (value.userId !== currentUserId) {
     currentUserId = value.userId
     storageVersion++
     for (const l of storageVersionListeners) l()
   }
 
-  // Migrate old localStorage data when userId changes
   useEffect(() => {
     if (!value.userId) return
     if (prevUserIdRef.current === value.userId) return
     prevUserIdRef.current = value.userId
-    migrateIfNeeded(value.userId)
+
+    // 1. Migrate old unprefixed localStorage → prefixed
+    migrateLocalStorageKeys(value.userId)
+
+    // 2. Pull from Supabase → localStorage
+    syncFromCloud(value.userId).then(() => {
+      // Force re-load in providers after cloud sync completes
+      storageVersion++
+      for (const l of storageVersionListeners) l()
+    })
   }, [value.userId])
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
