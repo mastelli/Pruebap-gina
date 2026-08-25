@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -11,7 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Wallet, Trash2 } from "lucide-react"
+import { Wallet, Trash2, RotateCcw, Calendar } from "lucide-react"
 import { useLanguage } from "@/lib/i18n"
 import { useTransactions, sortByDateDesc } from "@/lib/transactions"
 import {
@@ -24,39 +24,66 @@ import {
   type TransactionCategory,
 } from "@/lib/categories"
 
-const MONTHS = [
-  "January",
-  "February",
-  "March",
-  "April",
-  "May",
-  "June",
-  "July",
-  "August",
-  "September",
-  "October",
-  "November",
-  "December",
-]
+function getCurrentMonthRange(): { from: string; to: string } {
+  const now = new Date()
+  const y = now.getFullYear()
+  const m = String(now.getMonth() + 1).padStart(2, "0")
+  const d = String(now.getDate()).padStart(2, "0")
+  return { from: `${y}-${m}-01`, to: `${y}-${m}-${d}` }
+}
 
-function getCurrentMonth(): string {
-  return String(new Date().getMonth() + 1).padStart(2, "0")
+function toISODate(dateStr: string): string {
+  if (!dateStr) return ""
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr
+  const parts = dateStr.split("/")
+  if (parts.length === 3) return `${parts[2]}-${parts[1]}-${parts[0]}`
+  return dateStr
 }
 
 export default function TransactionsPage() {
   const { t } = useLanguage()
   const { transactions, removeTransaction } = useTransactions()
-  const [selectedMonth, setSelectedMonth] = useState<string>(getCurrentMonth)
+
+  const defaultRange = getCurrentMonthRange()
+  const [dateFrom, setDateFrom] = useState(defaultRange.from)
+  const [dateTo, setDateTo] = useState(defaultRange.to)
+  const [categoryFilter, setCategoryFilter] = useState<string>("all")
   const [overrides, setOverrides] = useState<Record<string, TransactionCategory>>({})
+
+  const isCustomRange = dateFrom !== defaultRange.from || dateTo !== defaultRange.to
+
+  const resetRange = () => {
+    const r = getCurrentMonthRange()
+    setDateFrom(r.from)
+    setDateTo(r.to)
+  }
 
   const handleTypeChange = (id: string, category: TransactionCategory) => {
     storeCategory(id, category)
     setOverrides((prev) => ({ ...prev, [id]: category }))
   }
 
-  const monthMovements = sortByDateDesc(
-    transactions.filter((transaction) => transaction.date.slice(5, 7) === selectedMonth),
-  )
+  const filteredTransactions = useMemo(() => {
+    const from = toISODate(dateFrom)
+    const to = toISODate(dateTo)
+    return sortByDateDesc(
+      transactions.filter((transaction) => {
+        const d = toISODate(transaction.date)
+        if (d < from || d > to) return false
+        if (categoryFilter !== "all") {
+          const cat = overrides[transaction.id] ?? getStoredCategory(transaction.id) ?? classifyTransaction(transaction)
+          if (cat !== categoryFilter) return false
+        }
+        return true
+      }),
+    )
+  }, [transactions, dateFrom, dateTo, categoryFilter, overrides])
+
+  const allCategories = useMemo(() => {
+    const expense = EXPENSE_CATEGORY_DEFS.map((def) => def.key)
+    const all = [...INCOME_CATEGORIES, ...expense]
+    return all.sort((a, b) => t(a).localeCompare(t(b), "es"))
+  }, [t])
 
   return (
     <div className="space-y-6">
@@ -65,15 +92,37 @@ export default function TransactionsPage() {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 gap-4">
           <CardTitle className="text-lg font-medium">{t("All Transactions")}</CardTitle>
-          <div className="flex items-center gap-4">
-            <Select value={selectedMonth} onValueChange={setSelectedMonth}>
+          <div className="flex items-center gap-3 flex-wrap">
+            <div className="flex items-center gap-2">
+              <Calendar className="h-4 w-4 text-muted-foreground" />
+              <input
+                type="date"
+                value={dateFrom}
+                onChange={(e) => setDateFrom(e.target.value)}
+                className="h-9 rounded-md border bg-background px-3 text-sm"
+              />
+              <span className="text-sm text-muted-foreground">-</span>
+              <input
+                type="date"
+                value={dateTo}
+                onChange={(e) => setDateTo(e.target.value)}
+                className="h-9 rounded-md border bg-background px-3 text-sm"
+              />
+            </div>
+            {isCustomRange && (
+              <Button variant="ghost" size="icon" className="h-9 w-9" onClick={resetRange} title={t("Reset")}>
+                <RotateCcw className="h-4 w-4" />
+              </Button>
+            )}
+            <Select value={categoryFilter} onValueChange={setCategoryFilter}>
               <SelectTrigger className="w-[180px]">
-                <SelectValue />
+                <SelectValue placeholder={t("All categories")} />
               </SelectTrigger>
               <SelectContent className="max-h-[480px]">
-                {MONTHS.map((month, index) => (
-                  <SelectItem key={month} value={String(index + 1).padStart(2, "0")}>
-                    {t(month)}
+                <SelectItem value="all">{t("All categories")}</SelectItem>
+                {allCategories.map((cat) => (
+                  <SelectItem key={cat} value={cat}>
+                    {t(cat)}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -83,7 +132,7 @@ export default function TransactionsPage() {
         </CardHeader>
         <CardContent>
           <div className="divide-y divide-border">
-            {monthMovements.map((transaction) => {
+            {filteredTransactions.map((transaction) => {
               const category =
                 overrides[transaction.id] ??
                 getStoredCategory(transaction.id) ??
@@ -91,7 +140,7 @@ export default function TransactionsPage() {
               const options =
                 transaction.amount >= 0
                   ? INCOME_CATEGORIES
-                  : EXPENSE_CATEGORY_DEFS.map((def) => def.key).sort((a, b) => t(a).localeCompare(t(b), "es"))
+                  : allCategories
               return (
                 <div key={transaction.id} className="flex items-center justify-between gap-4 py-3">
                   <div className="min-w-0">
@@ -140,7 +189,7 @@ export default function TransactionsPage() {
                 </div>
               )
             })}
-            {monthMovements.length === 0 && (
+            {filteredTransactions.length === 0 && (
               <p className="py-8 text-center text-sm text-muted-foreground">{t("No transactions yet")}</p>
             )}
           </div>

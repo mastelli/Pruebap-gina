@@ -19,6 +19,8 @@ const translations: Record<string, string> = {
   Home: "Inicio",
   Profile: "Perfil",
   "Log out": "Cerrar sesión",
+  Reset: "Restablecer",
+  "All categories": "Todas las categorías",
   Add: "Añadir",
   Send: "Enviar",
   Request: "Solicitar",
