@@ -73,6 +73,7 @@ const translations: Record<string, string> = {
   Checking: "Corriente",
   "Savings/Investment": "Ahorro/Inversión",
   "Savings and Investment": "Ahorro e Inversión",
+  Debt: "Deuda",
   "Total Income": "Total ingresos",
   "Average Income": "Media Ingresos",
   "Total Expenses": "Total gastos",

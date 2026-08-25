@@ -15,7 +15,6 @@ import { ExpenseDoughnut, ExpenseTotal } from "@/components/analytics/expense-do
 import { ExpenseTypes } from "@/components/analytics/expense-types"
 import { ExpenseList } from "@/components/analytics/expense-list"
 import { ExpenseHistory } from "@/components/analytics/expense-history"
-import { PortfolioPanel } from "@/components/analytics/portfolio-panel"
 import { Button } from "@/components/ui/button"
 import { Download } from "lucide-react"
 import { useLanguage } from "@/lib/i18n"
@@ -46,7 +45,7 @@ function AnalyticsContent() {
           <TabsTrigger value="overview">{t("Overview")}</TabsTrigger>
           <TabsTrigger value="income">{t("Revenue")}</TabsTrigger>
           <TabsTrigger value="expenses">{t("Expenses")}</TabsTrigger>
-          <TabsTrigger value="savings">{t("Savings/Investment")}</TabsTrigger>
+          <TabsTrigger value="savings">{t("Debt")}</TabsTrigger>
         </TabsList>
         <TabsContent value="overview" className="space-y-4">
           <OverviewTab />
@@ -109,8 +108,7 @@ function AnalyticsContent() {
           />
         </TabsContent>
         <TabsContent value="savings" className="space-y-4">
-          <PortfolioPanel />
-          <MetricTab titleKey="Savings/Investment" />
+          <MetricTab titleKey="Debt" />
         </TabsContent>
       </Tabs>
     </div>
