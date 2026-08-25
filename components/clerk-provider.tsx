@@ -14,6 +14,7 @@ function ClerkAuthProvider({ children }: { children: React.ReactNode }) {
     ? (user?.primaryEmailAddress?.emailAddress ?? user?.emailAddresses?.[0]?.emailAddress ?? null)
     : null
   const name = isSignedIn ? (user?.firstName ?? null) : null
+  const lastName = isSignedIn ? (user?.lastName ?? null) : null
   const userId = isSignedIn ? (user?.id ?? null) : null
 
   const logout = async () => {
@@ -22,7 +23,7 @@ function ClerkAuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <AuthProvider value={{ email, name, ready: isLoaded, userId, logout }}>
+    <AuthProvider value={{ email, name, lastName, ready: isLoaded, userId, logout }}>
       {children}
     </AuthProvider>
   )

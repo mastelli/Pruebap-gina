@@ -42,6 +42,7 @@ export function storageSetItem(base: string, value: string): void {
 interface AuthState {
   email: string | null
   name: string | null
+  lastName: string | null
   ready: boolean
   userId: string | null
   logout: () => void
@@ -50,6 +51,7 @@ interface AuthState {
 const AuthContext = createContext<AuthState>({
   email: null,
   name: null,
+  lastName: null,
   ready: false,
   userId: null,
   logout: () => {},

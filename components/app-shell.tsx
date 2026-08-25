@@ -10,7 +10,7 @@ import { usePathname } from "next/navigation"
 import type React from "react"
 
 export function AppShell({ children }: { children: React.ReactNode }) {
-  const { ready, userId, email, name } = useAuth()
+  const { ready, userId, email, name, lastName } = useAuth()
   const { settings, updateSettings } = useSettings()
   const pathname = usePathname()
 
@@ -19,10 +19,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!userId || !email) return
     const updates: Record<string, string> = {}
-    if (!settings.fullName && name) updates.fullName = name
+    if (!settings.fullName && name) {
+      updates.fullName = lastName ? `${name} ${lastName}` : name
+    }
     if (!settings.email) updates.email = email
     if (Object.keys(updates).length > 0) updateSettings(updates)
-  }, [userId, email, name, settings.fullName, settings.email, updateSettings])
+  }, [userId, email, name, lastName, settings.fullName, settings.email, updateSettings])
 
   if (isAuthPage) {
     return <>{children}</>
