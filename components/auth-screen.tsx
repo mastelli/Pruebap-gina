@@ -12,7 +12,6 @@ export function AuthScreen() {
             card: "shadow-lg",
           },
         }}
-        routing="hash"
       />
     </div>
   )
