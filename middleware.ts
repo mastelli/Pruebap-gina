@@ -1,24 +1,36 @@
-import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server"
+import type { NextRequest } from "next/server"
+import { NextResponse } from "next/server"
 
 const hasValidKeys =
-  process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY &&
+  typeof process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY === "string" &&
   !process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY.includes("TU_CLAVE") &&
-  process.env.CLERK_SECRET_KEY &&
+  typeof process.env.CLERK_SECRET_KEY === "string" &&
   !process.env.CLERK_SECRET_KEY.includes("TU_CLAVE")
 
-const isPublicRoute = createRouteMatcher([
-  "/sign-in(.*)",
-  "/sign-up(.*)",
-  "/api(.*)",
-])
+let clerkHandler: ((req: NextRequest) => Promise<NextResponse>) | null = null
 
-export default hasValidKeys
-  ? clerkMiddleware(async (auth, request) => {
-      if (!isPublicRoute(request)) {
-        await auth.protect()
-      }
-    })
-  : undefined
+async function getClerkHandler() {
+  if (clerkHandler) return clerkHandler
+  const { clerkMiddleware, createRouteMatcher } = await import("@clerk/nextjs/server")
+  const isPublicRoute = createRouteMatcher([
+    "/sign-in(.*)",
+    "/sign-up(.*)",
+    "/api(.*)",
+  ])
+  const middleware = clerkMiddleware(async (auth, request) => {
+    if (!isPublicRoute(request)) {
+      await auth.protect()
+    }
+  })
+  clerkHandler = middleware as unknown as (req: NextRequest) => Promise<NextResponse>
+  return clerkHandler
+}
+
+export async function middleware(request: NextRequest) {
+  if (!hasValidKeys) return NextResponse.next()
+  const handler = await getClerkHandler()
+  return handler(request)
+}
 
 export const config = {
   matcher: [
