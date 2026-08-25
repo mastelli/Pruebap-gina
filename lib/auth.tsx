@@ -16,6 +16,17 @@ export function ageFromBirthDate(birthDate: string): number | null {
 }
 
 let currentUserId: string | null = null
+let storageVersion = 0
+let storageVersionListeners: Array<() => void> = []
+
+export function onStorageVersionChange(cb: () => void): () => void {
+  storageVersionListeners.push(cb)
+  return () => { storageVersionListeners = storageVersionListeners.filter((l) => l !== cb) }
+}
+
+export function getStorageVersion(): number {
+  return storageVersion
+}
 
 export function accountStorageKey(base: string): string {
   return currentUserId ? `${base}::${currentUserId}` : base
@@ -35,6 +46,7 @@ export function storageGetItem(base: string): string | null {
 }
 
 export function storageSetItem(base: string, value: string): void {
+  if (!currentUserId) return
   try {
     window.localStorage.setItem(accountStorageKey(base), value)
   } catch {}
@@ -56,6 +68,7 @@ export function readStorage(base: string): string | null {
 
 // Write to localStorage with userId prefix
 export function writeStorage(base: string, value: string): void {
+  if (!currentUserId) return
   try {
     window.localStorage.setItem(accountStorageKey(base), value)
   } catch {}
@@ -120,6 +133,8 @@ export function AuthProvider({ children, value }: { children: React.ReactNode; v
   // already see the correct userId (no race condition).
   if (value.userId !== currentUserId) {
     currentUserId = value.userId
+    storageVersion++
+    for (const l of storageVersionListeners) l()
   }
 
   // Migrate old localStorage data when userId changes

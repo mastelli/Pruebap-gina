@@ -1,7 +1,7 @@
 "use client"
 
 import { createContext, useContext, useEffect, useState } from "react"
-import { storageGetItem, storageSetItem } from "@/lib/auth"
+import { storageGetItem, storageSetItem, onStorageVersionChange } from "@/lib/auth"
 
 export interface UserSettings {
   avatar: string
@@ -76,7 +76,6 @@ const SettingsContext = createContext<SettingsContextType | undefined>(undefined
 
 export function SettingsProvider({ children }: { children: React.ReactNode }) {
   const [settings, setSettings] = useState<UserSettings>(() => {
-    // Try to load settings from localStorage during initialization
     if (typeof window !== "undefined") {
       const savedSettings = storageGetItem("userSettings")
       if (savedSettings) {
@@ -85,6 +84,16 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     }
     return defaultSettings
   })
+
+  // Re-load settings when userId changes
+  useEffect(() => {
+    return onStorageVersionChange(() => {
+      try {
+        const saved = storageGetItem("userSettings")
+        if (saved) setSettings(JSON.parse(saved))
+      } catch {}
+    })
+  }, [])
 
   // Save settings to localStorage whenever they change
   useEffect(() => {

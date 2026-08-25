@@ -1,7 +1,7 @@
 "use client"
 
 import { createContext, useContext, useEffect, useState } from "react"
-import { storageGetItem, storageSetItem } from "@/lib/auth"
+import { storageGetItem, storageSetItem, onStorageVersionChange } from "@/lib/auth"
 
 export interface Transaction {
   id: string
@@ -40,7 +40,14 @@ export function TransactionsProvider({ children }: { children: React.ReactNode }
   const [transactions, setTransactions] = useState<Transaction[]>(DEFAULT_TRANSACTIONS)
   const [checkingBalance, setCheckingBalanceState] = useState<number | null>(null)
   const [hydrated, setHydrated] = useState(false)
+  const [storageVer, setStorageVer] = useState(0)
 
+  // Re-load data when userId changes (storage version increments)
+  useEffect(() => {
+    return onStorageVersionChange(() => setStorageVer((v) => v + 1))
+  }, [])
+
+  // Load from storage — re-runs on each storageVer change
   useEffect(() => {
     try {
       const stored = storageGetItem(STORAGE_KEY)
@@ -50,9 +57,7 @@ export function TransactionsProvider({ children }: { children: React.ReactNode }
           const withoutDemos = parsed.filter(
             (transaction) => typeof transaction?.id === "string" && !transaction.id.startsWith("demo-"),
           )
-          if (withoutDemos.length > 0) {
-            setTransactions(withoutDemos)
-          }
+          setTransactions(withoutDemos)
         }
       }
 
@@ -67,18 +72,15 @@ export function TransactionsProvider({ children }: { children: React.ReactNode }
       // ignore corrupted storage
     }
     setHydrated(true)
-  }, [])
+  }, [storageVer])
 
+  // Only save AFTER hydration with a valid storage version
   useEffect(() => {
     if (!hydrated) return
     try {
       storageSetItem(STORAGE_KEY, JSON.stringify(transactions))
-      if (checkingBalance !== null) {
-        storageSetItem(BALANCE_STORAGE_KEY, String(checkingBalance))
-      }
-    } catch {
-      // storage unavailable
-    }
+      storageSetItem(BALANCE_STORAGE_KEY, String(checkingBalance ?? 0))
+    } catch {}
   }, [transactions, checkingBalance, hydrated])
 
   const addBankMovements = (movements: BankMovementInput[]): number => {

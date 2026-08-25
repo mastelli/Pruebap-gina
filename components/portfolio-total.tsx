@@ -1,7 +1,7 @@
 "use client"
 
 import { useCallback, useEffect, useState } from "react"
-import { storageGetItem, storageSetItem } from "@/lib/auth"
+import { storageGetItem, storageSetItem, onStorageVersionChange } from "@/lib/auth"
 
 const PORTFOLIO_STORAGE_KEY = "appPortfolio"
 const PRICES_STORAGE_KEY = "appPortfolioPrices"
@@ -33,6 +33,12 @@ function monthKey(offsetMonths = 0): string {
 export function usePortfolioEurTotal(): { total: number | null; momPct: number | null } {
   const [total, setTotal] = useState<number | null>(null)
   const [momPct, setMomPct] = useState<number | null>(null)
+
+  const [storageVer, setStorageVer] = useState(0)
+
+  useEffect(() => {
+    return onStorageVersionChange(() => setStorageVer((v) => v + 1))
+  }, [])
 
   const computeTotal = useCallback(async () => {
     try {
@@ -113,7 +119,7 @@ export function usePortfolioEurTotal(): { total: number | null; momPct: number |
     } catch {
       // almacenamiento no disponible o respuesta invalida
     }
-  }, [])
+  }, [storageVer])
 
   useEffect(() => {
     void computeTotal()
