@@ -51,8 +51,8 @@ export function storageSetItem(base: string, value: string): void {
   try {
     const key = accountStorageKey(base)
     window.localStorage.setItem(key, value)
-    // Background sync to Supabase (fire and forget)
-    cloudSet(key, JSON.parse(value)).catch(() => {})
+    // Background sync to Supabase — store raw JSON string
+    cloudSet(key, value).catch(() => {})
   } catch {}
 }
 
@@ -74,8 +74,8 @@ export function writeStorage(base: string, value: string): void {
   try {
     const key = accountStorageKey(base)
     window.localStorage.setItem(key, value)
-    // Background sync to Supabase (fire and forget)
-    cloudSet(key, JSON.parse(value)).catch(() => {})
+    // Background sync to Supabase — store raw JSON string
+    cloudSet(key, value).catch(() => {})
   } catch {}
 }
 
