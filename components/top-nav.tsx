@@ -49,7 +49,7 @@ export function TopNav() {
               <DropdownMenuItem asChild>
                 <Link href="/settings">{t("Settings")}</Link>
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={logout}>{t("Log out")}</DropdownMenuItem>
+              <DropdownMenuItem onSelect={(e) => { e.preventDefault(); logout() }}>{t("Log out")}</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

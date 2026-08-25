@@ -37,7 +37,7 @@ function FallbackAuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => setReady(true), [])
 
   return (
-    <AuthProvider value={{ email: null, name: null, ready, userId: null, logout: () => {} }}>
+    <AuthProvider value={{ email: null, name: null, ready, userId: null, logout: () => { localStorage.removeItem("appSession"); window.location.reload() } }}>
       {children}
     </AuthProvider>
   )
