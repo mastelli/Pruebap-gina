@@ -66,6 +66,36 @@ export function AuthProvider({ children, value }: { children: React.ReactNode; v
     currentUserId = value.userId
   }, [value.userId])
 
+  // Migrate old localStorage data (no userId prefix) to new prefixed keys
+  // Only runs once per user: skips if user already has prefixed data
+  useEffect(() => {
+    if (!value.userId) return
+    const migrateKeys = [
+      "appTransactions",
+      "appPortfolio",
+      "appPortfolioPrices",
+      "appPortfolioHistory",
+      "userSettings",
+      "appCheckingBalance",
+      "appInvoices",
+      "appChatMessages",
+      "appChatNotes",
+      "appExpenseBudgets",
+      "appCategoryOverrides",
+      "appCustomCategories",
+      "appHiddenCategories",
+    ]
+    for (const key of migrateKeys) {
+      const prefixedKey = `${key}::${value.userId}`
+      const hasNew = window.localStorage.getItem(prefixedKey) !== null
+      if (hasNew) continue // already migrated, skip
+      const old = window.localStorage.getItem(key)
+      if (old !== null) {
+        window.localStorage.setItem(prefixedKey, old)
+      }
+    }
+  }, [value.userId])
+
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }
 
