@@ -4,8 +4,13 @@ import { SignIn } from "@clerk/nextjs"
 
 export default function SignInPage() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#EAE4D8] dark:bg-background p-4">
-      <SignIn />
+    <div className="min-h-screen bg-[#EAE4D8] dark:bg-background">
+      <div className="pt-12 pb-4 text-center">
+        <h1 className="text-3xl font-bold tracking-tight">MakeItRight</h1>
+      </div>
+      <div className="flex items-center justify-center px-4">
+        <SignIn />
+      </div>
     </div>
   )
 }
