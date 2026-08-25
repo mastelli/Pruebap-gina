@@ -26,7 +26,7 @@ function ClerkAuthProvider({ children }: { children: React.ReactNode }) {
   const userId = isSignedIn ? (user?.id ?? null) : null
 
   return (
-    <AuthProvider value={{ email, name, ready, userId, logout: () => signOut() }}>
+    <AuthProvider value={{ email, name, ready, userId, logout: () => { signOut({ redirectUrl: "/sign-in" }) } }}>
       {children}
     </AuthProvider>
   )
