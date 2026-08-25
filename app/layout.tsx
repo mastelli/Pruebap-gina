@@ -3,9 +3,7 @@ import { Inter } from "next/font/google"
 import { ThemeProvider } from "@/components/theme-provider"
 import { LanguageProvider } from "@/lib/i18n"
 import { ClerkProvider } from "@/components/clerk-provider"
-import { AuthGate } from "@/components/auth-gate"
-import { Sidebar } from "@/components/sidebar"
-import { TopNav } from "@/components/top-nav"
+import { AppShell } from "@/components/app-shell"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { Toaster } from "@/components/ui/sonner"
 import { SettingsProvider } from "@/contexts/settings-context"
@@ -34,17 +32,7 @@ export default function RootLayout({
               <TooltipProvider delayDuration={0}>
                 <SettingsProvider>
                   <TransactionsProvider>
-                    <AuthGate>
-                      <div className="min-h-screen flex">
-                        <Sidebar />
-                        <div className="flex-1">
-                          <TopNav />
-                          <div className="container mx-auto p-6 max-w-7xl">
-                            <main className="w-full">{children}</main>
-                          </div>
-                        </div>
-                      </div>
-                    </AuthGate>
+                    <AppShell>{children}</AppShell>
                   </TransactionsProvider>
                 </SettingsProvider>
               </TooltipProvider>
