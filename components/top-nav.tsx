@@ -16,11 +16,13 @@ import { Button } from "@/components/ui/button"
 import { UserAvatar } from "@/components/user-avatar"
 import { useLanguage } from "@/lib/i18n"
 import { useAuth } from "@/lib/auth"
+import { useClerk } from "@clerk/nextjs"
 
 export function TopNav() {
   const { settings } = useSettings()
   const { t } = useLanguage()
-  const { logout, email } = useAuth()
+  const { email } = useAuth()
+  const { signOut } = useClerk()
 
   return (
     <header className="sticky top-0 z-40 border-b bg-[#C1B6A3] dark:bg-background">
@@ -49,7 +51,7 @@ export function TopNav() {
               <DropdownMenuItem asChild>
                 <Link href="/settings">{t("Settings")}</Link>
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={logout}>{t("Log out")}</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => signOut()}>{t("Log out")}</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
