@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useCallback } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -11,16 +11,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Wallet, Trash2, RotateCcw, Calendar } from "lucide-react"
+import { Trash2, RotateCcw, Calendar, Settings } from "lucide-react"
 import { useLanguage } from "@/lib/i18n"
 import { useTransactions, sortByDateDesc } from "@/lib/transactions"
+import { CategoryManager } from "@/components/category-manager"
 import {
   classifyTransaction,
   getCategoryFor,
   getStoredCategory,
   storeCategory,
   INCOME_CATEGORIES,
-  EXPENSE_CATEGORY_DEFS,
+  getAllExpenseCategories,
   type TransactionCategory,
 } from "@/lib/categories"
 
@@ -49,6 +50,7 @@ export default function TransactionsPage() {
   const [dateTo, setDateTo] = useState(defaultRange.to)
   const [categoryFilter, setCategoryFilter] = useState<string>("all")
   const [overrides, setOverrides] = useState<Record<string, TransactionCategory>>({})
+  const [catVersion, setCatVersion] = useState(0)
 
   const isCustomRange = dateFrom !== defaultRange.from || dateTo !== defaultRange.to
 
@@ -80,10 +82,10 @@ export default function TransactionsPage() {
   }, [transactions, dateFrom, dateTo, categoryFilter, overrides])
 
   const allCategories = useMemo(() => {
-    const expense = EXPENSE_CATEGORY_DEFS.map((def) => def.key)
+    const expense = getAllExpenseCategories().map((def) => def.key)
     const all = [...INCOME_CATEGORIES, ...expense]
     return all.sort((a, b) => t(a).localeCompare(t(b), "es"))
-  }, [t])
+  }, [t, catVersion])
 
   return (
     <div className="space-y-6">
@@ -127,7 +129,11 @@ export default function TransactionsPage() {
                 ))}
               </SelectContent>
             </Select>
-            <Wallet className="h-4 w-4 text-muted-foreground" />
+            <CategoryManager key={catVersion} onChange={() => setCatVersion((v) => v + 1)} trigger={
+              <Button variant="ghost" size="icon" className="h-9 w-9" title={t("Categories")}>
+                <Settings className="h-4 w-4" />
+              </Button>
+            } />
           </div>
         </CardHeader>
         <CardContent>

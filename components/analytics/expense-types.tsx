@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input"
 import { useLanguage } from "@/lib/i18n"
 import { useTransactions } from "@/lib/transactions"
 import { storageGetItem, storageSetItem } from "@/lib/auth"
-import { getCategoryFor, EXPENSE_CATEGORY_DEFS } from "@/lib/categories"
+import { getCategoryFor, getAllExpenseCategories } from "@/lib/categories"
 
 const BUDGETS_STORAGE_KEY = "appExpenseBudgets"
 
@@ -67,14 +67,15 @@ export function ExpenseTypes({ month }: { month: string }) {
   const now = new Date()
   const prefix = `${now.getFullYear()}-${month}`
 
+  const allDefs = getAllExpenseCategories()
   const spentByCategory: Record<string, number> = {}
-  for (const def of EXPENSE_CATEGORY_DEFS) spentByCategory[def.key] = 0
+  for (const def of allDefs) spentByCategory[def.key] = 0
   for (const transaction of transactions) {
     if (transaction.amount >= 0 || !transaction.date.startsWith(prefix)) continue
     spentByCategory[getCategoryFor(transaction)] += Math.abs(transaction.amount)
   }
 
-  const sortedDefs = [...EXPENSE_CATEGORY_DEFS].sort((a, b) => t(a.key).localeCompare(t(b.key), "es"))
+  const sortedDefs = [...allDefs].sort((a, b) => t(a.key).localeCompare(t(b.key), "es"))
 
   return (
     <div className="space-y-4 px-2">
