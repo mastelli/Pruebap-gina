@@ -16,6 +16,7 @@ import {
   HelpCircle,
   Menu,
   ChevronLeft,
+  PiggyBank,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -25,6 +26,7 @@ import { useLanguage } from "@/lib/i18n"
 const navigation = [
   { name: "Dashboard", href: "/", icon: Home },
   { name: "Analytics", href: "/analytics", icon: BarChart2 },
+  { name: "Savings and Investment", href: "/investment", icon: PiggyBank },
   { name: "Transactions", href: "/transactions", icon: Wallet },
   { name: "Invoices", href: "/invoices", icon: Receipt },
   { name: "Payments", href: "/payments", icon: CreditCard },
