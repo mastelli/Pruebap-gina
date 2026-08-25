@@ -22,6 +22,7 @@ export function accountStorageKey(base: string): string {
 }
 
 export function storageGetItem(base: string): string | null {
+  if (!currentUserId) return null
   try {
     return window.localStorage.getItem(accountStorageKey(base))
   } catch {
@@ -30,6 +31,7 @@ export function storageGetItem(base: string): string | null {
 }
 
 export function storageSetItem(base: string, value: string): void {
+  if (!currentUserId) return
   try {
     window.localStorage.setItem(accountStorageKey(base), value)
   } catch {

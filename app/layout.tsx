@@ -34,17 +34,17 @@ export default function RootLayout({
               <TooltipProvider delayDuration={0}>
                 <SettingsProvider>
                   <TransactionsProvider>
-                <AuthGate>
-                  <div className="min-h-screen flex">
-                    <Sidebar />
-                    <div className="flex-1">
-                      <TopNav />
-                      <div className="container mx-auto p-6 max-w-7xl">
-                        <main className="w-full">{children}</main>
+                    <AuthGate>
+                      <div className="min-h-screen flex">
+                        <Sidebar />
+                        <div className="flex-1">
+                          <TopNav />
+                          <div className="container mx-auto p-6 max-w-7xl">
+                            <main className="w-full">{children}</main>
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  </div>
-                </AuthGate>
+                    </AuthGate>
                   </TransactionsProvider>
                 </SettingsProvider>
               </TooltipProvider>
