@@ -289,13 +289,7 @@ export function PortfolioPanel() {
   const refreshPrices = useCallback(async (list: Asset[], force = false) => {
     if (list.length === 0) return
     try {
-      let cached: PriceMap = {}
-      try {
-        const raw = storageGetItem(PRICES_STORAGE_KEY)
-        if (raw) cached = JSON.parse(raw) as PriceMap
-      } catch {
-        cached = {}
-      }
+      const cached = pricesRef.current
 
       const pending = force
         ? list
@@ -546,8 +540,8 @@ export function PortfolioPanel() {
         const stale = assets.filter((asset) => {
           const info = pricesRef.current[asset.isin]
           if (!info?.symbol) return true
-          if (info.marketOpen === false) return false
           const lastTick = lastTickRef.current[asset.isin]
+          if (lastTick && info.marketOpen === false) return false
           return !lastTick || now - lastTick > STALE_TICK_MS
         })
         if (stale.length > 0) void refreshPrices(stale, true)
