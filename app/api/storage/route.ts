@@ -1,17 +1,18 @@
 import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@clerk/nextjs/server"
-import { supabaseAdmin } from "@/lib/supabase-server"
+import { getSupabaseAdmin } from "@/lib/supabase-server"
 
 // GET /api/storage?key=xxx — read one key
-// GET /api/storage/all — read all keys for the user
+// GET /api/storage?key=all — read all keys for the user
 export async function GET(req: NextRequest) {
   const { userId } = await auth()
   if (!userId) return NextResponse.json({ error: "unauthorized" }, { status: 401 })
 
+  const db = getSupabaseAdmin()
   const key = req.nextUrl.searchParams.get("key")
 
   if (key === "all") {
-    const { data, error } = await supabaseAdmin
+    const { data, error } = await db
       .from("user_data")
       .select("key, value")
       .eq("user_id", userId)
@@ -23,7 +24,7 @@ export async function GET(req: NextRequest) {
 
   if (!key) return NextResponse.json({ error: "key required" }, { status: 400 })
 
-  const { data, error } = await supabaseAdmin
+  const { data, error } = await db
     .from("user_data")
     .select("value")
     .eq("user_id", userId)
@@ -39,6 +40,7 @@ export async function POST(req: NextRequest) {
   const { userId } = await auth()
   if (!userId) return NextResponse.json({ error: "unauthorized" }, { status: 401 })
 
+  const db = getSupabaseAdmin()
   const body = await req.json()
 
   if (body.items && Array.isArray(body.items)) {
@@ -47,7 +49,7 @@ export async function POST(req: NextRequest) {
       key: item.key,
       value: item.value,
     }))
-    const { error } = await supabaseAdmin
+    const { error } = await db
       .from("user_data")
       .upsert(rows, { onConflict: "user_id,key" })
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
@@ -56,7 +58,7 @@ export async function POST(req: NextRequest) {
 
   if (!body.key) return NextResponse.json({ error: "key required" }, { status: 400 })
 
-  const { error } = await supabaseAdmin
+  const { error } = await db
     .from("user_data")
     .upsert({ user_id: userId, key: body.key, value: body.value }, { onConflict: "user_id,key" })
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
@@ -69,10 +71,11 @@ export async function DELETE(req: NextRequest) {
   const { userId } = await auth()
   if (!userId) return NextResponse.json({ error: "unauthorized" }, { status: 401 })
 
+  const db = getSupabaseAdmin()
   const key = req.nextUrl.searchParams.get("key")
   if (!key) return NextResponse.json({ error: "key required" }, { status: 400 })
 
-  const { error } = await supabaseAdmin
+  const { error } = await db
     .from("user_data")
     .delete()
     .eq("user_id", userId)
