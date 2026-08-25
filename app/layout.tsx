@@ -34,8 +34,8 @@ export default function RootLayout({
               <TooltipProvider delayDuration={0}>
                 <SettingsProvider>
                   <TransactionsProvider>
-                <div className="min-h-screen flex">
-                  <AuthGate>
+                <AuthGate>
+                  <div className="min-h-screen flex">
                     <Sidebar />
                     <div className="flex-1">
                       <TopNav />
@@ -43,8 +43,8 @@ export default function RootLayout({
                         <main className="w-full">{children}</main>
                       </div>
                     </div>
-                  </AuthGate>
-                </div>
+                  </div>
+                </AuthGate>
                   </TransactionsProvider>
                 </SettingsProvider>
               </TooltipProvider>
