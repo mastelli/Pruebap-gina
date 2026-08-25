@@ -1,15 +1,12 @@
 "use client"
 
-import { SignedIn, SignedOut } from "@clerk/nextjs"
+import { useAuth } from "@/lib/auth"
 import { AuthScreen } from "./auth-screen"
 
 export function AuthGate({ children }: { children: React.ReactNode }) {
-  return (
-    <>
-      <SignedIn>{children}</SignedIn>
-      <SignedOut>
-        <AuthScreen />
-      </SignedOut>
-    </>
-  )
+  const { ready, userId } = useAuth()
+
+  if (!ready) return null
+  if (!userId) return <AuthScreen />
+  return <>{children}</>
 }

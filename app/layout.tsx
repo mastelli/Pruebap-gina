@@ -3,6 +3,7 @@ import { Inter } from "next/font/google"
 import { ThemeProvider } from "@/components/theme-provider"
 import { LanguageProvider } from "@/lib/i18n"
 import { ClerkProvider } from "@/components/clerk-provider"
+import { AuthGate } from "@/components/auth-gate"
 import { Sidebar } from "@/components/sidebar"
 import { TopNav } from "@/components/top-nav"
 import { TooltipProvider } from "@/components/ui/tooltip"
@@ -33,15 +34,17 @@ export default function RootLayout({
               <TooltipProvider delayDuration={0}>
                 <SettingsProvider>
                   <TransactionsProvider>
-                    <div className="min-h-screen flex">
-                      <Sidebar />
-                      <div className="flex-1">
-                        <TopNav />
-                        <div className="container mx-auto p-6 max-w-7xl">
-                          <main className="w-full">{children}</main>
-                        </div>
+                <div className="min-h-screen flex">
+                  <AuthGate>
+                    <Sidebar />
+                    <div className="flex-1">
+                      <TopNav />
+                      <div className="container mx-auto p-6 max-w-7xl">
+                        <main className="w-full">{children}</main>
                       </div>
                     </div>
+                  </AuthGate>
+                </div>
                   </TransactionsProvider>
                 </SettingsProvider>
               </TooltipProvider>

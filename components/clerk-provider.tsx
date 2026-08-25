@@ -17,6 +17,7 @@ function ClerkAuthProvider({ children }: { children: React.ReactNode }) {
   const userId = isSignedIn ? (user?.id ?? null) : null
 
   const logout = async () => {
+    try { localStorage.clear() } catch {}
     await signOut({ redirectUrl: "/sign-in" })
   }
 
