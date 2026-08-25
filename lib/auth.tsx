@@ -1,7 +1,6 @@
 ﻿"use client"
 
-import { useCallback, useEffect, useRef, useState } from "react"
-import { useUser, useAuth as useClerkAuth } from "@clerk/nextjs"
+import { createContext, useCallback, useContext, useEffect, useState } from "react"
 
 const ACCOUNTS_KEY = "appAccounts"
 const MIGRATED_KEY = "appMigratedToClerk"
@@ -84,33 +83,38 @@ function migrateFromLocalStorage(clerkUserId: string, email: string | null) {
   }
 }
 
-export function useAuth() {
-  const { isSignedIn, isLoaded } = useClerkAuth()
-  const { user } = useUser()
-
-  const email = isSignedIn ? (user?.primaryEmailAddress?.emailAddress ?? user?.emailAddresses?.[0]?.emailAddress ?? null) : null
-  const name = isSignedIn ? (user?.firstName ?? null) : null
-  const ready = isLoaded
-
-  useEffect(() => {
-    if (isSignedIn && user) {
-      currentUserId = user.id
-    } else {
-      currentUserId = null
-    }
-  }, [isSignedIn, user])
-
-  useEffect(() => {
-    if (isSignedIn && user && email) {
-      migrateFromLocalStorage(user.id, email)
-    }
-  }, [isSignedIn, user, email])
-
-  return { email, name, ready }
+interface AuthState {
+  email: string | null
+  name: string | null
+  ready: boolean
+  userId: string | null
+  logout: () => void
 }
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
-  return <>{children}</>
+const AuthContext = createContext<AuthState>({
+  email: null,
+  name: null,
+  ready: false,
+  userId: null,
+  logout: () => {},
+})
+
+export function useAuth() {
+  return useContext(AuthContext)
+}
+
+export function AuthProvider({ children, value }: { children: React.ReactNode; value: AuthState }) {
+  useEffect(() => {
+    currentUserId = value.userId
+  }, [value.userId])
+
+  useEffect(() => {
+    if (value.userId && value.email) {
+      migrateFromLocalStorage(value.userId, value.email)
+    }
+  }, [value.userId, value.email])
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }
 
 export function AuthGate({ children }: { children: React.ReactNode }) {
