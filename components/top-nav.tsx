@@ -20,7 +20,10 @@ import { useAuth } from "@/lib/auth"
 export function TopNav() {
   const { settings } = useSettings()
   const { t } = useLanguage()
-  const { email, logout } = useAuth()
+  const { email, name, logout } = useAuth()
+
+  const displayName = name ?? settings.fullName
+  const displayEmail = email ?? ""
 
   return (
     <header className="sticky top-0 z-40 border-b bg-[#C1B6A3] dark:bg-background">
@@ -32,14 +35,14 @@ export function TopNav() {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                <UserAvatar name={settings.fullName} className="h-8 w-8 text-xs" />
+                <UserAvatar name={displayName} className="h-8 w-8 text-xs" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-56" align="end" forceMount>
               <DropdownMenuLabel className="font-normal">
                 <div className="flex flex-col space-y-1">
-                  <p className="text-sm font-medium leading-none">{settings.fullName}</p>
-                  <p className="text-xs leading-none text-muted-foreground">{email ?? settings.email}</p>
+                  <p className="text-sm font-medium leading-none">{displayName}</p>
+                  <p className="text-xs leading-none text-muted-foreground">{displayEmail}</p>
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
