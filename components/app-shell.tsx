@@ -30,7 +30,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     return <>{children}</>
   }
 
-  if (!ready || !userId) {
+  if (!ready) {
+    return null
+  }
+
+  if (!userId) {
     return <AuthScreen />
   }
 
