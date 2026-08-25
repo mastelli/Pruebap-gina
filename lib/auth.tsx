@@ -1,23 +1,6 @@
 ﻿"use client"
 
-import { createContext, useCallback, useContext, useEffect, useState } from "react"
-
-const ACCOUNTS_KEY = "appAccounts"
-const MIGRATED_KEY = "appMigratedToClerk"
-
-const STORAGE_KEYS = [
-  "appPortfolio",
-  "appPortfolioPrices",
-  "appPortfolioHistory",
-  "userSettings",
-  "appTransactions",
-  "appCheckingBalance",
-  "appInvoices",
-  "appChatMessages",
-  "appChatNotes",
-  "appExpenseBudgets",
-  "appCategoryOverrides",
-]
+import { createContext, useContext, useEffect } from "react"
 
 export function ageFromBirthDate(birthDate: string): number | null {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(birthDate)) return null
@@ -54,35 +37,6 @@ export function storageSetItem(base: string, value: string): void {
   }
 }
 
-function migrateFromLocalStorage(clerkUserId: string, email: string | null) {
-  if (!email) return
-  try {
-    const migrated = localStorage.getItem(MIGRATED_KEY)
-    const migratedEmails: string[] = migrated ? JSON.parse(migrated) : []
-    if (migratedEmails.includes(email)) return
-
-    const accountsRaw = localStorage.getItem(ACCOUNTS_KEY)
-    if (accountsRaw) {
-      const accounts = JSON.parse(accountsRaw)
-      if (accounts[email]) {
-        for (const key of STORAGE_KEYS) {
-          const oldKey = `${key}::${email}`
-          const newKey = `${key}::${clerkUserId}`
-          const data = localStorage.getItem(oldKey)
-          if (data !== null && localStorage.getItem(newKey) === null) {
-            localStorage.setItem(newKey, data)
-          }
-        }
-      }
-    }
-
-    migratedEmails.push(email)
-    localStorage.setItem(MIGRATED_KEY, JSON.stringify(migratedEmails))
-  } catch {
-    // migracion silenciosa
-  }
-}
-
 interface AuthState {
   email: string | null
   name: string | null
@@ -107,12 +61,6 @@ export function AuthProvider({ children, value }: { children: React.ReactNode; v
   useEffect(() => {
     currentUserId = value.userId
   }, [value.userId])
-
-  useEffect(() => {
-    if (value.userId && value.email) {
-      migrateFromLocalStorage(value.userId, value.email)
-    }
-  }, [value.userId, value.email])
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }

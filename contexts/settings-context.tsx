@@ -35,9 +35,9 @@ export interface UserSettings {
 }
 
 const defaultSettings: UserSettings = {
-  avatar: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/38184074.jpg-M4vCjTSSWVw5RwWvvmrxXBcNVU8MBU.jpeg",
-  fullName: "Dollar Singh",
-  email: "dollar.singh@example.com",
+  avatar: "",
+  fullName: "",
+  email: "",
   birthDate: "",
   timezone: "utc-8",
   language: "en",
