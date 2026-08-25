@@ -1,6 +1,6 @@
 import { isElectricityBill, isInternetBill, isWaterBill, isSubscription } from "./bill-companies"
 import { normalize } from "./bill-companies"
-import { accountStorageKey } from "./auth"
+import { accountStorageKey, readStorage, writeStorage } from "./auth"
 
 // Palabras clave de nomina y transferencia (sin acentos; el nombre se
 // normaliza antes de comparar)
@@ -65,7 +65,7 @@ function loadOverrides(): CategoryOverrides {
   const storageKey = accountStorageKey(OVERRIDES_STORAGE_KEY)
   if (cachedOverrides && cachedStorageKey === storageKey) return cachedOverrides
   try {
-    const raw = window.localStorage.getItem(storageKey)
+    const raw = readStorage(OVERRIDES_STORAGE_KEY)
     cachedOverrides = raw ? (JSON.parse(raw) as CategoryOverrides) : {}
     cachedStorageKey = storageKey
   } catch {
@@ -82,10 +82,8 @@ export function getStoredCategory(id: string): TransactionCategory | undefined {
 export function storeCategory(id: string, category: TransactionCategory) {
   cachedOverrides = { ...loadOverrides(), [id]: category }
   try {
-    window.localStorage.setItem(cachedStorageKey ?? accountStorageKey(OVERRIDES_STORAGE_KEY), JSON.stringify(cachedOverrides))
-  } catch {
-    // almacenamiento no disponible
-  }
+    writeStorage(OVERRIDES_STORAGE_KEY, JSON.stringify(cachedOverrides))
+  } catch {}
 }
 
 // Tipo efectivo de un movimiento: manual si existe, automatico si no
@@ -130,7 +128,7 @@ export interface CustomCategoryDef {
 
 function loadCustomCategories(): CustomCategoryDef[] {
   try {
-    const raw = window.localStorage.getItem(accountStorageKey(CUSTOM_CATEGORIES_KEY))
+    const raw = readStorage(CUSTOM_CATEGORIES_KEY)
     return raw ? JSON.parse(raw) : []
   } catch {
     return []
@@ -139,13 +137,13 @@ function loadCustomCategories(): CustomCategoryDef[] {
 
 function saveCustomCategories(categories: CustomCategoryDef[]) {
   try {
-    window.localStorage.setItem(accountStorageKey(CUSTOM_CATEGORIES_KEY), JSON.stringify(categories))
+    writeStorage(CUSTOM_CATEGORIES_KEY, JSON.stringify(categories))
   } catch {}
 }
 
 function loadHiddenCategories(): string[] {
   try {
-    const raw = window.localStorage.getItem(accountStorageKey(HIDDEN_CATEGORIES_KEY))
+    const raw = readStorage(HIDDEN_CATEGORIES_KEY)
     return raw ? JSON.parse(raw) : []
   } catch {
     return []
@@ -154,7 +152,7 @@ function loadHiddenCategories(): string[] {
 
 function saveHiddenCategories(hidden: string[]) {
   try {
-    window.localStorage.setItem(accountStorageKey(HIDDEN_CATEGORIES_KEY), JSON.stringify(hidden))
+    writeStorage(HIDDEN_CATEGORIES_KEY, JSON.stringify(hidden))
   } catch {}
 }
 

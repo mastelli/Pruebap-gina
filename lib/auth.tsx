@@ -22,21 +22,43 @@ export function accountStorageKey(base: string): string {
 }
 
 export function storageGetItem(base: string): string | null {
-  if (!currentUserId) return null
   try {
-    return window.localStorage.getItem(accountStorageKey(base))
+    const prefixed = currentUserId ? `${base}::${currentUserId}` : null
+    if (prefixed) {
+      const val = window.localStorage.getItem(prefixed)
+      if (val !== null) return val
+    }
+    return window.localStorage.getItem(base)
   } catch {
     return null
   }
 }
 
 export function storageSetItem(base: string, value: string): void {
-  if (!currentUserId) return
   try {
     window.localStorage.setItem(accountStorageKey(base), value)
+  } catch {}
+}
+
+// Read from localStorage with userId prefix, falling back to unprefixed key
+export function readStorage(base: string): string | null {
+  try {
+    const prefixed = currentUserId ? `${base}::${currentUserId}` : null
+    if (prefixed) {
+      const val = window.localStorage.getItem(prefixed)
+      if (val !== null) return val
+    }
+    return window.localStorage.getItem(base)
   } catch {
-    // almacenamiento no disponible
+    return null
   }
+}
+
+// Write to localStorage with userId prefix
+export function writeStorage(base: string, value: string): void {
+  try {
+    window.localStorage.setItem(accountStorageKey(base), value)
+  } catch {}
 }
 
 const MIGRATE_KEYS = [
