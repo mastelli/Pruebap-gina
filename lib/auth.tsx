@@ -1,6 +1,6 @@
 ﻿"use client"
 
-import { createContext, useContext, useEffect } from "react"
+import { createContext, useContext, useEffect, useRef } from "react"
 
 export function ageFromBirthDate(birthDate: string): number | null {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(birthDate)) return null
@@ -39,6 +39,35 @@ export function storageSetItem(base: string, value: string): void {
   }
 }
 
+const MIGRATE_KEYS = [
+  "appTransactions",
+  "appPortfolio",
+  "appPortfolioPrices",
+  "appPortfolioHistory",
+  "userSettings",
+  "appCheckingBalance",
+  "appInvoices",
+  "appChatMessages",
+  "appChatNotes",
+  "appExpenseBudgets",
+  "appCategoryOverrides",
+  "appCustomCategories",
+  "appHiddenCategories",
+]
+
+function migrateIfNeeded(userId: string) {
+  try {
+    for (const key of MIGRATE_KEYS) {
+      const prefixedKey = `${key}::${userId}`
+      if (window.localStorage.getItem(prefixedKey) !== null) continue
+      const old = window.localStorage.getItem(key)
+      if (old !== null) {
+        window.localStorage.setItem(prefixedKey, old)
+      }
+    }
+  } catch {}
+}
+
 interface AuthState {
   email: string | null
   name: string | null
@@ -62,38 +91,21 @@ export function useAuth() {
 }
 
 export function AuthProvider({ children, value }: { children: React.ReactNode; value: AuthState }) {
-  useEffect(() => {
-    currentUserId = value.userId
-  }, [value.userId])
+  const prevUserIdRef = useRef<string | null>(null)
 
-  // Migrate old localStorage data (no userId prefix) to new prefixed keys
-  // Only runs once per user: skips if user already has prefixed data
+  // Set currentUserId SYNCHRONOUSLY during render so that any child
+  // component calling storageGetItem in its own mount/useEffect will
+  // already see the correct userId (no race condition).
+  if (value.userId !== currentUserId) {
+    currentUserId = value.userId
+  }
+
+  // Migrate old localStorage data when userId changes
   useEffect(() => {
     if (!value.userId) return
-    const migrateKeys = [
-      "appTransactions",
-      "appPortfolio",
-      "appPortfolioPrices",
-      "appPortfolioHistory",
-      "userSettings",
-      "appCheckingBalance",
-      "appInvoices",
-      "appChatMessages",
-      "appChatNotes",
-      "appExpenseBudgets",
-      "appCategoryOverrides",
-      "appCustomCategories",
-      "appHiddenCategories",
-    ]
-    for (const key of migrateKeys) {
-      const prefixedKey = `${key}::${value.userId}`
-      const hasNew = window.localStorage.getItem(prefixedKey) !== null
-      if (hasNew) continue // already migrated, skip
-      const old = window.localStorage.getItem(key)
-      if (old !== null) {
-        window.localStorage.setItem(prefixedKey, old)
-      }
-    }
+    if (prevUserIdRef.current === value.userId) return
+    prevUserIdRef.current = value.userId
+    migrateIfNeeded(value.userId)
   }, [value.userId])
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

@@ -18,7 +18,17 @@ function ClerkAuthProvider({ children }: { children: React.ReactNode }) {
   const userId = isSignedIn ? (user?.id ?? null) : null
 
   const logout = async () => {
-    try { localStorage.clear() } catch {}
+    try {
+      const userId = user?.id
+      if (userId) {
+        const keysToRemove: string[] = []
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i)
+          if (key && key.endsWith(`::${userId}`)) keysToRemove.push(key)
+        }
+        keysToRemove.forEach((k) => localStorage.removeItem(k))
+      }
+    } catch {}
     await signOut({ redirectUrl: "/sign-in" })
   }
 
