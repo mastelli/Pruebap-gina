@@ -1,6 +1,8 @@
 "use client"
 
+import { useEffect } from "react"
 import { useAuth } from "@/lib/auth"
+import { useSettings } from "@/contexts/settings-context"
 import { AuthScreen } from "./auth-screen"
 import { Sidebar } from "@/components/sidebar"
 import { TopNav } from "@/components/top-nav"
@@ -8,10 +10,19 @@ import { usePathname } from "next/navigation"
 import type React from "react"
 
 export function AppShell({ children }: { children: React.ReactNode }) {
-  const { ready, userId } = useAuth()
+  const { ready, userId, email, name } = useAuth()
+  const { settings, updateSettings } = useSettings()
   const pathname = usePathname()
 
   const isAuthPage = pathname.startsWith("/sign-in") || pathname.startsWith("/sign-up")
+
+  useEffect(() => {
+    if (!userId || !email) return
+    const updates: Record<string, string> = {}
+    if (!settings.fullName && name) updates.fullName = name
+    if (!settings.email) updates.email = email
+    if (Object.keys(updates).length > 0) updateSettings(updates)
+  }, [userId, email, name, settings.fullName, settings.email, updateSettings])
 
   if (isAuthPage) {
     return <>{children}</>
