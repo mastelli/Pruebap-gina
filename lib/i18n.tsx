@@ -507,6 +507,25 @@ const translations: Record<string, string> = {
   "Account settings saved successfully": "Configuración de la cuenta guardada correctamente",
   "Notification settings saved successfully": "Configuración de notificaciones guardada correctamente",
   "Privacy settings saved successfully": "Configuración de privacidad guardada correctamente",
+
+  // Calculadora de interés compuesto
+  Calculator: "Calculadora",
+  "Compound Interest Calculator": "Calculadora de Interés Compuesto",
+  "Initial Investment": "Inversión Inicial",
+  Contribution: "Aportación",
+  "Annual Interest Rate": "Tasa de Interés (% anual)",
+  "Horizon (years)": "Horizonte (años)",
+  Monthly: "Mensual",
+  Bimonthly: "Bimestral",
+  Quarterly: "Trimestral",
+  Semiannual: "Semestral",
+  Annual: "Anual",
+  Calculate: "Calcular",
+  "Total Invested": "Total Invertido",
+  "Future Interest": "Intereses Futuros",
+  "Final Value": "Valor Final",
+  "Total Value": "Valor Total",
+  Contributions: "Aportaciones",
 }
 
 interface LanguageContextType {

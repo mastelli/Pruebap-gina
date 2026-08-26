@@ -22,15 +22,16 @@ import {
   Tooltip as RechartsTooltip,
   Legend,
 } from "recharts"
+import { useLanguage } from "@/lib/i18n"
 
 type Frequency = "monthly" | "bimonthly" | "quarterly" | "semiannual" | "annual"
 
-const FREQUENCY_LABELS: Record<Frequency, string> = {
-  monthly: "Mensual",
-  bimonthly: "Bimestral",
-  quarterly: "Trimestral",
-  semiannual: "Semestral",
-  annual: "Anual",
+const FREQUENCY_KEYS: Record<Frequency, string> = {
+  monthly: "Monthly",
+  bimonthly: "Bimonthly",
+  quarterly: "Quarterly",
+  semiannual: "Semiannual",
+  annual: "Annual",
 }
 
 const FREQUENCY_MULTIPLIERS: Record<Frequency, number> = {
@@ -48,6 +49,9 @@ interface ChartPoint {
 }
 
 export default function CalculatorPage() {
+  const { lang, t } = useLanguage()
+  const currency = lang === "es" ? "EUR" : "USD"
+
   const [initialInvestment, setInitialInvestment] = useState("")
   const [contribution, setContribution] = useState("")
   const [frequency, setFrequency] = useState<Frequency>("monthly")
@@ -92,13 +96,8 @@ export default function CalculatorPage() {
     setFinalInterest(Math.round(balance - totalContributions))
   }
 
-  const maxVal = useMemo(() => {
-    if (results.length === 0) return 0
-    return Math.max(...results.map((r) => r.total))
-  }, [results])
-
   const formatCurrency = (v: number) =>
-    v.toLocaleString("es-ES", { style: "currency", currency: "EUR", maximumFractionDigits: 0 })
+    v.toLocaleString("es-ES", { style: "currency", currency, maximumFractionDigits: 0 })
 
   const formatYAxis = (v: number) => {
     if (v >= 1_000_000) return `${(v / 1_000_000).toFixed(1)}M`
@@ -112,15 +111,15 @@ export default function CalculatorPage() {
 
       <Card className="w-full">
         <CardHeader>
-          <CardTitle>Calculadora de Interés Compuesto</CardTitle>
+          <CardTitle>{t("Compound Interest Calculator")}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-5 gap-4 items-end">
             <div className="space-y-2">
-              <Label>Inversión Inicial (€)</Label>
+              <Label>{t("Initial Investment")} ({lang === "es" ? "€" : "$"})</Label>
               <Input
                 type="number"
-                placeholder="10000"
+                placeholder={lang === "es" ? "10000" : "10000"}
                 value={initialInvestment}
                 onChange={(e) => setInitialInvestment(e.target.value)}
                 min={0}
@@ -128,7 +127,7 @@ export default function CalculatorPage() {
             </div>
 
             <div className="space-y-2">
-              <Label>Aportación (€)</Label>
+              <Label>{t("Contribution")} ({lang === "es" ? "€" : "$"})</Label>
               <Input
                 type="number"
                 placeholder="500"
@@ -139,16 +138,16 @@ export default function CalculatorPage() {
             </div>
 
             <div className="space-y-2">
-              <Label>Frecuencia</Label>
+              <Label>{t("Frequency")}</Label>
               <Select value={frequency} onValueChange={(v) => setFrequency(v as Frequency)}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {(Object.entries(FREQUENCY_LABELS) as [Frequency, string][]).map(
-                    ([key, label]) => (
+                  {(Object.entries(FREQUENCY_KEYS) as [Frequency, string][]).map(
+                    ([key, labelKey]) => (
                       <SelectItem key={key} value={key}>
-                        {label}
+                        {t(labelKey)}
                       </SelectItem>
                     ),
                   )}
@@ -157,7 +156,7 @@ export default function CalculatorPage() {
             </div>
 
             <div className="space-y-2">
-              <Label>Tasa de Interés (% anual)</Label>
+              <Label>{t("Annual Interest Rate")}</Label>
               <Input
                 type="number"
                 placeholder="7"
@@ -169,7 +168,7 @@ export default function CalculatorPage() {
             </div>
 
             <div className="space-y-2">
-              <Label>Horizonte (años)</Label>
+              <Label>{t("Horizon (years)")}</Label>
               <Input
                 type="number"
                 placeholder="20"
@@ -181,22 +180,22 @@ export default function CalculatorPage() {
           </div>
 
           <Button className="mt-8 w-full" onClick={calculate}>
-            Calcular
+            {t("Calculate")}
           </Button>
 
           {results.length > 0 && (
             <>
               <div className="grid grid-cols-3 gap-4 mt-12 text-center">
                 <div className="rounded-lg bg-muted p-3">
-                  <p className="text-xs text-muted-foreground">Total Invertido</p>
+                  <p className="text-xs text-muted-foreground">{t("Total Invested")}</p>
                   <p className="text-lg font-semibold">{formatCurrency(finalContributions!)}</p>
                 </div>
                 <div className="rounded-lg bg-muted p-3">
-                  <p className="text-xs text-muted-foreground">Intereses Futuros</p>
+                  <p className="text-xs text-muted-foreground">{t("Future Interest")}</p>
                   <p className="text-lg font-semibold text-green-600">{formatCurrency(finalInterest!)}</p>
                 </div>
                 <div className="rounded-lg bg-muted p-3">
-                  <p className="text-xs text-muted-foreground">Valor Final</p>
+                  <p className="text-xs text-muted-foreground">{t("Final Value")}</p>
                   <p className="text-lg font-semibold">{formatCurrency(finalTotal!)}</p>
                 </div>
               </div>
@@ -217,7 +216,7 @@ export default function CalculatorPage() {
                     <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                     <XAxis
                       dataKey="year"
-                      label={{ value: "Años", position: "insideBottom", offset: -5 }}
+                      label={{ value: t("Years"), position: "insideBottom", offset: -5 }}
                       className="text-xs"
                     />
                     <YAxis tickFormatter={formatYAxis} className="text-xs" />
@@ -227,13 +226,13 @@ export default function CalculatorPage() {
                       labelStyle={{ color: "#94a3b8", fontWeight: 600 }}
                       formatter={(value: number, name: string) => [
                         formatCurrency(value),
-                        name === "total" ? "Valor Total" : "Aportaciones",
+                        name === "total" ? t("Total Value") : t("Contributions"),
                       ]}
-                      labelFormatter={(label) => `Año ${label}`}
+                      labelFormatter={(label) => `${t("Years")} ${label}`}
                     />
                     <Legend
                       wrapperStyle={{ paddingTop: "24px" }}
-                      formatter={(value) => (value === "total" ? "Valor Total" : "Aportaciones")}
+                      formatter={(value) => (value === "total" ? t("Total Value") : t("Contributions"))}
                     />
                     <Area
                       type="monotone"
