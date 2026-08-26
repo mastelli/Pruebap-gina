@@ -33,6 +33,10 @@ export function accountStorageKey(base: string): string {
   return currentUserId ? `${base}::${currentUserId}` : base
 }
 
+export function getAuthUserId(): string | null {
+  return currentUserId
+}
+
 export function storageGetItem(base: string): string | null {
   try {
     const prefixed = currentUserId ? `${base}::${currentUserId}` : null
