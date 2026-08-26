@@ -611,6 +611,9 @@ const translations: Record<string, string> = {
   "ProfitabilityTooltip": "(ROIC × 50%) + (ROE × 25%) + (Operating Margin × 25%)",
   "FinancialHealthTooltip": "(Net Debt/EBITDA + Interest Coverage + Current Ratio + Debt/Equity) comparados y normalizados frente al sector.",
   "CashFlowTooltip": "(FCF Margin × 33%) + (FCF Growth × 33%) + (FCF Yield × 34%)",
+  "Valuation Range": "Rango de Valoración",
+  "ValuationBarTooltip":
+    "Muestra visualmente dónde se sitúa el precio actual (línea negra) respecto al precio objetivo (línea azul) y el escenario alcista (Bull). Si el precio actual está a la izquierda del objetivo, la acción tiene potencial alcista.",
   "ScenariosTooltip":
     "Porcentaje de probabilidad asignado a cada escenario para calcular el valor esperado ponderado.",
   "Analysts": "Analistas",

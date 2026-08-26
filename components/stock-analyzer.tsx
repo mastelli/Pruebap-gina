@@ -249,6 +249,17 @@ export function StockAnalyzer() {
 
               {/* Valuation Bar */}
               <div className="mt-6">
+                <div className="flex items-center gap-1 mb-2">
+                  <span className="text-sm font-medium">{t("Valuation Range")}</span>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <HelpCircle className="h-3 w-3 text-muted-foreground/60 cursor-help" />
+                    </TooltipTrigger>
+                    <TooltipContent side="right" className="max-w-[280px] text-xs">
+                      {t("ValuationBarTooltip")}
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
                 <ValuationBar price={data.quote.price} target={valuation.targetPrice}
                   bull={valuation.scenarios[2].targetPrice} />
               </div>
