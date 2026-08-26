@@ -584,6 +584,48 @@ const translations: Record<string, string> = {
   "Annual Expenses": "Gastos Anuales",
   "Monthly Expenses": "Gastos Mensuales",
   "Property Taxes": "Impuestos de la Propiedad",
+
+  // Familia y miembros
+  "Create Family Unit": "Crear Unidad Familiar",
+  "Family name": "Nombre de familia",
+  "Create a family unit to share account summaries with your family members.":
+    "Crea una unidad familiar para compartir resúmenes de cuentas con tus familiares.",
+  "Family created": "Familia creada",
+  "Error creating family": "Error al crear familia",
+  "Add Family Member": "Añadir Miembro de Familia",
+  "Email address": "Correo electrónico",
+  "Search": "Buscar",
+  "Searching...": "Buscando...",
+  "User not found with that email": "Usuario no encontrado con ese email",
+  "Cannot add yourself": "No puedes añadirte a ti mismo",
+  "Error searching for user": "Error al buscar usuario",
+  "Member added": "Miembro añadido",
+  "Member removed": "Miembro eliminado",
+  "Remove member": "Eliminar miembro",
+  "No family members yet. Add members to see their account summaries.":
+    "Aún no hay miembros. Añade familiares para ver sus resúmenes de cuentas.",
+  "No data available": "Sin datos disponibles",
+  "Admin": "Admin",
+  "Member": "Miembro",
+  "Viewer": "Visor",
+  "Checking Balance": "Saldo Corriente",
+
+  // Permisos
+  "You need to create a family unit first to manage permissions.":
+    "Primero necesitas crear una unidad familiar para gestionar permisos.",
+  "Go to Members": "Ir a Miembros",
+  "Only the family admin can manage permissions.":
+    "Solo el admin de la familia puede gestionar permisos.",
+  "No other family members to set permissions for.":
+    "No hay otros miembros para configurar permisos.",
+  "View Account Summary": "Ver Resumen de Cuentas",
+  "Can see income, expenses and balance":
+    "Puede ver ingresos, gastos y saldo",
+  "Manage Members": "Gestionar Miembros",
+  "Can add and remove family members":
+    "Puede añadir y eliminar miembros de la familia",
+  "Permissions saved": "Permisos guardados",
+  "Save": "Guardar",
 }
 
 interface LanguageContextType {
