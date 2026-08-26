@@ -401,15 +401,9 @@ export default function AdvancedRealEstateCalculator() {
             {/* Step 3: Expenses */}
             {activeStep === 3 && (
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                <Field label="Comunidad" value={input.expenses.communityFee} onChange={v => updateExpenses("communityFee", v)} suffix={`${sym}/mes`} />
                 <Field label="IBI" value={input.expenses.ibi} onChange={v => updateExpenses("ibi", v)} suffix={`${sym}/año`} rightText={input.purchase.price > 0 ? `${((input.expenses.ibi / input.purchase.price) * 100).toFixed(2)}%` : ""} />
-                <Field label="Seguro" value={input.expenses.insurance} onChange={v => updateExpenses("insurance", v)} suffix={`${sym}/año`} />
                 <Field label="Mantenimiento" value={input.expenses.maintenance} onChange={v => updateExpenses("maintenance", v)} suffix={`${sym}/año`} />
-                <Field label="Reparaciones" value={input.expenses.repairs} onChange={v => updateExpenses("repairs", v)} suffix={`${sym}/año`} />
                 <Field label="Gestión inmobiliaria" value={input.expenses.propertyManagementPct} onChange={v => updateExpenses("propertyManagementPct", v)} suffix="% ingresos" tooltip="% sobre ingresos brutos de alquiler" />
-                <Field label="Servicios" value={input.expenses.utilities} onChange={v => updateExpenses("utilities", v)} suffix={`${sym}/mes`} />
-                <Field label="Otros impuestos" value={input.expenses.otherTaxes} onChange={v => updateExpenses("otherTaxes", v)} suffix={`${sym}/año`} />
-                <Field label="Otros gastos" value={input.expenses.otherExpenses} onChange={v => updateExpenses("otherExpenses", v)} suffix={`${sym}/año`} />
                 <div className="col-span-full pt-2 border-t">
                   <p className="text-sm text-muted-foreground">
                     Gastos operativos anuales: <span className="font-bold text-foreground">{formatCurrency(kpis.annualOperatingExpenses, input.currency)}</span>
