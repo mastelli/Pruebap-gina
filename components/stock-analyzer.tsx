@@ -96,12 +96,15 @@ function MetricRow({ label, value, color }: { label: string; value: string; colo
   )
 }
 
-function ChartTooltip({ active, payload, label }: any) {
+function ChartTooltip({ active, payload, label, range }: any) {
   if (!active || !payload?.length) return null
   const d = new Date(label)
-  const dateStr = label.includes("T")
-    ? `${d.getHours()}:${String(d.getMinutes()).padStart(2, "0")}`
-    : `${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()}`
+  const monthNames = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"]
+  let dateStr = ""
+  if (range === "1d") dateStr = `${d.getDate()} ${monthNames[d.getMonth()]} ${d.getHours()}:${String(d.getMinutes()).padStart(2, "0")}`
+  else if (range === "1mo") dateStr = `${d.getDate()} ${monthNames[d.getMonth()]}`
+  else if (["3mo", "6mo", "ytd"].includes(range)) dateStr = `${d.getDate()} ${monthNames[d.getMonth()]} ${d.getFullYear()}`
+  else dateStr = `${monthNames[d.getMonth()]} ${d.getFullYear()}`
   return (
     <div className="bg-background border rounded-md shadow-lg p-2 text-xs space-y-1">
       <p className="font-medium">{dateStr}</p>
@@ -115,9 +118,19 @@ function ChartTooltip({ active, payload, label }: any) {
   )
 }
 
-function PriceChart({ history, target, bear, bull }: { history: { date: string; price: number }[]; target: number; bear: number; bull: number }) {
+function PriceChart({ history, target, bear, bull, range }: { history: { date: string; price: number }[]; target: number; bear: number; bull: number; range: string }) {
   const data = history.map(h => ({ ...h, target, bear, bull }))
-  const isSingleDay = data.length > 0 && data[0].date.includes("T")
+  const isSingleDay = range === "1d"
+  const monthNames = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"]
+
+  const formatTick = (v: string) => {
+    const d = new Date(v)
+    if (isSingleDay) return `${d.getHours()}:${String(d.getMinutes()).padStart(2, "0")}`
+    if (range === "1mo") return `${d.getDate()}`
+    if (["3mo", "6mo", "ytd"].includes(range)) return `${monthNames[d.getMonth()]} ${d.getDate()}`
+    if (["5y", "2y"].includes(range)) return `${monthNames[d.getMonth()]} ${d.getFullYear()}`
+    return `${d.getFullYear()}`
+  }
   return (
     <ResponsiveContainer width="100%" height={440}>
       <LineChart data={data} margin={{ top: 5, right: 60, left: 10, bottom: 25 }}>
@@ -125,21 +138,14 @@ function PriceChart({ history, target, bear, bull }: { history: { date: string; 
         <XAxis
           dataKey="date"
           tick={{ fontSize: 10 }}
-          tickFormatter={v => {
-            if (isSingleDay) {
-              const d = new Date(v)
-              return `${d.getHours()}:${String(d.getMinutes()).padStart(2, "0")}`
-            }
-            const d = new Date(v)
-            return `${d.getMonth()+1}/${d.getDate()}`
-          }}
+          tickFormatter={formatTick}
           interval={Math.max(Math.floor(data.length / 8), 0)}
           minTickGap={30}
         />
         <YAxis yAxisId="left" tick={{ fontSize: 10 }} domain={["auto", "auto"]} tickFormatter={v => `$${v}`} width={55} />
         <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 10 }} domain={["auto", "auto"]} tickFormatter={v => `$${v}`} width={55} />
         <RechartsTooltip
-          content={<ChartTooltip />}
+          content={<ChartTooltip range={range} />}
           cursor={{ stroke: "hsl(var(--muted-foreground))", strokeWidth: 1, strokeDasharray: "4 4" }}
         />
         <Line yAxisId="left" type="monotone" dataKey="price" stroke="hsl(var(--foreground))" strokeWidth={2} dot={false} name="Precio" />
@@ -351,6 +357,7 @@ export function StockAnalyzer() {
                     target={valuation.targetPrice}
                     bear={valuation.scenarios[0].targetPrice}
                     bull={valuation.scenarios[2].targetPrice}
+                    range={chartRange}
                   />
                 ) : (
                   <p className="text-xs text-muted-foreground text-center py-8">{t("No historical data")}</p>
