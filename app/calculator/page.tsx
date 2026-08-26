@@ -97,7 +97,12 @@ export default function CalculatorPage() {
   }
 
   const formatCurrency = (v: number) =>
-    v.toLocaleString("es-ES", { style: "currency", currency, maximumFractionDigits: 0 })
+    v.toLocaleString(lang === "es" ? "es-ES" : "en-US", {
+      style: "currency",
+      currency,
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    })
 
   const formatYAxis = (v: number) => {
     if (v >= 1_000_000) return `${(v / 1_000_000).toFixed(1)}M`
