@@ -25,6 +25,7 @@ import {
 import { useLanguage } from "@/lib/i18n"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { RealEstateCalculator } from "@/components/real-estate-calculator"
+import AdvancedRealEstateCalculator from "@/components/advanced-real-estate-calculator"
 
 type Frequency = "monthly" | "bimonthly" | "quarterly" | "semiannual" | "annual"
 
@@ -271,7 +272,7 @@ export default function CalculatorPage() {
         </TabsContent>
 
         <TabsContent value="realestate">
-          <RealEstateCalculator />
+          <AdvancedRealEstateCalculator />
         </TabsContent>
 
         <TabsContent value="bonds">

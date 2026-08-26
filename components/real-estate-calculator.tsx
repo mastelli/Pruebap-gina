@@ -33,7 +33,6 @@ export function RealEstateCalculator() {
     purchaseTax: number
     loanAmount: number
     totalInvestment: number
-    totalCost: number
     monthlyCashFlow: number
     annualCashFlow: number
     grossYield: number
@@ -127,7 +126,6 @@ export function RealEstateCalculator() {
       purchaseTax: Math.round(totalTax),
       loanAmount: Math.round(loanAmount),
       totalInvestment: Math.round(totalInvestment),
-      totalCost: Math.round(totalCost),
       monthlyCashFlow: Math.round(monthlyCashFlow),
       annualCashFlow: Math.round(annualCashFlow),
       grossYield,
