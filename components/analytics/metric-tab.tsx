@@ -53,7 +53,7 @@ function getCurrentMonth(): string {
 
 interface MetricTabProps {
   titleKey: string
-  customBody?: (month: string) => ReactNode
+  customBody?: (month: string, setMonth: (m: string) => void) => ReactNode
   firstCardTitleKey?: string
   firstCardAction?: ReactNode | ((month: string) => ReactNode)
   firstCard?: (month: string) => ReactNode
@@ -87,28 +87,28 @@ export function MetricTab({
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <h3 className="text-2xl font-semibold">{t(titleKey)}</h3>
-      </div>
-      <div className="flex items-center justify-center gap-1">
-        {MONTHS.map((m) => (
-          <button
-            key={m.key}
-            onClick={() => setSelectedMonth(m.key)}
-            className={`px-3 py-1.5 text-sm rounded-md transition-colors ${
-              selectedMonth === m.key
-                ? "bg-primary text-primary-foreground font-medium"
-                : "text-muted-foreground hover:bg-muted hover:text-foreground"
-            }`}
-          >
-            {m.label}
-          </button>
-        ))}
-      </div>
       {customBody ? (
-        customBody(selectedMonth)
+        customBody(selectedMonth, setSelectedMonth)
       ) : (
         <>
+          <div className="flex justify-between items-center">
+            <h3 className="text-2xl font-semibold">{t(titleKey)}</h3>
+          </div>
+          <div className="flex items-center justify-center gap-1">
+            {MONTHS.map((m) => (
+              <button
+                key={m.key}
+                onClick={() => setSelectedMonth(m.key)}
+                className={`px-3 py-1.5 text-sm rounded-md transition-colors ${
+                  selectedMonth === m.key
+                    ? "bg-primary text-primary-foreground font-medium"
+                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                }`}
+              >
+                {m.label}
+              </button>
+            ))}
+          </div>
           <div className="grid gap-4 md:grid-cols-2">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0">
