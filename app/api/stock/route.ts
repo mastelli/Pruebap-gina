@@ -280,7 +280,7 @@ export async function GET(req: NextRequest) {
       strongSell: Math.round(strongSell * scale),
     },
     history: (() => {
-      const timestamps = chart?.timeline?.timestamp ?? []
+      const timestamps = chart?.timestamp ?? []
       const closes = chart?.indicators?.quote?.[0]?.close ?? []
       if (!timestamps.length) return []
       return timestamps
