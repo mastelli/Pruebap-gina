@@ -217,6 +217,12 @@ function CandlestickChart({ history, target, bear, bull, range }: { history: Can
   const data = history.map(h => ({ ...h, target, bear, bull }))
   const monthNames = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"]
   const zoom = useYAxisZoom(history)
+  const lows = history.map(h => h.low).filter(v => v != null) as number[]
+  const highs = history.map(h => h.high).filter(v => v != null) as number[]
+  const candleMin = lows.length > 0 ? Math.min(...lows) : 0
+  const candleMax = highs.length > 0 ? Math.max(...highs) : 100
+  const candleDomain: [number, number] = [candleMin, candleMax + (candleMax - candleMin) * 0.05]
+  const finalDomain: [number, number] = zoom.isZoomed ? zoom.yDomain : candleDomain
   const formatTick = (v: string) => {
     const d = new Date(v)
     if (range === "1d") return `${d.getHours()}:${String(d.getMinutes()).padStart(2, "0")}`
@@ -238,7 +244,7 @@ function CandlestickChart({ history, target, bear, bull, range }: { history: Can
           <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
           <XAxis dataKey="date" tick={{ fontSize: 10 }} tickFormatter={formatTick}
             interval={Math.max(Math.floor(data.length / 8), 0)} minTickGap={30} />
-          <YAxis tick={{ fontSize: 10 }} domain={zoom.yDomain} tickFormatter={v => `$${v}`} width={55} />
+          <YAxis tick={{ fontSize: 10 }} domain={finalDomain} tickFormatter={v => `$${v}`} width={55} />
           <RechartsTooltip content={<ChartTooltip range={range} />}
             cursor={{ stroke: "hsl(var(--muted-foreground))", strokeWidth: 1, strokeDasharray: "4 4" }} />
           <Bar dataKey="high" barSize={8} shape={<CandleShape />} isAnimationActive={false} />
