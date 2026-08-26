@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { Search, TrendingUp, TrendingDown, AlertTriangle, CheckCircle, XCircle, Loader2, HelpCircle } from "lucide-react"
 import { useLanguage } from "@/lib/i18n"
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip"
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Legend, Tooltip as RechartsTooltip, Bar, ComposedChart } from "recharts"
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Legend, Tooltip as RechartsTooltip } from "recharts"
 import { calculateValuation, type ValuationInput, type ValuationResult } from "@/lib/calculators/stock-valuation"
 
 interface StockData {
@@ -186,77 +186,6 @@ function PriceChart({ history, target, bear, bull, range }: { history: { date: s
   )
 }
 
-type CandleData = { date: string; price: number; open: number; high: number; low: number }
-
-function CandleShape(props: any) {
-  const { x, y, width, height, payload } = props
-  if (!payload) return null
-  const { open, high, low, price: close } = payload
-  if (open == null || high == null || low == null || close == null) return null
-  const isGreen = close >= open
-  const color = isGreen ? "#22c55e" : "#ef4444"
-  const bodyMin = Math.min(open, close)
-  const bodyMax = Math.max(open, close)
-  const yScale = (val: number) => {
-    const ratio = (val - low) / (high - low || 1)
-    return y + height - ratio * height
-  }
-  const bodyTop = yScale(bodyMax)
-  const bodyBottom = yScale(bodyMin)
-  const bodyHeight = Math.max(bodyBottom - bodyTop, 1)
-  const centerX = x + width / 2
-  return (
-    <g>
-      <line x1={centerX} y1={yScale(high)} x2={centerX} y2={yScale(low)} stroke={color} strokeWidth={1} />
-      <rect x={x + 1} y={bodyTop} width={Math.max(width - 2, 2)} height={bodyHeight} fill={color} rx={1} />
-    </g>
-  )
-}
-
-function CandlestickChart({ history, target, bear, bull, range }: { history: CandleData[]; target: number; bear: number; bull: number; range: string }) {
-  const data = history.map(h => ({ ...h, target, bear, bull }))
-  const monthNames = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"]
-  const zoom = useYAxisZoom(history)
-  const lows = history.map(h => h.low).filter(v => v != null) as number[]
-  const highs = history.map(h => h.high).filter(v => v != null) as number[]
-  const candleMin = lows.length > 0 ? Math.min(...lows) : 0
-  const candleMax = highs.length > 0 ? Math.max(...highs) : 100
-  const candleDomain: [number, number] = [candleMin, candleMax + (candleMax - candleMin) * 0.05]
-  const finalDomain: [number, number] = zoom.isZoomed ? zoom.yDomain : candleDomain
-  const formatTick = (v: string) => {
-    const d = new Date(v)
-    if (range === "1d") return `${d.getHours()}:${String(d.getMinutes()).padStart(2, "0")}`
-    if (range === "1mo") return `${d.getDate()}`
-    if (["3mo", "6mo", "ytd"].includes(range)) return `${monthNames[d.getMonth()]} ${d.getDate()}`
-    if (["5y", "2y"].includes(range)) return `${monthNames[d.getMonth()]} ${d.getFullYear()}`
-    return `${d.getFullYear()}`
-  }
-  return (
-    <div className="relative" onWheel={zoom.handleWheel}>
-      {zoom.isZoomed && (
-        <button onClick={zoom.resetZoom}
-          className="absolute top-1 right-14 z-10 text-xs bg-background/80 border rounded px-2 py-0.5 hover:bg-muted">
-          Reset Y
-        </button>
-      )}
-      <ResponsiveContainer width="100%" height={440}>
-        <ComposedChart data={data} margin={{ top: 5, right: 60, left: 10, bottom: 25 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-          <XAxis dataKey="date" tick={{ fontSize: 10 }} tickFormatter={formatTick}
-            interval={Math.max(Math.floor(data.length / 8), 0)} minTickGap={30} />
-          <YAxis tick={{ fontSize: 10 }} domain={finalDomain} tickFormatter={v => `$${v}`} width={55} />
-          <RechartsTooltip content={<ChartTooltip range={range} />}
-            cursor={{ stroke: "hsl(var(--muted-foreground))", strokeWidth: 1, strokeDasharray: "4 4" }} />
-          <Bar dataKey="high" barSize={8} shape={<CandleShape />} isAnimationActive={false} />
-          <Line type="monotone" dataKey="target" stroke="hsl(var(--primary))" strokeWidth={1.5} strokeDasharray="6 3" dot={false} name="Objetivo" />
-          <Line type="monotone" dataKey="bear" stroke="#ef4444" strokeWidth={1} strokeDasharray="4 4" dot={false} name="Bear" />
-          <Line type="monotone" dataKey="bull" stroke="#22c55e" strokeWidth={1} strokeDasharray="4 4" dot={false} name="Bull" />
-          <Legend verticalAlign="bottom" height={36} iconType="line" wrapperStyle={{ fontSize: 11, paddingTop: 10 }} />
-        </ComposedChart>
-      </ResponsiveContainer>
-    </div>
-  )
-}
 
 export function StockAnalyzer() {
   const { t } = useLanguage()
@@ -267,7 +196,37 @@ export function StockAnalyzer() {
   const [error, setError] = useState("")
   const [chartRange, setChartRange] = useState("6mo")
   const [chartHistory, setChartHistory] = useState<{ date: string; price: number; open: number; high: number; low: number }[]>([])
-  const [chartType, setChartType] = useState<"line" | "candle">("line")
+  const [suggestions, setSuggestions] = useState<{ symbol: string; name: string; exchange: string }[]>([])
+  const [showSuggestions, setShowSuggestions] = useState(false)
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const suggestionsRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (suggestionsRef.current && !suggestionsRef.current.contains(e.target as Node)) {
+        setShowSuggestions(false)
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => document.removeEventListener("mousedown", handleClickOutside)
+  }, [])
+
+  const handleTickerChange = (value: string) => {
+    setTicker(value)
+    if (debounceRef.current) clearTimeout(debounceRef.current)
+    if (value.trim().length < 2) { setSuggestions([]); setShowSuggestions(false); return }
+    debounceRef.current = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/stock?query=${encodeURIComponent(value.trim())}`)
+        if (res.ok) {
+          const data = await res.json()
+          setSuggestions(data)
+          setShowSuggestions(data.length > 0)
+        }
+      } catch {}
+    }, 300)
+  }
+
 
   const popularTickers = ["AAPL", "MSFT", "NVDA", "GOOGL", "AMZN", "META", "TSLA", "BRK-B", "JPM", "V"]
 
@@ -337,15 +296,31 @@ export function StockAnalyzer() {
       <Card>
         <CardContent className="pt-6">
           <div className="flex gap-2">
-            <div className="relative flex-1">
+            <div className="relative flex-1" ref={suggestionsRef}>
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 className="pl-9"
                 placeholder={t("Search ticker (e.g. MSFT, AAPL, NVDA)")}
                 value={ticker}
-                onChange={(e) => setTicker(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                onChange={(e) => handleTickerChange(e.target.value)}
+                onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") { setShowSuggestions(false); handleSearch() }
+                  if (e.key === "Escape") setShowSuggestions(false)
+                }}
               />
+              {showSuggestions && suggestions.length > 0 && (
+                <div className="absolute z-50 top-full mt-1 w-full bg-background border rounded-md shadow-lg max-h-64 overflow-y-auto">
+                  {suggestions.map((s) => (
+                    <button key={s.symbol}
+                      className="w-full px-3 py-2 text-left hover:bg-muted transition-colors flex items-center justify-between gap-2"
+                      onClick={() => { setTicker(s.symbol); setShowSuggestions(false); handleSearch(s.symbol) }}>
+                      <span className="font-medium text-sm">{s.symbol}</span>
+                      <span className="text-xs text-muted-foreground truncate">{s.name}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
             <Button onClick={() => handleSearch()} disabled={loading || !ticker.trim()}>
               {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : t("Analyze")}
@@ -434,24 +409,6 @@ export function StockAnalyzer() {
                     </Tooltip>
                   </div>
                   <div className="flex items-center gap-2">
-                    <div className="flex border rounded-md">
-                      <Button
-                        variant={chartType === "line" ? "default" : "ghost"}
-                        size="sm"
-                        className="h-6 px-2 text-xs rounded-r-none"
-                        onClick={() => setChartType("line")}
-                      >
-                        {t("Line")}
-                      </Button>
-                      <Button
-                        variant={chartType === "candle" ? "default" : "ghost"}
-                        size="sm"
-                        className="h-6 px-2 text-xs rounded-l-none border-l"
-                        onClick={() => setChartType("candle")}
-                      >
-                        {t("Candle")}
-                      </Button>
-                    </div>
                     <div className="flex gap-1">
                       {TIME_RANGES.map(r => (
                         <Button
@@ -468,7 +425,6 @@ export function StockAnalyzer() {
                   </div>
                 </div>
                 {chartHistory.length > 0 ? (
-                  chartType === "line" ? (
                     <PriceChart
                       history={chartHistory}
                       target={valuation.targetPrice}
@@ -476,15 +432,6 @@ export function StockAnalyzer() {
                       bull={valuation.scenarios[2].targetPrice}
                       range={chartRange}
                     />
-                  ) : (
-                    <CandlestickChart
-                      history={chartHistory}
-                      target={valuation.targetPrice}
-                      bear={valuation.scenarios[0].targetPrice}
-                      bull={valuation.scenarios[2].targetPrice}
-                      range={chartRange}
-                    />
-                  )
                 ) : (
                   <p className="text-xs text-muted-foreground text-center py-8">{t("No historical data")}</p>
                 )}

@@ -127,7 +127,26 @@ async function getChart(symbol: string, range: string = "6mo"): Promise<any> {
 
 export async function GET(req: NextRequest) {
   const symbol = req.nextUrl.searchParams.get("symbol")
+  const query = req.nextUrl.searchParams.get("query")
   const range = req.nextUrl.searchParams.get("range") || "6mo"
+
+  if (query) {
+    const session = await getYahooSession()
+    const crumbParam = encodeURIComponent(session.crumb)
+    const url = `https://query2.finance.yahoo.com/v1/finance/search?q=${encodeURIComponent(query)}&quotesCount=8&newsCount=0&listsCount=0&crumb=${crumbParam}`
+    const res = await httpsGet(url, { "User-Agent": UA, Cookie: session.cookies })
+    if (res.status === 200) {
+      try {
+        const data = JSON.parse(res.body)
+        const quotes = (data.quotes ?? [])
+          .filter((q: any) => q.symbol && q.shortname)
+          .map((q: any) => ({ symbol: q.symbol, name: q.shortname, exchange: q.exchange ?? "" }))
+        return NextResponse.json(quotes)
+      } catch { return NextResponse.json([]) }
+    }
+    return NextResponse.json([])
+  }
+
   if (!symbol) {
     return NextResponse.json({ error: "Symbol required" }, { status: 400 })
   }
