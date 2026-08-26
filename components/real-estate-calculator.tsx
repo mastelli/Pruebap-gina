@@ -29,7 +29,6 @@ export function RealEstateCalculator() {
 
   const [results, setResults] = useState<{
     priceVal: number
-    renovationVal: number
     initialEntry: number
     purchaseTax: number
     loanAmount: number
@@ -80,18 +79,16 @@ export function RealEstateCalculator() {
     const monthlyPropertyTaxes = annualPropertyTaxes / 12
     const monthlyCostsVal = p(monthlyCosts)
 
-    const totalUpfront = priceVal + totalTax + renovationVal
-
     let monthlyMortgage = 0
     let loanAmount = 0
-    let initialEntry = totalUpfront
+    let initialEntry = priceVal + renovationVal
 
     if (leveraged) {
       const contributionVal = p(initialContribution)
       const termMonths = (parseInt(mortgageTerm) || 0) * 12
       const annualMortRate = p(mortgageRate) / 100
       const monthlyMortRate = annualMortRate / 12
-      loanAmount = priceVal + totalTax - contributionVal
+      loanAmount = priceVal - contributionVal
 
       if (termMonths > 0 && loanAmount > 0) {
         if (monthlyMortRate > 0) {
@@ -104,17 +101,16 @@ export function RealEstateCalculator() {
         }
       }
 
-      initialEntry = contributionVal + renovationVal
+      initialEntry = contributionVal
     }
+
+    const totalInvestment = initialEntry + totalTax
 
     const effectiveRent = rentVal * (1 - vacancyVal)
     const annualRent = effectiveRent * 12
     const annualExpenses = (monthlyPropertyTaxes + monthlyCostsVal + monthlyMortgage) * 12
     const annualCashFlow = annualRent - annualExpenses
     const monthlyCashFlow = annualCashFlow / 12
-
-    const totalCost = totalUpfront + annualExpenses
-    const totalInvestment = leveraged ? initialEntry : totalUpfront
 
     const grossYield = totalInvestment > 0 ? (annualRent / totalInvestment) * 100 : 0
     const netYield = totalInvestment > 0 ? (annualCashFlow / totalInvestment) * 100 : 0
@@ -127,7 +123,6 @@ export function RealEstateCalculator() {
 
     setResults({
       priceVal,
-      renovationVal,
       initialEntry: Math.round(initialEntry),
       purchaseTax: Math.round(totalTax),
       loanAmount: Math.round(loanAmount),
@@ -271,12 +266,6 @@ export function RealEstateCalculator() {
                   <div className="border-b border-border" />
                 </>
               )}
-
-              <div className="flex justify-between py-2">
-                <span className="text-sm text-muted-foreground">{t("Estimated Renovation")}</span>
-                <span className="text-sm font-medium">{formatCurrency(results.renovationVal)}</span>
-              </div>
-              <div className="border-b border-border" />
 
               <div className="flex justify-between py-3">
                 <span className="text-base font-bold">{t("Total Investment")}</span>
