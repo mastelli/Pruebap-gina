@@ -28,13 +28,24 @@ export function RealEstateCalculator() {
   const [monthlyCosts, setMonthlyCosts] = useState("")
 
   const [results, setResults] = useState<{
+    priceVal: number
+    renovationVal: number
+    initialEntry: number
+    purchaseTax: number
+    loanAmount: number
     totalInvestment: number
+    totalCost: number
     monthlyCashFlow: number
+    annualCashFlow: number
     grossYield: number
     netYield: number
-    annualReturn: number
+    capRate: number
+    cashOnCash: number
+    effectiveRent: number
     monthlyMortgage: number
-    totalTax: number
+    annualExpenses: number
+    priceToRentRatio: number
+    breakevenMonths: number
   } | null>(null)
 
   const formatCurrency = (v: number) =>
@@ -72,14 +83,15 @@ export function RealEstateCalculator() {
     const totalUpfront = priceVal + totalTax + renovationVal
 
     let monthlyMortgage = 0
-    let totalInvestment = totalUpfront
+    let loanAmount = 0
+    let initialEntry = totalUpfront
 
     if (leveraged) {
       const contributionVal = p(initialContribution)
       const termMonths = (parseInt(mortgageTerm) || 0) * 12
       const annualMortRate = p(mortgageRate) / 100
       const monthlyMortRate = annualMortRate / 12
-      const loanAmount = priceVal + totalTax - contributionVal
+      loanAmount = priceVal + totalTax - contributionVal
 
       if (termMonths > 0 && loanAmount > 0) {
         if (monthlyMortRate > 0) {
@@ -92,27 +104,46 @@ export function RealEstateCalculator() {
         }
       }
 
-      totalInvestment = contributionVal + renovationVal
+      initialEntry = contributionVal + renovationVal
     }
 
     const effectiveRent = rentVal * (1 - vacancyVal)
     const annualRent = effectiveRent * 12
-    const annualCosts = (monthlyPropertyTaxes + monthlyCostsVal + monthlyMortgage) * 12
-    const annualCashFlow = annualRent - annualCosts
+    const annualExpenses = (monthlyPropertyTaxes + monthlyCostsVal + monthlyMortgage) * 12
+    const annualCashFlow = annualRent - annualExpenses
     const monthlyCashFlow = annualCashFlow / 12
+
+    const totalCost = totalUpfront + annualExpenses
+    const totalInvestment = leveraged ? initialEntry : totalUpfront
 
     const grossYield = totalInvestment > 0 ? (annualRent / totalInvestment) * 100 : 0
     const netYield = totalInvestment > 0 ? (annualCashFlow / totalInvestment) * 100 : 0
-    const annualReturn = totalInvestment > 0 ? (annualCashFlow / totalInvestment) * 100 : 0
+    const capRate = priceVal > 0 ? ((annualRent - (monthlyPropertyTaxes + monthlyCostsVal) * 12) / priceVal) * 100 : 0
+    const cashOnCash = totalInvestment > 0 ? (annualCashFlow / totalInvestment) * 100 : 0
+
+    const priceToRentRatio = effectiveRent > 0 ? priceVal / (effectiveRent * 12) : 0
+
+    const breakevenMonths = monthlyCashFlow > 0 ? Math.ceil(totalInvestment / monthlyCashFlow) : 0
 
     setResults({
+      priceVal,
+      renovationVal,
+      initialEntry: Math.round(initialEntry),
+      purchaseTax: Math.round(totalTax),
+      loanAmount: Math.round(loanAmount),
       totalInvestment: Math.round(totalInvestment),
+      totalCost: Math.round(totalCost),
       monthlyCashFlow: Math.round(monthlyCashFlow),
+      annualCashFlow: Math.round(annualCashFlow),
       grossYield,
       netYield,
-      annualReturn,
+      capRate,
+      cashOnCash,
+      effectiveRent: Math.round(effectiveRent),
       monthlyMortgage: Math.round(monthlyMortgage),
-      totalTax: Math.round(totalTax),
+      annualExpenses: Math.round(annualExpenses),
+      priceToRentRatio,
+      breakevenMonths,
     })
   }
 
@@ -137,7 +168,6 @@ export function RealEstateCalculator() {
           </div>
         </div>
 
-        {/* Purchase Tax */}
         <div className="space-y-3">
           <Label className="text-base font-semibold">{t("Purchase Tax")}</Label>
           <div className="grid grid-cols-2 gap-4">
@@ -155,7 +185,6 @@ export function RealEstateCalculator() {
           </p>
         </div>
 
-        {/* Vacancy */}
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-1">
             <Label>{t("Vacancy")} (%)</Label>
@@ -166,7 +195,6 @@ export function RealEstateCalculator() {
           </div>
         </div>
 
-        {/* Annual Property Taxes */}
         <div className="space-y-3">
           <Label className="text-base font-semibold">{t("Annual Property Taxes")}</Label>
           <div className="grid grid-cols-2 gap-4">
@@ -183,7 +211,6 @@ export function RealEstateCalculator() {
           </div>
         </div>
 
-        {/* Leveraged */}
         <div className="space-y-4">
           <div className="flex items-center gap-3">
             <Switch id="leveraged" checked={leveraged} onCheckedChange={setLeveraged} />
@@ -209,7 +236,6 @@ export function RealEstateCalculator() {
           )}
         </div>
 
-        {/* Monthly Costs */}
         <div className="space-y-1">
           <Label>{t("Monthly Costs")} ({sym}/{lang === "es" ? "mes" : "mo"})</Label>
           <Input type="number" placeholder="200" value={monthlyCosts} onChange={(e) => setMonthlyCosts(e.target.value)} min={0} />
@@ -220,34 +246,147 @@ export function RealEstateCalculator() {
 
         {/* Results */}
         {results && (
-          <div className="space-y-4 pt-4 border-t">
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-center">
-              <div className="rounded-lg bg-muted p-3">
-                <p className="text-xs text-muted-foreground">{t("Total Investment")}</p>
-                <p className="text-lg font-semibold">{formatCurrency(results.totalInvestment)}</p>
+          <div className="space-y-6 pt-6 border-t">
+
+            {/* Section 1: Summary */}
+            <div className="space-y-0">
+              <div className="flex justify-between py-2">
+                <span className="text-sm text-muted-foreground">{t("Initial Entry")}</span>
+                <span className="text-sm font-medium">{formatCurrency(results.initialEntry)}</span>
               </div>
-              <div className="rounded-lg bg-muted p-3">
-                <p className="text-xs text-muted-foreground">{t("Monthly Cash Flow")}</p>
-                <p className={`text-lg font-semibold ${results.monthlyCashFlow >= 0 ? "text-green-600" : "text-red-600"}`}>
-                  {formatCurrency(results.monthlyCashFlow)}
-                </p>
+              <div className="border-b border-border" />
+
+              <div className="flex justify-between py-2">
+                <span className="text-sm text-muted-foreground">{t("Purchase Tax Costs")}</span>
+                <span className="text-sm font-medium">{formatCurrency(results.purchaseTax)}</span>
               </div>
-              <div className="rounded-lg bg-muted p-3">
-                <p className="text-xs text-muted-foreground">{t("Gross Yield")}</p>
-                <p className="text-lg font-semibold">{formatPct(results.grossYield)}</p>
-              </div>
-              <div className="rounded-lg bg-muted p-3">
-                <p className="text-xs text-muted-foreground">{t("Net Yield")}</p>
-                <p className={`text-lg font-semibold ${results.netYield >= 0 ? "text-green-600" : "text-red-600"}`}>
-                  {formatPct(results.netYield)}
-                </p>
-              </div>
+              <div className="border-b border-border" />
+
               {leveraged && (
-                <div className="rounded-lg bg-muted p-3">
-                  <p className="text-xs text-muted-foreground">{t("Monthly Costs")} ({t("Mortgage Interest Rate")})</p>
-                  <p className="text-lg font-semibold">{formatCurrency(results.monthlyMortgage)}</p>
-                </div>
+                <>
+                  <div className="flex justify-between py-2">
+                    <span className="text-sm text-muted-foreground">{t("Loan Amount")}</span>
+                    <span className="text-sm font-medium">{formatCurrency(results.loanAmount)}</span>
+                  </div>
+                  <div className="border-b border-border" />
+                </>
               )}
+
+              <div className="flex justify-between py-2">
+                <span className="text-sm text-muted-foreground">{t("Estimated Renovation")}</span>
+                <span className="text-sm font-medium">{formatCurrency(results.renovationVal)}</span>
+              </div>
+              <div className="border-b border-border" />
+
+              <div className="flex justify-between py-3">
+                <span className="text-base font-bold">{t("Total Investment")}</span>
+                <span className="text-base font-bold">{formatCurrency(results.totalInvestment)}</span>
+              </div>
+            </div>
+
+            {/* Section 2: ROI on Capital */}
+            <div className="space-y-0">
+              <h4 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground mb-2">{t("ROI on Capital")}</h4>
+              <div className="border-b border-border" />
+
+              <div className="flex justify-between py-2">
+                <span className="text-sm text-muted-foreground">{t("Gross Yield")}</span>
+                <span className="text-sm font-medium">{formatPct(results.grossYield)}</span>
+              </div>
+              <div className="border-b border-border" />
+
+              <div className="flex justify-between py-2">
+                <span className="text-sm text-muted-foreground">{t("Net Yield")}</span>
+                <span className={`text-sm font-medium ${results.netYield >= 0 ? "text-green-600" : "text-red-600"}`}>
+                  {formatPct(results.netYield)}
+                </span>
+              </div>
+              <div className="border-b border-border" />
+
+              <div className="flex justify-between py-2">
+                <span className="text-sm text-muted-foreground">{t("Cash on Cash Return")}</span>
+                <span className={`text-sm font-medium ${results.cashOnCash >= 0 ? "text-green-600" : "text-red-600"}`}>
+                  {formatPct(results.cashOnCash)}
+                </span>
+              </div>
+              <div className="border-b border-border" />
+
+              <div className="flex justify-between py-2">
+                <span className="text-sm text-muted-foreground">{t("Cap Rate")}</span>
+                <span className="text-sm font-medium">{formatPct(results.capRate)}</span>
+              </div>
+            </div>
+
+            {/* Section 3: Cash Flow */}
+            <div className="space-y-0">
+              <h4 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground mb-2">{t("Cash Flow")}</h4>
+              <div className="border-b border-border" />
+
+              <div className="flex justify-between py-2">
+                <span className="text-sm text-muted-foreground">{t("Expected Rent")}</span>
+                <span className="text-sm font-medium">{formatCurrency(p(rent))}</span>
+              </div>
+              <div className="border-b border-border" />
+
+              <div className="flex justify-between py-2">
+                <span className="text-sm text-muted-foreground">{t("Effective Rent")}</span>
+                <span className="text-sm font-medium">{formatCurrency(results.effectiveRent)}</span>
+              </div>
+              <div className="border-b border-border" />
+
+              {leveraged && (
+                <>
+                  <div className="flex justify-between py-2">
+                    <span className="text-sm text-muted-foreground">{t("Monthly Mortgage")}</span>
+                    <span className="text-sm font-medium">{formatCurrency(results.monthlyMortgage)}</span>
+                  </div>
+                  <div className="border-b border-border" />
+                </>
+              )}
+
+              <div className="flex justify-between py-2">
+                <span className="text-sm text-muted-foreground">{t("Annual Property Cost")}</span>
+                <span className="text-sm font-medium">{formatCurrency(results.annualExpenses)}</span>
+              </div>
+              <div className="border-b border-border" />
+
+              <div className="flex justify-between py-2">
+                <span className="text-sm font-semibold">{t("Monthly Cash Flow")}</span>
+                <span className={`text-sm font-bold ${results.monthlyCashFlow >= 0 ? "text-green-600" : "text-red-600"}`}>
+                  {formatCurrency(results.monthlyCashFlow)}
+                </span>
+              </div>
+              <div className="border-b border-border" />
+
+              <div className="flex justify-between py-2">
+                <span className="text-sm font-semibold">{t("Annual Cash Flow")}</span>
+                <span className={`text-sm font-bold ${results.annualCashFlow >= 0 ? "text-green-600" : "text-red-600"}`}>
+                  {formatCurrency(results.annualCashFlow)}
+                </span>
+              </div>
+            </div>
+
+            {/* Section 4: Additional Metrics */}
+            <div className="space-y-0">
+              <h4 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground mb-2">{t("Additional Metrics")}</h4>
+              <div className="border-b border-border" />
+
+              <div className="flex justify-between py-2">
+                <span className="text-sm text-muted-foreground">{t("Price to Rent Ratio")}</span>
+                <span className="text-sm font-medium">{results.priceToRentRatio.toFixed(1)}</span>
+              </div>
+              <div className="border-b border-border" />
+
+              <div className="flex justify-between py-2">
+                <span className="text-sm text-muted-foreground">{t("Breakeven")}</span>
+                <span className="text-sm font-medium">
+                  {results.breakevenMonths > 0
+                    ? results.breakevenMonths === 1
+                      ? t("1 month to recoup investment")
+                      : `${results.breakevenMonths} ${t("months to recoup investment")}`
+                    : "—"}
+                </span>
+              </div>
             </div>
           </div>
         )}
