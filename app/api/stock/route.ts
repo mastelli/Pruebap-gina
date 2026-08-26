@@ -133,15 +133,16 @@ export async function GET(req: NextRequest) {
   if (query) {
     const session = await getYahooSession()
     const crumbParam = encodeURIComponent(session.crumb)
-    const url = `https://query2.finance.yahoo.com/v1/finance/search?q=${encodeURIComponent(query)}&quotesCount=8&newsCount=0&listsCount=0&crumb=${crumbParam}`
+    const url = `https://query2.finance.yahoo.com/v1/finance/search?q=${encodeURIComponent(query)}&quotesCount=25&newsCount=0&listsCount=0&crumb=${crumbParam}`
     const res = await httpsGet(url, { "User-Agent": UA, Cookie: session.cookies })
     if (res.status === 200) {
       try {
         const data = JSON.parse(res.body)
         const quotes = (data.quotes ?? [])
-          .filter((q: any) => q.symbol && q.shortname)
+          .filter((q: any) => q.symbol && q.shortname && q.quoteType === "EQUITY" && (q.marketCap ?? 0) > 0)
           .map((q: any) => ({ symbol: q.symbol, name: q.shortname, exchange: q.exchange ?? "", marketCap: q.marketCap ?? 0 }))
           .sort((a: any, b: any) => (b.marketCap ?? 0) - (a.marketCap ?? 0))
+          .slice(0, 8)
         return NextResponse.json(quotes)
       } catch { return NextResponse.json([]) }
     }
