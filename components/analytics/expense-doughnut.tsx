@@ -11,20 +11,6 @@ function formatEuros(value: number): string {
 
 const RADIAN = Math.PI / 180
 
-function CenterLabel({ total }: { total: number }) {
-  const { t } = useLanguage()
-  return (
-    <g>
-      <text x="50%" y="48%" textAnchor="middle" dominantBaseline="central" className="fill-foreground">
-        <tspan fontSize={14} fontWeight={500}>{t("Total")}</tspan>
-      </text>
-      <text x="50%" y="60%" textAnchor="middle" dominantBaseline="central" className="fill-foreground">
-        <tspan fontSize={18} fontWeight={700}>{formatEuros(total)}</tspan>
-      </text>
-    </g>
-  )
-}
-
 export function ExpenseDoughnut({ month }: { month: string }) {
   const { t } = useLanguage()
   const { transactions } = useTransactions()
@@ -72,22 +58,27 @@ export function ExpenseDoughnut({ month }: { month: string }) {
           innerRadius={100}
           outerRadius={160}
           paddingAngle={2}
-          label={({ cx, cy, midAngle, innerRadius, outerRadius, percent }) => {
-            const radius = innerRadius + (outerRadius - innerRadius) * 1.4
+          label={(props: any) => {
+            const { cx, cy, midAngle, outerRadius, percent, label: nameLabel } = props
+            if (!percent || percent < 0.05 || !midAngle) return null
+            const radius = outerRadius * 1.45
             const x = cx + radius * Math.cos(-midAngle * RADIAN)
             const y = cy + radius * Math.sin(-midAngle * RADIAN)
-            return percent > 0.05 ? (
+            return (
               <text x={x} y={y} fill="currentColor" textAnchor={x > cx ? "start" : "end"} dominantBaseline="central" fontSize={11}>
-                {`${(percent * 100).toFixed(0)}%`}
+                <tspan fontWeight={600}>{nameLabel}</tspan>
+                <tspan dx={4} fill="currentColor" opacity={0.6}>{`${(percent * 100).toFixed(0)}%`}</tspan>
               </text>
-            ) : null
+            )
           }}
         >
           {data.map((entry) => (
             <Cell key={entry.label} fill={entry.color} />
           ))}
         </Pie>
-        <CenterLabel total={totalExpenses} />
+        <text x="50%" y="50%" textAnchor="middle" dominantBaseline="central" className="fill-foreground">
+          <tspan fontSize={20} fontWeight={700}>{formatEuros(totalExpenses)}</tspan>
+        </text>
         <Tooltip
           formatter={(value) => formatEuros(Number(value))}
           contentStyle={{ backgroundColor: "#ffffff", border: "1px solid #e5e7eb", borderRadius: 8 }}
