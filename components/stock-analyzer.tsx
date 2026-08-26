@@ -5,8 +5,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Search, TrendingUp, TrendingDown, AlertTriangle, CheckCircle, XCircle, Loader2 } from "lucide-react"
+import { Search, TrendingUp, TrendingDown, AlertTriangle, CheckCircle, XCircle, Loader2, HelpCircle } from "lucide-react"
 import { useLanguage } from "@/lib/i18n"
+import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip"
 import { calculateValuation, type ValuationInput, type ValuationResult } from "@/lib/calculators/stock-valuation"
 
 interface StockData {
@@ -261,38 +262,100 @@ export function StockAnalyzer() {
                 <CardTitle className="text-base">{t("Fundamental Score")}</CardTitle>
               </CardHeader>
               <CardContent>
+                <TooltipProvider>
                 <div className="flex items-center gap-6">
                   <ScoreCircle score={valuation.score.total} />
                   <div className="flex-1 space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">{t("Valuation")}</span>
+                    <div className="flex justify-between text-sm items-center">
+                      <span className="text-muted-foreground flex items-center gap-1">
+                        {t("Valuation")}
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <HelpCircle className="h-3 w-3 text-muted-foreground/60 cursor-help" />
+                          </TooltipTrigger>
+                          <TooltipContent side="top" className="max-w-[220px] text-xs">
+                            {t("ValuationTooltip")}
+                          </TooltipContent>
+                        </Tooltip>
+                      </span>
                       <span className="font-medium">{valuation.score.valuation.toFixed(0)}/100</span>
                     </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">{t("Growth")}</span>
+                    <div className="flex justify-between text-sm items-center">
+                      <span className="text-muted-foreground flex items-center gap-1">
+                        {t("Growth")}
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <HelpCircle className="h-3 w-3 text-muted-foreground/60 cursor-help" />
+                          </TooltipTrigger>
+                          <TooltipContent side="top" className="max-w-[220px] text-xs">
+                            {t("GrowthTooltip")}
+                          </TooltipContent>
+                        </Tooltip>
+                      </span>
                       <span className="font-medium">{valuation.score.growth.toFixed(0)}/100</span>
                     </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">{t("Profitability")}</span>
+                    <div className="flex justify-between text-sm items-center">
+                      <span className="text-muted-foreground flex items-center gap-1">
+                        {t("Profitability")}
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <HelpCircle className="h-3 w-3 text-muted-foreground/60 cursor-help" />
+                          </TooltipTrigger>
+                          <TooltipContent side="top" className="max-w-[220px] text-xs">
+                            {t("ProfitabilityTooltip")}
+                          </TooltipContent>
+                        </Tooltip>
+                      </span>
                       <span className="font-medium">{valuation.score.profitability.toFixed(0)}/100</span>
                     </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">{t("Financial Health")}</span>
+                    <div className="flex justify-between text-sm items-center">
+                      <span className="text-muted-foreground flex items-center gap-1">
+                        {t("Financial Health")}
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <HelpCircle className="h-3 w-3 text-muted-foreground/60 cursor-help" />
+                          </TooltipTrigger>
+                          <TooltipContent side="top" className="max-w-[220px] text-xs">
+                            {t("FinancialHealthTooltip")}
+                          </TooltipContent>
+                        </Tooltip>
+                      </span>
                       <span className="font-medium">{valuation.score.financialHealth.toFixed(0)}/100</span>
                     </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">{t("Cash Flow")}</span>
+                    <div className="flex justify-between text-sm items-center">
+                      <span className="text-muted-foreground flex items-center gap-1">
+                        {t("Cash Flow")}
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <HelpCircle className="h-3 w-3 text-muted-foreground/60 cursor-help" />
+                          </TooltipTrigger>
+                          <TooltipContent side="top" className="max-w-[220px] text-xs">
+                            {t("CashFlowTooltip")}
+                          </TooltipContent>
+                        </Tooltip>
+                      </span>
                       <span className="font-medium">{valuation.score.cashFlow.toFixed(0)}/100</span>
                     </div>
                   </div>
                 </div>
+                </TooltipProvider>
               </CardContent>
             </Card>
 
             {/* Scenarios */}
             <Card>
               <CardHeader className="pb-3">
-                <CardTitle className="text-base">{t("Scenarios")}</CardTitle>
+                <CardTitle className="text-base flex items-center gap-1">
+                  {t("Scenarios")}
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <HelpCircle className="h-3 w-3 text-muted-foreground/60 cursor-help" />
+                    </TooltipTrigger>
+                    <TooltipContent side="top" className="max-w-[260px] text-xs">
+                      {t("ScenariosTooltip")}
+                    </TooltipContent>
+                  </Tooltip>
+                </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 {valuation.scenarios.map((s) => (

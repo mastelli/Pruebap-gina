@@ -606,6 +606,18 @@ const translations: Record<string, string> = {
   "Target Mean": "Objetivo Medio",
   "Target High": "Objetivo Máximo",
   "Target Low": "Objetivo Mínimo",
+  "ValuationTooltip":
+    "P/E, P/E forward, PEG y EV/EBITDA comparados con rangos sectoriales. Menor valoración = mayor puntuación.",
+  "GrowthTooltip":
+    "Crecimiento de ingresos y beneficios respecto al año anterior.",
+  "ProfitabilityTooltip":
+    "Margen bruto, margen operativo y ROE. Mayor rentabilidad = mayor puntuación.",
+  "FinancialHealthTooltip":
+    "Ratio de liquidez y nivel de deuda (debt/equity). Menos deuda y más liquidez = mayor puntuación.",
+  "CashFlowTooltip":
+    "FCF yield y margen de flujo de caja libre. Mayor generación de efectivo = mayor puntuación.",
+  "ScenariosTooltip":
+    "Porcentaje de probabilidad asignado a cada escenario para calcular el valor esperado ponderado.",
   "Analysts": "Analistas",
   "Consensus": "Consenso",
   "Our Model": "Nuestro Modelo",
