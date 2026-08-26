@@ -26,6 +26,7 @@ import { useLanguage } from "@/lib/i18n"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { RealEstateCalculator } from "@/components/real-estate-calculator"
 import AdvancedRealEstateCalculator from "@/components/advanced-real-estate-calculator"
+import { StockAnalyzer } from "@/components/stock-analyzer"
 
 type Frequency = "monthly" | "bimonthly" | "quarterly" | "semiannual" | "annual"
 
@@ -116,9 +117,10 @@ export default function CalculatorPage() {
   return (
     <div className="space-y-4">
       <Tabs defaultValue="compound" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="compound">{t("Compound Interest")}</TabsTrigger>
           <TabsTrigger value="realestate">{t("Real Estate Assets")}</TabsTrigger>
+          <TabsTrigger value="stocks">{t("Stocks")}</TabsTrigger>
           <TabsTrigger value="bonds">{t("Bonds")}</TabsTrigger>
         </TabsList>
 
@@ -273,6 +275,10 @@ export default function CalculatorPage() {
 
         <TabsContent value="realestate">
           <AdvancedRealEstateCalculator />
+        </TabsContent>
+
+        <TabsContent value="stocks">
+          <StockAnalyzer />
         </TabsContent>
 
         <TabsContent value="bonds">
