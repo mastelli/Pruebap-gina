@@ -607,15 +607,15 @@ const translations: Record<string, string> = {
   "Target High": "Objetivo Máximo",
   "Target Low": "Objetivo Mínimo",
   "ValuationTooltip":
-    "P/E: 10×(sector/empresa) + EV/EBITDA: 8×(sector/empresa) + FCF Yield: 7×(empresa/sector). Cada métrica se limita a su máximo. ×5 para escala 0-100.",
+    "P/E: sector/empresa + EV/EBITDA: sector/empresa + FCF Yield: empresa/sector",
   "GrowthTooltip":
-    "Revenue Growth: 7×(empresa/sector) + EPS Growth: 7×(empresa/sector) + FCF Growth: 6×(empresa/sector). Cada métrica se limita a su máximo. ×5 para escala 0-100.",
+    "Revenue: empresa/sector + EPS: empresa/sector + FCF: empresa/sector",
   "ProfitabilityTooltip":
-    "ROIC: 10×(empresa/sector) + ROE: 5×(empresa/sector) + Margen Operativo: 5×(empresa/sector). Cada métrica se limita a su máximo. ×5 para escala 0-100.",
+    "ROIC: empresa/sector + ROE: empresa/sector + Margen: empresa/sector",
   "FinancialHealthTooltip":
-    "Net Debt/EBITDA: 8×(1 - ratio/4) + Interest Coverage: 6×(ratio/8) + Current Ratio: 3×(ratio/1.5) + Debt/Equity: 3×(1 - ratio/160). ×5 para escala 0-100.",
+    "Net Debt/EBITDA: 1-ratio/4 + Interest Coverage: ratio/8 + Current Ratio: ratio/1.5 + Debt/Equity: 1-ratio/160",
   "CashFlowTooltip":
-    "FCF Margin: 5×(empresa/sector) + FCF Growth: 5×(empresa/sector) + FCF Yield: 5×(empresa/sector). Cada métrica se limita a su máximo. ×5 para escala 0-100.",
+    "FCF Margin: empresa/sector + FCF Growth: empresa/sector + FCF Yield: empresa/sector",
   "ScenariosTooltip":
     "Porcentaje de probabilidad asignado a cada escenario para calcular el valor esperado ponderado.",
   "Analysts": "Analistas",
