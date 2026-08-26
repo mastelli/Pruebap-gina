@@ -101,41 +101,47 @@ export function calculateValuation(input: ValuationInput): ValuationResult {
   const estEpsCurrentYear = safe(stats.estimatedEpsCurrentYear)
   const estEpsNextYear = safe(stats.estimatedEpsNextYear)
 
+  const analystTargetMean = safe(analystData.targetMean)
+
   let targetPrice = price
-  let methodCount = 0
+  if (analystTargetMean > 0) {
+    targetPrice = analystTargetMean * 0.95
+  } else {
+    let methodCount = 0
 
-  if (trailingPE > 0 && eps > 0) {
-    const sectorPE = 20
-    const histPE = trailingPE * 1.15
-    const peTarget = eps * Math.min(sectorPE, histPE)
-    targetPrice += peTarget
-    methodCount++
-  }
-
-  if (evEbitda > 0 && sharesOutstanding > 0) {
-    const sectorEV = evEbitda * 1.1
-    const evTarget = (sectorEV * ebitda - netDebt) / sharesOutstanding
-    if (evTarget > 0) {
-      targetPrice += evTarget
+    if (trailingPE > 0 && eps > 0) {
+      const sectorPE = 20
+      const histPE = trailingPE * 1.15
+      const peTarget = eps * Math.min(sectorPE, histPE)
+      targetPrice += peTarget
       methodCount++
     }
-  }
 
-  if (fcf > 0 && sharesOutstanding > 0) {
-    const fcfMultiple = 25
-    const fcfTarget = (fcf * fcfMultiple) / sharesOutstanding
-    targetPrice += fcfTarget
-    methodCount++
-  }
+    if (evEbitda > 0 && sharesOutstanding > 0) {
+      const sectorEV = evEbitda * 1.1
+      const evTarget = (sectorEV * ebitda - netDebt) / sharesOutstanding
+      if (evTarget > 0) {
+        targetPrice += evTarget
+        methodCount++
+      }
+    }
 
-  if (forwardEps > 0 && forwardPE > 0) {
-    const growthAdjustedPE = forwardPE * 1.1
-    const growthTarget = forwardEps * growthAdjustedPE
-    targetPrice += growthTarget
-    methodCount++
-  }
+    if (fcf > 0 && sharesOutstanding > 0) {
+      const fcfMultiple = 25
+      const fcfTarget = (fcf * fcfMultiple) / sharesOutstanding
+      targetPrice += fcfTarget
+      methodCount++
+    }
 
-  targetPrice = methodCount > 0 ? targetPrice / methodCount : price
+    if (forwardEps > 0 && forwardPE > 0) {
+      const growthAdjustedPE = forwardPE * 1.1
+      const growthTarget = forwardEps * growthAdjustedPE
+      targetPrice += growthTarget
+      methodCount++
+    }
+
+    targetPrice = methodCount > 0 ? targetPrice / methodCount : price
+  }
 
   const bearPrice = targetPrice * 0.8
   const basePrice = targetPrice
