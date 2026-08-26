@@ -39,9 +39,11 @@ interface StockData {
     numberOfAnalysts: number | null
     recommendationMean: number | null
     recommendationKey: string | null
+    strongBuy: number
     buyCount: number
     holdCount: number
     sellCount: number
+    strongSell: number
   }
 }
 
@@ -428,24 +430,28 @@ export function StockAnalyzer() {
                   </div>
                 </div>
                 {/* Buy/Hold/Sell bar */}
-                {data.analystData.buyCount + data.analystData.holdCount + data.analystData.sellCount > 0 && (
+                {data.analystData.numberOfAnalysts && data.analystData.numberOfAnalysts > 0 && (
                   <div className="mt-4">
                     <div className="flex h-4 rounded-full overflow-hidden">
                       {(() => {
-                        const total = data.analystData.buyCount + data.analystData.holdCount + data.analystData.sellCount
+                        const total = data.analystData.numberOfAnalysts!
                         return (
                           <>
-                            <div className="bg-green-500" style={{ width: `${(data.analystData.buyCount / total) * 100}%` }} />
-                            <div className="bg-yellow-500" style={{ width: `${(data.analystData.holdCount / total) * 100}%` }} />
-                            <div className="bg-red-500" style={{ width: `${(data.analystData.sellCount / total) * 100}%` }} />
+                            {data.analystData.strongBuy > 0 && <div className="bg-green-700" style={{ width: `${(data.analystData.strongBuy / total) * 100}%` }} />}
+                            {data.analystData.buyCount > 0 && <div className="bg-green-500" style={{ width: `${(data.analystData.buyCount / total) * 100}%` }} />}
+                            {data.analystData.holdCount > 0 && <div className="bg-yellow-500" style={{ width: `${(data.analystData.holdCount / total) * 100}%` }} />}
+                            {data.analystData.sellCount > 0 && <div className="bg-red-500" style={{ width: `${(data.analystData.sellCount / total) * 100}%` }} />}
+                            {data.analystData.strongSell > 0 && <div className="bg-red-700" style={{ width: `${(data.analystData.strongSell / total) * 100}%` }} />}
                           </>
                         )
                       })()}
                     </div>
                     <div className="flex justify-between text-xs text-muted-foreground mt-1">
-                      <span className="text-green-600">Buy {data.analystData.buyCount}</span>
-                      <span className="text-yellow-600">Hold {data.analystData.holdCount}</span>
-                      <span className="text-red-600">Sell {data.analystData.sellCount}</span>
+                      {data.analystData.strongBuy > 0 && <span className="text-green-700">Strong Buy {data.analystData.strongBuy}</span>}
+                      {data.analystData.buyCount > 0 && <span className="text-green-600">Buy {data.analystData.buyCount}</span>}
+                      {data.analystData.holdCount > 0 && <span className="text-yellow-600">Hold {data.analystData.holdCount}</span>}
+                      {data.analystData.sellCount > 0 && <span className="text-red-600">Sell {data.analystData.sellCount}</span>}
+                      {data.analystData.strongSell > 0 && <span className="text-red-700">Strong Sell {data.analystData.strongSell}</span>}
                     </div>
                   </div>
                 )}

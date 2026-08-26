@@ -220,9 +220,17 @@ export async function GET(req: NextRequest) {
 
   const recTrend = summary?.recommendationTrend?.trend ?? []
   const currentRec = recTrend.find((r: any) => r?.period === "0m") ?? recTrend[0] ?? null
-  const buyCount = (currentRec?.strongBuy ?? 0) + (currentRec?.buy ?? 0)
-  const holdCount = currentRec?.hold ?? 0
-  const sellCount = (currentRec?.sell ?? 0) + (currentRec?.strongSell ?? 0)
+  const strongBuy = currentRec?.strongBuy ?? 0
+  const buy = currentRec?.buy ?? 0
+  const hold = currentRec?.hold ?? 0
+  const sell = currentRec?.sell ?? 0
+  const strongSell = currentRec?.strongSell ?? 0
+  const recTotal = strongBuy + buy + hold + sell + strongSell
+
+  // Use numberOfAnalystOpinions from financialData as the authoritative total.
+  // The recommendationTrend total may differ slightly; recalculate counts proportionally.
+  const analystTotal = raw(financial.numberOfAnalystOpinions) ?? recTotal
+  const scale = recTotal > 0 && analystTotal > 0 ? analystTotal / recTotal : 1
 
   return NextResponse.json({
     profile: {
@@ -251,12 +259,14 @@ export async function GET(req: NextRequest) {
       targetMean: statsMap.targetMeanPrice,
       targetHigh: statsMap.targetHighPrice,
       targetLow: statsMap.targetLowPrice,
-      numberOfAnalysts: statsMap.numberOfAnalystOpinions,
+      numberOfAnalysts: analystTotal,
       recommendationMean: statsMap.recommendationMean,
       recommendationKey: financial.recommendationKey ?? null,
-      buyCount,
-      holdCount,
-      sellCount,
+      strongBuy: Math.round(strongBuy * scale),
+      buyCount: Math.round(buy * scale),
+      holdCount: Math.round(hold * scale),
+      sellCount: Math.round(sell * scale),
+      strongSell: Math.round(strongSell * scale),
     },
   })
 }
