@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Bell, X, Info, AlertTriangle, CreditCard, TrendingUp, Gift } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -55,10 +55,18 @@ export function Notifications() {
   const [hasUnread, setHasUnread] = useState(true)
   const { t } = useLanguage()
 
+  useEffect(() => {
+    const read = localStorage.getItem("notifications-read")
+    if (read) setHasUnread(false)
+  }, [])
+
   const toggleOpen = () => {
     const next = !isOpen
     setIsOpen(next)
-    if (next) setHasUnread(false)
+    if (next) {
+      setHasUnread(false)
+      localStorage.setItem("notifications-read", "1")
+    }
   }
 
   return (
