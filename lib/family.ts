@@ -22,19 +22,6 @@ export interface FamilyMember {
   inviteUrl?: string
 }
 
-export interface FamilyRequest {
-  id: string
-  familyId: string
-  familyName: string
-  fromUserId: string
-  fromUserName: string
-  toUserId: string
-  toUserEmail: string
-  status: "pending" | "accepted" | "rejected"
-  createdAt: string
-  respondedAt?: string
-}
-
 export interface FamilyPermissions {
   viewSummary: boolean
   manageMembers: boolean
@@ -257,66 +244,5 @@ export async function fetchMemberAccountSummary(member: FamilyMember): Promise<M
     yearlyExpenses,
     monthlyIncomeAverage: monthsElapsed > 0 ? yearlyIncome / monthsElapsed : 0,
     monthlyExpenseAverage: monthsElapsed > 0 ? yearlyExpenses / monthsElapsed : 0,
-  }
-}
-
-/* ── Family Requests (via API) ── */
-
-export async function sendFamilyRequest(
-  toUserId: string,
-  toUserEmail: string,
-): Promise<{ ok: boolean; error?: string }> {
-  const family = getCurrentFamily()
-  if (!family) return { ok: false, error: "No family" }
-
-  const userId = getAuthUserId()
-  if (!userId) return { ok: false, error: "Not authenticated" }
-
-  try {
-    const res = await fetch("/api/family/request", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        action: "send",
-        familyId: family.id,
-        familyName: family.name,
-        toUserId,
-        toUserEmail,
-      }),
-    })
-    const data = await res.json()
-    if (!res.ok) return { ok: false, error: data.error ?? "Failed" }
-    return { ok: true }
-  } catch {
-    return { ok: false, error: "Network error" }
-  }
-}
-
-export async function fetchMyRequests(): Promise<FamilyRequest[]> {
-  try {
-    const res = await fetch("/api/family/request?action=list")
-    if (!res.ok) return []
-    const data = await res.json()
-    return data.requests ?? []
-  } catch {
-    return []
-  }
-}
-
-export async function respondToRequest(
-  requestId: string,
-  response: "accepted" | "rejected",
-): Promise<{ ok: boolean; error?: string }> {
-  try {
-    const res = await fetch("/api/family/request", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ requestId, response }),
-    })
-    const data = await res.json()
-    if (!res.ok) return { ok: false, error: data.error ?? "Failed" }
-    return { ok: true }
-  } catch {
-    return { ok: false, error: "Network error" }
   }
 }

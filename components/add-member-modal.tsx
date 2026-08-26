@@ -15,7 +15,6 @@ import { Copy } from "lucide-react"
 import { useLanguage } from "@/lib/i18n"
 import {
   addFamilyMember,
-  sendFamilyRequest,
   getCurrentFamilyId,
   getCurrentFamily,
   type FamilyMember,
@@ -30,7 +29,6 @@ interface AddMemberModalProps {
 type Result =
   | { status: "found"; userId: string; email: string; name: string | null }
   | { status: "self" }
-  | { status: "request_sent"; email: string }
   | { status: "not_found"; email: string; inviteUrl: string | null }
   | { status: "error"; message: string }
   | null
@@ -49,55 +47,49 @@ export function AddMemberModal({ isOpen, onClose, onMemberAdded }: AddMemberModa
     setCopied(false)
 
     try {
-      // Step 1: Check if user exists in Clerk
       const lookupRes = await fetch(`/api/family/lookup?email=${encodeURIComponent(email.trim())}`)
       const lookupData = await lookupRes.json()
 
       if (lookupData.found && lookupData.userId) {
-        // Step 2: User found — send join request
-        const reqResult = await sendFamilyRequest(lookupData.userId, lookupData.email)
-        if (reqResult.ok) {
-          setResult({ status: "request_sent", email: lookupData.email })
-          toast.success(t("Request sent"))
-        } else {
-          // Fallback: add directly if request fails
-          const member: FamilyMember = {
-            userId: lookupData.userId,
-            email: lookupData.email,
-            displayName: lookupData.name ?? email.trim().split("@")[0],
-            role: "member",
-            addedAt: new Date().toISOString(),
-            status: "active",
-          }
-          addFamilyMember(member)
-          toast.success(t("Member added"))
-          onMemberAdded(member)
-          setEmail("")
-          setResult(null)
-          onClose()
-          return
+        const member: FamilyMember = {
+          userId: lookupData.userId,
+          email: lookupData.email,
+          displayName: lookupData.name ?? email.trim().split("@")[0],
+          role: "member",
+          addedAt: new Date().toISOString(),
+          status: "active",
         }
-      } else if (lookupData.reason === "self") {
+        addFamilyMember(member)
+        toast.success(t("Member added"))
+        onMemberAdded(member)
+        setEmail("")
+        setResult(null)
+        onClose()
+        return
+      }
+
+      if (lookupData.reason === "self") {
         setResult({ status: "self" })
         toast.error(t("Cannot add yourself"))
-      } else {
-        // Step 3: User not found — try invitation
-        const inviteRes = await fetch("/api/family/lookup", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            email: email.trim(),
-            familyId: getCurrentFamilyId() ?? "",
-            familyName: getCurrentFamily()?.name ?? "",
-          }),
-        })
-        const inviteData = await inviteRes.json()
+        return
+      }
 
-        if (inviteData.status === "not_found") {
-          setResult({ status: "not_found", email: inviteData.email, inviteUrl: inviteData.inviteUrl ?? null })
-        } else {
-          setResult({ status: "error", message: inviteData.error ?? t("Unknown error") })
-        }
+      // User not found — try invitation
+      const inviteRes = await fetch("/api/family/lookup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: email.trim(),
+          familyId: getCurrentFamilyId() ?? "",
+          familyName: getCurrentFamily()?.name ?? "",
+        }),
+      })
+      const inviteData = await inviteRes.json()
+
+      if (inviteData.status === "not_found") {
+        setResult({ status: "not_found", email: inviteData.email, inviteUrl: inviteData.inviteUrl ?? null })
+      } else {
+        setResult({ status: "error", message: inviteData.error ?? t("Unknown error") })
       }
     } catch {
       setResult({ status: "error", message: t("Error searching for user") })
@@ -171,15 +163,6 @@ export function AddMemberModal({ isOpen, onClose, onMemberAdded }: AddMemberModa
               {loading ? t("Searching...") : t("Search")}
             </Button>
           </div>
-
-          {result?.status === "request_sent" && (
-            <div className="rounded-lg border bg-muted/50 p-3 space-y-1">
-              <p className="text-sm font-medium">{result.email}</p>
-              <p className="text-xs text-muted-foreground">
-                {t("Request sent — they will see it in their notifications")}
-              </p>
-            </div>
-          )}
 
           {result?.status === "not_found" && (
             <div className="rounded-lg border bg-muted/50 p-3 space-y-3">
