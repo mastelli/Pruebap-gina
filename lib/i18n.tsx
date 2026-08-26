@@ -584,6 +584,7 @@ const translations: Record<string, string> = {
   "Annual Expenses": "Gastos Anuales",
   "Monthly Expenses": "Gastos Mensuales",
   "Property Taxes": "Impuestos de la Propiedad",
+  "Coming Soon": "Próximamente",
 
   // Familia y miembros
   "Create Family Unit": "Crear Unidad Familiar",
