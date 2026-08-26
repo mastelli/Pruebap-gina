@@ -52,7 +52,14 @@ const notifications = [
 
 export function Notifications() {
   const [isOpen, setIsOpen] = useState(false)
+  const [hasUnread, setHasUnread] = useState(true)
   const { t } = useLanguage()
+
+  const toggleOpen = () => {
+    const next = !isOpen
+    setIsOpen(next)
+    if (next) setHasUnread(false)
+  }
 
   return (
     <div className="relative">
@@ -60,11 +67,11 @@ export function Notifications() {
         variant="ghost"
         size="icon"
         className="relative"
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={toggleOpen}
         aria-label={t("Notifications")}
       >
         <Bell className="h-5 w-5" />
-        <span className="absolute top-0 right-0 h-2 w-2 bg-red-500 rounded-full" />
+        {hasUnread && <span className="absolute top-0 right-0 h-2 w-2 bg-red-500 rounded-full" />}
       </Button>
       {isOpen && (
         <Card className="absolute right-0 mt-2 w-96 z-50">
