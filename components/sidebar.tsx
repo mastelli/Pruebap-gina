@@ -83,7 +83,7 @@ export function Sidebar() {
           className={cn(
             // En movil es un cajon deslizante; en escritorio queda fijo
             // arriba para que la marca siga visible al hacer scroll
-            "fixed inset-y-0 z-20 flex flex-col bg-[#C1B6A3] transition-all duration-300 ease-in-out dark:bg-background",
+            "fixed inset-y-0 z-20 flex flex-col bg-sidebar transition-all duration-300 ease-in-out",
             "lg:sticky lg:top-0 lg:bottom-auto lg:h-screen lg:self-start",
             isCollapsed ? "w-[72px]" : "w-72",
             isMobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
