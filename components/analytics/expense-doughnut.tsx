@@ -47,7 +47,7 @@ export function ExpenseDoughnut({ month }: { month: string }) {
   }
 
   return (
-    <ResponsiveContainer width="100%" height={400}>
+    <ResponsiveContainer width="100%" height={450}>
       <PieChart>
         <Pie
           data={data}
@@ -59,15 +59,16 @@ export function ExpenseDoughnut({ month }: { month: string }) {
           outerRadius={160}
           paddingAngle={2}
           label={(props: any) => {
-            const { cx, cy, midAngle, outerRadius, percent, label: nameLabel } = props
-            if (!percent || percent < 0.05 || !midAngle) return null
-            const radius = outerRadius * 1.45
+            const { cx, cy, midAngle, outerRadius, percent, label: nameLabel, total: entryTotal } = props
+            if (!percent || percent < 0.02 || !midAngle) return null
+            const radius = outerRadius + 24
             const x = cx + radius * Math.cos(-midAngle * RADIAN)
             const y = cy + radius * Math.sin(-midAngle * RADIAN)
+            const anchor = x > cx ? "start" : "end"
             return (
-              <text x={x} y={y} fill="currentColor" textAnchor={x > cx ? "start" : "end"} dominantBaseline="central" fontSize={11}>
-                <tspan fontWeight={600}>{nameLabel}</tspan>
-                <tspan dx={4} fill="currentColor" opacity={0.6}>{`${(percent * 100).toFixed(0)}%`}</tspan>
+              <text x={x} y={y} fill="currentColor" textAnchor={anchor} dominantBaseline="central" fontSize={11}>
+                <tspan x={x} dy={-6} fontWeight={600}>{nameLabel}</tspan>
+                <tspan x={x} dy={14} fill="currentColor" opacity={0.6}>{formatEuros(entryTotal)}</tspan>
               </text>
             )
           }}
