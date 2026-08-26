@@ -13,29 +13,42 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Email required" }, { status: 400 })
   }
 
+  const normalizedEmail = email.toLowerCase().trim()
+
   try {
     const response = await clerkClient.users.getUserList({
-      emailAddress: [email.toLowerCase().trim()],
+      emailAddress: [normalizedEmail],
+      limit: 10,
     })
 
-    const users = response.data ?? response
-    if (!Array.isArray(users) || users.length === 0) {
+    const users = response.data ?? []
+
+    const matched = users.find((u) =>
+      u.emailAddresses?.some(
+        (ea) => ea.emailAddress?.toLowerCase() === normalizedEmail,
+      ),
+    )
+
+    if (!matched) {
       return NextResponse.json({ found: false })
     }
 
-    const user = users[0]
-    if (user.id === currentUserId) {
+    if (matched.id === currentUserId) {
       return NextResponse.json({ found: false, reason: "self" })
     }
 
+    const matchedEmail = matched.emailAddresses?.find(
+      (ea) => ea.emailAddress?.toLowerCase() === normalizedEmail,
+    )
+
     return NextResponse.json({
       found: true,
-      userId: user.id,
-      email: user.emailAddresses?.[0]?.emailAddress ?? email,
-      name: [user.firstName, user.lastName].filter(Boolean).join(" ") || null,
+      userId: matched.id,
+      email: matchedEmail?.emailAddress ?? normalizedEmail,
+      name: [matched.firstName, matched.lastName].filter(Boolean).join(" ") || null,
     })
   } catch (error) {
     console.error("[family/lookup] Clerk error:", error)
-    return NextResponse.json({ found: false })
+    return NextResponse.json({ found: false, error: String(error) })
   }
 }
