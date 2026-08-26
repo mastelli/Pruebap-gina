@@ -93,7 +93,7 @@ const p = (v: string | number) => parseFloat(String(v)) || 0
 
 // ── Field component ───────────────────────────────────
 function Field({
-  label, value, onChange, suffix, tooltip, placeholder, type = "number",
+  label, value, onChange, suffix, tooltip, placeholder, type = "number", rightText,
 }: {
   label: string
   value: string | number
@@ -102,9 +102,10 @@ function Field({
   tooltip?: string
   placeholder?: string
   type?: string
+  rightText?: string
 }) {
   const inner = (
-    <div className="space-y-1">
+    <div className="space-y-1.5">
       <Label className="text-sm flex items-center gap-1">
         {label}
         {tooltip && (
@@ -116,17 +117,22 @@ function Field({
           </TooltipProvider>
         )}
       </Label>
-      <div className="relative">
-        {suffix && <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">{suffix}</span>}
-        <Input
-          type={type}
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder={placeholder}
-          className={suffix ? "pl-8" : ""}
-          min={0}
-          step="any"
-        />
+      <div className="flex items-center gap-2">
+        <div className="relative flex-1">
+          {suffix && <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">{suffix}</span>}
+          <Input
+            type={type}
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            placeholder={placeholder}
+            className={suffix ? "pl-8" : ""}
+            min={0}
+            step="any"
+          />
+        </div>
+        {rightText && (
+          <span className="text-xs text-muted-foreground whitespace-nowrap min-w-[3rem] text-right">{rightText}</span>
+        )}
       </div>
     </div>
   )
@@ -316,10 +322,10 @@ export default function AdvancedRealEstateCalculator() {
 
             {/* Step 0: Purchase */}
             {activeStep === 0 && (
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 <Field label="Precio de compra" value={input.purchase.price} onChange={v => updatePurchase("price", v)} suffix={sym} tooltip="Precio de venta del inmueble" />
-                <Field label="Gastos de compra" value={input.purchase.purchaseExpenses} onChange={v => updatePurchase("purchaseExpenses", v)} suffix={sym} tooltip="Notaría, registro, gestoría" />
-                <Field label="Impuestos" value={input.purchase.taxes} onChange={v => updatePurchase("taxes", v)} suffix={sym} tooltip="ITP / AJD / IVA" />
+                <Field label="Gastos de compra" value={input.purchase.purchaseExpenses} onChange={v => updatePurchase("purchaseExpenses", v)} suffix={sym} tooltip="Notaría, registro, gestoría" rightText={input.purchase.price > 0 ? `${((input.purchase.purchaseExpenses / input.purchase.price) * 100).toFixed(1)}%` : ""} />
+                <Field label="Impuestos" value={input.purchase.taxes} onChange={v => updatePurchase("taxes", v)} suffix={sym} tooltip="ITP / AJD / IVA" rightText={input.purchase.price > 0 ? `${((input.purchase.taxes / input.purchase.price) * 100).toFixed(1)}%` : ""} />
                 <Field label="Reforma" value={input.purchase.renovationCost} onChange={v => updatePurchase("renovationCost", v)} suffix={sym} />
                 <Field label="Mobiliario" value={input.purchase.furnitureCost} onChange={v => updatePurchase("furnitureCost", v)} suffix={sym} />
                 <Field label="Otros costes" value={input.purchase.otherInitialCost} onChange={v => updatePurchase("otherInitialCost", v)} suffix={sym} />
@@ -337,7 +343,7 @@ export default function AdvancedRealEstateCalculator() {
                   <Label>Con financiación (hipoteca)</Label>
                 </div>
                 {input.financing.enabled && (
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                     <Field label="% Financiación (LTV)" value={input.financing.ltvPct} onChange={v => updateFinancing("ltvPct", v)} suffix="%" tooltip="Porcentaje del precio financiado" />
                     <Field label="Tipo de interés" value={input.financing.annualInterestRate} onChange={v => updateFinancing("annualInterestRate", v)} suffix="%" tooltip="TAE nominal" />
                     <Field label="Plazo" value={input.financing.termYears} onChange={v => updateFinancing("termYears", v)} suffix="años" />
@@ -377,7 +383,7 @@ export default function AdvancedRealEstateCalculator() {
 
             {/* Step 2: Rental */}
             {activeStep === 2 && (
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 <Field label="Alquiler mensual" value={input.rental.monthlyRent} onChange={v => updateRental("monthlyRent", v)} suffix={sym} />
                 <Field label="Otros ingresos mensuales" value={input.rental.otherMonthlyIncome} onChange={v => updateRental("otherMonthlyIncome", v)} suffix={sym} />
                 <Field label="Meses alquilados/año" value={input.rental.rentedMonthsPerYear} onChange={v => updateRental("rentedMonthsPerYear", v)} placeholder="12" />
@@ -393,9 +399,9 @@ export default function AdvancedRealEstateCalculator() {
 
             {/* Step 3: Expenses */}
             {activeStep === 3 && (
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 <Field label="Comunidad" value={input.expenses.communityFee} onChange={v => updateExpenses("communityFee", v)} suffix={`${sym}/mes`} />
-                <Field label="IBI" value={input.expenses.ibi} onChange={v => updateExpenses("ibi", v)} suffix={`${sym}/año`} />
+                <Field label="IBI" value={input.expenses.ibi} onChange={v => updateExpenses("ibi", v)} suffix={`${sym}/año`} rightText={input.purchase.price > 0 ? `${((input.expenses.ibi / input.purchase.price) * 100).toFixed(2)}%` : ""} />
                 <Field label="Seguro" value={input.expenses.insurance} onChange={v => updateExpenses("insurance", v)} suffix={`${sym}/año`} />
                 <Field label="Mantenimiento" value={input.expenses.maintenance} onChange={v => updateExpenses("maintenance", v)} suffix={`${sym}/año`} />
                 <Field label="Reparaciones" value={input.expenses.repairs} onChange={v => updateExpenses("repairs", v)} suffix={`${sym}/año`} />
@@ -413,7 +419,7 @@ export default function AdvancedRealEstateCalculator() {
 
             {/* Step 4: Assumptions */}
             {activeStep === 4 && (
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 <Field label="Revalorización anual" value={input.appreciation.annualAppreciationPct} onChange={v => updateAppreciation("annualAppreciationPct", v)} suffix="%" tooltip="Crecimiento anual estimado del valor del inmueble" />
                 <Field label="Horizonte de inversión" value={input.appreciation.investmentHorizonYears} onChange={v => updateAppreciation("investmentHorizonYears", v)} suffix="años" />
               </div>
