@@ -214,12 +214,10 @@ export async function GET(req: NextRequest) {
   }
 
   const recTrend = summary?.recommendationTrend?.trend ?? []
-  let buyCount = 0, holdCount = 0, sellCount = 0
-  for (const r of recTrend) {
-    buyCount += (r?.strongBuy ?? 0) + (r?.buy ?? 0)
-    holdCount += (r?.hold ?? 0)
-    sellCount += (r?.sell ?? 0) + (r?.strongSell ?? 0)
-  }
+  const currentRec = recTrend.find((r: any) => r?.period === "0m") ?? recTrend[0] ?? null
+  const buyCount = (currentRec?.strongBuy ?? 0) + (currentRec?.buy ?? 0)
+  const holdCount = currentRec?.hold ?? 0
+  const sellCount = (currentRec?.sell ?? 0) + (currentRec?.strongSell ?? 0)
 
   return NextResponse.json({
     profile: {
