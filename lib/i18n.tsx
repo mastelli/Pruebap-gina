@@ -606,16 +606,11 @@ const translations: Record<string, string> = {
   "Target Mean": "Objetivo Medio",
   "Target High": "Objetivo Máximo",
   "Target Low": "Objetivo Mínimo",
-  "ValuationTooltip":
-    "P/E: sector/empresa + EV/EBITDA: sector/empresa + FCF Yield: empresa/sector",
-  "GrowthTooltip":
-    "Revenue: empresa/sector + EPS: empresa/sector + FCF: empresa/sector",
-  "ProfitabilityTooltip":
-    "ROIC: empresa/sector + ROE: empresa/sector + Margen: empresa/sector",
-  "FinancialHealthTooltip":
-    "Net Debt/EBITDA: 1-ratio/4 + Interest Coverage: ratio/8 + Current Ratio: ratio/1.5 + Debt/Equity: 1-ratio/160",
-  "CashFlowTooltip":
-    "FCF Margin: empresa/sector + FCF Growth: empresa/sector + FCF Yield: empresa/sector",
+  "ValuationTooltip": "P/E + EV/EBITDA + FCF Yield",
+  "GrowthTooltip": "Revenue + EPS + FCF",
+  "ProfitabilityTooltip": "ROIC + ROE + Margen",
+  "FinancialHealthTooltip": "Net Debt/EBITDA: 1-ratio/4 + Interest Coverage: ratio/8 + Current Ratio: ratio/1.5 + Debt/Equity: 1-ratio/160",
+  "CashFlowTooltip": "FCF Margin + FCF Growth + FCF Yield",
   "ScenariosTooltip":
     "Porcentaje de probabilidad asignado a cada escenario para calcular el valor esperado ponderado.",
   "Analysts": "Analistas",
