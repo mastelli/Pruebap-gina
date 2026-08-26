@@ -118,20 +118,21 @@ function Field({
         )}
       </Label>
       <div className="flex items-center gap-2">
-        <div className="relative flex-1">
-          {suffix && <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">{suffix}</span>}
+        <div className="flex-1">
           <Input
             type={type}
             value={value}
             onChange={(e) => onChange(e.target.value)}
             placeholder={placeholder}
-            className={suffix ? "pl-8" : ""}
             min={0}
             step="any"
           />
         </div>
+        {suffix && (
+          <span className="text-sm text-muted-foreground whitespace-nowrap min-w-[4rem]">{suffix}</span>
+        )}
         {rightText && (
-          <span className="text-xs text-muted-foreground whitespace-nowrap min-w-[3rem] text-right">{rightText}</span>
+          <span className="text-xs text-muted-foreground whitespace-nowrap min-w-[3rem] text-right font-medium">{rightText}</span>
         )}
       </div>
     </div>
