@@ -618,6 +618,8 @@ const translations: Record<string, string> = {
   "PriceChartTooltip":
     "Gráfico con los últimos 6 meses de precios. Línea sólida: precio real. Línea punteada azul: precio objetivo. Verde: escenario alcista (Bull). Rojo: escenario bajista (Bear).",
   "No historical data": "No hay datos históricos disponibles",
+  "Line": "Línea",
+  "Candle": "Velas",
   "ScenariosTooltip":
     "Porcentaje de probabilidad asignado a cada escenario para calcular el valor esperado ponderado.",
   "Analysts": "Analistas",

@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { Search, TrendingUp, TrendingDown, AlertTriangle, CheckCircle, XCircle, Loader2, HelpCircle } from "lucide-react"
 import { useLanguage } from "@/lib/i18n"
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip"
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Legend, Tooltip as RechartsTooltip } from "recharts"
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Legend, Tooltip as RechartsTooltip, Bar, Cell, ComposedChart, BarChart } from "recharts"
 import { calculateValuation, type ValuationInput, type ValuationResult } from "@/lib/calculators/stock-valuation"
 
 interface StockData {
@@ -47,7 +47,7 @@ interface StockData {
     sellCount: number
     strongSell: number
   }
-  history: { date: string; price: number }[]
+  history: { date: string; price: number; open: number; high: number; low: number }[]
 }
 
 function fmt(v: number | null | undefined, decimals: number = 2): string {
@@ -163,6 +163,66 @@ function PriceChart({ history, target, bear, bull, range }: { history: { date: s
   )
 }
 
+type CandleData = { date: string; price: number; open: number; high: number; low: number; range: string }
+
+function CandleShape(props: any) {
+  const { x, y, width, height, payload } = props
+  if (!payload) return null
+  const { open, high, low, price: close } = payload
+  if (open == null || high == null || low == null || close == null) return null
+  const isGreen = close >= open
+  const color = isGreen ? "#22c55e" : "#ef4444"
+  const bodyMin = Math.min(open, close)
+  const bodyMax = Math.max(open, close)
+  const yScale = (val: number) => {
+    const ratio = (val - low) / (high - low || 1)
+    return y + height - ratio * height
+  }
+  const bodyTop = yScale(bodyMax)
+  const bodyBottom = yScale(bodyMin)
+  const bodyHeight = Math.max(bodyBottom - bodyTop, 1)
+  const centerX = x + width / 2
+  return (
+    <g>
+      <line x1={centerX} y1={yScale(high)} x2={centerX} y2={yScale(low)} stroke={color} strokeWidth={1} />
+      <rect x={x + 1} y={bodyTop} width={Math.max(width - 2, 2)} height={bodyHeight} fill={color} rx={1} />
+    </g>
+  )
+}
+
+function CandlestickChart({ history, target, bear, bull, range }: { history: CandleData[]; target: number; bear: number; bull: number; range: string }) {
+  const data = history.map(h => ({ ...h, target, bear, bull }))
+  const monthNames = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"]
+  const formatTick = (v: string) => {
+    const d = new Date(v)
+    if (range === "1d") return `${d.getHours()}:${String(d.getMinutes()).padStart(2, "0")}`
+    if (range === "1mo") return `${d.getDate()}`
+    if (["3mo", "6mo", "ytd"].includes(range)) return `${monthNames[d.getMonth()]} ${d.getDate()}`
+    if (["5y", "2y"].includes(range)) return `${monthNames[d.getMonth()]} ${d.getFullYear()}`
+    return `${d.getFullYear()}`
+  }
+  return (
+    <ResponsiveContainer width="100%" height={440}>
+      <ComposedChart data={data} margin={{ top: 5, right: 60, left: 10, bottom: 25 }}>
+        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+        <XAxis dataKey="date" tick={{ fontSize: 10 }} tickFormatter={formatTick}
+          interval={Math.max(Math.floor(data.length / 8), 0)} minTickGap={30} />
+        <YAxis yAxisId="left" tick={{ fontSize: 10 }} domain={["auto", "auto"]} tickFormatter={v => `$${v}`} width={55} />
+        <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 10 }} domain={["auto", "auto"]} tickFormatter={v => `$${v}`} width={55} />
+        <RechartsTooltip
+          content={<ChartTooltip range={range} />}
+          cursor={{ stroke: "hsl(var(--muted-foreground))", strokeWidth: 1, strokeDasharray: "4 4" }}
+        />
+        <Bar yAxisId="left" dataKey="high" barSize={8} shape={<CandleShape />} isAnimationActive={false} />
+        <Line yAxisId="right" type="monotone" dataKey="target" stroke="hsl(var(--primary))" strokeWidth={1.5} strokeDasharray="6 3" dot={false} name="Objetivo" />
+        <Line yAxisId="right" type="monotone" dataKey="bear" stroke="#ef4444" strokeWidth={1} strokeDasharray="4 4" dot={false} name="Bear" />
+        <Line yAxisId="right" type="monotone" dataKey="bull" stroke="#22c55e" strokeWidth={1} strokeDasharray="4 4" dot={false} name="Bull" />
+        <Legend verticalAlign="bottom" height={36} iconType="line" wrapperStyle={{ fontSize: 11, paddingTop: 10 }} />
+      </ComposedChart>
+    </ResponsiveContainer>
+  )
+}
+
 export function StockAnalyzer() {
   const { t } = useLanguage()
   const [ticker, setTicker] = useState("")
@@ -171,7 +231,8 @@ export function StockAnalyzer() {
   const [valuation, setValuation] = useState<ValuationResult | null>(null)
   const [error, setError] = useState("")
   const [chartRange, setChartRange] = useState("6mo")
-  const [chartHistory, setChartHistory] = useState<{ date: string; price: number }[]>([])
+  const [chartHistory, setChartHistory] = useState<{ date: string; price: number; open: number; high: number; low: number }[]>([])
+  const [chartType, setChartType] = useState<"line" | "candle">("line")
 
   const popularTickers = ["AAPL", "MSFT", "NVDA", "GOOGL", "AMZN", "META", "TSLA", "BRK-B", "JPM", "V"]
 
@@ -337,28 +398,58 @@ export function StockAnalyzer() {
                       </TooltipContent>
                     </Tooltip>
                   </div>
-                  <div className="flex gap-1">
-                    {TIME_RANGES.map(r => (
+                  <div className="flex items-center gap-2">
+                    <div className="flex border rounded-md">
                       <Button
-                        key={r.value}
-                        variant={chartRange === r.value ? "default" : "ghost"}
+                        variant={chartType === "line" ? "default" : "ghost"}
                         size="sm"
-                        className="h-6 px-2 text-xs"
-                        onClick={() => handleRangeChange(r.value)}
+                        className="h-6 px-2 text-xs rounded-r-none"
+                        onClick={() => setChartType("line")}
                       >
-                        {r.label}
+                        {t("Line")}
                       </Button>
-                    ))}
+                      <Button
+                        variant={chartType === "candle" ? "default" : "ghost"}
+                        size="sm"
+                        className="h-6 px-2 text-xs rounded-l-none border-l"
+                        onClick={() => setChartType("candle")}
+                      >
+                        {t("Candle")}
+                      </Button>
+                    </div>
+                    <div className="flex gap-1">
+                      {TIME_RANGES.map(r => (
+                        <Button
+                          key={r.value}
+                          variant={chartRange === r.value ? "default" : "ghost"}
+                          size="sm"
+                          className="h-6 px-2 text-xs"
+                          onClick={() => handleRangeChange(r.value)}
+                        >
+                          {r.label}
+                        </Button>
+                      ))}
+                    </div>
                   </div>
                 </div>
                 {chartHistory.length > 0 ? (
-                  <PriceChart
-                    history={chartHistory}
-                    target={valuation.targetPrice}
-                    bear={valuation.scenarios[0].targetPrice}
-                    bull={valuation.scenarios[2].targetPrice}
-                    range={chartRange}
-                  />
+                  chartType === "line" ? (
+                    <PriceChart
+                      history={chartHistory}
+                      target={valuation.targetPrice}
+                      bear={valuation.scenarios[0].targetPrice}
+                      bull={valuation.scenarios[2].targetPrice}
+                      range={chartRange}
+                    />
+                  ) : (
+                    <CandlestickChart
+                      history={chartHistory}
+                      target={valuation.targetPrice}
+                      bear={valuation.scenarios[0].targetPrice}
+                      bull={valuation.scenarios[2].targetPrice}
+                      range={chartRange}
+                    />
+                  )
                 ) : (
                   <p className="text-xs text-muted-foreground text-center py-8">{t("No historical data")}</p>
                 )}

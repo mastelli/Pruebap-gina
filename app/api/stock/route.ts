@@ -285,12 +285,19 @@ export async function GET(req: NextRequest) {
     },
     history: (() => {
       const timestamps = chart?.timestamp ?? []
-      const closes = chart?.indicators?.quote?.[0]?.close ?? []
+      const quote = chart?.indicators?.quote?.[0] ?? {}
+      const closes = quote.close ?? []
+      const opens = quote.open ?? []
+      const highs = quote.high ?? []
+      const lows = quote.low ?? []
       if (!timestamps.length) return []
       return timestamps
         .map((ts: number, i: number) => ({
           date: new Date(ts * 1000).toISOString().split("T")[0],
           price: closes[i] != null ? Math.round(closes[i] * 100) / 100 : null,
+          open: opens[i] != null ? Math.round(opens[i] * 100) / 100 : null,
+          high: highs[i] != null ? Math.round(highs[i] * 100) / 100 : null,
+          low: lows[i] != null ? Math.round(lows[i] * 100) / 100 : null,
         }))
         .filter((d: any) => d.price != null)
     })(),
