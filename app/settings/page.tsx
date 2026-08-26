@@ -331,37 +331,42 @@ export default function SettingsPage() {
                       updateNotificationSettings({ ...settings.notifications, email: !!checked })
                     }
                   />
-                  <Label htmlFor="email-notifications">{t("Email Notifications")}</Label>
+                  <Label htmlFor="email-notifications" className="font-medium">{t("Email Notifications")}</Label>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="account-activity"
-                    checked={settings.notifications.accountActivity}
-                    onCheckedChange={(checked) =>
-                      updateNotificationSettings({ ...settings.notifications, accountActivity: !!checked })
-                    }
-                  />
-                  <Label htmlFor="account-activity">{t("Account Activity")}</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="new-features"
-                    checked={settings.notifications.newFeatures}
-                    onCheckedChange={(checked) =>
-                      updateNotificationSettings({ ...settings.notifications, newFeatures: !!checked })
-                    }
-                  />
-                  <Label htmlFor="new-features">{t("New Features and Updates")}</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="marketing"
-                    checked={settings.notifications.marketing}
-                    onCheckedChange={(checked) =>
-                      updateNotificationSettings({ ...settings.notifications, marketing: !!checked })
-                    }
-                  />
-                  <Label htmlFor="marketing">{t("Marketing and Promotions")}</Label>
+                <div className="ml-6 pl-3 border-l-2 border-border space-y-3">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="account-activity"
+                      checked={settings.notifications.accountActivity}
+                      disabled={!settings.notifications.email}
+                      onCheckedChange={(checked) =>
+                        updateNotificationSettings({ ...settings.notifications, accountActivity: !!checked })
+                      }
+                    />
+                    <Label htmlFor="account-activity" className={!settings.notifications.email ? "opacity-50" : ""}>{t("Account Activity")}</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="new-features"
+                      checked={settings.notifications.newFeatures}
+                      disabled={!settings.notifications.email}
+                      onCheckedChange={(checked) =>
+                        updateNotificationSettings({ ...settings.notifications, newFeatures: !!checked })
+                      }
+                    />
+                    <Label htmlFor="new-features" className={!settings.notifications.email ? "opacity-50" : ""}>{t("New Features and Updates")}</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="marketing"
+                      checked={settings.notifications.marketing}
+                      disabled={!settings.notifications.email}
+                      onCheckedChange={(checked) =>
+                        updateNotificationSettings({ ...settings.notifications, marketing: !!checked })
+                      }
+                    />
+                    <Label htmlFor="marketing" className={!settings.notifications.email ? "opacity-50" : ""}>{t("Marketing and Promotions")}</Label>
+                  </div>
                 </div>
               </div>
             </CardContent>
