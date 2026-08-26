@@ -47,9 +47,9 @@ function defaultInput(): RealEstateInput {
       price: 150_000,
       purchaseExpenses: 3_000,
       taxes: 12_000,
-      renovationCost: 5_000,
-      furnitureCost: 2_000,
-      otherInitialCost: 1_000,
+      renovationCost: 0,
+      furnitureCost: 0,
+      otherInitialCost: 0,
     },
     financing: {
       enabled: true,
@@ -117,7 +117,7 @@ function Field({
           </TooltipProvider>
         )}
       </Label>
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1.5">
         <div className="flex-1">
           <Input
             type={type}
@@ -129,10 +129,10 @@ function Field({
           />
         </div>
         {suffix && (
-          <span className="text-sm text-muted-foreground whitespace-nowrap min-w-[4rem]">{suffix}</span>
+          <span className="text-sm text-muted-foreground whitespace-nowrap">{suffix}</span>
         )}
         {rightText && (
-          <span className="text-xs text-muted-foreground whitespace-nowrap min-w-[3rem] text-right font-medium">{rightText}</span>
+          <span className="text-xs text-muted-foreground whitespace-nowrap font-medium">{rightText}</span>
         )}
       </div>
     </div>
