@@ -17,6 +17,7 @@ import {
   Menu,
   ChevronLeft,
   PiggyBank,
+  Calculator,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -30,6 +31,7 @@ const navigation = [
   { name: "Transactions", href: "/transactions", icon: Wallet },
   { name: "Invoices", href: "/invoices", icon: Receipt },
   { name: "Payments", href: "/payments", icon: CreditCard },
+  { name: "Calculator", href: "/calculator", icon: Calculator },
   { name: "Members", href: "/members", icon: Users2 },
   { name: "Permissions", href: "/permissions", icon: Shield },
   { name: "Chat", href: "/chat", icon: MessagesSquare },
