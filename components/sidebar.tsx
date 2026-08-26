@@ -9,8 +9,6 @@ import {
   Wallet,
   Receipt,
   CreditCard,
-  Users2,
-  Shield,
   MessagesSquare,
   Settings,
   HelpCircle,
@@ -32,8 +30,6 @@ const navigation = [
   { name: "Invoices", href: "/invoices", icon: Receipt },
   { name: "Payments", href: "/payments", icon: CreditCard },
   { name: "Calculator", href: "/calculator", icon: Calculator },
-  { name: "Members", href: "/members", icon: Users2 },
-  { name: "Permissions", href: "/permissions", icon: Shield },
   { name: "Chat", href: "/chat", icon: MessagesSquare },
 ]
 
