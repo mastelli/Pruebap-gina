@@ -180,19 +180,19 @@ export default function CalculatorPage() {
             </div>
           </div>
 
-          <Button className="mt-4 w-full" onClick={calculate}>
+          <Button className="mt-8 w-full" onClick={calculate}>
             Calcular
           </Button>
 
           {results.length > 0 && (
             <>
-              <div className="grid grid-cols-3 gap-4 mt-6 text-center">
+              <div className="grid grid-cols-3 gap-4 mt-12 text-center">
                 <div className="rounded-lg bg-muted p-3">
                   <p className="text-xs text-muted-foreground">Total Invertido</p>
                   <p className="text-lg font-semibold">{formatCurrency(finalContributions!)}</p>
                 </div>
                 <div className="rounded-lg bg-muted p-3">
-                  <p className="text-xs text-muted-foreground">Intereses Ganados</p>
+                  <p className="text-xs text-muted-foreground">Intereses Futuros</p>
                   <p className="text-lg font-semibold text-green-600">{formatCurrency(finalInterest!)}</p>
                 </div>
                 <div className="rounded-lg bg-muted p-3">
@@ -201,7 +201,7 @@ export default function CalculatorPage() {
                 </div>
               </div>
 
-              <div className="mt-6 w-full" style={{ height: 400 }}>
+              <div className="mt-8 w-full" style={{ height: 400 }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={results}>
                     <defs>
@@ -222,6 +222,9 @@ export default function CalculatorPage() {
                     />
                     <YAxis tickFormatter={formatYAxis} className="text-xs" />
                     <RechartsTooltip
+                      contentStyle={{ backgroundColor: "#1e293b", color: "#fff", border: "none", borderRadius: "8px" }}
+                      itemStyle={{ color: "#fff" }}
+                      labelStyle={{ color: "#94a3b8", fontWeight: 600 }}
                       formatter={(value: number, name: string) => [
                         formatCurrency(value),
                         name === "total" ? "Valor Total" : "Aportaciones",
@@ -229,6 +232,7 @@ export default function CalculatorPage() {
                       labelFormatter={(label) => `Año ${label}`}
                     />
                     <Legend
+                      wrapperStyle={{ paddingTop: "24px" }}
                       formatter={(value) => (value === "total" ? "Valor Total" : "Aportaciones")}
                     />
                     <Area
