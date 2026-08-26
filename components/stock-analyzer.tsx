@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { Search, TrendingUp, TrendingDown, AlertTriangle, CheckCircle, XCircle, Loader2, HelpCircle } from "lucide-react"
 import { useLanguage } from "@/lib/i18n"
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip"
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Legend } from "recharts"
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Legend, Tooltip as RechartsTooltip } from "recharts"
 import { calculateValuation, type ValuationInput, type ValuationResult } from "@/lib/calculators/stock-valuation"
 
 interface StockData {
@@ -96,12 +96,31 @@ function MetricRow({ label, value, color }: { label: string; value: string; colo
   )
 }
 
+function ChartTooltip({ active, payload, label }: any) {
+  if (!active || !payload?.length) return null
+  const d = new Date(label)
+  const dateStr = label.includes("T")
+    ? `${d.getHours()}:${String(d.getMinutes()).padStart(2, "0")}`
+    : `${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()}`
+  return (
+    <div className="bg-background border rounded-md shadow-lg p-2 text-xs space-y-1">
+      <p className="font-medium">{dateStr}</p>
+      {payload.map((p: any) => (
+        <div key={p.dataKey} className="flex justify-between gap-4">
+          <span style={{ color: p.color }}>{p.name}</span>
+          <span className="font-medium">${fmt(p.value)}</span>
+        </div>
+      ))}
+    </div>
+  )
+}
+
 function PriceChart({ history, target, bear, bull }: { history: { date: string; price: number }[]; target: number; bear: number; bull: number }) {
   const data = history.map(h => ({ ...h, target, bear, bull }))
   const isSingleDay = data.length > 0 && data[0].date.includes("T")
   return (
-    <ResponsiveContainer width="100%" height={260}>
-      <LineChart data={data} margin={{ top: 5, right: 10, left: 10, bottom: 25 }}>
+    <ResponsiveContainer width="100%" height={440}>
+      <LineChart data={data} margin={{ top: 5, right: 60, left: 10, bottom: 25 }}>
         <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
         <XAxis
           dataKey="date"
@@ -117,11 +136,16 @@ function PriceChart({ history, target, bear, bull }: { history: { date: string; 
           interval={Math.max(Math.floor(data.length / 8), 0)}
           minTickGap={30}
         />
-        <YAxis tick={{ fontSize: 10 }} domain={["auto", "auto"]} tickFormatter={v => `$${v}`} width={55} />
-        <Line type="monotone" dataKey="price" stroke="hsl(var(--foreground))" strokeWidth={2} dot={false} name="Precio" />
-        <Line type="monotone" dataKey="target" stroke="hsl(var(--primary))" strokeWidth={1.5} strokeDasharray="6 3" dot={false} name="Objetivo" />
-        <Line type="monotone" dataKey="bear" stroke="#ef4444" strokeWidth={1} strokeDasharray="4 4" dot={false} name="Bear" />
-        <Line type="monotone" dataKey="bull" stroke="#22c55e" strokeWidth={1} strokeDasharray="4 4" dot={false} name="Bull" />
+        <YAxis yAxisId="left" tick={{ fontSize: 10 }} domain={["auto", "auto"]} tickFormatter={v => `$${v}`} width={55} />
+        <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 10 }} domain={["auto", "auto"]} tickFormatter={v => `$${v}`} width={55} />
+        <RechartsTooltip
+          content={<ChartTooltip />}
+          cursor={{ stroke: "hsl(var(--muted-foreground))", strokeWidth: 1, strokeDasharray: "4 4" }}
+        />
+        <Line yAxisId="left" type="monotone" dataKey="price" stroke="hsl(var(--foreground))" strokeWidth={2} dot={false} name="Precio" />
+        <Line yAxisId="right" type="monotone" dataKey="target" stroke="hsl(var(--primary))" strokeWidth={1.5} strokeDasharray="6 3" dot={false} name="Objetivo" />
+        <Line yAxisId="right" type="monotone" dataKey="bear" stroke="#ef4444" strokeWidth={1} strokeDasharray="4 4" dot={false} name="Bear" />
+        <Line yAxisId="right" type="monotone" dataKey="bull" stroke="#22c55e" strokeWidth={1} strokeDasharray="4 4" dot={false} name="Bull" />
         <Legend
           verticalAlign="bottom"
           height={36}
