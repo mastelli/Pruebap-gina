@@ -133,7 +133,7 @@ export async function GET(req: NextRequest) {
   const ticker = symbol.toUpperCase().trim()
 
   const [summary, chart] = await Promise.all([
-    fetchYahoo(ticker, "assetProfile,defaultKeyStatistics,financialData,earningsTrend,summaryDetail,recommendationTrend,price"),
+    fetchYahoo(ticker, "assetProfile,defaultKeyStatistics,financialData,earningsTrend,summaryDetail,recommendationTrend,price,growthEstimates"),
     getChart(ticker),
   ])
 
@@ -202,6 +202,11 @@ export async function GET(req: NextRequest) {
   }
 
   const trend = summary?.earningsTrend?.trend ?? []
+  const growthEst = summary?.growthEstimates ?? {}
+  const trend0q = trend.find((t: any) => t?.period === "0q")
+  statsMap.salesGrowthQoQ = raw(trend0q?.revenueEstimate?.growth) ?? raw(growthEst.currentQtr) ?? null
+  statsMap.salesGrowth5Y = raw(growthEst.earnings5Y) ?? null
+
   const currentYear = new Date().getFullYear()
   for (const t of trend) {
     if (t?.period === `${currentYear}-year` || t?.period === "0 year") {

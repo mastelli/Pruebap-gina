@@ -79,11 +79,14 @@ function ScoreCircle({ score }: { score: number }) {
   )
 }
 
-function MetricRow({ label, value, highlight }: { label: string; value: string; highlight?: boolean }) {
+function MetricRow({ label, value, color }: { label: string; value: string; color?: "green" | "red" }) {
   return (
     <div className="flex justify-between py-1.5 border-b border-border/50 last:border-0">
       <span className="text-sm text-muted-foreground">{label}</span>
-      <span className={`text-sm font-medium tabular-nums ${highlight ? "text-green-600 dark:text-green-400" : ""}`}>{value}</span>
+      <span className={`text-sm font-medium tabular-nums ${
+        color === "green" ? "text-green-600 dark:text-green-400" :
+        color === "red" ? "text-red-600 dark:text-red-400" : ""
+      }`}>{value}</span>
     </div>
   )
 }
@@ -342,25 +345,32 @@ export function StockAnalyzer() {
                 {/* Valuation */}
                 <div>
                   <h4 className="text-xs font-semibold uppercase text-muted-foreground mb-2">{t("Valuation")}</h4>
-                  <MetricRow label="P/E" value={fmt(data.stats.trailingPE)} />
-                  <MetricRow label="Forward P/E" value={fmt(data.stats.forwardPE)} />
+                  <MetricRow label="P/E" value={fmt(data.stats.trailingPE)}
+                    color={data.stats.trailingPE != null ? data.stats.trailingPE < 20 ? "green" : data.stats.trailingPE > 25 ? "red" : undefined : undefined} />
+                  <MetricRow label="Forward P/E" value={fmt(data.stats.forwardPE)}
+                    color={data.stats.forwardPE != null && data.stats.trailingPE != null
+                      ? data.stats.forwardPE < data.stats.trailingPE ? "green" : data.stats.forwardPE > data.stats.trailingPE + 3 ? "red" : undefined
+                      : undefined} />
                   <MetricRow label="PEG" value={fmt(data.stats.pegRatio)} />
                   <MetricRow label="P/S" value={fmt(data.stats.priceToSalesTrailing12Months)} />
                   <MetricRow label="P/B" value={fmt(data.stats.priceToBook)} />
-                  <MetricRow label="EV/EBITDA" value={fmt(data.stats.enterpriseToEbitda)} />
+                  <MetricRow label="EV/EBITDA" value={fmt(data.stats.enterpriseToEbitda)}
+                    color={data.stats.enterpriseToEbitda != null ? data.stats.enterpriseToEbitda < 12 ? "green" : data.stats.enterpriseToEbitda > 15 ? "red" : undefined : undefined} />
                   <MetricRow label="EV/Sales" value={fmt(data.stats.enterpriseToRevenue)} />
                   <MetricRow label="Earnings Yield" value={`${fmtPct(valuation.fairValue > 0 ? (1 / (data.quote.price / (data.stats.trailingEps || 1))) * 100 : null)}`} />
                 </div>
                 {/* Profitability */}
                 <div>
                   <h4 className="text-xs font-semibold uppercase text-muted-foreground mb-2">{t("Profitability")}</h4>
-                  <MetricRow label="Gross Margin" value={`${fmt(pctVal(data.stats.grossMargins))}%`} />
-                  <MetricRow label="Operating Margin" value={`${fmt(pctVal(data.stats.operatingMargins))}%`} />
+                  <MetricRow label="Gross Margin" value={`${fmt(pctVal(data.stats.grossMargins))}%`}
+                    color={pctVal(data.stats.grossMargins) > 10 ? "green" : pctVal(data.stats.grossMargins) < 0 ? "red" : undefined} />
+                  <MetricRow label="Operating Margin" value={`${fmt(pctVal(data.stats.operatingMargins))}%`}
+                    color={pctVal(data.stats.operatingMargins) > 10 ? "green" : pctVal(data.stats.operatingMargins) < 0 ? "red" : undefined} />
                   <MetricRow label="Net Margin" value={`${fmt(pctVal(data.stats.profitMargins))}%`} />
-                  <MetricRow label="ROE" value={`${fmt(pctVal(data.stats.returnOnEquity))}%`} highlight={pctVal(data.stats.returnOnEquity) > 20} />
+                  <MetricRow label="ROE" value={`${fmt(pctVal(data.stats.returnOnEquity))}%`} />
                   <MetricRow label="ROA" value={`${fmt(pctVal(data.stats.returnOnAssets))}%`} />
                 </div>
-                {/* Balance */}
+                {/* Growth */}
                 <div>
                   <h4 className="text-xs font-semibold uppercase text-muted-foreground mb-2">{t("Balance & Cash Flow")}</h4>
                   <MetricRow label="Market Cap" value={fmtMarketCap(data.quote.marketCap)} />
@@ -373,6 +383,16 @@ export function StockAnalyzer() {
                   {data.stats.dividendYield != null && data.stats.dividendYield > 0 && (
                     <MetricRow label="Dividend Yield" value={`${fmt(pctVal(data.stats.dividendYield))}%`} />
                   )}
+                </div>
+              </div>
+              {/* Sales Growth */}
+              <div className="mt-4 pt-4 border-t border-border/50">
+                <h4 className="text-xs font-semibold uppercase text-muted-foreground mb-2">{t("Sales Growth")}</h4>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <MetricRow label="Qtr over Qtr" value={data.stats.salesGrowthQoQ != null ? fmtPct(data.stats.salesGrowthQoQ * 100) : "N/D"}
+                    color={data.stats.salesGrowthQoQ != null ? data.stats.salesGrowthQoQ > 0 ? "green" : data.stats.salesGrowthQoQ < 0 ? "red" : undefined : undefined} />
+                  <MetricRow label="Past 5 Years" value={data.stats.salesGrowth5Y != null ? fmtPct(data.stats.salesGrowth5Y * 100) : "N/D"}
+                    color={data.stats.salesGrowth5Y != null ? data.stats.salesGrowth5Y > 0 ? "green" : data.stats.salesGrowth5Y < 0 ? "red" : undefined : undefined} />
                 </div>
               </div>
             </CardContent>
