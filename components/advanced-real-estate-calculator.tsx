@@ -254,7 +254,7 @@ export default function AdvancedRealEstateCalculator() {
   [projection])
 
   const scenarioChartData = useMemo(() => {
-    const maxLen = Math.max(...scenarios.map(s => s.projection.length))
+    const maxLen = Math.max(0, ...scenarios.map(s => s.projection.length))
     return Array.from({ length: maxLen }, (_, i) => {
       const row: Record<string, number | string> = { year: `Y${i + 1}` }
       scenarios.forEach(s => {

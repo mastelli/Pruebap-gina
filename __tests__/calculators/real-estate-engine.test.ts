@@ -287,6 +287,17 @@ describe("Edge cases", () => {
     expect(isFinite(kpis.roi)).toBe(true)
   })
 
+  it("zero horizon does not crash", () => {
+    const input = baseInput({
+      appreciation: { annualAppreciationPct: 2, investmentHorizonYears: 0 },
+    })
+    const proj = buildProjection(input)
+    expect(proj).toHaveLength(0)
+    const kpis = calculateKPIs(input)
+    expect(isFinite(kpis.roi)).toBe(true)
+    expect(kpis.equity).toBeGreaterThanOrEqual(0)
+  })
+
   it("100% vacancy produces zero income", () => {
     const input = baseInput({
       rental: { ...baseInput().rental, vacancyRate: 100 },

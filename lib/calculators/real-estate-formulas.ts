@@ -233,16 +233,20 @@ export function calculateKPIs(input: RealEstateInput): RealEstateKPIs {
   const loanAmount = input.financing.enabled ? input.financing.mortgageAmount : 0
   const equityInvested = totalInv - loanAmount
 
+  const propertyValueAtEnd = finalYear?.propertyValue ?? input.purchase.price
+  const equityAtEnd = finalYear?.equity ?? equityInvested
+  const cumulativeCF = finalYear?.cumulativeCashFlow ?? 0
+
   // Returns
   const grossYield = round2(safeDiv(grossRentalIncome, input.purchase.price) * 100)
   const netIncome = effectiveGrossIncome - annualOpEx
   const netYield = round2(safeDiv(netIncome, totalInv) * 100)
-  const capRate = round2(safeDiv(noi, finalYear.propertyValue) * 100)
+  const capRate = round2(safeDiv(noi, propertyValueAtEnd) * 100)
   const cashOnCash = round2(safeDiv(annualCF, equityInvested > 0 ? equityInvested : totalInv) * 100)
 
   // Total profit at horizon
   const totalProfit = round2(
-    finalYear.equity + finalYear.cumulativeCashFlow - equityInvested,
+    equityAtEnd + cumulativeCF - equityInvested,
   )
   const roi = round2(safeDiv(totalProfit, equityInvested) * 100)
   const horizon = input.appreciation.investmentHorizonYears
@@ -268,7 +272,7 @@ export function calculateKPIs(input: RealEstateInput): RealEstateKPIs {
     monthlyCashFlow: monthlyCF,
     annualCashFlow: annualCF,
     totalProfit,
-    equity: finalYear.equity,
+    equity: equityAtEnd,
     breakevenMonths: breakevenMonths(input),
     monthlyMortgage: monthlyMortgagePayment(loanAmount, input.financing.annualInterestRate, input.financing.termYears),
     annualMortgage: annualMortgagePayment(loanAmount, input.financing.annualInterestRate, input.financing.termYears),
