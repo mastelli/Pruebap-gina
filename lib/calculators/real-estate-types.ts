@@ -100,10 +100,14 @@ export interface RealEstateKPIs {
   netYield: number                // % = netIncome / totalInvestment × 100
   capRate: number                 // % = NOI / propertyValue × 100
   cashOnCashReturn: number        // % = annualCashFlow / equityInvested × 100
+  yieldOnEquity: number           // % = (income - interest - opex) / equity × 100
   roi: number                     // % = totalProfit / totalInvestment × 100
   roiAnnualized: number           // % annualized
   monthlyCashFlow: number
   annualCashFlow: number
+  annualInterestPaid: number      // interest component of mortgage
+  annualPrincipalPaid: number     // principal component of mortgage
+  annualWealthCreated: number     // CF + principal = total wealth creation
   totalProfit: number             // equity + cumulativeCashFlow - totalInvestment
   equity: number
   breakevenMonths: number         // months to recoup initial investment

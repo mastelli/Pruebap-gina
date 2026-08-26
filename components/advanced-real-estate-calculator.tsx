@@ -69,15 +69,15 @@ function defaultInput(): RealEstateInput {
       annualRentGrowthPct: 2,
     },
     expenses: {
-      communityFee: 50,
+      communityFee: 0,
       ibi: 600,
-      insurance: 300,
+      insurance: 0,
       maintenance: 500,
-      repairs: 300,
+      repairs: 0,
       propertyManagementPct: 8,
       utilities: 0,
       otherTaxes: 0,
-      otherExpenses: 200,
+      otherExpenses: 0,
       variableExpensePct: 0,
     },
     appreciation: {
@@ -435,18 +435,11 @@ export default function AdvancedRealEstateCalculator() {
         {/* ── KPI Dashboard ── */}
         <div className="grid grid-cols-3 md:grid-cols-5 gap-3">
           <KPICard
-            label="ROI Total"
-            value={formatPercent(kpis.roi)}
+            label="ROI sobre Capital"
+            value={formatPercent(kpis.yieldOnEquity)}
             icon={TrendingUp}
-            tooltip={`Beneficio total / Capital propio invertido × 100 = ${kpis.roi.toFixed(1)}%`}
-            color={kpis.roi >= 0 ? "text-emerald-600" : "text-red-600"}
-          />
-          <KPICard
-            label="ROI Anualizado"
-            value={formatPercent(kpis.roiAnnualized)}
-            icon={BarChart3}
-            tooltip="ROI compuesto anualizado sobre el horizonte de inversión"
-            color={kpis.roiAnnualized >= 0 ? "text-emerald-600" : "text-red-600"}
+            tooltip="(Ingresos - intereses - gastos operativos) / Capital propio × 100. Excluye amortización de capital."
+            color={kpis.yieldOnEquity >= 0 ? "text-emerald-600" : "text-red-600"}
           />
           <KPICard
             label="Cap Rate"
@@ -455,17 +448,25 @@ export default function AdvancedRealEstateCalculator() {
             tooltip="NOI / Valor propiedad × 100. Rendimiento operativo sin financiación."
           />
           <KPICard
-            label="Cash-on-Cash"
-            value={formatPercent(kpis.cashOnCashReturn)}
-            icon={PiggyBank}
-            tooltip="Cash flow anual / Capital propio invertido × 100"
-          />
-          <KPICard
             label="Cash Flow Mensual"
             value={formatCurrency(kpis.monthlyCashFlow, input.currency)}
             icon={DollarSign}
-            tooltip="Ingresos - gastos operativos - financiación, dividido entre 12"
+            tooltip="Ingresos - gastos operativos - cuota hipoteca completa, dividido entre 12"
             color={kpis.monthlyCashFlow >= 0 ? "text-emerald-600" : "text-red-600"}
+          />
+          <KPICard
+            label="Cash Flow Anual"
+            value={formatCurrency(kpis.annualCashFlow, input.currency)}
+            icon={DollarSign}
+            tooltip="NOI - cuota hipoteca (intereses + capital)"
+            color={kpis.annualCashFlow >= 0 ? "text-emerald-600" : "text-red-600"}
+          />
+          <KPICard
+            label="Patrimonio / Año"
+            value={formatCurrency(kpis.annualWealthCreated, input.currency)}
+            icon={PiggyBank}
+            tooltip="Cash flow + capital amortizado. Patrimonio total generado anualmente."
+            color={kpis.annualWealthCreated >= 0 ? "text-emerald-600" : "text-red-600"}
           />
           <KPICard
             label="Rentabilidad Bruta"
@@ -480,11 +481,11 @@ export default function AdvancedRealEstateCalculator() {
             tooltip="Ingresos netos anuales / Inversión total × 100"
           />
           <KPICard
-            label="Cash Flow Anual"
-            value={formatCurrency(kpis.annualCashFlow, input.currency)}
-            icon={DollarSign}
-            tooltip="NOI - costes financieros"
-            color={kpis.annualCashFlow >= 0 ? "text-emerald-600" : "text-red-600"}
+            label="ROI Total"
+            value={formatPercent(kpis.roi)}
+            icon={BarChart3}
+            tooltip="Beneficio total / Capital propio invertido × 100"
+            color={kpis.roi >= 0 ? "text-emerald-600" : "text-red-600"}
           />
           <KPICard
             label="Beneficio Total"
@@ -535,15 +536,28 @@ export default function AdvancedRealEstateCalculator() {
                 <CardHeader><CardTitle className="text-sm">Métricas Clave — Año 1</CardTitle></CardHeader>
                 <CardContent className="space-y-2 text-sm">
                   <div className="flex justify-between"><span className="text-muted-foreground">Ingresos efectivos</span><span>{formatCurrency(kpis.effectiveAnnualIncome, input.currency)}</span></div>
-                  <div className="flex justify-between"><span className="text-muted-foreground">Gastos operativos</span><span>{formatCurrency(kpis.annualOperatingExpenses, input.currency)}</span></div>
+                  <div className="flex justify-between"><span className="text-muted-foreground">Gastos operativos</span><span>-{formatCurrency(kpis.annualOperatingExpenses, input.currency)}</span></div>
                   <div className="flex justify-between"><span className="text-muted-foreground">NOI</span><span className="font-medium">{formatCurrency(kpis.noi, input.currency)}</span></div>
                   {input.financing.enabled && (
-                    <div className="flex justify-between"><span className="text-muted-foreground">Cuota hipoteca</span><span>{formatCurrency(kpis.annualMortgage, input.currency)}/año</span></div>
+                    <>
+                      <Separator />
+                      <div className="flex justify-between"><span className="text-muted-foreground">Cuota hipoteca</span><span>-{formatCurrency(kpis.annualMortgage, input.currency)}/año</span></div>
+                      <div className="flex justify-between pl-3"><span className="text-muted-foreground">↳ Intereses</span><span>{formatCurrency(kpis.annualInterestPaid, input.currency)}</span></div>
+                      <div className="flex justify-between pl-3"><span className="text-muted-foreground">↳ Capital (patrimonio)</span><span>{formatCurrency(kpis.annualPrincipalPaid, input.currency)}</span></div>
+                    </>
                   )}
                   <Separator />
-                  <div className="flex justify-between font-bold">
-                    <span>Cash flow anual</span>
-                    <span className={kpis.annualCashFlow >= 0 ? "text-emerald-600" : "text-red-600"}>{formatCurrency(kpis.annualCashFlow, input.currency)}</span>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Cash flow anual</span>
+                    <span className={kpis.annualCashFlow >= 0 ? "text-emerald-600 font-bold" : "text-red-600 font-bold"}>{formatCurrency(kpis.annualCashFlow, input.currency)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">ROI sobre Capital</span>
+                    <span className={`font-bold ${kpis.yieldOnEquity >= 0 ? "text-emerald-600" : "text-red-600"}`}>{formatPercent(kpis.yieldOnEquity)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Patrimonio generado / año</span>
+                    <span className={`font-bold ${kpis.annualWealthCreated >= 0 ? "text-emerald-600" : "text-red-600"}`}>{formatCurrency(kpis.annualWealthCreated, input.currency)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Punto de equilibrio</span>
@@ -741,10 +755,11 @@ export default function AdvancedRealEstateCalculator() {
                       </TableHeader>
                       <TableBody>
                         {([
+                          ["ROI sobre Capital", (s: ScenarioResult) => formatPercent(s.kpis.yieldOnEquity)],
                           ["Cap Rate", (s: ScenarioResult) => formatPercent(s.kpis.capRate)],
-                          ["Cash-on-Cash", (s: ScenarioResult) => formatPercent(s.kpis.cashOnCashReturn)],
                           ["Cash Flow / mes", (s: ScenarioResult) => formatCurrency(s.kpis.monthlyCashFlow, input.currency)],
                           ["Cash Flow / año", (s: ScenarioResult) => formatCurrency(s.kpis.annualCashFlow, input.currency)],
+                          ["Patrimonio / año", (s: ScenarioResult) => formatCurrency(s.kpis.annualWealthCreated, input.currency)],
                           ["ROI Total", (s: ScenarioResult) => formatPercent(s.kpis.roi)],
                           ["Beneficio Total", (s: ScenarioResult) => formatCurrency(s.kpis.totalProfit, input.currency)],
                           ["Equity final", (s: ScenarioResult) => formatCurrency(s.kpis.equity, input.currency)],

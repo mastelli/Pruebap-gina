@@ -233,6 +233,16 @@ export function calculateKPIs(input: RealEstateInput): RealEstateKPIs {
   const loanAmount = input.financing.enabled ? input.financing.mortgageAmount : 0
   const equityInvested = totalInv - loanAmount
 
+  // Mortgage split: interest vs principal (year 1)
+  let annualInterestPaid = 0
+  let annualPrincipalPaid = 0
+  if (loanAmount > 0) {
+    const schedule = buildAmortizationSchedule(loanAmount, input.financing.annualInterestRate, input.financing.termYears)
+    const year1 = schedule[0]
+    annualInterestPaid = year1?.interestPaid ?? 0
+    annualPrincipalPaid = year1?.principalPaid ?? 0
+  }
+
   const propertyValueAtEnd = finalYear?.propertyValue ?? input.purchase.price
   const equityAtEnd = finalYear?.equity ?? equityInvested
   const cumulativeCF = finalYear?.cumulativeCashFlow ?? 0
@@ -243,6 +253,14 @@ export function calculateKPIs(input: RealEstateInput): RealEstateKPIs {
   const netYield = round2(safeDiv(netIncome, totalInv) * 100)
   const capRate = round2(safeDiv(noi, propertyValueAtEnd) * 100)
   const cashOnCash = round2(safeDiv(annualCF, equityInvested > 0 ? equityInvested : totalInv) * 100)
+
+  // Yield on Equity (excludes principal — matches reference calculator's "ROI sobre Capital")
+  // = (effectiveIncome - operatingExpenses - interestOnly) / equityInvested × 100
+  const netIncomeExclPrincipal = effectiveGrossIncome - annualOpEx - annualInterestPaid
+  const yieldOnEquity = round2(safeDiv(netIncomeExclPrincipal, equityInvested > 0 ? equityInvested : totalInv) * 100)
+
+  // Wealth created = cash flow + principal paid (total patrimonio generado)
+  const annualWealthCreated = round2(annualCF + annualPrincipalPaid)
 
   // Total profit at horizon
   const totalProfit = round2(
@@ -267,10 +285,14 @@ export function calculateKPIs(input: RealEstateInput): RealEstateKPIs {
     netYield,
     capRate,
     cashOnCashReturn: cashOnCash,
+    yieldOnEquity,
     roi,
     roiAnnualized,
     monthlyCashFlow: monthlyCF,
     annualCashFlow: annualCF,
+    annualInterestPaid: round2(annualInterestPaid),
+    annualPrincipalPaid: round2(annualPrincipalPaid),
+    annualWealthCreated,
     totalProfit,
     equity: equityAtEnd,
     breakevenMonths: breakevenMonths(input),
