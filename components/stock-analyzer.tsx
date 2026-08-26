@@ -196,7 +196,7 @@ export function StockAnalyzer() {
   const [error, setError] = useState("")
   const [chartRange, setChartRange] = useState("6mo")
   const [chartHistory, setChartHistory] = useState<{ date: string; price: number; open: number; high: number; low: number }[]>([])
-  const [suggestions, setSuggestions] = useState<{ symbol: string; name: string; exchange: string }[]>([])
+  const [suggestions, setSuggestions] = useState<{ symbol: string; name: string; exchange: string; marketCap: number }[]>([])
   const [showSuggestions, setShowSuggestions] = useState(false)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const suggestionsRef = useRef<HTMLDivElement>(null)
@@ -315,8 +315,11 @@ export function StockAnalyzer() {
                     <button key={s.symbol}
                       className="w-full px-3 py-2 text-left hover:bg-muted transition-colors flex items-center justify-between gap-2"
                       onClick={() => { setTicker(s.symbol); setShowSuggestions(false); handleSearch(s.symbol) }}>
-                      <span className="font-medium text-sm">{s.symbol}</span>
-                      <span className="text-xs text-muted-foreground truncate">{s.name}</span>
+                      <div className="flex flex-col min-w-0">
+                        <span className="font-medium text-sm">{s.symbol}</span>
+                        <span className="text-xs text-muted-foreground truncate">{s.name}</span>
+                      </div>
+                      {s.marketCap > 0 && <span className="text-xs text-muted-foreground whitespace-nowrap">{fmtMarketCap(s.marketCap)}</span>}
                     </button>
                   ))}
                 </div>

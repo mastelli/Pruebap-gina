@@ -140,7 +140,8 @@ export async function GET(req: NextRequest) {
         const data = JSON.parse(res.body)
         const quotes = (data.quotes ?? [])
           .filter((q: any) => q.symbol && q.shortname)
-          .map((q: any) => ({ symbol: q.symbol, name: q.shortname, exchange: q.exchange ?? "" }))
+          .map((q: any) => ({ symbol: q.symbol, name: q.shortname, exchange: q.exchange ?? "", marketCap: q.marketCap ?? 0 }))
+          .sort((a: any, b: any) => (b.marketCap ?? 0) - (a.marketCap ?? 0))
         return NextResponse.json(quotes)
       } catch { return NextResponse.json([]) }
     }
