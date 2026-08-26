@@ -98,11 +98,16 @@ function MetricRow({ label, value, color }: { label: string; value: string; colo
 
 function PriceChart({ history, target, bear, bull }: { history: { date: string; price: number }[]; target: number; bear: number; bull: number }) {
   const data = history.map(h => ({ ...h, target, bear, bull }))
+  const isSingleDay = data.length > 0 && data[0].date.includes("T")
   return (
     <ResponsiveContainer width="100%" height={220}>
       <LineChart data={data} margin={{ top: 5, right: 10, left: 10, bottom: 0 }}>
         <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
         <XAxis dataKey="date" tick={{ fontSize: 10 }} tickFormatter={v => {
+          if (isSingleDay) {
+            const d = new Date(v)
+            return `${d.getHours()}:${String(d.getMinutes()).padStart(2, "0")}`
+          }
           const d = new Date(v)
           return `${d.getMonth()+1}/${d.getDate()}`
         }} interval="preserveStartEnd" minTickGap={40} />
@@ -123,8 +128,38 @@ export function StockAnalyzer() {
   const [data, setData] = useState<StockData | null>(null)
   const [valuation, setValuation] = useState<ValuationResult | null>(null)
   const [error, setError] = useState("")
+  const [chartRange, setChartRange] = useState("6mo")
+  const [chartHistory, setChartHistory] = useState<{ date: string; price: number }[]>([])
 
   const popularTickers = ["AAPL", "MSFT", "NVDA", "GOOGL", "AMZN", "META", "TSLA", "BRK-B", "JPM", "V"]
+
+  const TIME_RANGES = [
+    { label: "1D", value: "1d" },
+    { label: "1M", value: "1mo" },
+    { label: "3M", value: "3mo" },
+    { label: "6M", value: "6mo" },
+    { label: "YTD", value: "ytd" },
+    { label: "1Y", value: "1y" },
+    { label: "3Y", value: "2y" },
+    { label: "5Y", value: "5y" },
+    { label: "10Y", value: "10y" },
+    { label: "All", value: "max" },
+  ]
+
+  const fetchChartHistory = async (symbol: string, range: string) => {
+    try {
+      const res = await fetch(`/api/stock?symbol=${encodeURIComponent(symbol)}&range=${range}`)
+      if (res.ok) {
+        const json = await res.json()
+        setChartHistory(json.history ?? [])
+      }
+    } catch {}
+  }
+
+  const handleRangeChange = (range: string) => {
+    setChartRange(range)
+    if (data) fetchChartHistory(data.profile.symbol, range)
+  }
 
   const handleSearch = async (symbol?: string) => {
     const search = (symbol ?? ticker).toUpperCase().trim()
@@ -142,6 +177,7 @@ export function StockAnalyzer() {
       }
       const stockData: StockData = await res.json()
       setData(stockData)
+      setChartHistory(stockData.history ?? [])
 
       const input: ValuationInput = {
         price: stockData.quote.price,
@@ -247,20 +283,35 @@ export function StockAnalyzer() {
 
               {/* Price Chart */}
               <div className="mt-6">
-                <div className="flex items-center gap-1 mb-2">
-                  <span className="text-sm font-medium">{t("Price History")}</span>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <HelpCircle className="h-3 w-3 text-muted-foreground/60 cursor-help" />
-                    </TooltipTrigger>
-                    <TooltipContent side="right" className="max-w-[280px] text-xs">
-                      {t("PriceChartTooltip")}
-                    </TooltipContent>
-                  </Tooltip>
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-1">
+                    <span className="text-sm font-medium">{t("Price History")}</span>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <HelpCircle className="h-3 w-3 text-muted-foreground/60 cursor-help" />
+                      </TooltipTrigger>
+                      <TooltipContent side="right" className="max-w-[280px] text-xs">
+                        {t("PriceChartTooltip")}
+                      </TooltipContent>
+                    </Tooltip>
+                  </div>
+                  <div className="flex gap-1">
+                    {TIME_RANGES.map(r => (
+                      <Button
+                        key={r.value}
+                        variant={chartRange === r.value ? "default" : "ghost"}
+                        size="sm"
+                        className="h-6 px-2 text-xs"
+                        onClick={() => handleRangeChange(r.value)}
+                      >
+                        {r.label}
+                      </Button>
+                    ))}
+                  </div>
                 </div>
-                {data.history.length > 0 ? (
+                {chartHistory.length > 0 ? (
                   <PriceChart
-                    history={data.history}
+                    history={chartHistory}
                     target={valuation.targetPrice}
                     bear={valuation.scenarios[0].targetPrice}
                     bull={valuation.scenarios[2].targetPrice}

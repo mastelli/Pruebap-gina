@@ -113,10 +113,11 @@ async function fetchYahoo(symbol: string, modules: string): Promise<any> {
   return null
 }
 
-async function getChart(symbol: string): Promise<any> {
+async function getChart(symbol: string, range: string = "6mo"): Promise<any> {
   try {
+    const interval = range === "1d" ? "5m" : range === "5d" ? "15m" : "1d"
     const res = await httpsGet(
-      `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?range=6mo&interval=1d`,
+      `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?range=${range}&interval=${interval}`,
       { "User-Agent": UA },
     )
     if (res.status !== 200) return null
@@ -126,15 +127,18 @@ async function getChart(symbol: string): Promise<any> {
 
 export async function GET(req: NextRequest) {
   const symbol = req.nextUrl.searchParams.get("symbol")
+  const range = req.nextUrl.searchParams.get("range") || "6mo"
   if (!symbol) {
     return NextResponse.json({ error: "Symbol required" }, { status: 400 })
   }
 
   const ticker = symbol.toUpperCase().trim()
+  const validRanges = ["1d", "5d", "1mo", "3mo", "6mo", "1y", "2y", "5y", "10y", "ytd", "max"]
+  const chartRange = validRanges.includes(range) ? range : "6mo"
 
   const [summary, chart] = await Promise.all([
     fetchYahoo(ticker, "assetProfile,defaultKeyStatistics,financialData,earningsTrend,summaryDetail,recommendationTrend,price,growthEstimates,cashflowStatementHistory"),
-    getChart(ticker),
+    getChart(ticker, chartRange),
   ])
 
   if (!summary && !chart) {
