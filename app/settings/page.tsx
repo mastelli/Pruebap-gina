@@ -47,10 +47,9 @@ export default function SettingsPage() {
     <div className="container mx-auto py-10">
       <h1 className="text-3xl font-bold mb-6">{t("Settings")}</h1>
       <Tabs defaultValue="account" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="account">{t("Account")}</TabsTrigger>
           <TabsTrigger value="security">{t("Security")}</TabsTrigger>
-          <TabsTrigger value="preferences">{t("Preferences")}</TabsTrigger>
           <TabsTrigger value="notifications">{t("Notifications")}</TabsTrigger>
           <TabsTrigger value="privacy">{t("Privacy")}</TabsTrigger>
         </TabsList>
@@ -224,71 +223,6 @@ export default function SettingsPage() {
               </CardFooter>
             </Card>
           </div>
-        </TabsContent>
-
-        <TabsContent value="preferences">
-          <Card>
-            <CardContent className="space-y-4 pt-6">
-              <div className="grid gap-4 md:grid-cols-2">
-                <div className="space-y-2">
-                  <Label htmlFor="language">{t("Language")}</Label>
-                  <Select value={lang} onValueChange={(value) => setLang(value as Language)}>
-                    <SelectTrigger id="language">
-                      <SelectValue placeholder={t("Select Language")} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="es">Castellano</SelectItem>
-                      <SelectItem value="en">English</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="currency">{t("Currency")}</Label>
-                  <Select defaultValue="usd">
-                    <SelectTrigger id="currency">
-                      <SelectValue placeholder={t("Select Currency")} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="usd">USD ($)</SelectItem>
-                      <SelectItem value="eur">EUR (€)</SelectItem>
-                      <SelectItem value="gbp">GBP (£)</SelectItem>
-                      <SelectItem value="jpy">JPY (¥)</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="date-format">{t("Date Format")}</Label>
-                  <Select defaultValue="mm-dd-yyyy">
-                    <SelectTrigger id="date-format">
-                      <SelectValue placeholder={t("Select Date Format")} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="mm-dd-yyyy">MM-DD-YYYY</SelectItem>
-                      <SelectItem value="dd-mm-yyyy">DD-MM-YYYY</SelectItem>
-                      <SelectItem value="yyyy-mm-dd">YYYY-MM-DD</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label>{t("Theme")}</Label>
-                <RadioGroup defaultValue="system">
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="light" id="theme-light" />
-                    <Label htmlFor="theme-light">{t("Light")}</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="dark" id="theme-dark" />
-                    <Label htmlFor="theme-dark">{t("Dark")}</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="system" id="theme-system" />
-                    <Label htmlFor="theme-system">{t("System")}</Label>
-                  </div>
-                </RadioGroup>
-              </div>
-            </CardContent>
-          </Card>
         </TabsContent>
 
         <TabsContent value="notifications">
