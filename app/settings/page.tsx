@@ -321,81 +321,50 @@ export default function SettingsPage() {
 
         <TabsContent value="notifications">
           <Card>
-            <CardHeader>
-              <CardTitle>{t("Notification Settings")}</CardTitle>
-              <CardDescription>{t("Manage how you receive notifications")}</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid gap-4 md:grid-cols-2">
-                <div className="space-y-2">
-                  <Label>{t("Notification Channels")}</Label>
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="email-notifications"
-                      defaultChecked={settings.notifications.email}
-                      onChange={(e) =>
-                        updateNotificationSettings({ ...settings.notifications, email: e.target.checked })
-                      }
-                    />
-                    <Label htmlFor="email-notifications">{t("Email Notifications")}</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="push-notifications"
-                      defaultChecked={settings.notifications.push}
-                      onChange={(e) =>
-                        updateNotificationSettings({ ...settings.notifications, push: e.target.checked })
-                      }
-                    />
-                    <Label htmlFor="push-notifications">{t("Push Notifications")}</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="sms-notifications"
-                      defaultChecked={settings.notifications.sms}
-                      onChange={(e) => updateNotificationSettings({ ...settings.notifications, sms: e.target.checked })}
-                    />
-                    <Label htmlFor="sms-notifications">{t("SMS Notifications")}</Label>
-                  </div>
+            <CardContent className="space-y-4 pt-6">
+              <div className="space-y-3">
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="email-notifications"
+                    checked={settings.notifications.email}
+                    onCheckedChange={(checked) =>
+                      updateNotificationSettings({ ...settings.notifications, email: !!checked })
+                    }
+                  />
+                  <Label htmlFor="email-notifications">{t("Email Notifications")}</Label>
                 </div>
-                <div className="space-y-2">
-                  <Label>{t("Notification Types")}</Label>
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="account-activity"
-                      defaultChecked={settings.notifications.accountActivity}
-                      onChange={(e) =>
-                        updateNotificationSettings({ ...settings.notifications, accountActivity: e.target.checked })
-                      }
-                    />
-                    <Label htmlFor="account-activity">{t("Account Activity")}</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="new-features"
-                      defaultChecked={settings.notifications.newFeatures}
-                      onChange={(e) =>
-                        updateNotificationSettings({ ...settings.notifications, newFeatures: e.target.checked })
-                      }
-                    />
-                    <Label htmlFor="new-features">{t("New Features and Updates")}</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="marketing"
-                      defaultChecked={settings.notifications.marketing}
-                      onChange={(e) =>
-                        updateNotificationSettings({ ...settings.notifications, marketing: e.target.checked })
-                      }
-                    />
-                    <Label htmlFor="marketing">{t("Marketing and Promotions")}</Label>
-                  </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="account-activity"
+                    checked={settings.notifications.accountActivity}
+                    onCheckedChange={(checked) =>
+                      updateNotificationSettings({ ...settings.notifications, accountActivity: !!checked })
+                    }
+                  />
+                  <Label htmlFor="account-activity">{t("Account Activity")}</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="new-features"
+                    checked={settings.notifications.newFeatures}
+                    onCheckedChange={(checked) =>
+                      updateNotificationSettings({ ...settings.notifications, newFeatures: !!checked })
+                    }
+                  />
+                  <Label htmlFor="new-features">{t("New Features and Updates")}</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="marketing"
+                    checked={settings.notifications.marketing}
+                    onCheckedChange={(checked) =>
+                      updateNotificationSettings({ ...settings.notifications, marketing: !!checked })
+                    }
+                  />
+                  <Label htmlFor="marketing">{t("Marketing and Promotions")}</Label>
                 </div>
               </div>
             </CardContent>
-            <CardFooter>
-              <Button onClick={handleSaveNotifications}>{t("Save Notification Settings")}</Button>
-            </CardFooter>
           </Card>
         </TabsContent>
 
