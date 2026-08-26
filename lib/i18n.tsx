@@ -526,6 +526,10 @@ const translations: Record<string, string> = {
   "Final Value": "Valor Final",
   "Total Value": "Valor Total",
   Contributions: "Aportaciones",
+  "Compound Interest": "Interés Compuesto",
+  "Real Estate Assets": "Activos Inmobiliarios",
+  "Bonds": "Bonos",
+  "Coming soon": "Próximamente",
 }
 
 interface LanguageContextType {

@@ -23,6 +23,7 @@ import {
   Legend,
 } from "recharts"
 import { useLanguage } from "@/lib/i18n"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 type Frequency = "monthly" | "bimonthly" | "quarterly" | "semiannual" | "annual"
 
@@ -114,7 +115,15 @@ export default function CalculatorPage() {
     <div className="space-y-6">
       <div aria-hidden="true" className="h-9" />
 
-      <Card className="w-full">
+      <Tabs defaultValue="compound" className="space-y-4">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="compound">{t("Compound Interest")}</TabsTrigger>
+          <TabsTrigger value="realestate">{t("Real Estate Assets")}</TabsTrigger>
+          <TabsTrigger value="bonds">{t("Bonds")}</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="compound">
+          <Card className="w-full">
         <CardHeader>
           <CardTitle>{t("Compound Interest Calculator")}</CardTitle>
         </CardHeader>
@@ -260,6 +269,24 @@ export default function CalculatorPage() {
           )}
         </CardContent>
       </Card>
+        </TabsContent>
+
+        <TabsContent value="realestate">
+          <Card className="w-full">
+            <CardContent className="flex items-center justify-center py-20">
+              <p className="text-lg text-muted-foreground">{t("Coming soon")}</p>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="bonds">
+          <Card className="w-full">
+            <CardContent className="flex items-center justify-center py-20">
+              <p className="text-lg text-muted-foreground">{t("Coming soon")}</p>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   )
 }
