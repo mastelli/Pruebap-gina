@@ -392,30 +392,6 @@ export default function SettingsPage() {
                   </div>
                 </div>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="notification-frequency">{t("Notification Frequency")}</Label>
-                <Select
-                  value={settings.notifications.frequency}
-                  onValueChange={(value) => updateNotificationSettings({ ...settings.notifications, frequency: value })}
-                >
-                  <SelectTrigger id="notification-frequency">
-                    <SelectValue placeholder={t("Select Frequency")} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="real-time">{t("Real-time")}</SelectItem>
-                    <SelectItem value="daily">{t("Daily Digest")}</SelectItem>
-                    <SelectItem value="weekly">{t("Weekly Summary")}</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="quiet-hours-start">{t("Quiet Hours")}</Label>
-                <div className="flex items-center space-x-2">
-                  <Input id="quiet-hours-start" type="time" defaultValue="22:00" />
-                  <span>{t("to")}</span>
-                  <Input id="quiet-hours-end" type="time" defaultValue="07:00" />
-                </div>
-              </div>
             </CardContent>
             <CardFooter>
               <Button onClick={handleSaveNotifications}>{t("Save Notification Settings")}</Button>
