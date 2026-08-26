@@ -61,7 +61,7 @@ export function ExpenseDoughnut({ month }: { month: string }) {
           label={(props: any) => {
             const { cx, cy, midAngle, outerRadius, percent, label: nameLabel, total: entryTotal } = props
             if (!percent || percent < 0.02 || !midAngle) return null
-            const radius = outerRadius + 50
+            const radius = outerRadius + 38
             const x = cx + radius * Math.cos(-midAngle * RADIAN)
             const y = cy + radius * Math.sin(-midAngle * RADIAN)
             const anchor = x > cx ? "start" : "end"
