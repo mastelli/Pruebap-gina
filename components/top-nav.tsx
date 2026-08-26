@@ -26,7 +26,7 @@ export function TopNav() {
   const displayEmail = email ?? ""
 
   return (
-    <header className="sticky top-0 z-40 border-b bg-background">
+    <header className="sticky top-0 z-40 border-b bg-sidebar">
       <div className="container flex h-16 items-center justify-end px-4 md:px-6">
         <div className="flex items-center gap-4">
           <Notifications />
