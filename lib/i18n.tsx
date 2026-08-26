@@ -530,6 +530,36 @@ const translations: Record<string, string> = {
   "Real Estate Assets": "Activos Inmobiliarios",
   "Bonds": "Bonos",
   "Coming soon": "Próximamente",
+
+  // Calculadora de Activos Inmobiliarios
+  "Real Estate Calculator": "Calculadora de Activos Inmobiliarios",
+  "Property Price": "Precio de la Propiedad",
+  "Purchase Tax": "Impuesto de compra",
+  "Transfer Tax (ITP)": "Impuesto Sobre Transmisiones Patrimoniales (ITP)",
+  "Documented Acts (AJD)": "Actos Jurídicos Documentados (AJD)",
+  "Purchase Tax Costs": "Costes de Impuestos de Compra",
+  "Estimated Renovation": "Reforma Estimada",
+  "Expected Rent": "Alquiler Esperado",
+  Vacancy: "Vacancia",
+  "% of time the property will be rented": "% del tiempo en el que la propiedad estará alquilada.",
+  "Annual Property Taxes": "Impuestos Anuales de la Propiedad",
+  "Property Tax (IBI)": "Impuesto sobre Bienes Inmuebles (IBI)",
+  "% of Cadastral Value": "Porcentaje del Valor Catastral",
+  "Leveraged Property": "Inmueble Apalancado",
+  "Initial Contribution": "Aporte Inicial",
+  "Banks usually require 10% of the property + expenses":
+    "Los bancos suelen requerir un 10% del inmueble + gastos.",
+  "Mortgage Term": "Plazos de la Hipoteca",
+  "Mortgage Interest Rate": "Tasa de Interés Hipotecario",
+  "Monthly Costs": "Costes Mensuales",
+  "HOA fees, maintenance, etc.": "Comunidad de vecinos, mantenimiento, etc.",
+  "Total Investment": "Inversión Total",
+  "Monthly Cash Flow": "Flujo de Caja Mensual",
+  "Gross Yield": "Rentabilidad Bruta",
+  "Net Yield": "Rentabilidad Neta",
+  "Annual Return": "Retorno Anual",
+  "years": "años",
+  "months": "meses",
 }
 
 interface LanguageContextType {

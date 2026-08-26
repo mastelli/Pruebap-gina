@@ -24,6 +24,7 @@ import {
 } from "recharts"
 import { useLanguage } from "@/lib/i18n"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { RealEstateCalculator } from "@/components/real-estate-calculator"
 
 type Frequency = "monthly" | "bimonthly" | "quarterly" | "semiannual" | "annual"
 
@@ -270,11 +271,7 @@ export default function CalculatorPage() {
         </TabsContent>
 
         <TabsContent value="realestate">
-          <Card className="w-full">
-            <CardContent className="flex items-center justify-center py-20">
-              <p className="text-lg text-muted-foreground">{t("Coming soon")}</p>
-            </CardContent>
-          </Card>
+          <RealEstateCalculator />
         </TabsContent>
 
         <TabsContent value="bonds">
