@@ -113,19 +113,29 @@ function migrateLocalStorageKeys(userId: string) {
   } catch {}
 }
 
-// Pull all data from Supabase → localStorage (runs on login)
+// Pull all data from Supabase → localStorage (always overwrite — Supabase is source of truth)
 async function syncFromCloud(userId: string) {
   try {
     const allData = await cloudGetAll()
     if (!allData || Object.keys(allData).length === 0) return
     for (const [key, value] of Object.entries(allData)) {
-      // key format: "appTransactions::user_xxx"
-      // Only sync if we don't already have it locally
-      if (window.localStorage.getItem(key) === null && value !== null) {
+      if (value !== null) {
         window.localStorage.setItem(key, typeof value === "string" ? value : JSON.stringify(value))
       }
     }
   } catch {}
+}
+
+let lastSyncTime = 0
+const SYNC_COOLDOWN_MS = 10000
+
+async function syncFromCloudAndNotify(userId: string) {
+  const now = Date.now()
+  if (now - lastSyncTime < SYNC_COOLDOWN_MS) return
+  lastSyncTime = now
+  await syncFromCloud(userId)
+  storageVersion++
+  for (const l of storageVersionListeners) l()
 }
 
 interface AuthState {
@@ -174,6 +184,15 @@ export function AuthProvider({ children, value }: { children: React.ReactNode; v
       storageVersion++
       for (const l of storageVersionListeners) l()
     })
+
+    // 3. Re-sync when user returns to the tab
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible" && value.userId) {
+        syncFromCloudAndNotify(value.userId)
+      }
+    }
+    document.addEventListener("visibilitychange", handleVisibility)
+    return () => document.removeEventListener("visibilitychange", handleVisibility)
   }, [value.userId])
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
