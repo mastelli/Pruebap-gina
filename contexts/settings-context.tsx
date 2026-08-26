@@ -8,7 +8,6 @@ export interface UserSettings {
   fullName: string
   email: string
   birthDate: string
-  timezone: string
   language: string
   currency: string
   dateFormat: string
@@ -39,7 +38,6 @@ const defaultSettings: UserSettings = {
   fullName: "",
   email: "",
   birthDate: "",
-  timezone: "utc-8",
   language: "en",
   currency: "usd",
   dateFormat: "mm-dd-yyyy",
@@ -139,4 +137,3 @@ export function useSettings() {
   }
   return context
 }
-

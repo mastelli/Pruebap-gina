@@ -1,7 +1,6 @@
 "use client"
 
 import { useSettings } from "@/contexts/settings-context"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
@@ -11,10 +10,10 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { UserAvatar } from "@/components/user-avatar"
 import { ageFromBirthDate } from "@/lib/auth"
-import { Laptop, Smartphone, Tablet } from "lucide-react"
-import { useEffect, useState } from "react"
+import { useUser } from "@clerk/nextjs"
+import { useState } from "react"
 import { toast } from "sonner"
-import { useLanguage, type Language } from "@/lib/i18n"
+import { useLanguage } from "@/lib/i18n"
 
 const sections = [
   { id: "account", label: "Account" },
@@ -23,78 +22,72 @@ const sections = [
   { id: "privacy", label: "Privacy" },
 ]
 
-type AccountSession = {
-  id: string
-  status: string
-  createdAt: number | null
-  lastActiveAt: number | null
-  browserName: string | null
-  city: string | null
-  country: string | null
-  deviceType: string | null
-  ipAddress: string | null
-  isMobile: boolean
-}
-
-type SessionData = {
-  history: AccountSession[]
-  activeSessions: AccountSession[]
-  currentSessionId: string | null
-}
-
-function formatSessionDate(value: number | null, language: Language) {
-  if (!value) return "—"
-
-  return new Intl.DateTimeFormat(language === "es" ? "es-ES" : "en-US", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(new Date(value))
-}
-
-function sessionLocation(session: AccountSession) {
-  return [session.city, session.country].filter(Boolean).join(", ") || "—"
-}
-
-function SessionIcon({ session }: { session: AccountSession }) {
-  const device = session.deviceType?.toLowerCase() ?? ""
-  if (device.includes("tablet")) return <Tablet className="mr-2 h-4 w-4" />
-  if (session.isMobile || device.includes("mobile") || device.includes("phone")) {
-    return <Smartphone className="mr-2 h-4 w-4" />
-  }
-  return <Laptop className="mr-2 h-4 w-4" />
-}
-
 export default function SettingsPage() {
   const { settings, updateSettings, updateNotificationSettings, updatePrivacySettings } = useSettings()
-  const { t, lang, setLang } = useLanguage()
+  const { t } = useLanguage()
+  const { user, isLoaded: isUserLoaded } = useUser()
   const [activeSection, setActiveSection] = useState("account")
-  const [sessionData, setSessionData] = useState<SessionData | null>(null)
-  const [sessionsLoading, setSessionsLoading] = useState(true)
-  const [sessionsError, setSessionsError] = useState(false)
-
-  useEffect(() => {
-    const controller = new AbortController()
-
-    const loadSessions = async () => {
-      try {
-        const response = await fetch("/api/account/sessions", { signal: controller.signal })
-        if (!response.ok) throw new Error("Unable to load sessions")
-        const data = (await response.json()) as SessionData
-        setSessionData(data)
-      } catch (error) {
-        if ((error as Error).name !== "AbortError") setSessionsError(true)
-      } finally {
-        if (!controller.signal.aborted) setSessionsLoading(false)
-      }
-    }
-
-    void loadSessions()
-    return () => controller.abort()
-  }, [])
+  const [currentPassword, setCurrentPassword] = useState("")
+  const [newPassword, setNewPassword] = useState("")
+  const [confirmPassword, setConfirmPassword] = useState("")
+  const [isChangingPassword, setIsChangingPassword] = useState(false)
 
   const scrollTo = (id: string) => {
     setActiveSection(id)
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" })
+  }
+
+  const changePassword = async () => {
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      toast.error(t("Complete all password fields"))
+      return
+    }
+    if (newPassword !== confirmPassword) {
+      toast.error(t("Passwords do not match"))
+      return
+    }
+    if (!user) {
+      toast.error(t("Unable to update password"))
+      return
+    }
+
+    setIsChangingPassword(true)
+    try {
+      await user.updatePassword({
+        currentPassword,
+        newPassword,
+        signOutOfOtherSessions: true,
+      })
+      setCurrentPassword("")
+      setNewPassword("")
+      setConfirmPassword("")
+      toast.success(t("Password updated successfully"))
+    } catch {
+      toast.error(t("Unable to update password"))
+    } finally {
+      setIsChangingPassword(false)
+    }
+  }
+
+  const updateNotifications = (changes: Partial<typeof settings.notifications>) => {
+    const nextNotifications = { ...settings.notifications, ...changes }
+    updateNotificationSettings(nextNotifications)
+
+    void fetch("/api/notification-preferences", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email: nextNotifications.email,
+        accountActivity: nextNotifications.accountActivity,
+        newFeatures: nextNotifications.newFeatures,
+        marketing: nextNotifications.marketing,
+      }),
+    })
+      .then((response) => {
+        if (!response.ok) throw new Error("Unable to save notification preferences")
+        toast.success(t("Notification preferences saved"))
+      })
+      .catch(() => toast.error(t("Unable to save notification preferences")))
   }
 
   return (
@@ -167,43 +160,7 @@ export default function SettingsPage() {
                     : "—"}
                 </p>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="timezone">{t("Timezone")}</Label>
-                <Select value={settings.timezone} onValueChange={(value) => updateSettings({ timezone: value })}>
-                  <SelectTrigger id="timezone">
-                    <SelectValue placeholder={t("Select Timezone")} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="utc-12">{t("International Date Line West (UTC-12)")}</SelectItem>
-                    <SelectItem value="utc-11">{t("Samoa Standard Time (UTC-11)")}</SelectItem>
-                    <SelectItem value="utc-10">{t("Hawaii-Aleutian Standard Time (UTC-10)")}</SelectItem>
-                    <SelectItem value="utc-9">{t("Alaska Standard Time (UTC-9)")}</SelectItem>
-                    <SelectItem value="utc-8">{t("Pacific Time (UTC-8)")}</SelectItem>
-                    <SelectItem value="utc-7">{t("Mountain Time (UTC-7)")}</SelectItem>
-                    <SelectItem value="utc-6">{t("Central Time (UTC-6)")}</SelectItem>
-                    <SelectItem value="utc-5">{t("Eastern Time (UTC-5)")}</SelectItem>
-                    <SelectItem value="utc-4">{t("Atlantic Time (UTC-4)")}</SelectItem>
-                    <SelectItem value="utc-3">{t("Argentina Standard Time (UTC-3)")}</SelectItem>
-                    <SelectItem value="utc-2">{t("South Georgia Time (UTC-2)")}</SelectItem>
-                    <SelectItem value="utc-1">{t("Azores Time (UTC-1)")}</SelectItem>
-                    <SelectItem value="utc+0">{t("Greenwich Mean Time (UTC+0)")}</SelectItem>
-                    <SelectItem value="utc+1">{t("Central European Time (UTC+1)")}</SelectItem>
-                    <SelectItem value="utc+2">{t("Eastern European Time (UTC+2)")}</SelectItem>
-                    <SelectItem value="utc+3">{t("Moscow Time (UTC+3)")}</SelectItem>
-                    <SelectItem value="utc+4">{t("Gulf Standard Time (UTC+4)")}</SelectItem>
-                    <SelectItem value="utc+5">{t("Pakistan Standard Time (UTC+5)")}</SelectItem>
-                    <SelectItem value="utc+5.5">{t("Indian Standard Time (UTC+5:30)")}</SelectItem>
-                    <SelectItem value="utc+6">{t("Bangladesh Standard Time (UTC+6)")}</SelectItem>
-                    <SelectItem value="utc+7">{t("Indochina Time (UTC+7)")}</SelectItem>
-                    <SelectItem value="utc+8">{t("China Standard Time (UTC+8)")}</SelectItem>
-                    <SelectItem value="utc+9">{t("Japan Standard Time (UTC+9)")}</SelectItem>
-                    <SelectItem value="utc+10">{t("Australian Eastern Standard Time (UTC+10)")}</SelectItem>
-                    <SelectItem value="utc+11">{t("Solomon Islands Time (UTC+11)")}</SelectItem>
-                    <SelectItem value="utc+12">{t("New Zealand Standard Time (UTC+12)")}</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <Button onClick={() => { updateSettings({ avatar: settings.avatar, fullName: settings.fullName, email: settings.email, birthDate: settings.birthDate ?? "", timezone: settings.timezone }); toast.success(t("Account settings saved successfully")) }}>
+              <Button onClick={() => { updateSettings({ avatar: settings.avatar, fullName: settings.fullName, email: settings.email, birthDate: settings.birthDate ?? "" }); toast.success(t("Account settings saved successfully")) }}>
                 {t("Save Account Settings")}
               </Button>
             </div>
@@ -215,70 +172,23 @@ export default function SettingsPage() {
             <div className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="current-password">{t("Current Password")}</Label>
-                <Input id="current-password" type="password" />
+                <Input id="current-password" type="password" value={currentPassword} onChange={(event) => setCurrentPassword(event.target.value)} autoComplete="current-password" />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="new-password">{t("New Password")}</Label>
-                <Input id="new-password" type="password" />
+                <Input id="new-password" type="password" value={newPassword} onChange={(event) => setNewPassword(event.target.value)} autoComplete="new-password" />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="confirm-password">{t("Confirm New Password")}</Label>
-                <Input id="confirm-password" type="password" />
+                <Input id="confirm-password" type="password" value={confirmPassword} onChange={(event) => setConfirmPassword(event.target.value)} autoComplete="new-password" />
               </div>
               <div className="flex items-center space-x-2">
                 <Switch id="two-factor" />
                 <Label htmlFor="two-factor">{t("Enable Two-Factor Authentication")}</Label>
               </div>
-              <Button>{t("Save Security Settings")}</Button>
-            </div>
-
-            <div className="grid gap-4 md:grid-cols-2 mt-6">
-              <div className="space-y-3">
-                <h3 className="text-lg font-medium">{t("Login History")}</h3>
-                <p className="text-sm text-muted-foreground">{t("Recent login activities on your account")}</p>
-                {sessionsLoading ? (
-                  <p className="text-sm text-muted-foreground">{t("Loading session activity")}</p>
-                ) : sessionsError ? (
-                  <p className="text-sm text-destructive">{t("Unable to load session activity")}</p>
-                ) : sessionData?.history.length ? (
-                  sessionData.history.map((login) => (
-                    <div key={login.id} className="grid grid-cols-[minmax(0,1.3fr)_minmax(0,0.8fr)_minmax(0,1fr)] gap-2 text-sm">
-                      <span>{formatSessionDate(login.createdAt, lang)}</span>
-                      <span className="truncate" title={login.ipAddress ?? undefined}>{login.ipAddress ?? "—"}</span>
-                      <span className="truncate" title={sessionLocation(login)}>{sessionLocation(login)}</span>
-                    </div>
-                  ))
-                ) : (
-                  <p className="text-sm text-muted-foreground">{t("No sign-ins recorded yet")}</p>
-                )}
-              </div>
-              <div className="space-y-3">
-                <h3 className="text-lg font-medium">{t("Active Sessions")}</h3>
-                <p className="text-sm text-muted-foreground">{t("Currently active sessions on your account")}</p>
-                {sessionsLoading ? (
-                  <p className="text-sm text-muted-foreground">{t("Loading session activity")}</p>
-                ) : sessionsError ? (
-                  <p className="text-sm text-destructive">{t("Unable to load session activity")}</p>
-                ) : sessionData?.activeSessions.length ? (
-                  sessionData.activeSessions.map((session) => (
-                    <div key={session.id} className="grid grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)_minmax(0,1fr)] items-center gap-2 text-sm">
-                      <span className="flex min-w-0 items-center truncate">
-                        <SessionIcon session={session} />
-                        <span className="truncate">{session.deviceType ?? t("Unknown device")}</span>
-                        {session.id === sessionData.currentSessionId && (
-                          <span className="ml-2 shrink-0 text-xs text-muted-foreground">{t("This device")}</span>
-                        )}
-                      </span>
-                      <span className="truncate">{session.browserName ?? "—"}</span>
-                      <span className="truncate" title={formatSessionDate(session.lastActiveAt, lang)}>
-                        {formatSessionDate(session.lastActiveAt, lang)}
-                      </span>
-                    </div>
-                  ))
-                ) : (
-                  <p className="text-sm text-muted-foreground">{t("No active sessions")}</p>
-                )}
-              </div>
+              <Button onClick={changePassword} disabled={isChangingPassword || !isUserLoaded}>
+                {t("Save Security Settings")}
+              </Button>
             </div>
           </section>
 
@@ -290,9 +200,7 @@ export default function SettingsPage() {
                 <Checkbox
                   id="email-notifications"
                   checked={settings.notifications.email}
-                  onCheckedChange={(checked) =>
-                    updateNotificationSettings({ ...settings.notifications, email: !!checked })
-                  }
+                  onCheckedChange={(checked) => updateNotifications({ email: !!checked })}
                 />
                 <Label htmlFor="email-notifications" className="font-medium">{t("Email Notifications")}</Label>
               </div>
@@ -302,9 +210,7 @@ export default function SettingsPage() {
                     id="account-activity"
                     checked={settings.notifications.accountActivity}
                     disabled={!settings.notifications.email}
-                    onCheckedChange={(checked) =>
-                      updateNotificationSettings({ ...settings.notifications, accountActivity: !!checked })
-                    }
+                    onCheckedChange={(checked) => updateNotifications({ accountActivity: !!checked })}
                   />
                   <Label htmlFor="account-activity" className={!settings.notifications.email ? "opacity-50" : ""}>{t("Account Activity")}</Label>
                 </div>
@@ -313,9 +219,7 @@ export default function SettingsPage() {
                     id="new-features"
                     checked={settings.notifications.newFeatures}
                     disabled={!settings.notifications.email}
-                    onCheckedChange={(checked) =>
-                      updateNotificationSettings({ ...settings.notifications, newFeatures: !!checked })
-                    }
+                    onCheckedChange={(checked) => updateNotifications({ newFeatures: !!checked })}
                   />
                   <Label htmlFor="new-features" className={!settings.notifications.email ? "opacity-50" : ""}>{t("New Features and Updates")}</Label>
                 </div>
@@ -324,9 +228,7 @@ export default function SettingsPage() {
                     id="marketing"
                     checked={settings.notifications.marketing}
                     disabled={!settings.notifications.email}
-                    onCheckedChange={(checked) =>
-                      updateNotificationSettings({ ...settings.notifications, marketing: !!checked })
-                    }
+                    onCheckedChange={(checked) => updateNotifications({ marketing: !!checked })}
                   />
                   <Label htmlFor="marketing" className={!settings.notifications.email ? "opacity-50" : ""}>{t("Marketing and Promotions")}</Label>
                 </div>
