@@ -63,8 +63,8 @@ export function RealEstateCalculator() {
     const renovationVal = p(renovation)
     const rentVal = p(rent)
     const vacancyVal = p(vacancy) / 100
-    const ibiVal = p(ibi)
-    const cadastralVal = (p(cadastralPct) / 100) * priceVal * 0.01
+    const ibiVal = (p(ibi) / 100) * priceVal
+    const cadastralVal = (p(cadastralPct) / 100) * priceVal
     const annualPropertyTaxes = ibiVal + cadastralVal
     const monthlyPropertyTaxes = annualPropertyTaxes / 12
     const monthlyCostsVal = p(monthlyCosts)
@@ -171,11 +171,12 @@ export function RealEstateCalculator() {
           <Label className="text-base font-semibold">{t("Annual Property Taxes")}</Label>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1">
-              <Label className="text-sm">{t("Property Tax (IBI)")} ({sym}/{lang === "es" ? "año" : "yr"})</Label>
-              <Input type="number" placeholder="900" value={ibi} onChange={(e) => setIbi(e.target.value)} min={0} />
+              <Label className="text-sm">{t("Property Tax (IBI)")} (%)</Label>
+              <Input type="number" placeholder="0.35" value={ibi} onChange={(e) => setIbi(e.target.value)} min={0} step={0.01} />
+              <p className="text-xs text-muted-foreground">0.35 {lang === "es" ? "= valor habitual" : "= typical"}</p>
             </div>
             <div className="space-y-1">
-              <Label className="text-sm">{t("% of Cadastral Value")}</Label>
+              <Label className="text-sm">{t("% of Cadastral Value")} (%)</Label>
               <Input type="number" placeholder="0.4" value={cadastralPct} onChange={(e) => setCadastralPct(e.target.value)} min={0} step={0.01} />
               <p className="text-xs text-muted-foreground">0.4 {lang === "es" ? "= valor habitual" : "= typical"}</p>
             </div>
