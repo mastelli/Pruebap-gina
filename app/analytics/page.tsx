@@ -67,17 +67,17 @@ function AnalyticsContent() {
           <MetricTab
             titleKey="Expenses"
             customBody={(month) => (
-              <div className="grid gap-4 lg:grid-cols-2 items-stretch">
-                <div className="flex flex-col gap-4">
-                  <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0">
-                      <CardTitle className="text-xl font-semibold">{t("Expense Breakdown")}</CardTitle>
-                      <ExpenseTotal month={month} />
-                    </CardHeader>
-                    <CardContent>
-                      <ExpenseDoughnut month={month} />
-                    </CardContent>
-                  </Card>
+              <div className="grid gap-4 items-stretch">
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0">
+                    <CardTitle className="text-xl font-semibold">{t("Expense Breakdown")}</CardTitle>
+                    <ExpenseTotal month={month} />
+                  </CardHeader>
+                  <CardContent>
+                    <ExpenseDoughnut month={month} />
+                  </CardContent>
+                </Card>
+                <div className="grid gap-4 lg:grid-cols-2">
                   <Card>
                     <CardHeader>
                       <CardTitle className="text-xl font-semibold">{t("History")}</CardTitle>
@@ -86,21 +86,21 @@ function AnalyticsContent() {
                       <ExpenseHistory />
                     </CardContent>
                   </Card>
-                  <Card className="flex min-h-0 flex-1 flex-col">
+                  <Card className="flex flex-col">
                     <CardHeader>
-                      <CardTitle className="text-xl font-semibold">{t("Expense Movements")}</CardTitle>
+                      <CardTitle className="text-xl font-semibold">{t("Budget")}</CardTitle>
                     </CardHeader>
-                    <CardContent className="min-h-0 flex-1 overflow-hidden">
-                      <ExpenseList month={month} />
+                    <CardContent className="pb-2">
+                      <ExpenseTypes month={month} />
                     </CardContent>
                   </Card>
                 </div>
-                <Card className="flex flex-col">
+                <Card className="flex min-h-0 flex-1 flex-col">
                   <CardHeader>
-                    <CardTitle className="text-xl font-semibold">{t("Budget")}</CardTitle>
+                    <CardTitle className="text-xl font-semibold">{t("Expense Movements")}</CardTitle>
                   </CardHeader>
-                  <CardContent className="pb-2">
-                    <ExpenseTypes month={month} />
+                  <CardContent className="min-h-0 flex-1 overflow-hidden">
+                    <ExpenseList month={month} />
                   </CardContent>
                 </Card>
               </div>

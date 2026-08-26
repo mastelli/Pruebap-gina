@@ -4,7 +4,6 @@ import type { ReactNode } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Bar, BarChart, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
 import { useTheme } from "next-themes"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useState } from "react"
 import { useLanguage } from "@/lib/i18n"
 
@@ -34,18 +33,18 @@ const channelPerformanceData = [
 ]
 
 const MONTHS = [
-  "January",
-  "February",
-  "March",
-  "April",
-  "May",
-  "June",
-  "July",
-  "August",
-  "September",
-  "October",
-  "November",
-  "December",
+  { key: "01", label: "Ene" },
+  { key: "02", label: "Feb" },
+  { key: "03", label: "Mar" },
+  { key: "04", label: "Abr" },
+  { key: "05", label: "May" },
+  { key: "06", label: "Jun" },
+  { key: "07", label: "Jul" },
+  { key: "08", label: "Ago" },
+  { key: "09", label: "Sep" },
+  { key: "10", label: "Oct" },
+  { key: "11", label: "Nov" },
+  { key: "12", label: "Dic" },
 ]
 
 function getCurrentMonth(): string {
@@ -90,18 +89,21 @@ export function MetricTab({
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h3 className="text-2xl font-semibold">{t(titleKey)}</h3>
-        <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent className="max-h-[480px]">
-            {MONTHS.map((month, index) => (
-              <SelectItem key={month} value={String(index + 1).padStart(2, "0")}>
-                {t(month)}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+      </div>
+      <div className="flex items-center justify-center gap-1">
+        {MONTHS.map((m) => (
+          <button
+            key={m.key}
+            onClick={() => setSelectedMonth(m.key)}
+            className={`px-3 py-1.5 text-sm rounded-md transition-colors ${
+              selectedMonth === m.key
+                ? "bg-primary text-primary-foreground font-medium"
+                : "text-muted-foreground hover:bg-muted hover:text-foreground"
+            }`}
+          >
+            {m.label}
+          </button>
+        ))}
       </div>
       {customBody ? (
         customBody(selectedMonth)
