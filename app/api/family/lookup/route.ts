@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@clerk/nextjs/server"
-import { clerkClient } from "@clerk/nextjs/server"
 
 export async function GET(req: NextRequest) {
   const { userId: currentUserId } = await auth()
@@ -14,51 +13,53 @@ export async function GET(req: NextRequest) {
   }
 
   const normalizedEmail = email.toLowerCase().trim()
+  const secretKey = process.env.CLERK_SECRET_KEY
+
+  if (!secretKey) {
+    return NextResponse.json({ found: false, error: "Missing CLERK_SECRET_KEY" })
+  }
 
   try {
-    let found = false
-    let matchedUser: (typeof response.data)[number] | null = null
+    const res = await fetch(
+      `https://api.clerk.com/v1/users?email_address=${encodeURIComponent(normalizedEmail)}`,
+      {
+        headers: {
+          Authorization: `Bearer ${secretKey}`,
+          "Content-Type": "application/json",
+        },
+      },
+    )
 
-    const response = await clerkClient.users.getUserList({ limit: 100 })
-    const users = response.data ?? []
-
-    for (const user of users) {
-      const emails = (user as any).emailAddresses ?? (user as any).email_addresses ?? []
-      for (const ea of emails) {
-        const addr = typeof ea === "string" ? ea : ea?.emailAddress ?? ea?.email_address ?? ""
-        if (addr.toLowerCase() === normalizedEmail) {
-          matchedUser = user
-          found = true
-          break
-        }
-      }
-      if (found) break
+    if (!res.ok) {
+      const body = await res.text()
+      return NextResponse.json({ found: false, error: `Clerk API ${res.status}: ${body}` })
     }
 
-    if (!found || !matchedUser) {
-      return NextResponse.json({ found: false, debug: { totalUsers: users.length } })
+    const data = await res.json()
+    const users = data?.data ?? []
+
+    if (users.length === 0) {
+      return NextResponse.json({ found: false, error: "No users matched" })
     }
 
-    if (matchedUser.id === currentUserId) {
+    const matched = users[0]
+
+    if (matched.id === currentUserId) {
       return NextResponse.json({ found: false, reason: "self" })
     }
 
-    const emails = (matchedUser as any).emailAddresses ?? (matchedUser as any).email_addresses ?? []
-    const matchedEmail = emails[0]
-    const emailAddress = typeof matchedEmail === "string"
-      ? matchedEmail
-      : matchedEmail?.emailAddress ?? matchedEmail?.email_address ?? normalizedEmail
-
-    const name = [matchedUser.firstName, matchedUser.lastName].filter(Boolean).join(" ") || null
+    const matchedEmail =
+      matched.email_addresses?.find(
+        (ea: any) => ea.email_address?.toLowerCase() === normalizedEmail,
+      ) ?? matched.email_addresses?.[0]
 
     return NextResponse.json({
       found: true,
-      userId: matchedUser.id,
-      email: emailAddress,
-      name,
+      userId: matched.id,
+      email: matchedEmail?.email_address ?? normalizedEmail,
+      name: [matched.first_name, matched.last_name].filter(Boolean).join(" ") || null,
     })
   } catch (error) {
-    console.error("[family/lookup] Clerk error:", error)
     return NextResponse.json({ found: false, error: String(error) })
   }
 }

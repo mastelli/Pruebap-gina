@@ -39,10 +39,12 @@ export function AddMemberModal({ isOpen, onClose, onMemberAdded }: AddMemberModa
     try {
       const res = await fetch(`/api/family/lookup?email=${encodeURIComponent(email.trim())}`)
       const data = await res.json()
-      setResult(data)
+        setResult(data)
       if (!data.found) {
         if (data.reason === "self") {
           toast.error(t("Cannot add yourself"))
+        } else if (data.error) {
+          toast.error(data.error)
         } else {
           toast.error(t("User not found with that email"))
         }
