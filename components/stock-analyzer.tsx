@@ -273,7 +273,7 @@ export function StockAnalyzer() {
                           <TooltipTrigger asChild>
                             <HelpCircle className="h-3 w-3 text-muted-foreground/60 cursor-help" />
                           </TooltipTrigger>
-                          <TooltipContent side="top" className="max-w-[220px] text-xs">
+                          <TooltipContent side="right" className="max-w-[220px] text-xs">
                             {t("ValuationTooltip")}
                           </TooltipContent>
                         </Tooltip>
@@ -287,7 +287,7 @@ export function StockAnalyzer() {
                           <TooltipTrigger asChild>
                             <HelpCircle className="h-3 w-3 text-muted-foreground/60 cursor-help" />
                           </TooltipTrigger>
-                          <TooltipContent side="top" className="max-w-[220px] text-xs">
+                          <TooltipContent side="right" className="max-w-[220px] text-xs">
                             {t("GrowthTooltip")}
                           </TooltipContent>
                         </Tooltip>
@@ -301,7 +301,7 @@ export function StockAnalyzer() {
                           <TooltipTrigger asChild>
                             <HelpCircle className="h-3 w-3 text-muted-foreground/60 cursor-help" />
                           </TooltipTrigger>
-                          <TooltipContent side="top" className="max-w-[220px] text-xs">
+                          <TooltipContent side="right" className="max-w-[220px] text-xs">
                             {t("ProfitabilityTooltip")}
                           </TooltipContent>
                         </Tooltip>
@@ -315,7 +315,7 @@ export function StockAnalyzer() {
                           <TooltipTrigger asChild>
                             <HelpCircle className="h-3 w-3 text-muted-foreground/60 cursor-help" />
                           </TooltipTrigger>
-                          <TooltipContent side="top" className="max-w-[220px] text-xs">
+                          <TooltipContent side="right" className="max-w-[220px] text-xs">
                             {t("FinancialHealthTooltip")}
                           </TooltipContent>
                         </Tooltip>
@@ -329,7 +329,7 @@ export function StockAnalyzer() {
                           <TooltipTrigger asChild>
                             <HelpCircle className="h-3 w-3 text-muted-foreground/60 cursor-help" />
                           </TooltipTrigger>
-                          <TooltipContent side="top" className="max-w-[220px] text-xs">
+                          <TooltipContent side="right" className="max-w-[220px] text-xs">
                             {t("CashFlowTooltip")}
                           </TooltipContent>
                         </Tooltip>
@@ -351,7 +351,7 @@ export function StockAnalyzer() {
                     <TooltipTrigger asChild>
                       <HelpCircle className="h-3 w-3 text-muted-foreground/60 cursor-help" />
                     </TooltipTrigger>
-                    <TooltipContent side="top" className="max-w-[260px] text-xs">
+                    <TooltipContent side="right" className="max-w-[260px] text-xs">
                       {t("ScenariosTooltip")}
                     </TooltipContent>
                   </Tooltip>

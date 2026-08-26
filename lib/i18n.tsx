@@ -607,15 +607,15 @@ const translations: Record<string, string> = {
   "Target High": "Objetivo Máximo",
   "Target Low": "Objetivo Mínimo",
   "ValuationTooltip":
-    "P/E, P/E forward, PEG y EV/EBITDA comparados con rangos sectoriales. Menor valoración = mayor puntuación.",
+    "P/E (10pts) + EV/EBITDA (8pts) + FCF Yield (7pts). Compara con el sector: menor valoración = mayor puntuación.",
   "GrowthTooltip":
-    "Crecimiento de ingresos y beneficios respecto al año anterior.",
+    "Revenue Growth (7pts) + EPS Growth (7pts) + FCF Growth (6pts). Crecimiento relativo al sector.",
   "ProfitabilityTooltip":
-    "Margen bruto, margen operativo y ROE. Mayor rentabilidad = mayor puntuación.",
+    "ROIC (10pts) + ROE (5pts) + Margen Operativo (5pts). Rentabilidad vs. benchmarks sectoriales.",
   "FinancialHealthTooltip":
-    "Ratio de liquidez y nivel de deuda (debt/equity). Menos deuda y más liquidez = mayor puntuación.",
+    "Net Debt/EBITDA (8pts) + Interest Coverage (6pts) + Current Ratio (3pts) + Debt/Equity (3pts). Menos deuda = mejor.",
   "CashFlowTooltip":
-    "FCF yield y margen de flujo de caja libre. Mayor generación de efectivo = mayor puntuación.",
+    "FCF Margin (5pts) + FCF Growth (5pts) + FCF Yield (5pts). Capacidad de generar efectivo vs. sector.",
   "ScenariosTooltip":
     "Porcentaje de probabilidad asignado a cada escenario para calcular el valor esperado ponderado.",
   "Analysts": "Analistas",

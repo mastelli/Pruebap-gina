@@ -133,7 +133,7 @@ export async function GET(req: NextRequest) {
   const ticker = symbol.toUpperCase().trim()
 
   const [summary, chart] = await Promise.all([
-    fetchYahoo(ticker, "assetProfile,defaultKeyStatistics,financialData,earningsTrend,summaryDetail,recommendationTrend,price,growthEstimates"),
+    fetchYahoo(ticker, "assetProfile,defaultKeyStatistics,financialData,earningsTrend,summaryDetail,recommendationTrend,price,growthEstimates,cashflowStatementHistory"),
     getChart(ticker),
   ])
 
@@ -198,6 +198,7 @@ export async function GET(req: NextRequest) {
     heldPercentInsiders: raw(stats.heldPercentInsiders),
     heldPercentInstitutions: raw(stats.heldPercentInstitutions),
     earningsQuarterlyGrowth: raw(financial.earningsQuarterlyGrowth),
+    returnOnCapitalEmployed: raw(financial.returnOnCapitalEmployed),
     yearGrowth: null,
   }
 
@@ -215,6 +216,16 @@ export async function GET(req: NextRequest) {
     }
     if (t?.period === `${currentYear + 1}-year` || t?.period === "1 year") {
       statsMap.estimatedEpsNextYear = raw(t?.earningsEstimate?.avg)
+    }
+  }
+
+  // Calculate FCF growth from cashflow history
+  const cashflowHistory = summary?.cashflowStatementHistory?.cashflowStatements ?? []
+  if (cashflowHistory.length >= 2) {
+    const currentFCF = raw(cashflowHistory[0]?.freeCashflow)
+    const prevFCF = raw(cashflowHistory[1]?.freeCashflow)
+    if (currentFCF && prevFCF && prevFCF !== 0) {
+      statsMap.fcfGrowth = ((currentFCF - prevFCF) / Math.abs(prevFCF)) * 100
     }
   }
 

@@ -53,10 +53,26 @@ function pct(val: number | null | undefined): number {
   return Math.abs(v) <= 1 ? v * 100 : v
 }
 
-function scoreRange(value: number, min: number, max: number, invert: boolean = false): number {
-  if (value <= 0) return 0
-  const normalized = Math.min(Math.max((value - min) / (max - min), 0), 1)
-  return invert ? (1 - normalized) : normalized
+function cap(value: number, max: number): number {
+  return Math.min(Math.max(value, 0), max)
+}
+
+// Sector benchmarks (S&P 500 averages as default)
+const SECTOR = {
+  pe: 22,
+  evEbitda: 15,
+  fcfYield: 4,
+  revenueGrowth: 8,
+  epsGrowth: 10,
+  fcfGrowth: 8,
+  roic: 12,
+  roe: 18,
+  operatingMargin: 12,
+  netDebtEbitda: 2.5,
+  interestCoverage: 8,
+  currentRatio: 1.5,
+  debtEquity: 80,
+  fcfMargin: 12,
 }
 
 export function calculateValuation(input: ValuationInput): ValuationResult {
@@ -101,6 +117,7 @@ export function calculateValuation(input: ValuationInput): ValuationResult {
   const estEpsCurrentYear = safe(stats.estimatedEpsCurrentYear)
   const estEpsNextYear = safe(stats.estimatedEpsNextYear)
 
+  // --- Target Price ---
   const analystTargetMean = safe(analystData.targetMean)
 
   let targetPrice = price
@@ -163,41 +180,42 @@ export function calculateValuation(input: ValuationInput): ValuationResult {
     { label: "Bull", targetPrice: bullPrice, probability: 25, assumptions: "Crecimiento alto, múltiplo expandido" },
   ]
 
-  let valScore = 0, valCount = 0
-  if (trailingPE > 0) { valScore += scoreRange(trailingPE, 5, 40, true) * 25; valCount++ }
-  if (forwardPE > 0) { valScore += scoreRange(forwardPE, 5, 35, true) * 25; valCount++ }
-  if (pegRatio > 0) { valScore += scoreRange(pegRatio, 0.5, 3, true) * 25; valCount++ }
-  if (evEbitda > 0) { valScore += scoreRange(evEbitda, 5, 25, true) * 25; valCount++ }
-  const valuationScore = valCount > 0 ? Math.round(valScore / valCount) : 12.5
+  // --- SCORING ---
 
-  let growthScore = 0, growthCount = 0
-  if (revenueGrowth !== 0) { growthScore += scoreRange(revenueGrowth, -10, 40) * 50; growthCount++ }
-  if (earningsGrowth !== 0) { growthScore += scoreRange(earningsGrowth, -10, 50) * 50; growthCount++ }
-  const growthScoreFinal = growthCount > 0 ? Math.round(growthScore / growthCount) : 10
+  // 1. Valuation (25 points)
+  const peScore = trailingPE > 0 ? cap(10 * (SECTOR.pe / trailingPE), 10) : 0
+  const evScore = evEbitda > 0 ? cap(8 * (SECTOR.evEbitda / evEbitda), 8) : 0
+  const fcfYieldScore = fcfYield > 0 ? cap(7 * (fcfYield / SECTOR.fcfYield), 7) : 0
+  const valuationScore = Math.round(peScore + evScore + fcfYieldScore)
 
-  let profScore = 0, profCount = 0
-  if (grossMargin > 0) { profScore += scoreRange(grossMargin, 20, 80) * 33; profCount++ }
-  if (operatingMargin > 0) { profScore += scoreRange(operatingMargin, 5, 40) * 33; profCount++ }
-  if (roe > 0) { profScore += scoreRange(roe, 5, 40) * 34; profCount++ }
-  const profitabilityScore = profCount > 0 ? Math.round(profScore / profCount) : 10
+  // 2. Growth (20 points)
+  const revenueScore = revenueGrowth > 0 ? cap(7 * (revenueGrowth / SECTOR.revenueGrowth), 7) : 0
+  const epsScore = earningsGrowth > 0 ? cap(7 * (earningsGrowth / SECTOR.epsGrowth), 7) : 0
+  const fcfGrowthVal = safe(stats.fcfGrowth)
+  const fcfGrowthScore = fcfGrowthVal > 0 ? cap(6 * (fcfGrowthVal / SECTOR.fcfGrowth), 6) : 0
+  const growthScore = Math.round(revenueScore + epsScore + fcfGrowthScore)
 
-  let healthScore = 0, healthCount = 0
-  if (currentRatio > 0) { healthScore += scoreRange(currentRatio, 0.5, 3) * 50; healthCount++ }
-  if (debtToEquity >= 0) { healthScore += scoreRange(debtToEquity, 200, 0, true) * 50; healthCount++ }
-  const financialHealthScore = healthCount > 0 ? Math.round(healthScore / healthCount) : 10
+  // 3. Profitability (20 points)
+  const roicVal = safe(stats.returnOnCapitalEmployed) || roe
+  const roicScore = roicVal > 0 ? cap(10 * (roicVal / SECTOR.roic), 10) : 0
+  const roeScore = roe > 0 ? cap(5 * (roe / SECTOR.roe), 5) : 0
+  const marginScore = operatingMargin > 0 ? cap(5 * (operatingMargin / SECTOR.operatingMargin), 5) : 0
+  const profitabilityScore = Math.round(roicScore + roeScore + marginScore)
 
-  let cfScore = 0, cfCount = 0
-  if (fcfYield > 0) { cfScore += scoreRange(fcfYield, 0, 10) * 50; cfCount++ }
-  if (fcfMargin !== 0) { cfScore += scoreRange(fcfMargin, -5, 30) * 50; cfCount++ }
-  const cashFlowScore = cfCount > 0 ? Math.round(cfScore / cfCount) : 7.5
+  // 4. Financial Health (20 points)
+  const ndEbitdaScore = netDebtEbitda > 0 ? cap(8 * (1 - netDebtEbitda / 4), 8) : 8
+  const icScore = interestCoverage > 0 ? cap(6 * (interestCoverage / SECTOR.interestCoverage), 6) : 0
+  const crScore = currentRatio > 0 ? cap(3 * (currentRatio / SECTOR.currentRatio), 3) : 0
+  const deScore = debtToEquity >= 0 ? cap(3 * (1 - debtToEquity / (SECTOR.debtEquity * 2)), 3) : 0
+  const financialHealthScore = Math.round(ndEbitdaScore + icScore + crScore + deScore)
 
-  const totalScore = Math.round(
-    valuationScore * 0.25 +
-    growthScoreFinal * 0.20 +
-    profitabilityScore * 0.20 +
-    financialHealthScore * 0.20 +
-    cashFlowScore * 0.15
-  )
+  // 5. Cash Flow (15 points)
+  const fcfMarginScore = fcfMargin > 0 ? cap(5 * (fcfMargin / SECTOR.fcfMargin), 5) : 0
+  const fcfGrowthScore2 = fcfGrowthVal > 0 ? cap(5 * (fcfGrowthVal / SECTOR.fcfGrowth), 5) : 0
+  const fcfYieldScore2 = fcfYield > 0 ? cap(5 * (fcfYield / SECTOR.fcfYield), 5) : 0
+  const cashFlowScore = Math.round(fcfMarginScore + fcfGrowthScore2 + fcfYieldScore2)
+
+  const totalScore = valuationScore + growthScore + profitabilityScore + financialHealthScore + cashFlowScore
 
   const alerts: { type: "green" | "yellow" | "red"; text: string }[] = []
   if (trailingPE > 0 && trailingPE < 20) alerts.push({ type: "green", text: "P/E inferior a 20 — valoración atractiva" })
@@ -224,7 +242,7 @@ export function calculateValuation(input: ValuationInput): ValuationResult {
     score: {
       total: totalScore,
       valuation: valuationScore,
-      growth: growthScoreFinal,
+      growth: growthScore,
       profitability: profitabilityScore,
       financialHealth: financialHealthScore,
       cashFlow: cashFlowScore,
