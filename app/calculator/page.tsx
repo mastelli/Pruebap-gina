@@ -112,9 +112,7 @@ export default function CalculatorPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div aria-hidden="true" className="h-9" />
-
+    <div className="space-y-4">
       <Tabs defaultValue="compound" className="space-y-4">
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="compound">{t("Compound Interest")}</TabsTrigger>
