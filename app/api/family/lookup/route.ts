@@ -47,87 +47,93 @@ export async function GET(req: NextRequest) {
 
   const normalizedEmail = email.toLowerCase().trim()
 
-  // Use query param for flexible search (partial match across emails)
-  const result = await clerkGet("/users", { query: normalizedEmail, limit: "20" })
+  try {
+    const result = await clerkGet("/users", { query: normalizedEmail, limit: "20" })
 
-  if (!result.ok) {
-    return NextResponse.json({ found: false, error: `Clerk API ${result.status}` })
+    if (!result.ok) {
+      return NextResponse.json({ found: false, error: `Clerk API ${result.status}` })
+    }
+
+    const users = result.data?.data ?? []
+    const matched = users.find((u: any) => extractEmail(u)?.toLowerCase() === normalizedEmail)
+
+    if (!matched) return NextResponse.json({ found: false })
+    if (matched.id === currentUserId) return NextResponse.json({ found: false, reason: "self" })
+
+    return NextResponse.json({
+      found: true,
+      userId: matched.id,
+      email: extractEmail(matched) ?? normalizedEmail,
+      name: [matched.first_name, matched.last_name].filter(Boolean).join(" ") || null,
+    })
+  } catch (error) {
+    return NextResponse.json({ found: false, error: String(error) })
   }
-
-  const users = result.data?.data ?? []
-
-  // Find exact email match
-  const matched = users.find((u: any) => {
-    const addr = extractEmail(u)
-    return addr?.toLowerCase() === normalizedEmail
-  })
-
-  if (!matched) {
-    return NextResponse.json({ found: false })
-  }
-
-  if (matched.id === currentUserId) {
-    return NextResponse.json({ found: false, reason: "self" })
-  }
-
-  return NextResponse.json({
-    found: true,
-    userId: matched.id,
-    email: extractEmail(matched) ?? normalizedEmail,
-    name: [matched.first_name, matched.last_name].filter(Boolean).join(" ") || null,
-  })
 }
 
-/* POST /api/family/lookup  { email: "xxx", familyId: "xxx", familyName: "xxx" } */
+/* POST /api/family/lookup  { action: "lookup"|"invite", email, familyId, familyName } */
 export async function POST(req: NextRequest) {
   const { userId: currentUserId } = await auth()
   if (!currentUserId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
   const body = await req.json()
-  const { email, familyId, familyName } = body as { email?: string; familyId?: string; familyName?: string }
-
-  if (!email || !familyId || !familyName) {
-    return NextResponse.json({ error: "Missing fields" }, { status: 400 })
+  const { action, email, familyId, familyName } = body as {
+    action?: string
+    email?: string
+    familyId?: string
+    familyName?: string
   }
 
+  if (!email) return NextResponse.json({ error: "Missing email" }, { status: 400 })
   if (!CLERK_SECRET) return NextResponse.json({ error: "Missing CLERK_SECRET_KEY" }, { status: 500 })
 
   const normalizedEmail = email.toLowerCase().trim()
 
-  // Check if user already exists
-  const lookup = await clerkGet("/users", { query: normalizedEmail, limit: "20" })
-  if (lookup.ok) {
-    const users = lookup.data?.data ?? []
-    const matched = users.find((u: any) => extractEmail(u)?.toLowerCase() === normalizedEmail)
-    if (matched && matched.id !== currentUserId) {
-      return NextResponse.json({
-        status: "found",
-        userId: matched.id,
-        email: extractEmail(matched) ?? normalizedEmail,
-        name: [matched.first_name, matched.last_name].filter(Boolean).join(" ") || null,
-      })
+  // Step 1: Try to find existing user
+  try {
+    const lookup = await clerkGet("/users", { query: normalizedEmail, limit: "20" })
+    if (lookup.ok) {
+      const users = lookup.data?.data ?? []
+      const matched = users.find((u: any) => extractEmail(u)?.toLowerCase() === normalizedEmail)
+
+      if (matched && matched.id !== currentUserId) {
+        return NextResponse.json({
+          status: "found",
+          userId: matched.id,
+          email: extractEmail(matched) ?? normalizedEmail,
+          name: [matched.first_name, matched.last_name].filter(Boolean).join(" ") || null,
+        })
+      }
+      if (matched && matched.id === currentUserId) {
+        return NextResponse.json({ status: "self" })
+      }
     }
-    if (matched && matched.id === currentUserId) {
-      return NextResponse.json({ status: "self" })
-    }
+  } catch {
+    // Clerk failed, fall through to pending
   }
 
-  // User not found — send invitation
-  const inviteResult = await clerkPost("/invitations", {
-    email_address: normalizedEmail,
-    redirect_url: `${req.nextUrl.origin}/sign-in`,
-    ignore_existing: true,
-    public_metadata: { invitedToFamily: familyId, invitedBy: currentUserId },
-  })
+  // Step 2: User not found — try to create invitation (may fail in test mode)
+  let inviteUrl: string | null = null
+  try {
+    const inviteResult = await clerkPost("/invitations", {
+      email_address: normalizedEmail,
+      redirect_url: `${req.nextUrl.origin}/sign-in`,
+      ignore_existing: true,
+      public_metadata: { invitedToFamily: familyId ?? "", invitedBy: currentUserId },
+    })
 
-  if (!inviteResult.ok) {
-    const errMsg = inviteResult.data?.errors?.[0]?.message ?? "Failed to send invitation"
-    return NextResponse.json({ status: "invite_error", error: errMsg })
+    if (inviteResult.ok && inviteResult.data?.url) {
+      inviteUrl = inviteResult.data.url
+    }
+  } catch {
+    // Invitation failed, that's fine — we'll add as pending
   }
 
   return NextResponse.json({
-    status: "invited",
+    status: "not_found",
     email: normalizedEmail,
-    invitationId: inviteResult.data?.id,
+    inviteUrl,
+    familyId: familyId ?? null,
+    familyName: familyName ?? null,
   })
 }

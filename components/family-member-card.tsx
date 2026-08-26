@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { ExternalLink } from "lucide-react"
 import { useLanguage } from "@/lib/i18n"
 import {
   fetchMemberAccountSummary,
@@ -14,8 +15,10 @@ function formatCurrency(value: number): string {
   return value.toLocaleString("es-ES", { style: "currency", currency: "EUR" })
 }
 
-function RoleBadge({ role }: { role: FamilyMember["role"] }) {
+function RoleBadge({ role, status }: { role: FamilyMember["role"]; status?: FamilyMember["status"] }) {
   const { t } = useLanguage()
+  const isPending = status === "pending"
+
   const labels: Record<string, string> = {
     admin: t("Admin"),
     member: t("Member"),
@@ -27,9 +30,16 @@ function RoleBadge({ role }: { role: FamilyMember["role"] }) {
     viewer: "outline",
   }
   return (
-    <Badge variant={variants[role] ?? "outline"}>
-      {labels[role] ?? role}
-    </Badge>
+    <div className="flex gap-1.5">
+      {isPending && (
+        <Badge variant="outline" className="border-amber-500 text-amber-600 dark:text-amber-400">
+          {t("Pending")}
+        </Badge>
+      )}
+      <Badge variant={variants[role] ?? "outline"}>
+        {labels[role] ?? role}
+      </Badge>
+    </div>
   )
 }
 
@@ -100,7 +110,7 @@ export function FamilyMemberCard({ member }: { member: FamilyMember }) {
               <p className="text-xs text-muted-foreground truncate">{member.email}</p>
             )}
           </div>
-          <RoleBadge role={member.role} />
+          <RoleBadge role={member.role} status={member.status} />
         </div>
       </CardHeader>
       <CardContent className="flex flex-1 flex-col pt-0">
@@ -112,6 +122,23 @@ export function FamilyMemberCard({ member }: { member: FamilyMember }) {
                 <div className="h-4 w-20 bg-muted animate-pulse rounded" />
               </div>
             ))}
+          </div>
+        ) : member.status === "pending" ? (
+          <div className="space-y-2">
+            <p className="text-sm text-muted-foreground">
+              {t("Awaiting registration")}
+            </p>
+            {member.inviteUrl && (
+              <a
+                href={member.inviteUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 text-xs text-primary hover:underline"
+              >
+                <ExternalLink className="h-3 w-3" />
+                {t("Open invitation link")}
+              </a>
+            )}
           </div>
         ) : summary ? (
           <div className="space-y-1.5">

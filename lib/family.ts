@@ -18,6 +18,8 @@ export interface FamilyMember {
   displayName: string
   role: "admin" | "member" | "viewer"
   addedAt: string
+  status?: "active" | "pending"
+  inviteUrl?: string
 }
 
 export interface FamilyPermissions {

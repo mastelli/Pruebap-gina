@@ -11,6 +11,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { toast } from "sonner"
+import { Copy, ExternalLink } from "lucide-react"
 import { useLanguage } from "@/lib/i18n"
 import {
   addFamilyMember,
@@ -25,22 +26,25 @@ interface AddMemberModalProps {
   onMemberAdded: (member: FamilyMember) => void
 }
 
+type Result =
+  | { status: "found"; userId: string; email: string; name: string | null }
+  | { status: "self" }
+  | { status: "not_found"; email: string; inviteUrl: string | null }
+  | { status: "error"; message: string }
+  | null
+
 export function AddMemberModal({ isOpen, onClose, onMemberAdded }: AddMemberModalProps) {
   const { t } = useLanguage()
   const [email, setEmail] = useState("")
   const [loading, setLoading] = useState(false)
-  const [result, setResult] = useState<{
-    status: "found" | "invited" | "self" | "invite_error" | "not_found"
-    userId?: string
-    name?: string | null
-    email?: string
-    error?: string
-  } | null>(null)
+  const [result, setResult] = useState<Result>(null)
+  const [copied, setCopied] = useState(false)
 
   const handleSearch = async () => {
     if (!email.trim()) return
     setLoading(true)
     setResult(null)
+    setCopied(false)
 
     const familyId = getCurrentFamilyId()
     const family = getCurrentFamily()
@@ -57,20 +61,20 @@ export function AddMemberModal({ isOpen, onClose, onMemberAdded }: AddMemberModa
       })
       const data = await res.json()
 
-      setResult(data)
-
       if (data.status === "found") {
-        toast.success(t("User found — click Add to include them"))
-      } else if (data.status === "invited") {
-        toast.success(t("Invitation sent"))
+        setResult({ status: "found", userId: data.userId, email: data.email, name: data.name })
+        toast.success(t("User found"))
       } else if (data.status === "self") {
+        setResult({ status: "self" })
         toast.error(t("Cannot add yourself"))
-      } else if (data.status === "invite_error") {
-        toast.error(data.error ?? t("Error sending invitation"))
+      } else if (data.status === "not_found") {
+        setResult({ status: "not_found", email: data.email, inviteUrl: data.inviteUrl ?? null })
       } else {
-        toast.error(t("Could not find user or send invitation"))
+        setResult({ status: "error", message: data.error ?? t("Unknown error") })
+        toast.error(data.error ?? t("Unknown error"))
       }
     } catch {
+      setResult({ status: "error", message: t("Error searching for user") })
       toast.error(t("Error searching for user"))
     } finally {
       setLoading(false)
@@ -78,7 +82,7 @@ export function AddMemberModal({ isOpen, onClose, onMemberAdded }: AddMemberModa
   }
 
   const handleAdd = () => {
-    if (!result?.userId || !result.email) return
+    if (result?.status !== "found" || !result.userId) return
 
     const member: FamilyMember = {
       userId: result.userId,
@@ -86,6 +90,7 @@ export function AddMemberModal({ isOpen, onClose, onMemberAdded }: AddMemberModa
       displayName: result.name ?? email.trim().split("@")[0],
       role: "member",
       addedAt: new Date().toISOString(),
+      status: "active",
     }
 
     addFamilyMember(member)
@@ -96,13 +101,44 @@ export function AddMemberModal({ isOpen, onClose, onMemberAdded }: AddMemberModa
     onClose()
   }
 
-  const handleClose = () => {
+  const handleAddPending = () => {
+    if (result?.status !== "not_found") return
+
+    const member: FamilyMember = {
+      userId: `pending-${Date.now()}`,
+      email: result.email,
+      displayName: result.email.split("@")[0],
+      role: "member",
+      addedAt: new Date().toISOString(),
+      status: "pending",
+      inviteUrl: result.inviteUrl ?? undefined,
+    }
+
+    addFamilyMember(member)
+    toast.success(t("Member added as pending"))
+    onMemberAdded(member)
     setEmail("")
     setResult(null)
     onClose()
   }
 
-  const canAdd = result?.status === "found" && result.userId
+  const handleCopyLink = async () => {
+    if (result?.status !== "not_found" || !result.inviteUrl) return
+    try {
+      await navigator.clipboard.writeText(result.inviteUrl)
+      setCopied(true)
+      toast.success(t("Link copied"))
+    } catch {
+      toast.error(t("Error copying link"))
+    }
+  }
+
+  const handleClose = () => {
+    setEmail("")
+    setResult(null)
+    setCopied(false)
+    onClose()
+  }
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
@@ -134,32 +170,58 @@ export function AddMemberModal({ isOpen, onClose, onMemberAdded }: AddMemberModa
             <div className="rounded-lg border bg-muted/50 p-3 space-y-1">
               <p className="text-sm font-medium">{result.name ?? result.email}</p>
               <p className="text-xs text-muted-foreground">{result.email}</p>
-              <p className="text-xs text-green-600 dark:text-green-400">{t("User found in the system")}</p>
             </div>
           )}
 
-          {result?.status === "invited" && (
-            <div className="rounded-lg border bg-muted/50 p-3 space-y-1">
+          {result?.status === "not_found" && (
+            <div className="rounded-lg border bg-muted/50 p-3 space-y-3">
               <p className="text-sm font-medium">{result.email}</p>
-              <p className="text-xs text-muted-foreground">{t("Invitation sent — they will receive an email to sign up")}</p>
+              <p className="text-xs text-muted-foreground">
+                {t("User not registered yet")}
+              </p>
+              {result.inviteUrl && (
+                <div className="space-y-2">
+                  <p className="text-xs text-muted-foreground">
+                    {t("Share this invitation link")}
+                  </p>
+                  <div className="flex gap-2">
+                    <Input
+                      readOnly
+                      value={result.inviteUrl}
+                      className="text-xs h-8 flex-1 font-mono"
+                      onClick={(e) => (e.target as HTMLInputElement).select()}
+                    />
+                    <Button size="sm" variant="outline" onClick={handleCopyLink}>
+                      {copied ? "✓" : <Copy className="h-3.5 w-3.5" />}
+                    </Button>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
-          {result?.status === "invite_error" && (
+          {result?.status === "self" && (
+            <div className="rounded-lg border bg-muted/50 p-3">
+              <p className="text-sm text-muted-foreground">{t("Cannot add yourself")}</p>
+            </div>
+          )}
+
+          {result?.status === "error" && (
             <div className="rounded-lg border border-destructive/50 bg-destructive/5 p-3">
-              <p className="text-sm text-destructive">{result.error ?? t("Error sending invitation")}</p>
+              <p className="text-sm text-destructive">{result.message}</p>
             </div>
           )}
         </div>
 
-        <DialogFooter>
+        <DialogFooter className="gap-2 sm:gap-0">
           <Button variant="outline" onClick={handleClose}>
             {t("Cancel")}
           </Button>
-          {canAdd && (
-            <Button onClick={handleAdd}>
-              {t("Add Member")}
-            </Button>
+          {result?.status === "found" && (
+            <Button onClick={handleAdd}>{t("Add Member")}</Button>
+          )}
+          {result?.status === "not_found" && (
+            <Button onClick={handleAddPending}>{t("Add as Pending")}</Button>
           )}
         </DialogFooter>
       </DialogContent>
