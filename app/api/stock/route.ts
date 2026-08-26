@@ -116,7 +116,7 @@ async function fetchYahoo(symbol: string, modules: string): Promise<any> {
 async function getChart(symbol: string): Promise<any> {
   try {
     const res = await httpsGet(
-      `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?range=1d&interval=1d`,
+      `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?range=6mo&interval=1d`,
       { "User-Agent": UA },
     )
     if (res.status !== 200) return null
@@ -279,5 +279,16 @@ export async function GET(req: NextRequest) {
       sellCount: Math.round(sell * scale),
       strongSell: Math.round(strongSell * scale),
     },
+    history: (() => {
+      const timestamps = chart?.timeline?.timestamp ?? []
+      const closes = chart?.indicators?.quote?.[0]?.close ?? []
+      if (!timestamps.length) return []
+      return timestamps
+        .map((ts: number, i: number) => ({
+          date: new Date(ts * 1000).toISOString().split("T")[0],
+          price: closes[i] != null ? Math.round(closes[i] * 100) / 100 : null,
+        }))
+        .filter((d: any) => d.price != null)
+    })(),
   })
 }

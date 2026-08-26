@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { Search, TrendingUp, TrendingDown, AlertTriangle, CheckCircle, XCircle, Loader2, HelpCircle } from "lucide-react"
 import { useLanguage } from "@/lib/i18n"
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip"
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, ReferenceLine } from "recharts"
 import { calculateValuation, type ValuationInput, type ValuationResult } from "@/lib/calculators/stock-valuation"
 
 interface StockData {
@@ -46,6 +47,7 @@ interface StockData {
     sellCount: number
     strongSell: number
   }
+  history: { date: string; price: number }[]
 }
 
 function fmt(v: number | null | undefined, decimals: number = 2): string {
@@ -94,27 +96,23 @@ function MetricRow({ label, value, color }: { label: string; value: string; colo
   )
 }
 
-function ValuationBar({ price, target, bull }: { price: number; target: number; bull: number }) {
-  const max = Math.max(price, bull, target) * 1.1
-  const pricePct = (price / max) * 100
-  const targetPct = (target / max) * 100
-  const bullPct = (bull / max) * 100
+function PriceChart({ history, target, bear, bull }: { history: { date: string; price: number }[]; target: number; bear: number; bull: number }) {
+  const data = history.map(h => ({ ...h, target, bear, bull }))
   return (
-    <div className="space-y-2">
-      <div className="relative h-3 bg-muted rounded-full overflow-hidden">
-        <div className="absolute h-full bg-gradient-to-r from-red-400 via-yellow-400 to-green-400 rounded-full"
-          style={{ width: `${bullPct}%` }} />
-        <div className="absolute top-0 h-full w-1 bg-foreground rounded"
-          style={{ left: `${pricePct}%` }} />
-        <div className="absolute top-0 h-full w-1 bg-primary rounded"
-          style={{ left: `${targetPct}%` }} />
-      </div>
-      <div className="flex justify-between text-xs text-muted-foreground">
-        <span>Actual ${fmt(price, 0)}</span>
-        <span>Objetivo ${fmt(target, 0)}</span>
-        <span>Bull ${fmt(bull, 0)}</span>
-      </div>
-    </div>
+    <ResponsiveContainer width="100%" height={220}>
+      <LineChart data={data} margin={{ top: 5, right: 10, left: 10, bottom: 0 }}>
+        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+        <XAxis dataKey="date" tick={{ fontSize: 10 }} tickFormatter={v => {
+          const d = new Date(v)
+          return `${d.getMonth()+1}/${d.getDate()}`
+        }} interval="preserveStartEnd" minTickGap={40} />
+        <YAxis tick={{ fontSize: 10 }} domain={["auto", "auto"]} tickFormatter={v => `$${v}`} width={55} />
+        <Line type="monotone" dataKey="price" stroke="hsl(var(--foreground))" strokeWidth={2} dot={false} name="Precio" />
+        <Line type="monotone" dataKey="target" stroke="hsl(var(--primary))" strokeWidth={1.5} strokeDasharray="6 3" dot={false} name="Objetivo" />
+        <Line type="monotone" dataKey="bear" stroke="#ef4444" strokeWidth={1} strokeDasharray="4 4" dot={false} name="Bear" />
+        <Line type="monotone" dataKey="bull" stroke="#22c55e" strokeWidth={1} strokeDasharray="4 4" dot={false} name="Bull" />
+      </LineChart>
+    </ResponsiveContainer>
   )
 }
 
@@ -247,21 +245,29 @@ export function StockAnalyzer() {
                 </div>
               </div>
 
-              {/* Valuation Bar */}
+              {/* Price Chart */}
               <div className="mt-6">
                 <div className="flex items-center gap-1 mb-2">
-                  <span className="text-sm font-medium">{t("Valuation Range")}</span>
+                  <span className="text-sm font-medium">{t("Price History")}</span>
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <HelpCircle className="h-3 w-3 text-muted-foreground/60 cursor-help" />
                     </TooltipTrigger>
                     <TooltipContent side="right" className="max-w-[280px] text-xs">
-                      {t("ValuationBarTooltip")}
+                      {t("PriceChartTooltip")}
                     </TooltipContent>
                   </Tooltip>
                 </div>
-                <ValuationBar price={data.quote.price} target={valuation.targetPrice}
-                  bull={valuation.scenarios[2].targetPrice} />
+                {data.history.length > 0 ? (
+                  <PriceChart
+                    history={data.history}
+                    target={valuation.targetPrice}
+                    bear={valuation.scenarios[0].targetPrice}
+                    bull={valuation.scenarios[2].targetPrice}
+                  />
+                ) : (
+                  <p className="text-xs text-muted-foreground text-center py-8">{t("No historical data")}</p>
+                )}
               </div>
             </CardContent>
           </Card>

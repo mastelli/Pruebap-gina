@@ -614,6 +614,10 @@ const translations: Record<string, string> = {
   "Valuation Range": "Rango de Valoración",
   "ValuationBarTooltip":
     "Muestra visualmente dónde se sitúa el precio actual (línea negra) respecto al precio objetivo (línea azul) y el escenario alcista (Bull). Si el precio actual está a la izquierda del objetivo, la acción tiene potencial alcista.",
+  "Price History": "Historial de Precio",
+  "PriceChartTooltip":
+    "Gráfico con los últimos 6 meses de precios. Línea sólida: precio real. Línea punteada azul: precio objetivo. Verde: escenario alcista (Bull). Rojo: escenario bajista (Bear).",
+  "No historical data": "No hay datos históricos disponibles",
   "ScenariosTooltip":
     "Porcentaje de probabilidad asignado a cada escenario para calcular el valor esperado ponderado.",
   "Analysts": "Analistas",
