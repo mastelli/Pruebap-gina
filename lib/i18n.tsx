@@ -601,6 +601,12 @@ const translations: Record<string, string> = {
   "Error searching for user": "Error al buscar usuario",
   "Member added": "Miembro añadido",
   "Member removed": "Miembro eliminado",
+  "User found in the system": "Usuario encontrado en el sistema",
+  "User found — click Add to include them": "Usuario encontrado — pulsa Añadir para incluirlo",
+  "Invitation sent": "Invitación enviada",
+  "Invitation sent — they will receive an email to sign up": "Invitación enviada — recibirá un email para registrarse",
+  "Error sending invitation": "Error al enviar la invitación",
+  "Could not find user or send invitation": "No se pudo encontrar al usuario ni enviar la invitación",
   "Remove member": "Eliminar miembro",
   "No family members yet. Add members to see their account summaries.":
     "Aún no hay miembros. Añade familiares para ver sus resúmenes de cuentas.",
