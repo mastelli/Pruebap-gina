@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { Search, TrendingUp, TrendingDown, AlertTriangle, CheckCircle, XCircle, Loader2, HelpCircle } from "lucide-react"
 import { useLanguage } from "@/lib/i18n"
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip"
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Legend, Tooltip as RechartsTooltip, Bar, Cell, ComposedChart, BarChart } from "recharts"
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Legend, Tooltip as RechartsTooltip, Bar, ComposedChart } from "recharts"
 import { calculateValuation, type ValuationInput, type ValuationResult } from "@/lib/calculators/stock-valuation"
 
 interface StockData {
@@ -163,7 +163,7 @@ function PriceChart({ history, target, bear, bull, range }: { history: { date: s
   )
 }
 
-type CandleData = { date: string; price: number; open: number; high: number; low: number; range: string }
+type CandleData = { date: string; price: number; open: number; high: number; low: number }
 
 function CandleShape(props: any) {
   const { x, y, width, height, payload } = props
