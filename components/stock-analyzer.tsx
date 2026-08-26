@@ -221,14 +221,10 @@ export function StockAnalyzer() {
               </div>
 
               {/* Key Metrics Grid */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-6">
                 <div className="rounded-lg bg-muted/50 p-4 text-center">
                   <p className="text-xs text-muted-foreground mb-1">{t("Target Price")}</p>
                   <p className="text-lg font-bold text-primary">${fmt(valuation.targetPrice)}</p>
-                </div>
-                <div className="rounded-lg bg-muted/50 p-4 text-center">
-                  <p className="text-xs text-muted-foreground mb-1">{t("Expected Value")}</p>
-                  <p className="text-lg font-bold">${fmt(valuation.expectedValue)}</p>
                 </div>
                 <div className="rounded-lg bg-muted/50 p-4 text-center">
                   <p className="text-xs text-muted-foreground mb-1">{t("Potential")}</p>
@@ -468,8 +464,8 @@ export function StockAnalyzer() {
                   <p className="text-lg font-bold">${fmt(data.quote.price)}</p>
                 </div>
                 <div className="rounded-lg bg-muted/50 p-3 text-center">
-                  <p className="text-xs text-muted-foreground">{t("Expected Value")}</p>
-                  <p className="text-lg font-bold">${fmt(valuation.expectedValue)}</p>
+                  <p className="text-xs text-muted-foreground">{t("Target Price")}</p>
+                  <p className="text-lg font-bold">${fmt(valuation.targetPrice)}</p>
                 </div>
                 <div className="rounded-lg bg-muted/50 p-3 text-center">
                   <p className="text-xs text-muted-foreground">{t("Score")}</p>
