@@ -842,6 +842,11 @@ export default function AdvancedRealEstateCalculator() {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* ── Disclaimer ── */}
+        <p className="text-xs text-muted-foreground text-center leading-relaxed pt-4 border-t">
+          Los resultados mostrados son aproximaciones obtenidas a partir de los datos introducidos y de los supuestos utilizados en el cálculo. La rentabilidad final de una inversión puede ser diferente debido a factores financieros, fiscales y de mercado. Utiliza esta herramienta como referencia y contrasta los resultados con un profesional antes de tomar una decisión de inversión.
+        </p>
       </div>
     </TooltipProvider>
   )
