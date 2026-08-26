@@ -228,11 +228,7 @@ export default function SettingsPage() {
 
         <TabsContent value="preferences">
           <Card>
-            <CardHeader>
-              <CardTitle>{t("Preferences")}</CardTitle>
-              <CardDescription>{t("Customize your dashboard experience")}</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-4 pt-6">
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
                   <Label htmlFor="language">{t("Language")}</Label>
@@ -273,10 +269,6 @@ export default function SettingsPage() {
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="font-size">{t("Font Size")}</Label>
-                  <Slider defaultValue={[16]} max={24} min={12} step={1} />
-                </div>
               </div>
               <div className="space-y-2">
                 <Label>{t("Theme")}</Label>
@@ -295,27 +287,7 @@ export default function SettingsPage() {
                   </div>
                 </RadioGroup>
               </div>
-              <div className="space-y-2">
-                <Label>{t("Dashboard Layout")}</Label>
-                <RadioGroup defaultValue="default">
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="default" id="layout-default" />
-                    <Label htmlFor="layout-default">{t("Default")}</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="compact" id="layout-compact" />
-                    <Label htmlFor="layout-compact">{t("Compact")}</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="expanded" id="layout-expanded" />
-                    <Label htmlFor="layout-expanded">{t("Expanded")}</Label>
-                  </div>
-                </RadioGroup>
-              </div>
             </CardContent>
-            <CardFooter>
-              <Button>{t("Save Preferences")}</Button>
-            </CardFooter>
           </Card>
         </TabsContent>
 
