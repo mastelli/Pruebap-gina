@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { Search, TrendingUp, TrendingDown, AlertTriangle, CheckCircle, XCircle, Loader2, HelpCircle } from "lucide-react"
 import { useLanguage } from "@/lib/i18n"
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip"
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, ReferenceLine } from "recharts"
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Legend } from "recharts"
 import { calculateValuation, type ValuationInput, type ValuationResult } from "@/lib/calculators/stock-valuation"
 
 interface StockData {
@@ -100,22 +100,34 @@ function PriceChart({ history, target, bear, bull }: { history: { date: string; 
   const data = history.map(h => ({ ...h, target, bear, bull }))
   const isSingleDay = data.length > 0 && data[0].date.includes("T")
   return (
-    <ResponsiveContainer width="100%" height={220}>
-      <LineChart data={data} margin={{ top: 5, right: 10, left: 10, bottom: 0 }}>
+    <ResponsiveContainer width="100%" height={260}>
+      <LineChart data={data} margin={{ top: 5, right: 10, left: 10, bottom: 25 }}>
         <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-        <XAxis dataKey="date" tick={{ fontSize: 10 }} tickFormatter={v => {
-          if (isSingleDay) {
+        <XAxis
+          dataKey="date"
+          tick={{ fontSize: 10 }}
+          tickFormatter={v => {
+            if (isSingleDay) {
+              const d = new Date(v)
+              return `${d.getHours()}:${String(d.getMinutes()).padStart(2, "0")}`
+            }
             const d = new Date(v)
-            return `${d.getHours()}:${String(d.getMinutes()).padStart(2, "0")}`
-          }
-          const d = new Date(v)
-          return `${d.getMonth()+1}/${d.getDate()}`
-        }} interval="preserveStartEnd" minTickGap={40} />
+            return `${d.getMonth()+1}/${d.getDate()}`
+          }}
+          interval={Math.max(Math.floor(data.length / 8), 0)}
+          minTickGap={30}
+        />
         <YAxis tick={{ fontSize: 10 }} domain={["auto", "auto"]} tickFormatter={v => `$${v}`} width={55} />
         <Line type="monotone" dataKey="price" stroke="hsl(var(--foreground))" strokeWidth={2} dot={false} name="Precio" />
         <Line type="monotone" dataKey="target" stroke="hsl(var(--primary))" strokeWidth={1.5} strokeDasharray="6 3" dot={false} name="Objetivo" />
         <Line type="monotone" dataKey="bear" stroke="#ef4444" strokeWidth={1} strokeDasharray="4 4" dot={false} name="Bear" />
         <Line type="monotone" dataKey="bull" stroke="#22c55e" strokeWidth={1} strokeDasharray="4 4" dot={false} name="Bull" />
+        <Legend
+          verticalAlign="bottom"
+          height={36}
+          iconType="line"
+          wrapperStyle={{ fontSize: 11, paddingTop: 10 }}
+        />
       </LineChart>
     </ResponsiveContainer>
   )
