@@ -118,10 +118,47 @@ function ChartTooltip({ active, payload, label, range }: any) {
   )
 }
 
+function useYAxisZoom(data: { price: number }[]) {
+  const [yDomain, setYDomain] = useState<[number, number] | null>(null)
+  const [dragStart, setDragStart] = useState<{ y: number; domain: [number, number] } | null>(null)
+
+  const prices = data.map(d => d.price).filter(p => p > 0)
+  const fullDomain: [number, number] = prices.length > 0
+    ? [Math.min(...prices) * 0.95, Math.max(...prices) * 1.05]
+    : [0, 100]
+
+  const currentDomain = yDomain ?? fullDomain
+
+  const handleMouseDown = (e: any) => {
+    if (e && e.activeCoordinate && e.chartX < 70) {
+      setDragStart({ y: e.activeCoordinate.y, domain: [...currentDomain] as [number, number] })
+    }
+  }
+
+  const handleMouseMove = (e: any) => {
+    if (!dragStart || !e?.activeCoordinate) return
+    const dy = e.activeCoordinate.y - dragStart.y
+    const range = dragStart.domain[1] - dragStart.domain[0]
+    const factor = dy * (range / 400)
+    const newLow = dragStart.domain[0] + factor
+    const newHigh = dragStart.domain[1] + factor
+    if (newHigh - newLow > 10) {
+      setYDomain([newLow, newHigh])
+    }
+  }
+
+  const handleMouseUp = () => setDragStart(null)
+
+  const resetZoom = () => setYDomain(null)
+
+  return { yDomain: currentDomain, fullDomain, handleMouseDown, handleMouseMove, handleMouseUp, resetZoom, isZoomed: yDomain !== null }
+}
+
 function PriceChart({ history, target, bear, bull, range }: { history: { date: string; price: number }[]; target: number; bear: number; bull: number; range: string }) {
   const data = history.map(h => ({ ...h, target, bear, bull }))
   const isSingleDay = range === "1d"
   const monthNames = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"]
+  const zoom = useYAxisZoom(history)
 
   const formatTick = (v: string) => {
     const d = new Date(v)
@@ -132,34 +169,31 @@ function PriceChart({ history, target, bear, bull, range }: { history: { date: s
     return `${d.getFullYear()}`
   }
   return (
-    <ResponsiveContainer width="100%" height={440}>
-      <LineChart data={data} margin={{ top: 5, right: 60, left: 10, bottom: 25 }}>
-        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-        <XAxis
-          dataKey="date"
-          tick={{ fontSize: 10 }}
-          tickFormatter={formatTick}
-          interval={Math.max(Math.floor(data.length / 8), 0)}
-          minTickGap={30}
-        />
-        <YAxis yAxisId="left" tick={{ fontSize: 10 }} domain={["auto", "auto"]} tickFormatter={v => `$${v}`} width={55} />
-        <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 10 }} domain={["auto", "auto"]} tickFormatter={v => `$${v}`} width={55} />
-        <RechartsTooltip
-          content={<ChartTooltip range={range} />}
-          cursor={{ stroke: "hsl(var(--muted-foreground))", strokeWidth: 1, strokeDasharray: "4 4" }}
-        />
-        <Line yAxisId="left" type="monotone" dataKey="price" stroke="hsl(var(--foreground))" strokeWidth={2} dot={false} name="Precio" />
-        <Line yAxisId="right" type="monotone" dataKey="target" stroke="hsl(var(--primary))" strokeWidth={1.5} strokeDasharray="6 3" dot={false} name="Objetivo" />
-        <Line yAxisId="right" type="monotone" dataKey="bear" stroke="#ef4444" strokeWidth={1} strokeDasharray="4 4" dot={false} name="Bear" />
-        <Line yAxisId="right" type="monotone" dataKey="bull" stroke="#22c55e" strokeWidth={1} strokeDasharray="4 4" dot={false} name="Bull" />
-        <Legend
-          verticalAlign="bottom"
-          height={36}
-          iconType="line"
-          wrapperStyle={{ fontSize: 11, paddingTop: 10 }}
-        />
-      </LineChart>
-    </ResponsiveContainer>
+    <div className="relative">
+      {zoom.isZoomed && (
+        <button onClick={zoom.resetZoom}
+          className="absolute top-1 right-14 z-10 text-xs bg-background/80 border rounded px-2 py-0.5 hover:bg-muted">
+          Reset Y
+        </button>
+      )}
+      <ResponsiveContainer width="100%" height={440}>
+        <LineChart data={data} margin={{ top: 5, right: 60, left: 10, bottom: 25 }}
+          onMouseDown={zoom.handleMouseDown} onMouseMove={zoom.handleMouseMove} onMouseUp={zoom.handleMouseUp} onMouseLeave={zoom.handleMouseUp}>
+          <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+          <XAxis dataKey="date" tick={{ fontSize: 10 }} tickFormatter={formatTick}
+            interval={Math.max(Math.floor(data.length / 8), 0)} minTickGap={30} />
+          <YAxis yAxisId="left" tick={{ fontSize: 10 }} domain={zoom.yDomain} tickFormatter={v => `$${v}`} width={55} />
+          <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 10 }} domain={zoom.yDomain} tickFormatter={v => `$${v}`} width={55} />
+          <RechartsTooltip content={<ChartTooltip range={range} />}
+            cursor={{ stroke: "hsl(var(--muted-foreground))", strokeWidth: 1, strokeDasharray: "4 4" }} />
+          <Line yAxisId="left" type="monotone" dataKey="price" stroke="hsl(var(--foreground))" strokeWidth={2} dot={false} name="Precio" />
+          <Line yAxisId="right" type="monotone" dataKey="target" stroke="hsl(var(--primary))" strokeWidth={1.5} strokeDasharray="6 3" dot={false} name="Objetivo" />
+          <Line yAxisId="right" type="monotone" dataKey="bear" stroke="#ef4444" strokeWidth={1} strokeDasharray="4 4" dot={false} name="Bear" />
+          <Line yAxisId="right" type="monotone" dataKey="bull" stroke="#22c55e" strokeWidth={1} strokeDasharray="4 4" dot={false} name="Bull" />
+          <Legend verticalAlign="bottom" height={36} iconType="line" wrapperStyle={{ fontSize: 11, paddingTop: 10 }} />
+        </LineChart>
+      </ResponsiveContainer>
+    </div>
   )
 }
 
@@ -193,6 +227,7 @@ function CandleShape(props: any) {
 function CandlestickChart({ history, target, bear, bull, range }: { history: CandleData[]; target: number; bear: number; bull: number; range: string }) {
   const data = history.map(h => ({ ...h, target, bear, bull }))
   const monthNames = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"]
+  const zoom = useYAxisZoom(history)
   const formatTick = (v: string) => {
     const d = new Date(v)
     if (range === "1d") return `${d.getHours()}:${String(d.getMinutes()).padStart(2, "0")}`
@@ -202,24 +237,31 @@ function CandlestickChart({ history, target, bear, bull, range }: { history: Can
     return `${d.getFullYear()}`
   }
   return (
-    <ResponsiveContainer width="100%" height={440}>
-      <ComposedChart data={data} margin={{ top: 5, right: 60, left: 10, bottom: 25 }}>
-        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-        <XAxis dataKey="date" tick={{ fontSize: 10 }} tickFormatter={formatTick}
-          interval={Math.max(Math.floor(data.length / 8), 0)} minTickGap={30} />
-        <YAxis yAxisId="left" tick={{ fontSize: 10 }} domain={["auto", "auto"]} tickFormatter={v => `$${v}`} width={55} />
-        <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 10 }} domain={["auto", "auto"]} tickFormatter={v => `$${v}`} width={55} />
-        <RechartsTooltip
-          content={<ChartTooltip range={range} />}
-          cursor={{ stroke: "hsl(var(--muted-foreground))", strokeWidth: 1, strokeDasharray: "4 4" }}
-        />
-        <Bar yAxisId="left" dataKey="high" barSize={8} shape={<CandleShape />} isAnimationActive={false} />
-        <Line yAxisId="right" type="monotone" dataKey="target" stroke="hsl(var(--primary))" strokeWidth={1.5} strokeDasharray="6 3" dot={false} name="Objetivo" />
-        <Line yAxisId="right" type="monotone" dataKey="bear" stroke="#ef4444" strokeWidth={1} strokeDasharray="4 4" dot={false} name="Bear" />
-        <Line yAxisId="right" type="monotone" dataKey="bull" stroke="#22c55e" strokeWidth={1} strokeDasharray="4 4" dot={false} name="Bull" />
-        <Legend verticalAlign="bottom" height={36} iconType="line" wrapperStyle={{ fontSize: 11, paddingTop: 10 }} />
-      </ComposedChart>
-    </ResponsiveContainer>
+    <div className="relative">
+      {zoom.isZoomed && (
+        <button onClick={zoom.resetZoom}
+          className="absolute top-1 right-14 z-10 text-xs bg-background/80 border rounded px-2 py-0.5 hover:bg-muted">
+          Reset Y
+        </button>
+      )}
+      <ResponsiveContainer width="100%" height={440}>
+        <ComposedChart data={data} margin={{ top: 5, right: 60, left: 10, bottom: 25 }}
+          onMouseDown={zoom.handleMouseDown} onMouseMove={zoom.handleMouseMove} onMouseUp={zoom.handleMouseUp} onMouseLeave={zoom.handleMouseUp}>
+          <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+          <XAxis dataKey="date" tick={{ fontSize: 10 }} tickFormatter={formatTick}
+            interval={Math.max(Math.floor(data.length / 8), 0)} minTickGap={30} />
+          <YAxis yAxisId="left" tick={{ fontSize: 10 }} domain={zoom.yDomain} tickFormatter={v => `$${v}`} width={55} />
+          <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 10 }} domain={zoom.yDomain} tickFormatter={v => `$${v}`} width={55} />
+          <RechartsTooltip content={<ChartTooltip range={range} />}
+            cursor={{ stroke: "hsl(var(--muted-foreground))", strokeWidth: 1, strokeDasharray: "4 4" }} />
+          <Bar yAxisId="left" dataKey="high" barSize={8} shape={<CandleShape />} isAnimationActive={false} />
+          <Line yAxisId="right" type="monotone" dataKey="target" stroke="hsl(var(--primary))" strokeWidth={1.5} strokeDasharray="6 3" dot={false} name="Objetivo" />
+          <Line yAxisId="right" type="monotone" dataKey="bear" stroke="#ef4444" strokeWidth={1} strokeDasharray="4 4" dot={false} name="Bear" />
+          <Line yAxisId="right" type="monotone" dataKey="bull" stroke="#22c55e" strokeWidth={1} strokeDasharray="4 4" dot={false} name="Bull" />
+          <Legend verticalAlign="bottom" height={36} iconType="line" wrapperStyle={{ fontSize: 11, paddingTop: 10 }} />
+        </ComposedChart>
+      </ResponsiveContainer>
+    </div>
   )
 }
 
