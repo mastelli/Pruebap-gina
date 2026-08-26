@@ -11,10 +11,11 @@ import {
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { toast } from "sonner"
-import { Copy, ExternalLink } from "lucide-react"
+import { Copy } from "lucide-react"
 import { useLanguage } from "@/lib/i18n"
 import {
   addFamilyMember,
+  sendFamilyRequest,
   getCurrentFamilyId,
   getCurrentFamily,
   type FamilyMember,
@@ -29,6 +30,7 @@ interface AddMemberModalProps {
 type Result =
   | { status: "found"; userId: string; email: string; name: string | null }
   | { status: "self" }
+  | { status: "request_sent"; email: string }
   | { status: "not_found"; email: string; inviteUrl: string | null }
   | { status: "error"; message: string }
   | null
@@ -46,32 +48,56 @@ export function AddMemberModal({ isOpen, onClose, onMemberAdded }: AddMemberModa
     setResult(null)
     setCopied(false)
 
-    const familyId = getCurrentFamilyId()
-    const family = getCurrentFamily()
-
     try {
-      const res = await fetch("/api/family/lookup", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: email.trim(),
-          familyId: familyId ?? "",
-          familyName: family?.name ?? "",
-        }),
-      })
-      const data = await res.json()
+      // Step 1: Check if user exists in Clerk
+      const lookupRes = await fetch(`/api/family/lookup?email=${encodeURIComponent(email.trim())}`)
+      const lookupData = await lookupRes.json()
 
-      if (data.status === "found") {
-        setResult({ status: "found", userId: data.userId, email: data.email, name: data.name })
-        toast.success(t("User found"))
-      } else if (data.status === "self") {
+      if (lookupData.found && lookupData.userId) {
+        // Step 2: User found — send join request
+        const reqResult = await sendFamilyRequest(lookupData.userId, lookupData.email)
+        if (reqResult.ok) {
+          setResult({ status: "request_sent", email: lookupData.email })
+          toast.success(t("Request sent"))
+        } else {
+          // Fallback: add directly if request fails
+          const member: FamilyMember = {
+            userId: lookupData.userId,
+            email: lookupData.email,
+            displayName: lookupData.name ?? email.trim().split("@")[0],
+            role: "member",
+            addedAt: new Date().toISOString(),
+            status: "active",
+          }
+          addFamilyMember(member)
+          toast.success(t("Member added"))
+          onMemberAdded(member)
+          setEmail("")
+          setResult(null)
+          onClose()
+          return
+        }
+      } else if (lookupData.reason === "self") {
         setResult({ status: "self" })
         toast.error(t("Cannot add yourself"))
-      } else if (data.status === "not_found") {
-        setResult({ status: "not_found", email: data.email, inviteUrl: data.inviteUrl ?? null })
       } else {
-        setResult({ status: "error", message: data.error ?? t("Unknown error") })
-        toast.error(data.error ?? t("Unknown error"))
+        // Step 3: User not found — try invitation
+        const inviteRes = await fetch("/api/family/lookup", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: email.trim(),
+            familyId: getCurrentFamilyId() ?? "",
+            familyName: getCurrentFamily()?.name ?? "",
+          }),
+        })
+        const inviteData = await inviteRes.json()
+
+        if (inviteData.status === "not_found") {
+          setResult({ status: "not_found", email: inviteData.email, inviteUrl: inviteData.inviteUrl ?? null })
+        } else {
+          setResult({ status: "error", message: inviteData.error ?? t("Unknown error") })
+        }
       }
     } catch {
       setResult({ status: "error", message: t("Error searching for user") })
@@ -79,26 +105,6 @@ export function AddMemberModal({ isOpen, onClose, onMemberAdded }: AddMemberModa
     } finally {
       setLoading(false)
     }
-  }
-
-  const handleAdd = () => {
-    if (result?.status !== "found" || !result.userId) return
-
-    const member: FamilyMember = {
-      userId: result.userId,
-      email: result.email,
-      displayName: result.name ?? email.trim().split("@")[0],
-      role: "member",
-      addedAt: new Date().toISOString(),
-      status: "active",
-    }
-
-    addFamilyMember(member)
-    toast.success(t("Member added"))
-    onMemberAdded(member)
-    setEmail("")
-    setResult(null)
-    onClose()
   }
 
   const handleAddPending = () => {
@@ -166,10 +172,12 @@ export function AddMemberModal({ isOpen, onClose, onMemberAdded }: AddMemberModa
             </Button>
           </div>
 
-          {result?.status === "found" && (
+          {result?.status === "request_sent" && (
             <div className="rounded-lg border bg-muted/50 p-3 space-y-1">
-              <p className="text-sm font-medium">{result.name ?? result.email}</p>
-              <p className="text-xs text-muted-foreground">{result.email}</p>
+              <p className="text-sm font-medium">{result.email}</p>
+              <p className="text-xs text-muted-foreground">
+                {t("Request sent — they will see it in their notifications")}
+              </p>
             </div>
           )}
 
@@ -213,13 +221,10 @@ export function AddMemberModal({ isOpen, onClose, onMemberAdded }: AddMemberModa
           )}
         </div>
 
-        <DialogFooter className="gap-2 sm:gap-0">
+        <DialogFooter>
           <Button variant="outline" onClick={handleClose}>
             {t("Cancel")}
           </Button>
-          {result?.status === "found" && (
-            <Button onClick={handleAdd}>{t("Add Member")}</Button>
-          )}
           {result?.status === "not_found" && (
             <Button onClick={handleAddPending}>{t("Add as Pending")}</Button>
           )}
