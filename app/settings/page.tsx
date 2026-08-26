@@ -12,7 +12,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { UserAvatar } from "@/components/user-avatar"
 import { ageFromBirthDate } from "@/lib/auth"
 import { Laptop, Smartphone, Tablet } from "lucide-react"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { toast } from "sonner"
 import { useLanguage, type Language } from "@/lib/i18n"
 
@@ -23,10 +23,74 @@ const sections = [
   { id: "privacy", label: "Privacy" },
 ]
 
+type AccountSession = {
+  id: string
+  status: string
+  createdAt: number | null
+  lastActiveAt: number | null
+  browserName: string | null
+  city: string | null
+  country: string | null
+  deviceType: string | null
+  ipAddress: string | null
+  isMobile: boolean
+}
+
+type SessionData = {
+  history: AccountSession[]
+  activeSessions: AccountSession[]
+  currentSessionId: string | null
+}
+
+function formatSessionDate(value: number | null, language: Language) {
+  if (!value) return "—"
+
+  return new Intl.DateTimeFormat(language === "es" ? "es-ES" : "en-US", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  }).format(new Date(value))
+}
+
+function sessionLocation(session: AccountSession) {
+  return [session.city, session.country].filter(Boolean).join(", ") || "—"
+}
+
+function SessionIcon({ session }: { session: AccountSession }) {
+  const device = session.deviceType?.toLowerCase() ?? ""
+  if (device.includes("tablet")) return <Tablet className="mr-2 h-4 w-4" />
+  if (session.isMobile || device.includes("mobile") || device.includes("phone")) {
+    return <Smartphone className="mr-2 h-4 w-4" />
+  }
+  return <Laptop className="mr-2 h-4 w-4" />
+}
+
 export default function SettingsPage() {
   const { settings, updateSettings, updateNotificationSettings, updatePrivacySettings } = useSettings()
   const { t, lang, setLang } = useLanguage()
   const [activeSection, setActiveSection] = useState("account")
+  const [sessionData, setSessionData] = useState<SessionData | null>(null)
+  const [sessionsLoading, setSessionsLoading] = useState(true)
+  const [sessionsError, setSessionsError] = useState(false)
+
+  useEffect(() => {
+    const controller = new AbortController()
+
+    const loadSessions = async () => {
+      try {
+        const response = await fetch("/api/account/sessions", { signal: controller.signal })
+        if (!response.ok) throw new Error("Unable to load sessions")
+        const data = (await response.json()) as SessionData
+        setSessionData(data)
+      } catch (error) {
+        if ((error as Error).name !== "AbortError") setSessionsError(true)
+      } finally {
+        if (!controller.signal.aborted) setSessionsLoading(false)
+      }
+    }
+
+    void loadSessions()
+    return () => controller.abort()
+  }, [])
 
   const scrollTo = (id: string) => {
     setActiveSection(id)
@@ -171,34 +235,49 @@ export default function SettingsPage() {
             <div className="grid gap-4 md:grid-cols-2 mt-6">
               <div className="space-y-3">
                 <h3 className="text-lg font-medium">{t("Login History")}</h3>
-                {[
-                  { date: "2023-07-20", time: "14:30 UTC", ip: "192.168.1.1", location: "New York, USA" },
-                  { date: "2023-07-19", time: "09:15 UTC", ip: "10.0.0.1", location: "London, UK" },
-                  { date: "2023-07-18", time: "22:45 UTC", ip: "172.16.0.1", location: "Tokyo, Japan" },
-                ].map((login, index) => (
-                  <div key={index} className="flex justify-between items-center text-sm">
-                    <span>{login.date} {login.time}</span>
-                    <span>{login.ip}</span>
-                    <span>{t(login.location)}</span>
-                  </div>
-                ))}
+                <p className="text-sm text-muted-foreground">{t("Recent login activities on your account")}</p>
+                {sessionsLoading ? (
+                  <p className="text-sm text-muted-foreground">{t("Loading session activity")}</p>
+                ) : sessionsError ? (
+                  <p className="text-sm text-destructive">{t("Unable to load session activity")}</p>
+                ) : sessionData?.history.length ? (
+                  sessionData.history.map((login) => (
+                    <div key={login.id} className="grid grid-cols-[minmax(0,1.3fr)_minmax(0,0.8fr)_minmax(0,1fr)] gap-2 text-sm">
+                      <span>{formatSessionDate(login.createdAt, lang)}</span>
+                      <span className="truncate" title={login.ipAddress ?? undefined}>{login.ipAddress ?? "—"}</span>
+                      <span className="truncate" title={sessionLocation(login)}>{sessionLocation(login)}</span>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-sm text-muted-foreground">{t("No sign-ins recorded yet")}</p>
+                )}
               </div>
               <div className="space-y-3">
                 <h3 className="text-lg font-medium">{t("Active Sessions")}</h3>
-                {[
-                  { device: "Laptop", browser: "Chrome", os: "Windows 10", icon: Laptop },
-                  { device: "Smartphone", browser: "Safari", os: "iOS 15", icon: Smartphone },
-                  { device: "Tablet", browser: "Firefox", os: "Android 12", icon: Tablet },
-                ].map((session, index) => (
-                  <div key={index} className="flex items-center justify-between text-sm">
-                    <span className="flex items-center">
-                      <session.icon className="mr-2 h-4 w-4" />
-                      {t(session.device)}
-                    </span>
-                    <span>{session.browser}</span>
-                    <span>{session.os}</span>
-                  </div>
-                ))}
+                <p className="text-sm text-muted-foreground">{t("Currently active sessions on your account")}</p>
+                {sessionsLoading ? (
+                  <p className="text-sm text-muted-foreground">{t("Loading session activity")}</p>
+                ) : sessionsError ? (
+                  <p className="text-sm text-destructive">{t("Unable to load session activity")}</p>
+                ) : sessionData?.activeSessions.length ? (
+                  sessionData.activeSessions.map((session) => (
+                    <div key={session.id} className="grid grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)_minmax(0,1fr)] items-center gap-2 text-sm">
+                      <span className="flex min-w-0 items-center truncate">
+                        <SessionIcon session={session} />
+                        <span className="truncate">{session.deviceType ?? t("Unknown device")}</span>
+                        {session.id === sessionData.currentSessionId && (
+                          <span className="ml-2 shrink-0 text-xs text-muted-foreground">{t("This device")}</span>
+                        )}
+                      </span>
+                      <span className="truncate">{session.browserName ?? "—"}</span>
+                      <span className="truncate" title={formatSessionDate(session.lastActiveAt, lang)}>
+                        {formatSessionDate(session.lastActiveAt, lang)}
+                      </span>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-sm text-muted-foreground">{t("No active sessions")}</p>
+                )}
               </div>
             </div>
           </section>
