@@ -607,15 +607,15 @@ const translations: Record<string, string> = {
   "Target High": "Objetivo Máximo",
   "Target Low": "Objetivo Mínimo",
   "ValuationTooltip":
-    "P/E (10pts) + EV/EBITDA (8pts) + FCF Yield (7pts). Compara con el sector: menor valoración = mayor puntuación.",
+    "P/E: 10×(sector/empresa) + EV/EBITDA: 8×(sector/empresa) + FCF Yield: 7×(empresa/sector). Cada métrica se limita a su máximo. ×5 para escala 0-100.",
   "GrowthTooltip":
-    "Revenue Growth (7pts) + EPS Growth (7pts) + FCF Growth (6pts). Crecimiento relativo al sector.",
+    "Revenue Growth: 7×(empresa/sector) + EPS Growth: 7×(empresa/sector) + FCF Growth: 6×(empresa/sector). Cada métrica se limita a su máximo. ×5 para escala 0-100.",
   "ProfitabilityTooltip":
-    "ROIC (10pts) + ROE (5pts) + Margen Operativo (5pts). Rentabilidad vs. benchmarks sectoriales.",
+    "ROIC: 10×(empresa/sector) + ROE: 5×(empresa/sector) + Margen Operativo: 5×(empresa/sector). Cada métrica se limita a su máximo. ×5 para escala 0-100.",
   "FinancialHealthTooltip":
-    "Net Debt/EBITDA (8pts) + Interest Coverage (6pts) + Current Ratio (3pts) + Debt/Equity (3pts). Menos deuda = mejor.",
+    "Net Debt/EBITDA: 8×(1 - ratio/4) + Interest Coverage: 6×(ratio/8) + Current Ratio: 3×(ratio/1.5) + Debt/Equity: 3×(1 - ratio/160). ×5 para escala 0-100.",
   "CashFlowTooltip":
-    "FCF Margin (5pts) + FCF Growth (5pts) + FCF Yield (5pts). Capacidad de generar efectivo vs. sector.",
+    "FCF Margin: 5×(empresa/sector) + FCF Growth: 5×(empresa/sector) + FCF Yield: 5×(empresa/sector). Cada métrica se limita a su máximo. ×5 para escala 0-100.",
   "ScenariosTooltip":
     "Porcentaje de probabilidad asignado a cada escenario para calcular el valor esperado ponderado.",
   "Analysts": "Analistas",

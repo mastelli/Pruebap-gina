@@ -207,7 +207,7 @@ export function calculateValuation(input: ValuationInput): ValuationResult {
   const icScore = interestCoverage > 0 ? cap(6 * (interestCoverage / SECTOR.interestCoverage), 6) : 0
   const crScore = currentRatio > 0 ? cap(3 * (currentRatio / SECTOR.currentRatio), 3) : 0
   const deScore = debtToEquity >= 0 ? cap(3 * (1 - debtToEquity / (SECTOR.debtEquity * 2)), 3) : 0
-  const financialHealthScore = Math.round(ndEbitdaScore + icScore + crScore + deScore)
+  const financialHealthScore = Math.min(Math.round(ndEbitdaScore + icScore + crScore + deScore), 20)
 
   // 5. Cash Flow (15 points)
   const fcfMarginScore = fcfMargin > 0 ? cap(5 * (fcfMargin / SECTOR.fcfMargin), 5) : 0

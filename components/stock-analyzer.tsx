@@ -278,7 +278,7 @@ export function StockAnalyzer() {
                           </TooltipContent>
                         </Tooltip>
                       </span>
-                      <span className="font-medium">{valuation.score.valuation.toFixed(0)}/100</span>
+                      <span className="font-medium">{(valuation.score.valuation * 5).toFixed(0)}/100</span>
                     </div>
                     <div className="flex justify-between text-sm items-center">
                       <span className="text-muted-foreground flex items-center gap-1">
@@ -292,7 +292,7 @@ export function StockAnalyzer() {
                           </TooltipContent>
                         </Tooltip>
                       </span>
-                      <span className="font-medium">{valuation.score.growth.toFixed(0)}/100</span>
+                      <span className="font-medium">{(valuation.score.growth * 5).toFixed(0)}/100</span>
                     </div>
                     <div className="flex justify-between text-sm items-center">
                       <span className="text-muted-foreground flex items-center gap-1">
@@ -306,7 +306,7 @@ export function StockAnalyzer() {
                           </TooltipContent>
                         </Tooltip>
                       </span>
-                      <span className="font-medium">{valuation.score.profitability.toFixed(0)}/100</span>
+                      <span className="font-medium">{(valuation.score.profitability * 5).toFixed(0)}/100</span>
                     </div>
                     <div className="flex justify-between text-sm items-center">
                       <span className="text-muted-foreground flex items-center gap-1">
@@ -320,7 +320,7 @@ export function StockAnalyzer() {
                           </TooltipContent>
                         </Tooltip>
                       </span>
-                      <span className="font-medium">{valuation.score.financialHealth.toFixed(0)}/100</span>
+                      <span className="font-medium">{(valuation.score.financialHealth * 5).toFixed(0)}/100</span>
                     </div>
                     <div className="flex justify-between text-sm items-center">
                       <span className="text-muted-foreground flex items-center gap-1">
@@ -334,7 +334,7 @@ export function StockAnalyzer() {
                           </TooltipContent>
                         </Tooltip>
                       </span>
-                      <span className="font-medium">{valuation.score.cashFlow.toFixed(0)}/100</span>
+                      <span className="font-medium">{(valuation.score.cashFlow * 5).toFixed(0)}/100</span>
                     </div>
                   </div>
                 </div>
