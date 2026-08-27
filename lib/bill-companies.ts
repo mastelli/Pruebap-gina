@@ -267,6 +267,16 @@ export const isInternetBill = makeMatcher(INTERNET_COMPANIES)
 export const isWaterBill = makeMatcher(WATER_COMPANIES)
 export const isSubscription = makeMatcher(SUBSCRIPTION_SERVICES)
 
+const RENT_MORTGAGE_KEYWORDS = [
+  "alquiler",
+  "hipoteca",
+  "arrendamiento",
+  "rent",
+  "mortgage",
+]
+
+export const isRentOrMortgage = makeMatcher(RENT_MORTGAGE_KEYWORDS)
+
 export interface DetectableMovement {
   name: string
   date: string

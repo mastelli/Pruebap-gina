@@ -11,6 +11,7 @@ import {
   isInternetBill,
   isWaterBill,
   isSubscription,
+  isRentOrMortgage,
   ELECTRICITY_COMPANIES,
   INTERNET_COMPANIES,
   WATER_COMPANIES,
@@ -26,6 +27,7 @@ const initialBills: Bill[] = [
   { id: 2, name: "Internet Service" },
   { id: 4, name: "Water Bill" },
   { id: 3, name: "Subscriptions" },
+  { id: 5, name: "Rent/Mortgage" },
 ]
 
 function formatEuros(value: number): string {
@@ -46,6 +48,9 @@ export function QuickBillPay() {
 
   // Suscripciones detectadas por nombre de servicio (Netflix, Spotify, etc.)
   const subscriptionsAmount = getMonthlyBillAmount(transactions, currentYear, currentMonth, isSubscription)
+
+  // Alquiler o hipoteca detectado por concepto
+  const rentMortgageAmount = getMonthlyBillAmount(transactions, currentYear, currentMonth, isRentOrMortgage)
 
   // Proveedor detectado para cada tipo de factura (p. ej. Movistar, Endesa)
   const electricityProvider = getMonthlyBillProvider(transactions, currentYear, currentMonth, ELECTRICITY_COMPANIES)
@@ -93,6 +98,11 @@ export function QuickBillPay() {
                 {bill.name === "Subscriptions" && (
                   <span className="text-sm font-medium tabular-nums text-red-600 dark:text-red-400">
                     {formatEuros(subscriptionsAmount)}
+                  </span>
+                )}
+                {bill.name === "Rent/Mortgage" && (
+                  <span className="text-sm font-medium tabular-nums text-red-600 dark:text-red-400">
+                    {formatEuros(rentMortgageAmount)}
                   </span>
                 )}
               </div>
