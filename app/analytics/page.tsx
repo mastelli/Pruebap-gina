@@ -111,22 +111,24 @@ function AnalyticsContent() {
                     {t("Months")}
                   </button>
                 </div>
-                <Card className="flex flex-col">
-                  <CardHeader>
-                    <CardTitle className="text-xl font-semibold">{t("Budget")}</CardTitle>
-                  </CardHeader>
-                  <CardContent className="pb-2">
-                    <ExpenseTypes month={month} />
-                  </CardContent>
-                </Card>
-                <Card className="flex min-h-0 flex-1 flex-col">
-                  <CardHeader>
-                    <CardTitle className="text-xl font-semibold">{t("Expense Movements")}</CardTitle>
-                  </CardHeader>
-                  <CardContent className="min-h-0 flex-1 overflow-hidden">
-                    <ExpenseList month={month} />
-                  </CardContent>
-                </Card>
+                <div className="grid gap-4 lg:grid-cols-2">
+                  <Card className="flex flex-col">
+                    <CardHeader>
+                      <CardTitle className="text-xl font-semibold">{t("Budget")}</CardTitle>
+                    </CardHeader>
+                    <CardContent className="pb-2">
+                      <ExpenseTypes month={month} />
+                    </CardContent>
+                  </Card>
+                  <Card className="flex min-h-0 flex-col">
+                    <CardHeader>
+                      <CardTitle className="text-xl font-semibold">{t("Expense Movements")}</CardTitle>
+                    </CardHeader>
+                    <CardContent className="min-h-0 flex-1 overflow-hidden">
+                      <ExpenseList month={month} />
+                    </CardContent>
+                  </Card>
+                </div>
               </div>
             )}
           />
