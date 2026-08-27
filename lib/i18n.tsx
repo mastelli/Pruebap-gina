@@ -166,6 +166,7 @@ const translations: Record<string, string> = {
   "Transfers": "Transferencias",
   "Bizum": "Bizum",
   "History": "Historial",
+  "Months": "Meses",
   "Annual Breakdown": "Desglose anual",
   Movements: "Movimientos",
   "Monthly Remainder": "Resto mensual",

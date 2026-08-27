@@ -1,6 +1,6 @@
 "use client"
 
-import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
+import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
 import { useLanguage } from "@/lib/i18n"
 import { useTransactions } from "@/lib/transactions"
 
@@ -23,7 +23,8 @@ function formatEuros(value: number): string {
   return value.toLocaleString("es-ES", { style: "currency", currency: "EUR" })
 }
 
-// Linea con puntos marcando la suma mensual de gastos a lo largo del ano
+// Area con degradado rojo hacia la base del eje x mostrando
+// la suma mensual de gastos a lo largo del ano
 export function ExpenseHistory() {
   const { t } = useLanguage()
   const { transactions } = useTransactions()
@@ -41,7 +42,13 @@ export function ExpenseHistory() {
 
   return (
     <ResponsiveContainer width="100%" height={300}>
-      <LineChart data={data}>
+      <AreaChart data={data}>
+        <defs>
+          <linearGradient id="expenseHistoryFill" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#e53935" stopOpacity={0.7} />
+            <stop offset="100%" stopColor="#e53935" stopOpacity={0.05} />
+          </linearGradient>
+        </defs>
         <XAxis dataKey="month" tick={{ fontSize: 11 }} interval={0} angle={-35} textAnchor="end" height={50} />
         <YAxis />
         <Tooltip
@@ -51,15 +58,16 @@ export function ExpenseHistory() {
           labelStyle={{ color: "#000000", fontWeight: 600 }}
           itemStyle={{ color: "#000000" }}
         />
-        <Line
+        <Area
           type="monotone"
           dataKey="total"
           name={t("Expenses")}
           stroke="#e53935"
           strokeWidth={2}
+          fill="url(#expenseHistoryFill)"
           dot={{ r: 4, fill: "#e53935" }}
         />
-      </LineChart>
+      </AreaChart>
     </ResponsiveContainer>
   )
 }

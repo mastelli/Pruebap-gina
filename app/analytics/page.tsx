@@ -27,6 +27,8 @@ function AnalyticsContent() {
   const { t } = useLanguage()
   const searchParams = useSearchParams()
   const [tab, setTab] = useState(searchParams.get("tab") ?? "overview")
+  // Alterna entre la grafica del mes y la de historial anual en Gastos
+  const [expensesChart, setExpensesChart] = useState<"month" | "history">("month")
 
   return (
     <div className="flex-1 space-y-4 p-8 pt-6">
@@ -68,25 +70,9 @@ function AnalyticsContent() {
             titleKey="Expenses"
             customBody={(month, setMonth) => (
               <div className="grid gap-4 items-stretch">
-                <ExpenseDoughnut month={month} />
-                <div className="flex items-center justify-center gap-1">
-                  {[
-                    { key: "01", label: "Ene" }, { key: "02", label: "Feb" }, { key: "03", label: "Mar" },
-                    { key: "04", label: "Abr" }, { key: "05", label: "May" }, { key: "06", label: "Jun" },
-                    { key: "07", label: "Jul" }, { key: "08", label: "Ago" }, { key: "09", label: "Sep" },
-                    { key: "10", label: "Oct" }, { key: "11", label: "Nov" }, { key: "12", label: "Dic" },
-                  ].map((m) => (
-                    <button key={m.key} onClick={() => setMonth(m.key)}
-                      className={`px-3 py-1.5 text-sm rounded-md transition-colors ${
-                        month === m.key
-                          ? "bg-primary text-primary-foreground font-medium"
-                          : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                      }`}>
-                      {m.label}
-                    </button>
-                  ))}
-                </div>
-                <div className="grid gap-4 lg:grid-cols-2">
+                {expensesChart === "month" ? (
+                  <ExpenseDoughnut month={month} />
+                ) : (
                   <Card>
                     <CardHeader>
                       <CardTitle className="text-xl font-semibold">{t("History")}</CardTitle>
@@ -95,15 +81,44 @@ function AnalyticsContent() {
                       <ExpenseHistory />
                     </CardContent>
                   </Card>
-                  <Card className="flex flex-col">
-                    <CardHeader>
-                      <CardTitle className="text-xl font-semibold">{t("Budget")}</CardTitle>
-                    </CardHeader>
-                    <CardContent className="pb-2">
-                      <ExpenseTypes month={month} />
-                    </CardContent>
-                  </Card>
+                )}
+                <div className="flex items-center justify-center gap-3">
+                  <div className="flex items-center gap-1">
+                    {[
+                      { key: "01", label: "Ene" }, { key: "02", label: "Feb" }, { key: "03", label: "Mar" },
+                      { key: "04", label: "Abr" }, { key: "05", label: "May" }, { key: "06", label: "Jun" },
+                      { key: "07", label: "Jul" }, { key: "08", label: "Ago" }, { key: "09", label: "Sep" },
+                      { key: "10", label: "Oct" }, { key: "11", label: "Nov" }, { key: "12", label: "Dic" },
+                    ].map((m) => (
+                      <button key={m.key} onClick={() => setMonth(m.key)}
+                        className={`px-3 py-1.5 text-sm rounded-md transition-colors ${
+                          month === m.key
+                            ? "bg-primary text-primary-foreground font-medium"
+                            : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                        }`}>
+                        {m.label}
+                      </button>
+                    ))}
+                  </div>
+                  <button
+                    onClick={() => setExpensesChart(expensesChart === "month" ? "history" : "month")}
+                    className={`px-3 py-1.5 text-sm rounded-md transition-colors ${
+                      expensesChart === "history"
+                        ? "bg-primary text-primary-foreground font-medium"
+                        : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                    }`}
+                  >
+                    {t("Months")}
+                  </button>
                 </div>
+                <Card className="flex flex-col">
+                  <CardHeader>
+                    <CardTitle className="text-xl font-semibold">{t("Budget")}</CardTitle>
+                  </CardHeader>
+                  <CardContent className="pb-2">
+                    <ExpenseTypes month={month} />
+                  </CardContent>
+                </Card>
                 <Card className="flex min-h-0 flex-1 flex-col">
                   <CardHeader>
                     <CardTitle className="text-xl font-semibold">{t("Expense Movements")}</CardTitle>
