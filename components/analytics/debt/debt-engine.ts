@@ -136,7 +136,7 @@ export interface DiagnosisFlag {
   detail: string
 }
 
-export function diagnose(base: Derived, scenario: Derived, sim: SimulatorState): DiagnosisFlag[] {
+export function diagnose(base: Derived, scenario: Derived, sim: SimulatorState, items: Item[]): DiagnosisFlag[] {
   const flags: DiagnosisFlag[] = []
 
   if (scenario.patrimonioNeto <= 0) {

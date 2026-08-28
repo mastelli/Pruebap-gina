@@ -52,7 +52,7 @@ export function DebtDashboard() {
 
   const base = useMemo(() => computeDerived(items), [items])
   const scenario = useMemo(() => applyScenario(base, items, sim), [base, items, sim])
-  const flags = useMemo(() => diagnose(base, scenario, sim), [base, scenario, sim])
+  const flags = useMemo(() => diagnose(base, scenario, sim, items), [base, scenario, sim, items])
   const recs = useMemo(() => recommend(base, scenario, items, sim), [base, scenario, items, sim])
   const projection = useMemo(
     () => project(base, scenario, sim, monthlySavings, months),
