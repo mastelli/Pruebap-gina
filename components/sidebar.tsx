@@ -16,20 +16,38 @@ import {
   ChevronLeft,
   PiggyBank,
   Calculator,
+  type LucideIcon,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip"
 import { useLanguage } from "@/lib/i18n"
 
-const navigation = [
+interface NavItem {
+  name: string
+  href: string
+  icon: LucideIcon
+  children?: { name: string; href: string }[]
+}
+
+const navigation: NavItem[] = [
   { name: "Dashboard", href: "/", icon: Home },
   { name: "Analytics", href: "/analytics", icon: BarChart2 },
   { name: "Savings and Investment", href: "/investment", icon: PiggyBank },
   { name: "Transactions", href: "/transactions", icon: Wallet },
   { name: "Invoices", href: "/invoices", icon: Receipt },
   { name: "Payments", href: "/payments", icon: CreditCard },
-  { name: "Calculator", href: "/calculator", icon: Calculator },
+  {
+    name: "Calculator",
+    href: "/calculator",
+    icon: Calculator,
+    children: [
+      { name: "Compound Interest", href: "/calculator/compound" },
+      { name: "Real Estate Assets", href: "/calculator/realestate" },
+      { name: "Stocks", href: "/calculator/stocks" },
+      { name: "Bonds", href: "/calculator/bonds" },
+    ],
+  },
   { name: "Chat", href: "/chat", icon: MessagesSquare },
 ]
 
@@ -44,29 +62,52 @@ export function Sidebar() {
   const [isMobileOpen, setIsMobileOpen] = useState(false)
   const { t } = useLanguage()
 
+  const isParentActive = (item: NavItem) =>
+    pathname === item.href || (item.children?.some((c) => pathname === c.href) ?? false)
+
   const NavItem = ({ item, isBottom = false }) => (
-    <Tooltip delayDuration={0}>
-      <TooltipTrigger asChild>
-        <Link
-          href={item.href}
-          className={cn(
-            "flex items-center rounded-md px-3 py-2 text-sm font-medium transition-colors",
-            pathname === item.href
-              ? "bg-secondary text-secondary-foreground"
-              : "text-muted-foreground hover:bg-secondary hover:text-secondary-foreground",
-            isCollapsed && "justify-center px-2",
-          )}
-        >
-          <item.icon className={cn("h-4 w-4", !isCollapsed && "mr-3")} />
-          {!isCollapsed && <span>{t(item.name)}</span>}
-        </Link>
-      </TooltipTrigger>
-      {isCollapsed && (
-        <TooltipContent side="right" className="flex items-center gap-4">
-          {t(item.name)}
-        </TooltipContent>
+    <div>
+      <Tooltip delayDuration={0}>
+        <TooltipTrigger asChild>
+          <Link
+            href={item.href}
+            className={cn(
+              "flex items-center rounded-md px-3 py-2 text-sm font-medium transition-colors",
+              isParentActive(item)
+                ? "bg-secondary text-secondary-foreground"
+                : "text-muted-foreground hover:bg-secondary hover:text-secondary-foreground",
+              isCollapsed && "justify-center px-2",
+            )}
+          >
+            <item.icon className={cn("h-4 w-4", !isCollapsed && "mr-3")} />
+            {!isCollapsed && <span>{t(item.name)}</span>}
+          </Link>
+        </TooltipTrigger>
+        {isCollapsed && (
+          <TooltipContent side="right" className="flex items-center gap-4">
+            {t(item.name)}
+          </TooltipContent>
+        )}
+      </Tooltip>
+      {!isCollapsed && item.children && (
+        <div className="ml-4 space-y-1 border-l border-border pl-3 pt-1">
+          {item.children.map((child) => (
+            <Link
+              key={child.href}
+              href={child.href}
+              className={cn(
+                "block rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
+                pathname === child.href
+                  ? "bg-secondary text-secondary-foreground"
+                  : "text-muted-foreground hover:bg-secondary hover:text-secondary-foreground",
+              )}
+            >
+              {t(child.name)}
+            </Link>
+          ))}
+        </div>
       )}
-    </Tooltip>
+    </div>
   )
 
   return (
