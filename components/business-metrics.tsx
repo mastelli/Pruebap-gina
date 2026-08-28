@@ -40,21 +40,21 @@ export function BusinessMetrics() {
 
   const cards = [
     {
-      href: "/analytics?tab=income",
+      href: "/analytics/income",
       tab: "income",
       titleKey: "Revenue",
       value: formatEuros(yearlyIncome),
       sub: `${t("Monthly average")}: ${formatEuros(monthlyAverage)}`,
     },
     {
-      href: "/analytics?tab=expenses",
+      href: "/analytics/expenses",
       tab: "expenses",
       titleKey: "Expenses",
       value: formatEuros(yearlyExpenses),
       sub: `${t("Monthly average")}: ${formatEuros(monthlyExpenseAverage)}`,
     },
     {
-      href: "/analytics?tab=savings",
+      href: "/analytics/savings",
       tab: "savings",
       titleKey: "Savings/Investment",
       value: <PortfolioTotal />,

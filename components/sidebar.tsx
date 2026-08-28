@@ -32,7 +32,17 @@ interface NavItem {
 
 const navigation: NavItem[] = [
   { name: "Dashboard", href: "/", icon: Home },
-  { name: "Analytics", href: "/analytics", icon: BarChart2 },
+  {
+    name: "Analytics",
+    href: "/analytics",
+    icon: BarChart2,
+    children: [
+      { name: "Overview", href: "/analytics/overview" },
+      { name: "Revenue", href: "/analytics/income" },
+      { name: "Expenses", href: "/analytics/expenses" },
+      { name: "Debt", href: "/analytics/savings" },
+    ],
+  },
   { name: "Savings and Investment", href: "/investment", icon: PiggyBank },
   { name: "Transactions", href: "/transactions", icon: Wallet },
   { name: "Invoices", href: "/invoices", icon: Receipt },
