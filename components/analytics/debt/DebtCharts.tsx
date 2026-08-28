@@ -200,7 +200,7 @@ export function DebtCharts({
           </Tabs>
         }
       >
-        {projection.length === 0 ? (
+        {projection.length === 0 || (d.activoTotal <= 0 && d.pasivoTotal <= 0) ? (
           <Empty />
         ) : (
           <ResponsiveContainer width="100%" height="100%">
@@ -208,12 +208,14 @@ export function DebtCharts({
               <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
               <XAxis dataKey="month" className="text-xs" tickFormatter={(v) => `${v}m`} />
               <YAxis yAxisId="left" tickFormatter={(v) => `${Math.round(v / 1000)}k`} className="text-xs" />
-              <YAxis
-                yAxisId="right"
-                orientation="right"
-                tickFormatter={(v) => (v === null ? ND : v.toFixed(1))}
-                className="text-xs"
-              />
+              {d.PC > 0 && (
+                <YAxis
+                  yAxisId="right"
+                  orientation="right"
+                  tickFormatter={(v) => (v === null ? ND : v.toFixed(1))}
+                  className="text-xs"
+                />
+              )}
               <Tooltip
                 contentStyle={tooltipStyle}
                 formatter={(v: number, n: string) =>
@@ -223,7 +225,9 @@ export function DebtCharts({
               <Legend />
               <Line yAxisId="left" type="monotone" dataKey="patrimonioNeto" name="Patrimonio Neto" stroke="#16a34a" strokeWidth={2} dot={false} />
               <Line yAxisId="left" type="monotone" dataKey="deuda" name="Deuda" stroke="#dc2626" strokeWidth={2} dot={false} />
-              <Line yAxisId="right" type="monotone" dataKey="liquidez" name="Liquidez" stroke="#2563eb" strokeWidth={2} dot={false} connectNulls />
+              {d.PC > 0 && (
+                <Line yAxisId="right" type="monotone" dataKey="liquidez" name="Liquidez" stroke="#2563eb" strokeWidth={2} dot={false} connectNulls />
+              )}
             </LineChart>
           </ResponsiveContainer>
         )}
