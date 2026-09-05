@@ -2,7 +2,7 @@ import { type NextRequest, NextResponse } from "next/server"
 
 // Clave del proveedor, leida solo en el servidor (Vercel / .env.local)
 const API_KEY = process.env.GEMINI_API_KEY
-const MODEL = process.env.GEMINI_MODEL ?? "gemini-2.0-flash"
+const MODEL = process.env.GEMINI_MODEL ?? "gemini-3.6-flash"
 
 interface ChatMessage {
   role: "user" | "assistant"
