@@ -10,6 +10,7 @@ import type { LucideIcon } from "lucide-react"
 import { IncomeCategoriesChart } from "./income-breakdown"
 import { IncomeHistory } from "./income-history"
 import { IncomeTips } from "./income-tips"
+import { IncomeGuide } from "./income-guide"
 
 const MONTHS = [
   "January",
@@ -227,6 +228,9 @@ export function IncomeOverview({
 
       {/* Consejos sobre ingresos */}
       <IncomeTips />
+
+      {/* Guía sobre la nómina */}
+      <IncomeGuide />
     </div>
   )
 }
