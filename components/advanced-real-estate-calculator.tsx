@@ -20,7 +20,7 @@ import {
 import {
   Home, DollarSign, TrendingUp, Building2, Percent,
   Info, Landmark, PiggyBank, BarChart3, Scale, ChevronRight, ChevronLeft,
-  KeyRound, ReceiptText, Wallet,
+  KeyRound, ReceiptText, Wallet, BookOpen, ClipboardList, Target, Lightbulb, Sparkles,
 } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 import type {
@@ -981,6 +981,126 @@ export default function AdvancedRealEstateCalculator() {
               <p className="text-xs text-muted-foreground">Intereses totales</p>
               <p className="font-semibold">{input.financing.enabled ? formatCurrency(amortSchedule.reduce((acc, l) => acc + l.interestPaid, 0), input.currency) : "—"}</p>
             </div>
+          </div>
+        </div>
+
+        {/* ── Sección educativa ── */}
+        <div className="pt-2 space-y-6">
+          <div className="flex items-center gap-2.5">
+            <BookOpen className="h-5 w-5 text-primary" />
+            <h2 className="text-xl font-bold tracking-tight text-foreground">¿Cómo funciona el análisis de Activos Inmobiliarios?</h2>
+          </div>
+          <p className="text-sm text-muted-foreground -mt-3">
+            Completa cada paso del formulario y usa esta guía para interpretar la rentabilidad real de tu vivienda.
+          </p>
+
+          {/* Callout motivacional */}
+          <div className="rounded-2xl border bg-card p-6 shadow-sm">
+            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Ejemplo real</p>
+            <p className="mt-2 text-xl font-bold text-foreground">
+              Una vivienda de <span className="text-primary">150.000 €</span> alquilada por{" "}
+              <span className="text-primary">900 €/mes</span> parece rendir un{" "}
+              <span className="text-primary">7,2% bruto</span>, pero tras impuestos, hipoteca, comunidad, IBI y
+              mantenimiento, el <em>cash flow</em> real suele quedarse en una fracción: esta calculadora te enseña la
+              cuenta de verdad <strong>antes</strong> de firmar nada.
+            </p>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Dato clave: la parte de la cuota que <strong>amortiza capital no es un gasto</strong> — es patrimonio que
+              se queda en tu bolsillo. Por eso aquí se separa con claridad el interés (gasto) del capital (tu riqueza):
+              un cash flow bajo con buena amortización sigue creando patrimonio año tras año.
+            </p>
+          </div>
+
+          {/* Qué mide / De dónde salen los números */}
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div className="rounded-2xl border bg-card p-6 shadow-sm">
+              <div className="flex items-center gap-2">
+                <ClipboardList className="h-4 w-4 text-primary" />
+                <h3 className="font-semibold text-foreground">¿Qué mide el análisis?</h3>
+              </div>
+              <ul className="mt-3 space-y-1.5 text-sm text-muted-foreground leading-relaxed">
+                <li className="flex gap-2">
+                  <TrendingUp className="h-4 w-4 shrink-0 text-primary" />
+                  <span><strong className="text-foreground">Rentabilidad del alquiler</strong> — la renta frente al precio total de compra (bruta, neta y cap rate) para saber si el inquilino paga la casa.</span>
+                </li>
+                <li className="flex gap-2">
+                  <Landmark className="h-4 w-4 shrink-0 text-primary" />
+                  <span><strong className="text-foreground">Efecto de la financiación</strong> — cuota, intereses y capital amortizado. El % financiado (LTV) y el tipo de interés cambian por completo el ROI.</span>
+                </li>
+                <li className="flex gap-2">
+                  <ReceiptText className="h-4 w-4 shrink-0 text-primary" />
+                  <span><strong className="text-foreground">Gastos reales</strong> — comunidad, IBI, seguro, mantenimiento, gestión y reparaciones: lo que olvida la publicidad inmobiliaria.</span>
+                </li>
+                <li className="flex gap-2">
+                  <PiggyBank className="h-4 w-4 shrink-0 text-primary" />
+                  <span><strong className="text-foreground">Revalorización y horizonte</strong> — cuánto valdrá el inmueble al vender y cómo crece tu equity con los años.</span>
+                </li>
+              </ul>
+            </div>
+            <div className="rounded-2xl border bg-card p-6 shadow-sm">
+              <div className="flex items-center gap-2">
+                <Target className="h-4 w-4 text-primary" />
+                <h3 className="font-semibold text-foreground">De dónde salen los resultados</h3>
+              </div>
+              <p className="mt-3 text-sm text-muted-foreground leading-relaxed">
+                Cada bloque se proyecta <strong className="text-foreground">año a año</strong>: la renta crece con la
+                inflación que definas, los gastos se actualizan, el valor del inmueble se capitaliza con la revalorización
+                y la hipoteca se amortiza con el <strong className="text-foreground">sistema francés</strong> (cuota
+                constante que paga cada vez más capital y menos intereses).
+              </p>
+              <p className="mt-3 text-sm text-muted-foreground leading-relaxed">
+                Con esas proyecciones se calculan los KPI clave — ROI sobre capital, cap rate, cash flow, patrimonio
+                creado — y los <em>escenarios</em> conservador, base y optimista para que veas cuánto cambia la rentabilidad
+                si las cosas van mejor o peor de lo previsto.
+              </p>
+              <div className="mt-4 flex flex-wrap gap-1.5">
+                {["ITP / AJD", "Hipoteca francesa", "IPC", "Cash flow", "Equity", "Cap rate"].map((item) => (
+                  <span key={item} className="rounded-full border px-2.5 py-0.5 text-xs text-muted-foreground">
+                    {item}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Consejos */}
+          <div className="rounded-2xl border bg-card p-6 shadow-sm">
+            <div className="flex items-center gap-2">
+              <Lightbulb className="h-4 w-4 text-primary" />
+              <h3 className="font-semibold text-foreground">Consejos para interpretar tu análisis</h3>
+            </div>
+            <ul className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2 text-sm text-muted-foreground leading-relaxed">
+              <li className="flex gap-2">
+                <span className="text-primary">1.</span>
+                <span><strong className="text-foreground">La rentabilidad bruta engaña.</strong> Casi todos los anuncios cuelgan el "8% bruto": es la renta antes de impuestos, gastos y financiación, no lo que llega a tu bolsillo.</span>
+              </li>
+              <li className="flex gap-2">
+                <span className="text-primary">2.</span>
+                <span><strong className="text-foreground">La financiación es palanca, no regalo.</strong> Más LTV dispara el ROI sobre tu capital, pero también los intereses totales y el riesgo si el mercado baja.</span>
+              </li>
+              <li className="flex gap-2">
+                <span className="text-primary">3.</span>
+                <span><strong className="text-foreground">Separa cash flow de patrimonio.</strong> Una cuota que amortiza capital te hace más rico aunque el flujo de caja sea flojo.</span>
+              </li>
+              <li className="flex gap-2">
+                <span className="text-primary">4.</span>
+                <span><strong className="text-foreground">Sé honesto con tus supuestos.</strong> Vacancia del 0%, cero reparaciones o revalorizaciones del 10% anual son la forma más rápida de engañarte a ti mismo.</span>
+              </li>
+              <li className="flex gap-2">
+                <span className="text-primary">5.</span>
+                <span><strong className="text-foreground">El precio importa más que la renta.</strong> Comprar un 10% más barato mejora el ROI final mucho más que subir 50 € el alquiler.</span>
+              </li>
+            </ul>
+          </div>
+
+          {/* Callout cómo empezar */}
+          <div className="flex items-start gap-3 rounded-2xl bg-secondary/60 p-5">
+            <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+            <p className="text-sm text-foreground/90 leading-relaxed">
+              ¿Empezando? Deja el ejemplo por defecto — 150.000 €, 70% financiado al 3% a 30 años y alquiler de 900 € — y
+              luego prueba la pestaña de <strong>Sensibilidad</strong> para ver cómo cambia todo si sube el tipo de
+              interés o baja el precio.
+            </p>
           </div>
         </div>
 
