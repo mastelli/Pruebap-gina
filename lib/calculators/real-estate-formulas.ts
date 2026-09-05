@@ -101,13 +101,13 @@ export function resolveYearValues(
   const growthFactor = Math.pow(1 + rental.annualRentGrowthPct / 100, year - 1)
   const rentGrowth = year <= 1 ? 1 : growthFactor
 
+  const leasedMonths = Math.min(12, Math.max(0, rental.rentedMonthsPerYear))
   const monthlyRent = rental.monthlyRent * rentGrowth
   const monthlyOther = rental.otherMonthlyIncome * rentGrowth
-  const grossIncome = monthlyRent * 12
-  const otherIncome = monthlyOther * 12
-  const grossWithOther = grossIncome + otherIncome
-  const effectiveGrossIncome = grossIncome * (1 - rental.vacancyRate / 100)
-      + otherIncome * (1 - rental.vacancyRate / 100)
+  const grossIncome = monthlyRent * leasedMonths
+  const otherIncome = monthlyOther * leasedMonths
+  const leasedIncome = grossIncome + otherIncome
+  const effectiveGrossIncome = leasedIncome * (1 - rental.vacancyRate / 100)
 
   // Operating expenses (grow 2% per year for inflation after year 1)
   const expGrowth = year <= 1 ? 1 : Math.pow(1.02, year - 1)
@@ -218,10 +218,11 @@ export function breakevenMonths(input: RealEstateInput): number {
 // ── Full KPI calculation ──────────────────────────────
 export function calculateKPIs(input: RealEstateInput): RealEstateKPIs {
   const totalInv = totalInitialInvestment(input.purchase)
+  const leasedMonths = Math.min(12, Math.max(0, input.rental.rentedMonthsPerYear))
   const projection = buildProjection(input)
   const finalYear = projection[projection.length - 1]
 
-  const grossRentalIncome = input.rental.monthlyRent * 12
+  const grossRentalIncome = input.rental.monthlyRent * leasedMonths
   const effectiveGrossIncome = projection[0]?.totalIncome ?? 0
   const annualOpEx = projection[0]?.operatingExpenses ?? 0
   const annualFinancing = projection[0]?.financingCosts ?? 0
@@ -243,7 +244,6 @@ export function calculateKPIs(input: RealEstateInput): RealEstateKPIs {
     annualPrincipalPaid = year1?.principalPaid ?? 0
   }
 
-  const propertyValueAtEnd = finalYear?.propertyValue ?? input.purchase.price
   const equityAtEnd = finalYear?.equity ?? equityInvested
   const cumulativeCF = finalYear?.cumulativeCashFlow ?? 0
 
@@ -251,7 +251,8 @@ export function calculateKPIs(input: RealEstateInput): RealEstateKPIs {
   const grossYield = round2(safeDiv(grossRentalIncome, input.purchase.price) * 100)
   const netIncome = effectiveGrossIncome - annualOpEx
   const netYield = round2(safeDiv(netIncome, totalInv) * 100)
-  const capRate = round2(safeDiv(noi, propertyValueAtEnd) * 100)
+  // Cap rate: NOI del año actual / valor de compra × 100 (valor inicial, no el de fin de horizonte)
+  const capRate = round2(safeDiv(noi, input.purchase.price) * 100)
   const cashOnCash = round2(safeDiv(annualCF, equityInvested > 0 ? equityInvested : totalInv) * 100)
 
   // Yield on Equity (excludes principal — matches reference calculator's "ROI sobre Capital")
@@ -268,12 +269,13 @@ export function calculateKPIs(input: RealEstateInput): RealEstateKPIs {
   )
   const roi = round2(safeDiv(totalProfit, equityInvested) * 100)
   const horizon = input.appreciation.investmentHorizonYears
-  const roiAnnualized = horizon > 0
-    ? round2((Math.pow(1 + roi / 100, 1 / horizon) - 1) * 100)
-    : 0
+  const annualizedBase = 1 + roi / 100
+  const roiAnnualized = horizon > 0 && annualizedBase > 0
+    ? round2((Math.pow(annualizedBase, 1 / horizon) - 1) * 100)
+    : roi <= -100 ? -100 : 0
 
-  const priceToRent = input.rental.monthlyRent > 0
-    ? round2(input.purchase.price / (input.rental.monthlyRent * 12))
+  const priceToRent = input.rental.monthlyRent > 0 && leasedMonths > 0
+    ? round2(input.purchase.price / (input.rental.monthlyRent * leasedMonths))
     : 0
 
   const ltv = input.purchase.price > 0
@@ -302,6 +304,7 @@ export function calculateKPIs(input: RealEstateInput): RealEstateKPIs {
     annualOperatingExpenses: round2(annualOpEx),
     noi: round2(noi),
     totalInvestment: round2(totalInv),
+    cashInvested: round2(equityInvested),
     ltv,
     priceToRentRatio: priceToRent,
   }

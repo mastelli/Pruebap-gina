@@ -1,35 +1,38 @@
 import type {
   RealEstateInput,
   SensitivityResult,
+  SensitivityRow,
 } from "./real-estate-types"
 import { calculateKPIs } from "./real-estate-formulas"
+
+const labels: Record<string, string> = {
+  price: "Precio de compra",
+  rent: "Alquiler mensual",
+  interestRate: "Tipo de interés",
+  ltv: "% Financiación (LTV)",
+  appreciation: "Revalorización",
+}
+
+const kpiRows: { key: string; label: string; kind: SensitivityRow["kind"] }[] = [
+  { key: "monthlyCashFlow", label: "Cash Flow / mes", kind: "currency" },
+  { key: "annualCashFlow", label: "Cash Flow / año", kind: "currency" },
+  { key: "annualWealthCreated", label: "Patrimonio / año", kind: "currency" },
+  { key: "totalProfit", label: "Beneficio Total", kind: "currency" },
+  { key: "equity", label: "Equity final", kind: "currency" },
+  { key: "roi", label: "ROI Total", kind: "percent" },
+  { key: "roiAnnualized", label: "ROI Anualizado", kind: "percent" },
+  { key: "yieldOnEquity", label: "ROI sobre Capital", kind: "percent" },
+  { key: "capRate", label: "Cap Rate", kind: "percent" },
+  { key: "grossYield", label: "Rentabilidad Bruta", kind: "percent" },
+  { key: "netYield", label: "Rentabilidad Neta", kind: "percent" },
+  { key: "breakevenMonths", label: "Punto de equilibrio", kind: "months" },
+]
 
 export function analyzeSensitivity(
   base: RealEstateInput,
   variable: "price" | "rent" | "interestRate" | "ltv" | "appreciation",
   variations: number[],  // percentage offsets, e.g. [-20, -10, 0, 10, 20]
-  kpiKey: keyof ReturnType<typeof calculateKPIs> = "roi",
 ): SensitivityResult {
-  const labels: Record<string, string> = {
-    price: "Purchase Price",
-    rent: "Monthly Rent",
-    interestRate: "Interest Rate",
-    ltv: "Loan-to-Value",
-    appreciation: "Appreciation",
-  }
-
-  const kpiLabels: Record<string, string> = {
-    roi: "ROI",
-    netYield: "Net Yield",
-    capRate: "Cap Rate",
-    cashOnCashReturn: "Cash-on-Cash",
-    monthlyCashFlow: "Monthly Cash Flow",
-    annualCashFlow: "Annual Cash Flow",
-    grossYield: "Gross Yield",
-    totalProfit: "Total Profit",
-    breakevenMonths: "Breakeven (months)",
-  }
-
   // Calculate for each variation percentage
   const kpiResults = variations.map((pct) => {
     const input = JSON.parse(JSON.stringify(base)) as RealEstateInput
@@ -59,8 +62,9 @@ export function analyzeSensitivity(
   })
 
   // Build rows: one per KPI
-  const rows = Object.entries(kpiLabels).map(([key, label]) => ({
+  const rows: SensitivityRow[] = kpiRows.map(({ key, label, kind }) => ({
     label,
+    kind,
     values: kpiResults.map((kpi) => {
       const val = kpi[key as keyof typeof kpi]
       return typeof val === "number" ? val : 0

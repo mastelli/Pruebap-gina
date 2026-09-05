@@ -117,6 +117,7 @@ export interface RealEstateKPIs {
   annualOperatingExpenses: number
   noi: number
   totalInvestment: number
+  cashInvested: number             // capital propio desembolsado (totalInv - préstamo)
   ltv: number
   priceToRentRatio: number
 }
@@ -137,8 +138,11 @@ export interface ScenarioResult {
 }
 
 // ── Sensitivity ───────────────────────────────────────
+export type SensitivityValueKind = "currency" | "percent" | "months"
+
 export interface SensitivityRow {
   label: string
+  kind: SensitivityValueKind
   values: number[]               // KPI values for each variation
 }
 
