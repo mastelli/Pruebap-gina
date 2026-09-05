@@ -7,6 +7,7 @@ import { AuthScreen } from "./auth-screen"
 import { Sidebar } from "@/components/sidebar"
 import { TopNav } from "@/components/top-nav"
 import { usePathname } from "next/navigation"
+import { isPublicPath } from "@/lib/public-routes"
 import type React from "react"
 
 export function AppShell({ children }: { children: React.ReactNode }) {
@@ -15,6 +16,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
 
   const isAuthPage = pathname.startsWith("/sign-in") || pathname.startsWith("/sign-up")
+  const isPublic = isPublicPath(pathname)
 
   useEffect(() => {
     if (!userId || !email) return
@@ -28,6 +30,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   if (isAuthPage) {
     return <>{children}</>
+  }
+
+  // Rutas públicas: no exigimos sesión, se muestra el contenido sin el AuthScreen
+  if (isPublic) {
+    return <div className="min-h-screen">{children}</div>
   }
 
   if (!ready) {
