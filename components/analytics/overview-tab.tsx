@@ -62,11 +62,11 @@ export function OverviewTab() {
             <RevenueChart />
           </CardContent>
         </Card>
-        <Card className="col-span-3">
+        <Card className="col-span-3 flex flex-col">
           <CardHeader>
             <CardTitle className="text-xl font-semibold">{t("Recent Transactions")}</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="flex min-h-0 flex-1 flex-col">
             <RecentTransactions month={month} />
           </CardContent>
         </Card>
