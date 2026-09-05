@@ -93,55 +93,53 @@ function ExpenseOverview({ month, setMonth }: { month: string; setMonth: (m: str
   return (
     <div className="space-y-6">
       {/* Cabecera tipo saldo de cuenta */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-rose-500 via-rose-600 to-red-700 p-6 text-white shadow-xl">
-        <div className="pointer-events-none absolute -left-16 -top-16 h-64 w-64 rounded-full bg-white/10" />
-        <div className="pointer-events-none absolute -bottom-24 left-24 h-56 w-56 rounded-full bg-white/10" />
-        <div className="relative flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+      <div className="rounded-2xl border bg-card p-6 shadow-sm">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <div className="flex items-center gap-2 text-rose-100">
+            <div className="flex items-center gap-2 text-muted-foreground">
               <span className="text-xs font-semibold uppercase tracking-widest">{t("Expenses")}</span>
-              <span className="h-1 w-1 rounded-full bg-rose-200/70" />
+              <span className="h-1 w-1 rounded-full bg-border" />
               <span className="text-xs font-medium">{monthLabel}</span>
             </div>
-            <p className="mt-3 text-4xl font-extrabold tabular-nums tracking-tight sm:text-5xl">
+            <p className="mt-3 text-4xl font-extrabold tabular-nums tracking-tight text-foreground sm:text-5xl">
               {formatEuros(total)}
             </p>
             <div className="mt-4 flex flex-wrap items-center gap-2 text-sm">
               {delta !== null && (
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 font-semibold backdrop-blur">
-                  <TrendingUp className={`h-3.5 w-3.5 ${delta < 0 ? "rotate-180" : ""}`} />
+                <span className="inline-flex items-center gap-1.5 rounded-full border bg-secondary px-3 py-1 font-semibold">
+                  <TrendingUp className={`h-3.5 w-3.5 ${delta < 0 ? "rotate-180" : ""} ${delta < 0 ? "text-red-500" : "text-emerald-500"}`} />
                   {`${delta >= 0 ? "+" : ""}${delta.toFixed(1).replace(".", ",")}% ${t("vs last month")}`}
                 </span>
               )}
-              <span className="rounded-full bg-white/15 px-3 py-1 font-medium backdrop-blur">
+              <span className="rounded-full border bg-secondary px-3 py-1 font-medium">
                 {count} {t("Movements")}
               </span>
-              <span className="rounded-full bg-white/15 px-3 py-1 font-medium backdrop-blur">
+              <span className="rounded-full border bg-secondary px-3 py-1 font-medium">
                 {t("Average per day")}: {formatEuros(avgPerDay)}
               </span>
             </div>
           </div>
           <div className="grid shrink-0 gap-2 sm:min-w-[260px]">
             {topCategories.map((row) => (
-              <div key={row.key} className="flex items-center gap-3 rounded-xl bg-white/10 p-3 backdrop-blur">
+              <div key={row.key} className="flex items-center gap-3 rounded-xl border bg-secondary/40 p-3">
                 <span
                   className="h-2.5 w-2.5 shrink-0 rounded-full"
                   style={{ backgroundColor: row.color }}
                 />
                 <div className="min-w-0">
-                  <p className="truncate text-[11px] font-semibold uppercase tracking-wide text-rose-100">
+                  <p className="truncate text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
                     {t(row.key)}
                   </p>
-                  <p className="text-sm font-bold tabular-nums">{formatEuros(row.value)}</p>
+                  <p className="text-sm font-bold tabular-nums text-foreground">{formatEuros(row.value)}</p>
                 </div>
                 <div className="ml-auto">
-                  <div className="h-1.5 w-12 overflow-hidden rounded-full bg-white/25">
+                  <div className="h-1.5 w-12 overflow-hidden rounded-full bg-border">
                     <div
-                      className="h-full rounded-full bg-white/90 transition-all"
+                      className="h-full rounded-full bg-primary transition-all"
                       style={{ width: `${pctOf(row.value)}%` }}
                     />
                   </div>
-                  <p className="mt-1 text-right text-[11px] font-semibold tabular-nums text-rose-50">
+                  <p className="mt-1 text-right text-[11px] font-semibold tabular-nums text-muted-foreground">
                     {pctOf(row.value)}%
                   </p>
                 </div>

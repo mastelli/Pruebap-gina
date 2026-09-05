@@ -91,47 +91,45 @@ export function IncomeOverview({
   return (
     <div className="space-y-6">
       {/* Cabecera tipo saldo de cuenta */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-500 via-emerald-600 to-teal-700 p-6 text-white shadow-xl">
-        <div className="pointer-events-none absolute -right-16 -top-16 h-64 w-64 rounded-full bg-white/10" />
-        <div className="pointer-events-none absolute -bottom-24 right-24 h-56 w-56 rounded-full bg-white/10" />
-        <div className="relative flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+      <div className="rounded-2xl border bg-card p-6 shadow-sm">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <div className="flex items-center gap-2 text-emerald-100">
+            <div className="flex items-center gap-2 text-muted-foreground">
               <span className="text-xs font-semibold uppercase tracking-widest">{t("Revenue")}</span>
-              <span className="h-1 w-1 rounded-full bg-emerald-200/70" />
+              <span className="h-1 w-1 rounded-full bg-border" />
               <span className="text-xs font-medium">{monthLabel}</span>
             </div>
-            <p className="mt-3 text-4xl font-extrabold tabular-nums tracking-tight sm:text-5xl">
+            <p className="mt-3 text-4xl font-extrabold tabular-nums tracking-tight text-foreground sm:text-5xl">
               {formatEuros(total)}
             </p>
             <div className="mt-4 flex flex-wrap items-center gap-2 text-sm">
               {delta !== null && (
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 font-semibold backdrop-blur">
-                  <TrendingUp className={`h-3.5 w-3.5 ${delta < 0 ? "rotate-180" : ""}`} />
+                <span className="inline-flex items-center gap-1.5 rounded-full border bg-secondary px-3 py-1 font-semibold">
+                  <TrendingUp className={`h-3.5 w-3.5 ${delta < 0 ? "rotate-180" : ""} ${delta < 0 ? "text-red-500" : "text-emerald-500"}`} />
                   {`${delta >= 0 ? "+" : ""}${delta.toFixed(1).replace(".", ",")}% ${t("vs last month")}`}
                 </span>
               )}
-              <span className="rounded-full bg-white/15 px-3 py-1 font-medium backdrop-blur">
+              <span className="rounded-full border bg-secondary px-3 py-1 font-medium">
                 {count} {t("Movements")}
               </span>
-              <span className="rounded-full bg-white/15 px-3 py-1 font-medium backdrop-blur">
+              <span className="rounded-full border bg-secondary px-3 py-1 font-medium">
                 {t("Average per day")}: {formatEuros(avgPerDay)}
               </span>
             </div>
           </div>
           <div className="grid shrink-0 grid-cols-3 gap-3">
             {catTiles.map(({ key, value }) => (
-              <div key={key} className="min-w-[96px] rounded-xl bg-white/10 p-3 backdrop-blur">
-                <p className="text-[11px] font-semibold uppercase tracking-wide text-emerald-100">
+              <div key={key} className="min-w-[96px] rounded-xl border bg-secondary/40 p-3">
+                <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
                   {t(key)}
                 </p>
-                <p className="mt-1.5 text-lg font-bold tabular-nums">{formatEuros(value)}</p>
-                <p className="mt-1 text-[11px] font-semibold tabular-nums text-emerald-50">
+                <p className="mt-1.5 text-lg font-bold tabular-nums text-foreground">{formatEuros(value)}</p>
+                <p className="mt-1 text-[11px] font-semibold tabular-nums text-muted-foreground">
                   {pctOf(value)}%
                 </p>
-                <div className="mt-2 h-1 overflow-hidden rounded-full bg-white/25">
+                <div className="mt-2 h-1 overflow-hidden rounded-full bg-border">
                   <div
-                    className="h-full rounded-full bg-white/90 transition-all"
+                    className="h-full rounded-full bg-primary transition-all"
                     style={{ width: `${pctOf(value)}%` }}
                   />
                 </div>
