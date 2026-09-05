@@ -37,7 +37,6 @@ const navigation: NavItem[] = [
     href: "/analytics",
     icon: BarChart2,
     children: [
-      { name: "Overview", href: "/analytics/overview" },
       { name: "Revenue", href: "/analytics/income" },
       { name: "Expenses", href: "/analytics/expenses" },
       { name: "Debt", href: "/analytics/savings" },
