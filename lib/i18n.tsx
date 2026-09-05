@@ -276,6 +276,7 @@ const translations: Record<string, string> = {
 
   // Analíticas
   "Export Data": "Exportar datos",
+  "Import data": "Importar datos",
   Overview: "Vista general",
   Reports: "Informes",
   "Pick a date": "Elige una fecha",
