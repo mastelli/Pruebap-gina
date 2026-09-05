@@ -1,10 +1,9 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Button } from "@/components/ui/button"
 import {
   Select,
   SelectContent,
@@ -52,25 +51,23 @@ export function CompoundInterestCalculator() {
   const { lang, t } = useLanguage()
   const currency = lang === "es" ? "EUR" : "USD"
 
-  const [initialInvestment, setInitialInvestment] = useState("")
-  const [contribution, setContribution] = useState("")
+  const [initialInvestment, setInitialInvestment] = useState("10000")
+  const [contribution, setContribution] = useState("500")
   const [frequency, setFrequency] = useState<Frequency>("monthly")
-  const [rate, setRate] = useState("")
-  const [horizon, setHorizon] = useState("")
-  const [results, setResults] = useState<ChartPoint[]>([])
-  const [finalTotal, setFinalTotal] = useState<number | null>(null)
-  const [finalContributions, setFinalContributions] = useState<number | null>(null)
-  const [finalInterest, setFinalInterest] = useState<number | null>(null)
+  const [rate, setRate] = useState("7")
+  const [horizon, setHorizon] = useState("20")
 
-  const calculate = () => {
+  const calculation = useMemo(() => {
     const P = parseFloat(initialInvestment) || 0
     const C = parseFloat(contribution) || 0
     const annualRate = (parseFloat(rate) || 0) / 100
-    const years = parseInt(horizon) || 0
+    const years = parseInt(horizon, 10) || 0
     const periodsPerYear = FREQUENCY_MULTIPLIERS[frequency]
     const periodRate = annualRate / periodsPerYear
 
-    if (years <= 0) return
+    if (years <= 0) {
+      return { results: [] as ChartPoint[], finalTotal: 0, finalContributions: 0, finalInterest: 0 }
+    }
 
     const data: ChartPoint[] = []
     let balance = P
@@ -90,11 +87,13 @@ export function CompoundInterestCalculator() {
       })
     }
 
-    setResults(data)
-    setFinalTotal(Math.round(balance))
-    setFinalContributions(Math.round(totalContributions))
-    setFinalInterest(Math.round(balance - totalContributions))
-  }
+    return {
+      results: data,
+      finalTotal: Math.round(balance),
+      finalContributions: Math.round(totalContributions),
+      finalInterest: Math.round(balance - totalContributions),
+    }
+  }, [initialInvestment, contribution, frequency, rate, horizon])
 
   const formatCurrency = (v: number) =>
     v.toLocaleString(lang === "es" ? "es-ES" : "en-US", {
@@ -181,30 +180,26 @@ export function CompoundInterestCalculator() {
           </div>
         </div>
 
-        <Button className="mt-8 w-full" onClick={calculate}>
-          {t("Calculate")}
-        </Button>
-
-        {results.length > 0 && (
+        {calculation.results.length > 0 && (
           <>
-            <div className="grid grid-cols-3 gap-4 mt-12 text-center">
+            <div className="grid grid-cols-3 gap-4 mt-8 text-center">
               <div className="rounded-lg bg-muted p-3">
                 <p className="text-xs text-muted-foreground">{t("Total Invested")}</p>
-                <p className="text-lg font-semibold">{formatCurrency(finalContributions!)}</p>
+                <p className="text-lg font-semibold">{formatCurrency(calculation.finalContributions)}</p>
               </div>
               <div className="rounded-lg bg-muted p-3">
                 <p className="text-xs text-muted-foreground">{t("Future Interest")}</p>
-                <p className="text-lg font-semibold text-green-600">{formatCurrency(finalInterest!)}</p>
+                <p className="text-lg font-semibold text-green-600">{formatCurrency(calculation.finalInterest)}</p>
               </div>
               <div className="rounded-lg bg-muted p-3">
                 <p className="text-xs text-muted-foreground">{t("Final Value")}</p>
-                <p className="text-lg font-semibold">{formatCurrency(finalTotal!)}</p>
+                <p className="text-lg font-semibold">{formatCurrency(calculation.finalTotal)}</p>
               </div>
             </div>
 
             <div className="mt-8 w-full" style={{ height: 400 }}>
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={results}>
+                <AreaChart data={calculation.results}>
                   <defs>
                     <linearGradient id="gradTotal" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="5%" stopColor="#2563eb" stopOpacity={0.3} />
