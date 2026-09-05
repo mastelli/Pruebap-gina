@@ -4,9 +4,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { OverviewCards } from "@/components/analytics/overview-cards"
 import { RevenueChart } from "@/components/analytics/revenue-chart"
 import { RecentTransactions } from "@/components/analytics/recent-transactions"
-import { AccountGrowth } from "@/components/analytics/account-growth"
-import { TopProducts } from "@/components/analytics/top-products"
-import { UserActivity } from "@/components/analytics/user-activity"
+import { IncomeMonthBreakdown } from "@/components/analytics/income-month-breakdown"
+import { ExpenseMonthBreakdown } from "@/components/analytics/expense-month-breakdown"
+import { CumulativeBalanceChart } from "@/components/analytics/cumulative-balance-chart"
 import { useLanguage } from "@/lib/i18n"
 
 export function OverviewTab() {
@@ -38,28 +38,28 @@ export function OverviewTab() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7 mt-4">
         <Card className="col-span-4">
           <CardHeader>
-            <CardTitle className="text-xl font-semibold">{t("Account Growth")}</CardTitle>
+            <CardTitle className="text-xl font-semibold">{t("Monthly Income")}</CardTitle>
           </CardHeader>
           <CardContent>
-            <AccountGrowth />
+            <IncomeMonthBreakdown />
           </CardContent>
         </Card>
         <Card className="col-span-3">
           <CardHeader>
-            <CardTitle className="text-xl font-semibold">{t("Top Products")}</CardTitle>
+            <CardTitle className="text-xl font-semibold">{t("Monthly Expenses")}</CardTitle>
           </CardHeader>
           <CardContent>
-            <TopProducts />
+            <ExpenseMonthBreakdown />
           </CardContent>
         </Card>
       </div>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7 mt-4">
-        <Card className="col-span-4">
+        <Card className="col-span-7">
           <CardHeader>
-            <CardTitle className="text-xl font-semibold">{t("User Activity")}</CardTitle>
+            <CardTitle className="text-xl font-semibold">{t("Balance Evolution")}</CardTitle>
           </CardHeader>
           <CardContent>
-            <UserActivity />
+            <CumulativeBalanceChart />
           </CardContent>
         </Card>
       </div>
