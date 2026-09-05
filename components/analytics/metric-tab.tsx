@@ -6,6 +6,7 @@ import { Bar, BarChart, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YA
 import { useTheme } from "next-themes"
 import { useState } from "react"
 import { useLanguage } from "@/lib/i18n"
+import { useTransactions } from "@/lib/transactions"
 
 const customerSegmentationData = [
   { segment: "High Value", count: 1200 },
@@ -82,7 +83,13 @@ export function MetricTab({
   metricsCard,
 }: MetricTabProps) {
   const { theme } = useTheme()
-  const [selectedMonth, setSelectedMonth] = useState(getCurrentMonth)
+  const { transactions } = useTransactions()
+  // El mes seleccionado por defecto es el de la ultima transaccion,
+  // asi las pestanas de Ingresos y Gastos abren mostrando datos reales
+  const [selectedMonth, setSelectedMonth] = useState(() => {
+    const latestDate = transactions.reduce((max, transaction) => (transaction.date > max ? transaction.date : max), "")
+    return latestDate.length >= 7 ? latestDate.slice(5, 7) : getCurrentMonth()
+  })
   const { t } = useLanguage()
 
   return (

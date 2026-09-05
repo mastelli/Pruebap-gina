@@ -114,8 +114,11 @@ function parseCsvMovements(content: string): BankMovement[] {
 }
 
 function looksLikeRevolut(content: string): boolean {
-  const head = content.slice(0, 2000)
-  return head.includes("Fecha de inicio") && head.includes("Saldo")
+  const head = content.slice(0, 4000)
+  // La cabecera aparece en ingles ("Started Date"/"Balance") o en espanol
+  // ("Fecha de inicio"/"Saldo") segun el idioma de la cuenta
+  const hasDateField = head.includes("Started Date") || head.includes("Fecha de inicio")
+  return hasDateField && (head.includes("Balance") || head.includes("Saldo"))
 }
 
 // Fechas tipo "2026-08-02 22:07:29"
@@ -124,11 +127,16 @@ const ISO_DATE_RE = /^\d{4}-\d{2}-\d{2}(?:[ T]\d{2}:\d{2}(?::\d{2})?)?$/
 function parseRevolutMovements(content: string): BankMovement[] {
   const movements: BankMovement[] = []
 
+  // Los informes exportados con configuracion espanola usan ";" como
+  // separador y "," como decimal (p. ej. guardados desde Excel); el
+  // resto de exports usan "," y "." respectivamente
+  const sep = content.slice(0, 4000).includes(";") ? ";" : ","
+
   for (const rawLine of content.split(/\r?\n/)) {
     const line = rawLine.trim()
     if (!line) continue
 
-    const fields = line.split(",").map((field) => field.trim())
+    const fields = line.split(sep).map((field) => field.trim())
     if (fields.length < 6) continue
 
     // Localizar las dos primeras fechas (fecha de inicio y fecha de finalización);
@@ -147,9 +155,9 @@ function parseRevolutMovements(content: string): BankMovement[] {
     if (rest.length < 5) continue
 
     const tail = rest.slice(-5)
-    const amountValue = Number.parseFloat(tail[0])
-    const feeValue = tail[1] === "" ? 0 : Number.parseFloat(tail[1])
-    const balanceValue = Number.parseFloat(tail[4])
+    const amountValue = parseEuropeanNumber(tail[0])
+    const feeValue = tail[1] === "" ? 0 : parseEuropeanNumber(tail[1])
+    const balanceValue = parseEuropeanNumber(tail[4])
 
     if (Number.isNaN(amountValue) || Number.isNaN(balanceValue)) continue
 
