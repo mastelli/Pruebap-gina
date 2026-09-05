@@ -172,7 +172,7 @@ function PriceChart({ history, target, bear, bull, range }: { history: { date: s
           <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
           <XAxis dataKey="date" tick={{ fontSize: 10 }} tickFormatter={formatTick}
             interval={Math.max(Math.floor(data.length / 8), 0)} minTickGap={30} />
-          <YAxis tick={{ fontSize: 10 }} domain={zoom.yDomain} tickFormatter={v => `$${v}`} width={55} />
+          <YAxis tick={{ fontSize: 10 }} domain={zoom.yDomain} tickFormatter={v => `$${Number(v).toFixed(2)}`} width={55} />
           <RechartsTooltip content={<ChartTooltip range={range} />}
             cursor={{ stroke: "hsl(var(--muted-foreground))", strokeWidth: 1, strokeDasharray: "4 4" }} />
           <Line type="monotone" dataKey="price" stroke="hsl(var(--foreground))" strokeWidth={2} dot={false} name="Precio" />
