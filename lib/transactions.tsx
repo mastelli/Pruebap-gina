@@ -161,3 +161,18 @@ export function getPeriodPrefix(transactions: Transaction[], month: string): str
   if (!Number.isFinite(latestYear)) return `${new Date().getFullYear()}-${month}`
   return `${latestYear}-${month}`
 }
+
+// Prefijo AAAA-MM del momento real de los datos: el periodo (mes + anio) de la
+// ultima transaccion importada o anadida. Sin datos, cae al mes en curso.
+export function getLatestPeriod(transactions: Transaction[]): string {
+  let latest = ""
+  for (const transaction of transactions) {
+    const prefix = transaction.date.slice(0, 7)
+    if (prefix.length === 7 && prefix > latest) latest = prefix
+  }
+  if (!latest) {
+    const now = new Date()
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`
+  }
+  return latest
+}

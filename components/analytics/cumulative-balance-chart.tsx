@@ -4,7 +4,7 @@ import { Bar, ComposedChart, Legend, Line, ResponsiveContainer, Tooltip, XAxis, 
 import { Card, CardContent } from "@/components/ui/card"
 import { useTheme } from "next-themes"
 import { useLanguage } from "@/lib/i18n"
-import { useTransactions } from "@/lib/transactions"
+import { useTransactions, getLatestPeriod } from "@/lib/transactions"
 
 const MONTHS = [
   "January",
@@ -42,12 +42,11 @@ export function CumulativeBalanceChart() {
   const { t } = useLanguage()
   const { transactions } = useTransactions()
 
-  const now = new Date()
-  const year = now.getFullYear()
+  const [year, latestMonth] = getLatestPeriod(transactions).split("-").map(Number)
 
   const data: ChartPoint[] = []
   let cumulative = 0
-  for (let m = 0; m <= now.getMonth(); m++) {
+  for (let m = 0; m < latestMonth; m++) {
     const prefix = `${year}-${String(m + 1).padStart(2, "0")}`
     let income = 0
     let expenses = 0

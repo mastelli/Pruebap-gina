@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Wallet, DollarSign, Receipt, LineChart, TrendingUp } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 import { useLanguage } from "@/lib/i18n"
-import { useTransactions } from "@/lib/transactions"
+import { useTransactions, getLatestPeriod, getPeriodPrefix } from "@/lib/transactions"
 import { usePortfolioEurTotal } from "@/components/portfolio-total"
 
 function formatEuros(value: number, decimals = 2): string {
@@ -16,12 +16,19 @@ function formatEuros(value: number, decimals = 2): string {
   })
 }
 
-// "YYYY-MM" del mes en curso y del anterior (cruza de ano correctamente)
-function monthPrefixes(): { cur: string; prev: string } {
-  const now = new Date()
-  const cur = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`
-  const prevDate = new Date(now.getFullYear(), now.getMonth() - 1, 1)
-  const prev = `${prevDate.getFullYear()}-${String(prevDate.getMonth() + 1).padStart(2, "0")}`
+// Periodo real de los datos (mes de la ultima transaccion) y el periodo
+// anterior: asi las tarjetas nunca muestran 0 por mirar un mes vacio
+function monthPrefixes(transactions: ReturnType<typeof useTransactions>["transactions"]): {
+  cur: string
+  prev: string
+} {
+  const cur = getLatestPeriod(transactions)
+  const [year, month] = cur.split("-").map((part) => Number.parseInt(part, 10))
+  const prevDate = new Date(year, month - 2, 1)
+  const prev = getPeriodPrefix(
+    transactions,
+    String(prevDate.getMonth() + 1).padStart(2, "0"),
+  )
   return { cur, prev }
 }
 
@@ -39,7 +46,7 @@ export function OverviewCards() {
   const { transactions } = useTransactions()
   const { total: investment, momPct } = usePortfolioEurTotal()
 
-  const { cur, prev } = monthPrefixes()
+  const { cur, prev } = monthPrefixes(transactions)
   let incCur = 0
   let incPrev = 0
   let expCur = 0

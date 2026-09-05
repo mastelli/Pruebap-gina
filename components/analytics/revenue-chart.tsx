@@ -14,7 +14,7 @@ import {
 import { Card, CardContent } from "@/components/ui/card"
 import { useTheme } from "next-themes"
 import { useLanguage } from "@/lib/i18n"
-import { useTransactions } from "@/lib/transactions"
+import { useTransactions, getLatestPeriod } from "@/lib/transactions"
 import { usePortfolioEurTotal } from "@/components/portfolio-total"
 import { storageGetItem } from "@/lib/auth"
 
@@ -70,9 +70,8 @@ export function RevenueChart() {
     }
   }, [])
 
-  const now = new Date()
-  const year = now.getFullYear()
-  const lastMonthIndex = now.getMonth()
+  const [year, latestMonth] = getLatestPeriod(transactions).split("-").map(Number)
+  const lastMonthIndex = latestMonth - 1
 
   const data: ChartPoint[] = []
   for (let m = 0; m <= lastMonthIndex; m++) {

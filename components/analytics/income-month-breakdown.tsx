@@ -1,7 +1,7 @@
 "use client"
 
 import { useLanguage } from "@/lib/i18n"
-import { useTransactions, getPeriodPrefix } from "@/lib/transactions"
+import { useTransactions, getLatestPeriod } from "@/lib/transactions"
 import { getIncomeBreakdown } from "@/lib/income"
 
 function formatEuros(value: number): string {
@@ -16,8 +16,7 @@ export function IncomeMonthBreakdown() {
   const { t } = useLanguage()
   const { transactions } = useTransactions()
 
-  const currentMonth = String(new Date().getMonth() + 1).padStart(2, "0")
-  const prefix = getPeriodPrefix(transactions, currentMonth)
+  const prefix = getLatestPeriod(transactions)
   const { salary, transfers, bizum } = getIncomeBreakdown(transactions, prefix)
   const total = salary + transfers + bizum
 
