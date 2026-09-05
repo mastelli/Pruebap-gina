@@ -6,6 +6,7 @@ import { MetricTab } from "@/components/analytics/metric-tab"
 import { ExpenseDoughnut } from "@/components/analytics/expense-doughnut"
 import { ExpenseTypes } from "@/components/analytics/expense-types"
 import { ExpenseHistory } from "@/components/analytics/expense-history"
+import { ExpenseInsights } from "@/components/analytics/expense-insights"
 import { useLanguage } from "@/lib/i18n"
 import { useTransactions, getPeriodPrefix, sortByDateDesc } from "@/lib/transactions"
 import { getCategoryFor, getAllExpenseCategories } from "@/lib/categories"
@@ -226,6 +227,9 @@ function ExpenseOverview({ month, setMonth }: { month: string; setMonth: (m: str
           </CardContent>
         </Card>
       </div>
+
+      {/* Mensajes de ayuda del mes */}
+      <ExpenseInsights month={month} />
 
       {/* Presupuestos + historial anual */}
       <div className="space-y-4">
