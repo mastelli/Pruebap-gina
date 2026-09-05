@@ -62,7 +62,7 @@ export function NetWorth() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-col items-center gap-6 md:flex-row md:justify-between">
+      <div className="flex flex-col items-center gap-6 lg:flex-row lg:justify-between">
         <div className="relative h-[240px] w-[240px] shrink-0">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>

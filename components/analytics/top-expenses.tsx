@@ -25,7 +25,7 @@ export function TopExpenses() {
   }
 
   return (
-    <div className="space-y-3">
+    <div className="grid gap-3 sm:grid-cols-2">
       {top.map((transaction) => {
         const category = getCategoryFor(transaction)
         return (

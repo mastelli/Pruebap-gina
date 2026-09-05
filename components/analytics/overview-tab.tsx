@@ -46,20 +46,20 @@ export function OverviewTab() {
         </Card>
         <Card className="col-span-4">
           <CardHeader>
-            <CardTitle className="text-xl font-semibold">{t("Top Expenses")}</CardTitle>
+            <CardTitle className="text-xl font-semibold">{t("Net Worth")}</CardTitle>
           </CardHeader>
           <CardContent>
-            <TopExpenses />
+            <NetWorth />
           </CardContent>
         </Card>
       </div>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7 mt-4">
         <Card className="col-span-7">
           <CardHeader>
-            <CardTitle className="text-xl font-semibold">{t("Net Worth")}</CardTitle>
+            <CardTitle className="text-xl font-semibold">{t("Top Expenses")}</CardTitle>
           </CardHeader>
           <CardContent>
-            <NetWorth />
+            <TopExpenses />
           </CardContent>
         </Card>
       </div>
