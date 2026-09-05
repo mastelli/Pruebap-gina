@@ -1,7 +1,6 @@
 "use client"
 
 import Link from "next/link"
-import { useMemo } from "react"
 import {
   Calculator,
   LineChart,
@@ -10,7 +9,8 @@ import {
   ArrowRight,
   Check,
   Sparkles,
-  Play,
+  GraduationCap,
+  Lightbulb,
 } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useLanguage } from "@/lib/i18n"
@@ -72,61 +72,44 @@ const TOOLS: Tool[] = [
   },
 ]
 
-// Valores por defecto de cada calculadora
-const COMPOUND = { initial: 10000, contribution: 500, rate: 7, years: 20, periods: 12 }
-const REAL_ESTATE = { price: 150000, ltv: 0.7, tint: 3, years: 30, rent: 900 }
-
-function fmtEuro(v: number): string {
-  return v.toLocaleString("es-ES", {
-    style: "currency",
-    currency: "EUR",
-    maximumFractionDigits: 0,
-  })
+interface Lesson {
+  href: string
+  icon: LucideIcon
+  accent: Accent
+  titleKey: string
+  whatKey: string
+  lessonKey: string
 }
+
+const LESSONS: Lesson[] = [
+  {
+    href: "/calculator/compound",
+    icon: LineChart,
+    accent: ACCENTS.indigo,
+    titleKey: "Compound Interest",
+    whatKey: "Compound what",
+    lessonKey: "Compound lesson",
+  },
+  {
+    href: "/calculator/realestate",
+    icon: Building2,
+    accent: ACCENTS.emerald,
+    titleKey: "Real Estate Assets",
+    whatKey: "Real estate what",
+    lessonKey: "Real estate lesson",
+  },
+  {
+    href: "/calculator/stocks",
+    icon: TrendingUp,
+    accent: ACCENTS.sky,
+    titleKey: "Stocks",
+    whatKey: "Stocks what",
+    lessonKey: "Stocks lesson",
+  },
+]
 
 export default function CalculatorHub() {
   const { t } = useLanguage()
-
-  const compoundValue = useMemo(() => {
-    const m = COMPOUND.rate / 100 / COMPOUND.periods
-    const g = Math.pow(1 + m, COMPOUND.periods * COMPOUND.years)
-    return COMPOUND.initial * g + COMPOUND.contribution * ((g - 1) / m)
-  }, [])
-
-  const mortgageInstallment = useMemo(() => {
-    const loan = REAL_ESTATE.price * REAL_ESTATE.ltv
-    const i = REAL_ESTATE.tint / 100 / 12
-    const n = REAL_ESTATE.years * 12
-    const k = Math.pow(1 + i, n)
-    return (loan * i * k) / (k - 1)
-  }, [])
-
-  const examples: { href: string; icon: LucideIcon; accent: Accent; nameKey: string; inputKey: string; output: string }[] = [
-    {
-      href: "/calculator/compound",
-      icon: LineChart,
-      accent: ACCENTS.indigo,
-      nameKey: "Compound Interest",
-      inputKey: "Compound example input",
-      output: `${t("In 20 years")}: ${fmtEuro(Math.round(compoundValue / 100) * 100)}`,
-    },
-    {
-      href: "/calculator/realestate",
-      icon: Building2,
-      accent: ACCENTS.emerald,
-      nameKey: "Real Estate Assets",
-      inputKey: "Real estate example input",
-      output: `${t("Mortgage installment")}: ${fmtEuro(Math.round(mortgageInstallment))}/mes`,
-    },
-    {
-      href: "/calculator/stocks",
-      icon: TrendingUp,
-      accent: ACCENTS.sky,
-      nameKey: "Stocks",
-      inputKey: "Stocks example input",
-      output: t("Instant valuation"),
-    },
-  ]
 
   return (
     <div className="space-y-6">
@@ -178,40 +161,47 @@ export default function CalculatorHub() {
         ))}
       </div>
 
-      {/* ── Quick start with examples ── */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-base">
-            <Play className="h-4 w-4 text-muted-foreground" />
-            {t("Start example")}
-          </CardTitle>
-          <p className="text-sm text-muted-foreground">{t("Start example hint")}</p>
-        </CardHeader>
-        <CardContent className="space-y-2.5">
-          {examples.map((ex) => (
-            <Link
-              key={ex.href}
-              href={ex.href}
-              className="group flex items-center gap-4 rounded-xl border p-4 transition-colors hover:border-primary/40 hover:bg-secondary"
-            >
-              <div className={`rounded-xl p-2.5 shrink-0 ${ex.accent.chip}`}>
-                <ex.icon className="h-5 w-5" />
+      {/* ── Learn before you calculate ── */}
+      <div className="pt-4">
+        <div className="flex items-center gap-2">
+          <GraduationCap className="h-4 w-4 text-muted-foreground" />
+          <h2 className="text-base font-semibold text-foreground">{t("Learn before you calculate")}</h2>
+        </div>
+        <p className="mt-1 text-sm text-muted-foreground">{t("Learn hint")}</p>
+
+        <div className="mt-6 grid grid-cols-1 gap-8 md:grid-cols-3">
+          {LESSONS.map((lesson) => (
+            <div key={lesson.href} className="flex flex-col">
+              <div className="flex items-center gap-2.5">
+                <div className={`rounded-xl p-2 ${lesson.accent.chip}`}>
+                  <lesson.icon className="h-5 w-5" />
+                </div>
+                <h3 className="text-base font-semibold text-foreground">{t(lesson.titleKey)}</h3>
               </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-sm font-semibold text-foreground">{t(ex.nameKey)}</p>
-                <p className="text-sm text-muted-foreground">{t(ex.inputKey)}</p>
+
+              <div className="mt-4">
+                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  {t("What it measures")}
+                </p>
+                <p className="mt-1.5 text-sm text-muted-foreground">{t(lesson.whatKey)}</p>
               </div>
-              <div className="hidden shrink-0 text-right sm:block">
-                <p className="text-sm font-bold text-foreground">{ex.output}</p>
+
+              <div className="mt-4 flex items-start gap-2.5 rounded-xl bg-secondary/50 p-3">
+                <Lightbulb className={`mt-0.5 h-4 w-4 shrink-0 ${lesson.accent.check}`} />
+                <p className="text-sm text-foreground/85">{t(lesson.lessonKey)}</p>
               </div>
-              <span className="inline-flex shrink-0 items-center gap-1 rounded-full border px-3 py-1.5 text-sm font-medium transition-all group-hover:translate-x-0.5 group-hover:border-primary/50 group-hover:bg-primary/10">
+
+              <Link
+                href={lesson.href}
+                className="group mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-foreground transition-colors hover:text-primary"
+              >
                 {t("Try it")}
-                <ArrowRight className="h-3.5 w-3.5" />
-              </span>
-            </Link>
+                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+              </Link>
+            </div>
           ))}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {/* ── Tip ── */}
       <div className="flex items-start gap-3 rounded-2xl border border-dashed bg-card/50 p-4">
