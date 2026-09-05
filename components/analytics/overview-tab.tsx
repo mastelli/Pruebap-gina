@@ -5,8 +5,8 @@ import { OverviewCards } from "@/components/analytics/overview-cards"
 import { RevenueChart } from "@/components/analytics/revenue-chart"
 import { RecentTransactions } from "@/components/analytics/recent-transactions"
 import { SavingsRate } from "@/components/analytics/savings-rate"
-import { TopExpenses } from "@/components/analytics/top-expenses"
 import { NetWorth } from "@/components/analytics/net-worth"
+import { MonthProjection } from "@/components/analytics/month-projection"
 import { useLanguage } from "@/lib/i18n"
 
 export function OverviewTab() {
@@ -56,10 +56,10 @@ export function OverviewTab() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7 mt-4">
         <Card className="col-span-7">
           <CardHeader>
-            <CardTitle className="text-xl font-semibold">{t("Top Expenses")}</CardTitle>
+            <CardTitle className="text-xl font-semibold">{t("Month Projection")}</CardTitle>
           </CardHeader>
           <CardContent>
-            <TopExpenses />
+            <MonthProjection />
           </CardContent>
         </Card>
       </div>
