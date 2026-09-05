@@ -19,7 +19,7 @@ export function RecentTransactions({ month }: { month?: string }) {
   }
 
   return (
-    <div className="min-h-0 flex-1 space-y-1 overflow-y-auto pr-1">
+    <div className="max-h-[460px] min-h-0 flex-1 space-y-1 overflow-y-auto pr-1">
       {recent.map((transaction) => (
         <div key={transaction.id} className="flex items-center py-2">
           <Badge variant={transaction.amount >= 0 ? "default" : "secondary"} className="mr-3">
