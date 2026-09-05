@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Search, TrendingUp, TrendingDown, AlertTriangle, CheckCircle, XCircle, Loader2, HelpCircle } from "lucide-react"
+import { Search, TrendingUp, TrendingDown, AlertTriangle, CheckCircle, XCircle, Loader2, HelpCircle, BookOpen, ClipboardList, Target, Lightbulb, Info, Sparkles } from "lucide-react"
 import { useLanguage } from "@/lib/i18n"
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip"
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Legend, Tooltip as RechartsTooltip } from "recharts"
@@ -780,6 +780,139 @@ export function StockAnalyzer() {
           </Card>
         </>
       )}
+
+      {/* ── Sección educativa ── */}
+      <div className="pt-2 space-y-6">
+        <div className="flex items-center gap-2.5">
+          <BookOpen className="h-5 w-5 text-primary" />
+          <h2 className="text-xl font-bold tracking-tight text-foreground">¿Cómo funciona el análisis de acciones?</h2>
+        </div>
+        <p className="text-sm text-muted-foreground -mt-3">
+          Busca una empresa arriba y usa esta guía para interpretar lo que ves.
+        </p>
+
+        {/* Callout motivacional */}
+        <div className="rounded-2xl border bg-card p-6 shadow-sm">
+          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Ejemplo real</p>
+          <p className="mt-2 text-xl font-bold text-foreground">
+            Invertir <span className="text-primary">10.000 €</span> en el índice S&P 500 hace{" "}
+            <span className="text-primary">20 años</span> (≈ <span className="text-primary">8% anual</span> histórico)
+            te habría convertido hoy en casi <span className="text-emerald-600">47.000 €</span>.
+          </p>
+          <p className="mt-2 text-sm text-muted-foreground">
+            No por acertar el momento, sino por permanecer invertido: el mercado sube y baja a corto plazo, pero a
+            décadas vista las grandes empresas han tendido a crecer. Por eso este analizador te ayuda a juzgar la
+            <em> calidad</em> de una empresa, no su precio de mañana.
+          </p>
+        </div>
+
+        {/* Qué mide / De dónde salen los números */}
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div className="rounded-2xl border bg-card p-6 shadow-sm">
+            <div className="flex items-center gap-2">
+              <ClipboardList className="h-4 w-4 text-primary" />
+              <h3 className="font-semibold text-foreground">¿Qué mide el analizador?</h3>
+            </div>
+            <p className="mt-3 text-sm text-muted-foreground leading-relaxed">
+              El <strong className="text-foreground">Fundamental Score</strong> combina cinco bloques: valoración,
+              crecimiento, rentabilidad, salud financiera y flujo de caja. El resultado es un 0-100 y una etiqueta que
+              dice si la acción parece <em>cara</em> o <em>barata</em> frente a las cifras de la propia empresa.
+            </p>
+            <ul className="mt-4 space-y-1.5 text-sm text-muted-foreground">
+              <li className="flex gap-2">
+                <Target className="h-4 w-4 shrink-0 text-primary" />
+                <span><strong className="text-foreground">Valoración</strong> — precio actual frente a un objetivo calculado con fundamentos (beneficios, flujo de caja y múltiplos del sector).</span>
+              </li>
+              <li className="flex gap-2">
+                <TrendingUp className="h-4 w-4 shrink-0 text-primary" />
+                <span><strong className="text-foreground">Crecimiento</strong> — cómo evolucionan ventas y beneficios trimestre a trimestre y a 5 años.</span>
+              </li>
+              <li className="flex gap-2">
+                <CheckCircle className="h-4 w-4 shrink-0 text-primary" />
+                <span><strong className="text-foreground">Calidad del negocio</strong> — márgenes, ROE, deuda y caja para saber si la empresa genera dinero de verdad.</span>
+              </li>
+              <li className="flex gap-2">
+                <HelpCircle className="h-4 w-4 shrink-0 text-primary" />
+                <span><strong className="text-foreground">Consenso de analistas</strong> — qué opinan los profesionales que siguen la acción de cerca.</span>
+              </li>
+            </ul>
+          </div>
+          <div className="rounded-2xl border bg-card p-6 shadow-sm">
+            <div className="flex items-center gap-2">
+              <Target className="h-4 w-4 text-primary" />
+              <h3 className="font-semibold text-foreground">De dónde sale el precio objetivo</h3>
+            </div>
+            <p className="mt-3 text-sm text-muted-foreground leading-relaxed">
+              El objetivo combina un descuento de los flujos de caja esperados con los múltiplos de mercado (PER,
+              EV/EBITDA) y las estimaciones de los analistas. No es una promesa de compra: es una referencia razonada
+              para comparar con el precio actual.
+            </p>
+            <p className="mt-3 text-sm text-muted-foreground leading-relaxed">
+              En el gráfico verás tres líneas: el <strong className="text-foreground">objetivo</strong> del modelo y los
+              escenarios <strong className="text-red-500">bajista (bear)</strong> y{" "}
+              <strong className="text-green-600">alcista (bull)</strong> con su probabilidad. Si el precio cotiza muy
+              por debajo del objetivo y los fundamentos son sólidos, el mercado puede estar descontando riesgos… o
+              señalando una oportunidad.
+            </p>
+            <div className="mt-4 flex flex-wrap gap-1.5">
+              {["NYSE · Nasdaq", "Large caps", "ETFs", "Índices", "Cualquier mercado"].map((item) => (
+                <span key={item} className="rounded-full border px-2.5 py-0.5 text-xs text-muted-foreground">
+                  {item}
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Consejos para leer los resultados */}
+        <div className="rounded-2xl border bg-card p-6 shadow-sm">
+          <div className="flex items-center gap-2">
+            <Lightbulb className="h-4 w-4 text-primary" />
+            <h3 className="font-semibold text-foreground">Consejos para interpretar tu análisis</h3>
+          </div>
+          <ul className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2 text-sm text-muted-foreground leading-relaxed">
+            <li className="flex gap-2">
+              <span className="text-primary">1.</span>
+              <span><strong className="text-foreground">Compara con el sector.</strong> Un PER bajo solo dice algo frente a empresas similares del mismo sector.</span>
+            </li>
+            <li className="flex gap-2">
+              <span className="text-primary">2.</span>
+              <span><strong className="text-foreground">Asume el riesgo de precio.</strong> Una acción puede estar barata y seguir bajando: el precio objetivo es orientativo, no una cuenta atrás.</span>
+            </li>
+            <li className="flex gap-2">
+              <span className="text-primary">3.</span>
+              <span><strong className="text-foreground">Mira la calidad, no el último trimestre.</strong> Márgenes altos, poca deuda y caja positiva son lo que sobrevive a las crisis.</span>
+            </li>
+            <li className="flex gap-2">
+              <span className="text-primary">4.</span>
+              <span><strong className="text-foreground">Desconfía de alertas en rojo.</strong> Cada alerta es una advertencia que debes entender antes de invertir, no un veredicto.</span>
+            </li>
+            <li className="flex gap-2">
+              <span className="text-primary">5.</span>
+              <span><strong className="text-foreground">Diversifica.</strong> Ninguna acción individual es segura por muy bien puntuada que salga en el análisis.</span>
+            </li>
+          </ul>
+        </div>
+
+        {/* Callout con cómo empezar */}
+        <div className="flex items-start gap-3 rounded-2xl bg-secondary/60 p-5">
+          <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+          <p className="text-sm text-foreground/90 leading-relaxed">
+            ¿Aún no tienes datos? Abajo del buscador tienes acciones de primera línea —{""} AAPL, MSFT, NVDA, GOOGL, META… {""}
+            pulsa una y observa cómo se monta el análisis al instante.
+          </p>
+        </div>
+
+        {/* Aviso */}
+        <div className="flex items-start gap-2.5 rounded-2xl border border-dashed p-4">
+          <Info className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
+          <p className="text-xs text-muted-foreground leading-relaxed">
+            Todo el análisis se construye con datos públicos y es orientativo: no constituye asesoramiento financiero.
+            La rentabilidad pasada de un índice o una acción no garantiza resultados futuros. Antes de invertir,
+            contrasta la información con un profesional.
+          </p>
+        </div>
+      </div>
     </div>
   )
 }
