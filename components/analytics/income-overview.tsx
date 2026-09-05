@@ -9,6 +9,7 @@ import { getCategoryFor } from "@/lib/categories"
 import type { LucideIcon } from "lucide-react"
 import { IncomeCategoriesChart } from "./income-breakdown"
 import { IncomeHistory } from "./income-history"
+import { IncomeTips } from "./income-tips"
 
 const MONTHS = [
   "January",
@@ -223,6 +224,9 @@ export function IncomeOverview({
           <IncomeHistory />
         </CardContent>
       </Card>
+
+      {/* Consejos sobre ingresos */}
+      <IncomeTips />
     </div>
   )
 }
