@@ -228,7 +228,7 @@ function ExpenseOverview({ month, setMonth }: { month: string; setMonth: (m: str
       </div>
 
       {/* Presupuestos + historial anual */}
-      <div className="grid gap-4 lg:grid-cols-2">
+      <div className="space-y-4">
         <Card className="flex flex-col">
           <CardHeader>
             <CardTitle className="text-lg font-semibold">{t("Budget")}</CardTitle>
