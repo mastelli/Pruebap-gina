@@ -792,7 +792,7 @@ export function StockAnalyzer() {
         </p>
 
         {/* Callout motivacional */}
-        <div className="rounded-2xl border bg-card p-6 shadow-sm">
+        <div className="rounded-2xl bg-card p-6 shadow-sm">
           <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Ejemplo real</p>
           <p className="mt-2 text-xl font-bold text-foreground">
             Invertir <span className="text-primary">10.000 €</span> en el índice S&P 500 hace{" "}
@@ -865,7 +865,7 @@ export function StockAnalyzer() {
         </div>
 
         {/* Consejos para leer los resultados */}
-        <div className="rounded-2xl border bg-card p-6 shadow-sm">
+        <div className="rounded-2xl bg-card p-6 shadow-sm">
           <div className="flex items-center gap-2">
             <Lightbulb className="h-4 w-4 text-primary" />
             <h3 className="font-semibold text-foreground">Consejos para interpretar tu análisis</h3>
