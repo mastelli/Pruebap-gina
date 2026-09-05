@@ -138,12 +138,26 @@ export async function GET(req: NextRequest) {
     if (res.status === 200) {
       try {
         const data = JSON.parse(res.body)
+        // Coincide por ticket o por nombre de empresa; Yahoo no siempre
+        // envía marketCap, así que no se exige aqui y solo se usa para ordenar
         const quotes = (data.quotes ?? [])
-          .filter((q: any) => q.symbol && q.shortname && q.quoteType === "EQUITY" && (q.marketCap ?? 0) > 0)
-          .map((q: any) => ({ symbol: q.symbol, name: q.shortname, exchange: q.exchange ?? "", marketCap: q.marketCap ?? 0 }))
+          .filter((q: any) => q.symbol && (q.shortname || q.longname) && q.quoteType === "EQUITY")
+          .map((q: any) => ({
+            symbol: q.symbol,
+            name: q.shortname ?? q.longname,
+            exchange: q.exchange ?? "",
+            marketCap: q.marketCap ?? 0,
+          }))
           .sort((a: any, b: any) => (b.marketCap ?? 0) - (a.marketCap ?? 0))
-          .slice(0, 8)
-        return NextResponse.json(quotes)
+        // Evita duplicados por nombre (misma empresa en varias bolsas)
+        const seen = new Set<string>()
+        const deduped = quotes.filter((q: any) => {
+          const key = String(q.name).toLowerCase()
+          if (seen.has(key)) return false
+          seen.add(key)
+          return true
+        })
+        return NextResponse.json(deduped.slice(0, 8))
       } catch { return NextResponse.json([]) }
     }
     return NextResponse.json([])

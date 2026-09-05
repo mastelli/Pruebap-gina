@@ -649,7 +649,7 @@ const translations: Record<string, string> = {
   "Property Taxes": "Impuestos de la Propiedad",
   "Coming Soon": "Próximamente",
   "Stocks": "Acciones",
-  "Search ticker (e.g. MSFT, AAPL, NVDA)": "Buscar ticker (ej: MSFT, AAPL, NVDA)",
+  "Search ticker (e.g. MSFT, AAPL, NVDA)": "Busca por ticker o nombre de empresa (ej: MSFT, Oracle)",
   "Analyze": "Analizar",
   "Target Price": "Precio Objetivo",
   "Expected Value": "Valor Esperado",
