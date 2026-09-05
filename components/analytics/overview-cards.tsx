@@ -16,15 +16,18 @@ function formatEuros(value: number, decimals = 2): string {
   })
 }
 
-// Periodo real de los datos (mes de la ultima transaccion) y el periodo
-// anterior: asi las tarjetas nunca muestran 0 por mirar un mes vacio
-function monthPrefixes(transactions: ReturnType<typeof useTransactions>["transactions"]): {
+// Periodo real de los datos (mes elegido o el de la ultima transaccion) y el
+// periodo anterior: asi las tarjetas nunca muestran 0 por mirar un mes vacio
+function monthPrefixes(
+  transactions: ReturnType<typeof useTransactions>["transactions"],
+  month?: string,
+): {
   cur: string
   prev: string
 } {
-  const cur = getLatestPeriod(transactions)
-  const [year, month] = cur.split("-").map((part) => Number.parseInt(part, 10))
-  const prevDate = new Date(year, month - 2, 1)
+  const cur = month ? getPeriodPrefix(transactions, month) : getLatestPeriod(transactions)
+  const [year, monthNum] = cur.split("-").map((part) => Number.parseInt(part, 10))
+  const prevDate = new Date(year, monthNum - 2, 1)
   const prev = getPeriodPrefix(
     transactions,
     String(prevDate.getMonth() + 1).padStart(2, "0"),
@@ -41,12 +44,12 @@ interface CardModel {
   invertColor?: boolean
 }
 
-export function OverviewCards() {
+export function OverviewCards({ month }: { month?: string }) {
   const { t } = useLanguage()
   const { transactions } = useTransactions()
   const { total: investment, momPct } = usePortfolioEurTotal()
 
-  const { cur, prev } = monthPrefixes(transactions)
+  const { cur, prev } = monthPrefixes(transactions, month)
   let incCur = 0
   let incPrev = 0
   let expCur = 0

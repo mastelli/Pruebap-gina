@@ -2,7 +2,7 @@
 
 import { TrendingDown, TrendingUp } from "lucide-react"
 import { useLanguage } from "@/lib/i18n"
-import { useTransactions, getLatestPeriod } from "@/lib/transactions"
+import { useTransactions, getLatestPeriod, getPeriodPrefix } from "@/lib/transactions"
 
 function formatEuros(value: number): string {
   return value.toLocaleString("es-ES", { style: "currency", currency: "EUR" })
@@ -10,11 +10,11 @@ function formatEuros(value: number): string {
 
 // Primer vistazo: cuantos ingresos del mes acaban quedandose como ahorro.
 // Barra segmentada con la parte gastada y la ahorrada de cada euro.
-export function SavingsRate() {
+export function SavingsRate({ month }: { month?: string }) {
   const { t } = useLanguage()
   const { transactions } = useTransactions()
 
-  const period = getLatestPeriod(transactions)
+  const period = month ? getPeriodPrefix(transactions, month) : getLatestPeriod(transactions)
   let income = 0
   let expenses = 0
   for (const transaction of transactions) {

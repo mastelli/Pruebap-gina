@@ -8,14 +8,50 @@ import { SavingsRate } from "@/components/analytics/savings-rate"
 import { NetWorth } from "@/components/analytics/net-worth"
 import { PeriodComparison } from "@/components/analytics/period-comparison"
 import { useLanguage } from "@/lib/i18n"
+import { useState } from "react"
+
+const MONTHS = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+]
 
 export function OverviewTab() {
   const { t } = useLanguage()
+  const [month, setMonth] = useState<string | undefined>(undefined)
 
   return (
     <>
+      <div className="flex flex-wrap items-center justify-center gap-1">
+        {MONTHS.map((name, index) => {
+          const key = String(index + 1).padStart(2, "0")
+          const active = month === key
+          return (
+            <button
+              key={key}
+              onClick={() => setMonth(active ? undefined : key)}
+              className={`rounded-md px-3 py-1.5 text-sm transition-colors ${
+                !active
+                  ? "text-muted-foreground hover:bg-muted hover:text-foreground"
+                  : "bg-primary font-medium text-primary-foreground"
+              }`}
+            >
+              {t(name).slice(0, 3)}
+            </button>
+          )
+        })}
+      </div>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <OverviewCards />
+        <OverviewCards month={month} />
       </div>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7 mt-4">
         <Card className="col-span-4">
@@ -31,7 +67,7 @@ export function OverviewTab() {
             <CardTitle className="text-xl font-semibold">{t("Recent Transactions")}</CardTitle>
           </CardHeader>
           <CardContent>
-            <RecentTransactions />
+            <RecentTransactions month={month} />
           </CardContent>
         </Card>
       </div>
@@ -41,7 +77,7 @@ export function OverviewTab() {
             <CardTitle className="text-xl font-semibold">{t("Savings Rate")}</CardTitle>
           </CardHeader>
           <CardContent>
-            <SavingsRate />
+            <SavingsRate month={month} />
           </CardContent>
         </Card>
         <Card className="col-span-4">
@@ -59,7 +95,7 @@ export function OverviewTab() {
             <CardTitle className="text-xl font-semibold">{t("Period comparison")}</CardTitle>
           </CardHeader>
           <CardContent>
-            <PeriodComparison />
+            <PeriodComparison month={month} />
           </CardContent>
         </Card>
       </div>

@@ -46,11 +46,11 @@ function calcPeriod(transactions: ReturnType<typeof useTransactions>["transactio
 
 // Primer vistazo: como va este periodo frente al anterior en ingresos,
 // gastos y resultado, con un grafico de barras que lo compara.
-export function PeriodComparison() {
+export function PeriodComparison({ month }: { month?: string }) {
   const { t } = useLanguage()
   const { transactions } = useTransactions()
 
-  const cur = getLatestPeriod(transactions)
+  const cur = month ? getPeriodPrefix(transactions, month) : getLatestPeriod(transactions)
   const [curYear, curMonthNum] = cur.split("-").map(Number)
   const prevDate = new Date(curYear, curMonthNum - 2, 1)
   const prev = getPeriodPrefix(

@@ -5,11 +5,15 @@ import { Badge } from "@/components/ui/badge"
 import { useLanguage } from "@/lib/i18n"
 import { useTransactions, sortByDateDesc } from "@/lib/transactions"
 
-export function RecentTransactions() {
+export function RecentTransactions({ month }: { month?: string }) {
   const { t } = useLanguage()
   const { transactions } = useTransactions()
 
-  const recent = sortByDateDesc(transactions).slice(0, 5)
+  const prefix = month
+  const scoped = prefix
+    ? transactions.filter((transaction) => transaction.date.startsWith(prefix))
+    : transactions
+  const recent = sortByDateDesc(scoped).slice(0, 5)
 
   if (recent.length === 0) {
     return <p className="py-8 text-center text-sm text-muted-foreground">{t("No transactions yet")}</p>
