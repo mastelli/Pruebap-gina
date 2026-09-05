@@ -1,33 +1,509 @@
+"use client"
+
+import Link from "next/link"
+import {
+  ArrowRight,
+  Lock,
+  TrendingUp,
+  PieChart,
+  Wallet,
+  ShieldCheck,
+  Calculator,
+  LineChart,
+  Landmark,
+  Globe,
+  Smartphone,
+  Star,
+  Menu,
+  X,
+  CheckCircle2,
+} from "lucide-react"
+import { useState } from "react"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { useLanguage } from "@/lib/i18n"
+
 export default function Welcome() {
+  const { t } = useLanguage()
+  const [mobileOpen, setMobileOpen] = useState(false)
+
   return (
-    <div className="min-h-screen bg-background py-12 px-4">
-      <div className="w-full max-w-2xl text-center">
-        <h1 className="text-4xl font-bold tracking-tight mb-4">Make It Right</h1>
-        <p className="text-lg text-muted-foreground mb-8">
-          Gestión financiera para personas y empresas.
-        </p>
-        <div className="grid grid-cols-2 gap-4 mt-8">
-          <a href="/calculator" className="btn btn-primary flex items-center justify-center">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M12 2v20M2 12h20M4.93 4.93l2.83 2.83l2.83-2.83l-2.83-2.83l2.83-2.83l-2.83 2.83l2.83 2.83l2.83-2.83l-2.83 2.83l2.83 2.83l-2.83-2.83z" />
-            </svg>
-            <span>Calculadora de Interés Compuesto</span>
-          </a>
-          <a href="/analytics/overview" className="btn btn-secondary">
-            Análisis Financiero
-          </a>
+    <div className="min-h-screen bg-background text-foreground">
+      {/* ======================= NAVBAR ======================= */}
+      <header className="sticky top-0 z-50 border-b border-border/60 bg-background/80 backdrop-blur-md">
+        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+          <Link href="/" className="flex items-center gap-2">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+              <LineChart className="h-5 w-5" />
+            </div>
+            <span className="text-lg font-bold tracking-tight">MakeItRight</span>
+          </Link>
+
+          <nav className="hidden items-center gap-8 md:flex">
+            {["Producto", "Características", "Precios", "Blog"].map((label) => (
+              <a
+                key={label}
+                href="#features"
+                className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+              >
+                {label}
+              </a>
+            ))}
+          </nav>
+
+          <div className="hidden items-center gap-3 md:flex">
+            <Button variant="outline" size="sm" asChild>
+              <Link href="/sign-in">{t("Sign in")}</Link>
+            </Button>
+            <Button size="sm" asChild>
+              <Link href="/sign-up">{t("Create account")}</Link>
+            </Button>
+          </div>
+
+          <button
+            className="rounded-md p-2 md:hidden"
+            onClick={() => setMobileOpen(!mobileOpen)}
+            aria-label="Toggle menu"
+          >
+            {mobileOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          </button>
         </div>
-        <div className="mt-6">
-          <h3 className="text-xl font-medium mb-3">Características</h3>
-          <div className="space-y-2">
-            <div>Calculadora de Interés Compuesto</div>
-            <div>Control de Patrimonio neto</div>
+
+        {mobileOpen && (
+          <div className="border-t border-border bg-background px-4 py-4 md:hidden">
+            <nav className="flex flex-col gap-3">
+              <a href="#features" onClick={() => setMobileOpen(false)} className="text-sm font-medium text-muted-foreground hover:text-foreground">
+                Producto
+              </a>
+              <div className="flex gap-3 pt-2">
+                <Button variant="outline" size="sm" className="flex-1" asChild>
+                  <Link href="/sign-in">{t("Sign in")}</Link>
+                </Button>
+                <Button size="sm" className="flex-1" asChild>
+                  <Link href="/sign-up">{t("Create account")}</Link>
+                </Button>
+              </div>
+            </nav>
+          </div>
+        )}
+      </header>
+
+      {/* ======================= HERO ======================= */}
+      <section className="relative overflow-hidden">
+        <div
+          className="pointer-events-none absolute inset-0 -z-10"
+          style={{
+            background:
+              "radial-gradient(ellipse 60% 50% at 50% -10%, hsl(var(--primary) / 0.08), transparent 60%)",
+          }}
+        />
+        <div className="mx-auto max-w-7xl px-4 pb-16 pt-20 sm:px-6 lg:px-8 lg:pb-24 lg:pt-28">
+          <div className="mx-auto max-w-3xl text-center">
+            <Badge variant="secondary" className="mb-5 px-3 py-1">
+              <ShieldCheck className="mr-1.5 h-3.5 w-3.5" />
+              La plataforma financiera de confianza
+            </Badge>
+            <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl lg:text-6xl">
+              Controla tus finanzas.
+              <br />
+              Decide con <span className="text-primary/70">inteligencia</span>.
+            </h1>
+            <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground">
+              MakeItRight reúne tu patrimonio, tus inversiones y tus cálculos en un solo
+              lugar. Analiza, simula y planifica tu futuro financiero con herramientas de
+              nivel profesional.
+            </p>
+            <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+              <Button size="lg" className="min-w-[220px]" asChild>
+                <Link href="/sign-up">
+                  Empieza gratis
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
+              </Button>
+              <Button size="lg" variant="outline" className="min-w-[220px]" asChild>
+                <Link href="/calculator">
+                  Ver calculadoras
+                </Link>
+              </Button>
+            </div>
+            <p className="mt-4 text-sm text-muted-foreground">
+              14 días de prueba gratuita · Sin tarjeta de crédito
+            </p>
           </div>
         </div>
-        <p className="mt-6 text-sm text-muted-foreground">
-          Versión actual. Las funciones completas requieren iniciar sesión.
-        </p>
-      </div>
+      </section>
+
+      {/* ======================= TRUST BAR ======================= */}
+      <section className="border-y border-border/60 bg-card/40">
+        <div className="mx-auto grid max-w-7xl grid-cols-2 gap-8 px-4 py-10 sm:px-6 md:grid-cols-4 lg:px-8">
+          {[
+            { value: "+12.000", label: "Usuarios activos" },
+            { value: "+350M€", label: "Gestionados" },
+            { value: "99,9%", label: "Uptime" },
+            { value: "4,9/5", label: "Valoración" },
+          ].map((stat) => (
+            <div key={stat.label} className="text-center">
+              <div className="text-2xl font-bold tracking-tight sm:text-3xl">{stat.value}</div>
+              <div className="mt-1 text-sm text-muted-foreground">{stat.label}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ======================= FEATURES ======================= */}
+      <section id="features" className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-2xl text-center">
+          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
+            Todo tu dinero, bajo control
+          </h2>
+          <p className="mt-4 text-lg text-muted-foreground">
+            Herramientas que antes solo estaban al alcance de asesores profesionales.
+          </p>
+        </div>
+
+        <div className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {[
+            {
+              icon: Wallet,
+              title: "Control de patrimonio",
+              desc: "Sincroniza tus cuentas y sigue tu patrimonio neto al día. Ingresos, gastos y ahorro en un solo panel.",
+            },
+            {
+              icon: Calculator,
+              title: "Calculadoras financieras",
+              desc: "Interés compuesto, inmuebles, acciones y bonos. Simula escenarios antes de tomar decisiones.",
+            },
+            {
+              icon: TrendingUp,
+              title: "Análisis avanzado",
+              desc: "Gráficos, métricas y diagnóstico automático de tu salud financiera con recomendaciones personalizadas.",
+            },
+            {
+              icon: PieChart,
+              title: "Inversión inteligente",
+              desc: "Sigue tu cartera con cotizaciones en tiempo real y analiza cada activo con nuestro modelo propio.",
+            },
+            {
+              icon: ShieldCheck,
+              title: "Seguridad bancaria",
+              desc: "Autenticación segura y cifrado de extremo a extremo. Tus datos protegidos con los estándares más exigentes.",
+            },
+            {
+              icon: Landmark,
+              title: "Planificación a largo plazo",
+              desc: "Proyecciones de rentabilidad, análisis de deuda y simulación de hipotecas para planificar tu futuro.",
+            },
+          ].map(({ icon: Icon, title, desc }) => (
+            <div
+              key={title}
+              className="group rounded-xl border border-border bg-card p-6 shadow-sm transition-all hover:-translate-y-1 hover:shadow-md"
+            >
+              <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                <Icon className="h-6 w-6" />
+              </div>
+              <h3 className="text-lg font-semibold">{title}</h3>
+              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ======================= CALCULATORS HIGHLIGHT ======================= */}
+      <section className="border-y border-border/60 bg-card/40">
+        <div className="mx-auto grid max-w-7xl items-center gap-12 px-4 py-20 sm:px-6 lg:grid-cols-2 lg:px-8">
+          <div>
+            <Badge variant="secondary" className="mb-4">
+              <Calculator className="mr-1.5 h-3.5 w-3.5" />
+              Prueba sin registro
+            </Badge>
+            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
+              Nuestras calculadoras,
+              <br />
+              a tu alcance
+            </h2>
+            <p className="mt-4 text-lg text-muted-foreground">
+              No necesitas crear una cuenta para empezar. Accede gratis a todas nuestras
+              calculadoras y hazte una idea de lo que es posible.
+            </p>
+            <ul className="mt-6 space-y-3">
+              {[
+                "Interés compuesto con aportaciones periódicas",
+                "Rentabilidad real de propiedades en alquiler",
+                "Análisis fundamental de acciones con objetivo de precio",
+                "Evaluación de bonos y renta fija",
+              ].map((feature) => (
+                <li key={feature} className="flex items-start gap-3">
+                  <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
+                  <span className="text-sm text-muted-foreground">{feature}</span>
+                </li>
+              ))}
+            </ul>
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+              <Button variant="outline" asChild>
+                <Link href="/calculator/compound">Interés compuesto</Link>
+              </Button>
+              <Button variant="outline" asChild>
+                <Link href="/calculator/realestate">Activos inmobiliarios</Link>
+              </Button>
+              <Button variant="outline" asChild>
+                <Link href="/calculator/stocks">Acciones</Link>
+              </Button>
+            </div>
+          </div>
+
+          <div className="relative">
+            <div
+              className="pointer-events-none absolute inset-0 -z-10 rounded-2xl"
+              style={{
+                background:
+                  "radial-gradient(circle at 30% 30%, hsl(var(--primary) / 0.1), transparent 60%)",
+              }}
+            />
+            <div className="space-y-4">
+              {[
+                { label: "Interés compuesto", value: "10.000 € → 43.178 €", sub: "en 15 años al 8% anual" },
+                { label: "Inmueble en alquiler", value: "8,7% ROI", sub: "rentabilidad neta anual" },
+                { label: "Cartera de acciones", value: "+23,4%", sub: "potencial alcista del consenso" },
+              ].map((card) => (
+                <div
+                  key={card.label}
+                  className="rounded-xl border border-border bg-background/80 p-5 shadow-sm backdrop-blur"
+                >
+                  <div className="text-sm font-medium text-muted-foreground">{card.label}</div>
+                  <div className="mt-1 text-2xl font-bold tracking-tight">{card.value}</div>
+                  <div className="mt-0.5 text-sm text-muted-foreground">{card.sub}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ======================= TESTIMONIALS ======================= */}
+      <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-2xl text-center">
+          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
+            Lo que dicen nuestros usuarios
+          </h2>
+        </div>
+        <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {[
+            {
+              quote:
+                "Por fin una herramienta que une mis cuentas, mis inversiones y mis cálculos. He dejado de usar tres aplicaciones distintas.",
+              name: "Carlos M.",
+              role: "Inversor particular",
+            },
+            {
+              quote:
+                "La calculadora de inmuebles me ayudó a decidir no comprar un piso que únicamente habría perdido dinero.",
+              name: "Elena R.",
+              role: "Propietaria y gestora",
+            },
+            {
+              quote:
+                "El diagnóstico financiero automático es oro. Me señala problemas que ni mis números me decían.",
+              name: "Javier T.",
+              role: "Autónomo",
+            },
+          ].map(({ quote, name, role }) => (
+            <div key={name} className="flex flex-col justify-between rounded-xl border border-border bg-card p-6 shadow-sm">
+              <div>
+                <div className="flex gap-1 text-amber-500">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <Star key={i} className="h-4 w-4 fill-current" />
+                  ))}
+                </div>
+                <p className="mt-4 text-sm leading-relaxed text-muted-foreground">“{quote}”</p>
+              </div>
+              <div className="mt-6 flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary">
+                  {name.charAt(0)}
+                </div>
+                <div>
+                  <div className="text-sm font-semibold">{name}</div>
+                  <div className="text-xs text-muted-foreground">{role}</div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ======================= PRICING ======================= */}
+      <section className="border-y border-border/60 bg-card/40">
+        <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-2xl text-center">
+            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">Precios sencillos</h2>
+            <p className="mt-4 text-lg text-muted-foreground">
+              Empieza gratis y escala cuando lo necesites.
+            </p>
+          </div>
+
+          <div className="mt-12 grid gap-6 md:grid-cols-3">
+            <div className="flex flex-col rounded-xl border border-border bg-card p-6 shadow-sm">
+              <h3 className="text-lg font-semibold">Gratis</h3>
+              <div className="mt-3 flex items-baseline gap-1">
+                <span className="text-4xl font-bold">0€</span>
+                <span className="text-muted-foreground">/mes</span>
+              </div>
+              <ul className="mt-6 flex-1 space-y-3">
+                {["Calculadoras ilimitadas", "Panel básico de patrimonio", "1 cuenta sincronizada", "Soporte por email"].map(
+                  (f) => (
+                    <li key={f} className="flex items-start gap-2 text-sm text-muted-foreground">
+                      <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                      {f}
+                    </li>
+                  ),
+                )}
+              </ul>
+              <Button variant="outline" className="mt-8" asChild>
+                <Link href="/sign-up">Comenzar gratis</Link>
+              </Button>
+            </div>
+
+            <div className="relative flex flex-col rounded-xl border-2 border-primary bg-card p-6 shadow-lg">
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                <Badge>Más popular</Badge>
+              </div>
+              <h3 className="text-lg font-semibold">Pro</h3>
+              <div className="mt-3 flex items-baseline gap-1">
+                <span className="text-4xl font-bold">9,90€</span>
+                <span className="text-muted-foreground">/mes</span>
+              </div>
+              <ul className="mt-6 flex-1 space-y-3">
+                {[
+                  "Todo lo del plan Gratis",
+                  "Análisis y diagnóstico avanzado",
+                  "Cartera en tiempo real",
+                  "Informes y exportación",
+                  "Miembro de familia (máx. 5)",
+                  "Soporte prioritario",
+                ].map((f) => (
+                  <li key={f} className="flex items-start gap-2 text-sm text-muted-foreground">
+                    <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                    {f}
+                  </li>
+                ))}
+              </ul>
+              <Button className="mt-8" asChild>
+                <Link href="/sign-up">Empezar ahora</Link>
+              </Button>
+            </div>
+
+            <div className="flex flex-col rounded-xl border border-border bg-card p-6 shadow-sm">
+              <h3 className="text-lg font-semibold">Familiar</h3>
+              <div className="mt-3 flex items-baseline gap-1">
+                <span className="text-4xl font-bold">19,90€</span>
+                <span className="text-muted-foreground">/mes</span>
+              </div>
+              <ul className="mt-6 flex-1 space-y-3">
+                {[
+                  "Todo lo del plan Pro",
+                  "Hasta 10 miembros",
+                  "Resúmenes compartidos",
+                  "Permisos granulares",
+                  "Gestión de invitaciones",
+                ].map((f) => (
+                  <li key={f} className="flex items-start gap-2 text-sm text-muted-foreground">
+                    <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                    {f}
+                  </li>
+                ))}
+              </ul>
+              <Button variant="outline" className="mt-8" asChild>
+                <Link href="/sign-up">Elegir plan</Link>
+              </Button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ======================= FINAL CTA ======================= */}
+      <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
+        <div className="relative overflow-hidden rounded-2xl border border-border bg-primary text-primary-foreground">
+          <div
+            className="pointer-events-none absolute inset-0"
+            style={{
+              background:
+                "radial-gradient(circle at 20% 20%, hsl(var(--primary-foreground) / 0.1), transparent 50%)",
+            }}
+          />
+          <div className="relative px-6 py-16 text-center sm:px-16">
+            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
+              Empieza a tomar mejores decisiones financieras hoy
+            </h2>
+            <p className="mx-auto mt-4 max-w-xl text-lg text-primary-foreground/80">
+              Únete a miles de usuarios que ya controlan su futuro financiero con MakeItRight.
+            </p>
+            <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+              <Button size="lg" variant="secondary" className="min-w-[220px]" asChild>
+                <Link href="/sign-up">
+                  Crear cuenta gratuita
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
+              </Button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ======================= FOOTER ======================= */}
+      <footer className="border-t border-border/60 bg-card/40">
+        <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+          <div className="grid gap-8 md:grid-cols-4">
+            <div>
+              <Link href="/" className="flex items-center gap-2">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+                  <LineChart className="h-4 w-4" />
+                </div>
+                <span className="font-bold tracking-tight">MakeItRight</span>
+              </Link>
+              <p className="mt-4 text-sm text-muted-foreground">
+                Gestión financiera inteligente para personas y empresas.
+              </p>
+            </div>
+            {[
+              {
+                title: "Producto",
+                links: ["Calculadoras", "Análisis", "Inversiones", "Precios"],
+              },
+              {
+                title: "Compañía",
+                links: ["Sobre nosotros", "Blog", "Empleo", "Contacto"],
+              },
+              {
+                title: "Legal",
+                links: ["Privacidad", "Términos", "Cookies", "Seguridad"],
+              },
+            ].map((col) => (
+              <div key={col.title}>
+                <h4 className="text-sm font-semibold">{col.title}</h4>
+                <ul className="mt-4 space-y-2">
+                  {col.links.map((link) => (
+                    <li key={link}>
+                      <a href="#" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
+                        {link}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+          <div className="mt-10 flex flex-col items-center justify-between gap-4 border-t border-border/60 pt-6 sm:flex-row">
+            <p className="text-sm text-muted-foreground">
+              © {new Date().getFullYear()} MakeItRight. Todos los derechos reservados.
+            </p>
+            <div className="flex items-center gap-4">
+              <Lock className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm text-muted-foreground">Cifrado de extremo a extremo</span>
+              <Globe className="h-4 w-4 text-muted-foreground" />
+              <Smartphone className="h-4 w-4 text-muted-foreground" />
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   )
 }
