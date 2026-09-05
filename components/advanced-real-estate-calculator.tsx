@@ -995,7 +995,7 @@ export default function AdvancedRealEstateCalculator() {
           </p>
 
           {/* Callout motivacional */}
-          <div className="rounded-2xl border bg-card p-6 shadow-sm">
+          <div className="rounded-2xl bg-card p-6 shadow-sm">
             <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Ejemplo real</p>
             <p className="mt-2 text-xl font-bold text-foreground">
               Una vivienda de <span className="text-primary">150.000 €</span> alquilada por{" "}
@@ -1013,7 +1013,7 @@ export default function AdvancedRealEstateCalculator() {
 
           {/* Qué mide / De dónde salen los números */}
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <div className="rounded-2xl border bg-card p-6 shadow-sm">
+            <div className="rounded-2xl bg-card p-6 shadow-sm">
               <div className="flex items-center gap-2">
                 <ClipboardList className="h-4 w-4 text-primary" />
                 <h3 className="font-semibold text-foreground">¿Qué mide el análisis?</h3>
@@ -1037,7 +1037,7 @@ export default function AdvancedRealEstateCalculator() {
                 </li>
               </ul>
             </div>
-            <div className="rounded-2xl border bg-card p-6 shadow-sm">
+            <div className="rounded-2xl bg-card p-6 shadow-sm">
               <div className="flex items-center gap-2">
                 <Target className="h-4 w-4 text-primary" />
                 <h3 className="font-semibold text-foreground">De dónde salen los resultados</h3>
@@ -1064,7 +1064,7 @@ export default function AdvancedRealEstateCalculator() {
           </div>
 
           {/* Consejos */}
-          <div className="rounded-2xl border bg-card p-6 shadow-sm">
+          <div className="rounded-2xl bg-card p-6 shadow-sm">
             <div className="flex items-center gap-2">
               <Lightbulb className="h-4 w-4 text-primary" />
               <h3 className="font-semibold text-foreground">Consejos para interpretar tu análisis</h3>
