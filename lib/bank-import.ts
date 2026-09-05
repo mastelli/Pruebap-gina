@@ -176,9 +176,6 @@ function parseRevolutMovements(content: string): BankMovement[] {
   return movements
 }
 
-// Recargas/traspasos de tarjeta Revolut: se descartan al importar
-const REVOLUT_TRANSFER_RE = /revolut\s*\*\*/i
-
 export function parseBankMovements(content: string): BankMovement[] {
   let parsed: BankMovement[] = []
 
@@ -198,5 +195,5 @@ export function parseBankMovements(content: string): BankMovement[] {
     }))
   }
 
-  return parsed.filter((movement) => !REVOLUT_TRANSFER_RE.test(movement.concept))
+  return parsed
 }
