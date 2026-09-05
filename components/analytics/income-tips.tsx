@@ -63,8 +63,8 @@ export function IncomeTips() {
   ]
 
   return (
-    <div className="rounded-2xl border bg-card shadow-sm">
-      <div className="border-b px-5 py-4">
+    <div className="rounded-2xl bg-card shadow-sm">
+      <div className="px-5 py-4">
         <h3 className="text-base font-semibold">{t("Income tips")}</h3>
       </div>
       <div className="grid gap-4 p-5 md:grid-cols-2 xl:grid-cols-3">
