@@ -70,6 +70,13 @@ export function ExpenseInsights({ month }: { month: string }) {
     .filter((row) => row.value > 0)
     .sort((a, b) => b.value - a.value)[0]
 
+  // Para el consejo no se sugiere nunca Alquiler/Hipoteca, al ser un
+  // gasto fijo dificil de recortar; se toma la siguiente categoria
+  const tipTop = Object.entries(spentByCategory)
+    .filter(([key, value]) => value > 0 && key !== "Rent/Mortgage")
+    .map(([key, value]) => ({ key, value }))
+    .sort((a, b) => b.value - a.value)[0]
+
   const prevDate = new Date(yearNum, monthNum - 2, 1)
   const prevPrefix = getPeriodPrefix(
     transactions,
@@ -135,11 +142,9 @@ export function ExpenseInsights({ month }: { month: string }) {
       icon: Lightbulb,
       color: "#f59e0b",
       title: t("Tip"),
-      desc: top
-        ? `${t("Biggest opportunity")} ${t(top.key)} (${pctOf(top.value)}%)`
-        : t("No transactions yet"),
+      desc: tipTop ? `${t("Biggest opportunity")} ${t(tipTop.key)} (${pctOf(tipTop.value)}%)` : t("No transactions yet"),
     },
-  ]
+  ].filter((row) => (row.id === "tip" ? tipTop !== undefined : true))
 
   return (
     <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
