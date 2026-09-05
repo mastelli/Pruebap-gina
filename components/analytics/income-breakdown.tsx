@@ -2,7 +2,7 @@
 
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts"
 import { useLanguage } from "@/lib/i18n"
-import { useTransactions } from "@/lib/transactions"
+import { useTransactions, getPeriodPrefix } from "@/lib/transactions"
 import { getIncomeBreakdown } from "@/lib/income"
 
 // Tonos verdes, uno por categoria
@@ -24,13 +24,10 @@ export function IncomeCategoriesChart({ scope = "month", month }: IncomeCategori
   const { transactions } = useTransactions()
 
   const now = new Date()
-  const year = `${now.getFullYear()}`
   const currentMonth = String(now.getMonth() + 1).padStart(2, "0")
   const selectedMonth = month ?? currentMonth
-  const { salary, transfers, bizum } = getIncomeBreakdown(
-    transactions,
-    scope === "month" ? `${year}-${selectedMonth}` : year,
-  )
+  const year = scope === "month" ? getPeriodPrefix(transactions, selectedMonth) : `${now.getFullYear()}`
+  const { salary, transfers, bizum } = getIncomeBreakdown(transactions, year)
 
   const data = [
     { label: "Salary", total: salary, color: SLICE_COLORS[0] },
@@ -133,8 +130,8 @@ export function IncomeTotal({ month }: { month: string }) {
   const { t } = useLanguage()
   const { transactions } = useTransactions()
 
-  const year = `${new Date().getFullYear()}`
-  const { salary, transfers, bizum } = getIncomeBreakdown(transactions, `${year}-${month}`)
+  const prefix = getPeriodPrefix(transactions, month)
+  const { salary, transfers, bizum } = getIncomeBreakdown(transactions, prefix)
   const total = salary + transfers + bizum
 
   return (

@@ -4,6 +4,7 @@ import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts"
 import { useLanguage } from "@/lib/i18n"
 import { useTransactions } from "@/lib/transactions"
 import { getCategoryFor, getAllExpenseCategories } from "@/lib/categories"
+import { getPeriodPrefix } from "@/lib/transactions"
 
 function formatEuros(value: number): string {
   return value.toLocaleString("es-ES", { style: "currency", currency: "EUR" })
@@ -16,7 +17,7 @@ export function ExpenseDoughnut({ month }: { month: string }) {
   const { transactions } = useTransactions()
 
   const now = new Date()
-  const prefix = `${now.getFullYear()}-${month}`
+  const prefix = getPeriodPrefix(transactions, month)
 
   const allDefs = getAllExpenseCategories()
   const totals: Record<string, number> = {}
@@ -95,8 +96,7 @@ export function ExpenseTotal({ month }: { month: string }) {
   const { t } = useLanguage()
   const { transactions } = useTransactions()
 
-  const now = new Date()
-  const prefix = `${now.getFullYear()}-${month}`
+  const prefix = getPeriodPrefix(transactions, month)
   const total = transactions.reduce(
     (sum, transaction) =>
       transaction.amount < 0 && transaction.date.startsWith(prefix)

@@ -148,3 +148,18 @@ export function useTransactions(): TransactionsContextValue {
 }
 
 export { sortByDateDesc }
+
+// Prefijo AAAA-MM del mes elegido usando el anio mas reciente que tenga
+// movimientos en ese mes; si no hay datos, cae al anio en curso.
+export function getPeriodPrefix(transactions: Transaction[], month: string): string {
+  const candidates = transactions.filter(
+    (transaction) => transaction.date.length >= 7 && transaction.date.slice(5, 7) === month,
+  )
+  if (candidates.length === 0) return `${new Date().getFullYear()}-${month}`
+  const currentYear = new Date().getFullYear()
+  const latestYear = candidates.reduce((maxYear, transaction) => {
+    const year = Number.parseInt(transaction.date.slice(0, 4), 10)
+    return Number.isFinite(year) ? Math.max(maxYear, year) : maxYear
+  }, currentYear)
+  return `${latestYear}-${month}`
+}

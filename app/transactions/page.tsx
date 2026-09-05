@@ -25,12 +25,11 @@ import {
   type TransactionCategory,
 } from "@/lib/categories"
 
-function getCurrentMonthRange(): { from: string; to: string } {
+const ALL_TIME_FROM = "1970-01-01"
+
+function getTodayISO(): string {
   const now = new Date()
-  const y = now.getFullYear()
-  const m = String(now.getMonth() + 1).padStart(2, "0")
-  const d = String(now.getDate()).padStart(2, "0")
-  return { from: `${y}-${m}-01`, to: `${y}-${m}-${d}` }
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`
 }
 
 function toISODate(dateStr: string): string {
@@ -45,7 +44,7 @@ export default function TransactionsPage() {
   const { t } = useLanguage()
   const { transactions, removeTransaction } = useTransactions()
 
-  const defaultRange = getCurrentMonthRange()
+  const defaultRange = { from: ALL_TIME_FROM, to: getTodayISO() }
   const [dateFrom, setDateFrom] = useState(defaultRange.from)
   const [dateTo, setDateTo] = useState(defaultRange.to)
   const [categoryFilter, setCategoryFilter] = useState<string>("all")
@@ -55,9 +54,8 @@ export default function TransactionsPage() {
   const isCustomRange = dateFrom !== defaultRange.from || dateTo !== defaultRange.to
 
   const resetRange = () => {
-    const r = getCurrentMonthRange()
-    setDateFrom(r.from)
-    setDateTo(r.to)
+    setDateFrom(ALL_TIME_FROM)
+    setDateTo(getTodayISO())
   }
 
   const handleTypeChange = (id: string, category: TransactionCategory) => {

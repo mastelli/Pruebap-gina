@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import { Input } from "@/components/ui/input"
 import { useLanguage } from "@/lib/i18n"
-import { useTransactions } from "@/lib/transactions"
+import { useTransactions, getPeriodPrefix } from "@/lib/transactions"
 import { storageGetItem, storageSetItem } from "@/lib/auth"
 import { getCategoryFor, getAllExpenseCategories } from "@/lib/categories"
 
@@ -64,8 +64,7 @@ export function ExpenseTypes({ month }: { month: string }) {
     })
   }
 
-  const now = new Date()
-  const prefix = `${now.getFullYear()}-${month}`
+  const prefix = getPeriodPrefix(transactions, month)
 
   const allDefs = getAllExpenseCategories()
   const spentByCategory: Record<string, number> = {}
