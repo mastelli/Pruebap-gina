@@ -91,24 +91,3 @@ export function ExpenseDoughnut({ month }: { month: string }) {
     </ResponsiveContainer>
   )
 }
-
-export function ExpenseTotal({ month }: { month: string }) {
-  const { t } = useLanguage()
-  const { transactions } = useTransactions()
-
-  const prefix = getPeriodPrefix(transactions, month)
-  const total = transactions.reduce(
-    (sum, transaction) =>
-      transaction.amount < 0 && transaction.date.startsWith(prefix)
-        ? sum + Math.abs(transaction.amount)
-        : sum,
-    0,
-  )
-
-  return (
-    <div className="text-right">
-      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{t("Total")}</p>
-      <p className="text-lg font-bold tabular-nums">{formatEuros(total)}</p>
-    </div>
-  )
-}
