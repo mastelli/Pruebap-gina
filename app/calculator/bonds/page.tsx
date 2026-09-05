@@ -1,18 +1,16 @@
 "use client"
 
-import { Card, CardContent } from "@/components/ui/card"
-import { useLanguage } from "@/lib/i18n"
+import { Landmark } from "lucide-react"
+import { BondCalculator } from "@/components/bond-calculator"
 
 export default function BondsCalculatorPage() {
-  const { t } = useLanguage()
-
   return (
     <div className="space-y-4">
-      <Card className="w-full">
-        <CardContent className="flex items-center justify-center py-20">
-          <p className="text-lg text-muted-foreground">{t("Coming soon")}</p>
-        </CardContent>
-      </Card>
+      <div className="flex items-center gap-3">
+        <Landmark className="h-6 w-6" />
+        <h1 className="text-2xl font-semibold">Bonos</h1>
+      </div>
+      <BondCalculator />
     </div>
   )
 }

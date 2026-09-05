@@ -9,7 +9,7 @@ const sections = [
   { name: "Compound Interest", href: "/calculator/compound", icon: LineChart, desc: "Compound Interest Calculator" },
   { name: "Real Estate Assets", href: "/calculator/realestate", icon: Building2, desc: "Real Estate Calculator" },
   { name: "Stocks", href: "/calculator/stocks", icon: TrendingUp, desc: "Stock Analyzer" },
-  { name: "Bonds", href: "/calculator/bonds", icon: Landmark, desc: "Coming soon" },
+  { name: "Bonds", href: "/calculator/bonds", icon: Landmark, desc: "Bond Calculator" },
 ]
 
 export default function CalculatorHub() {
