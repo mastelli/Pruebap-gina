@@ -8,10 +8,11 @@ import {
   TrendingUp,
   ArrowRight,
   Check,
-  Target,
   Sparkles,
+  GitCompareArrows,
 } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { useLanguage } from "@/lib/i18n"
 import type { LucideIcon } from "lucide-react"
 
@@ -42,6 +43,8 @@ interface Tool {
   nameKey: string
   descKey: string
   chips: string[]
+  purposeKey: string
+  resultKey: string
 }
 
 const TOOLS: Tool[] = [
@@ -52,6 +55,8 @@ const TOOLS: Tool[] = [
     nameKey: "Compound Interest",
     descKey: "Compound Interest desc",
     chips: ["Contributions", "Frequency", "Projection"],
+    purposeKey: "Compound purpose",
+    resultKey: "Compound result",
   },
   {
     href: "/calculator/realestate",
@@ -60,6 +65,8 @@ const TOOLS: Tool[] = [
     nameKey: "Real Estate Assets",
     descKey: "Real Estate desc",
     chips: ["Taxes and fees", "Mortgage", "Scenarios"],
+    purposeKey: "Real estate purpose",
+    resultKey: "Real estate result",
   },
   {
     href: "/calculator/stocks",
@@ -68,20 +75,9 @@ const TOOLS: Tool[] = [
     nameKey: "Stocks",
     descKey: "Stocks desc",
     chips: ["Valuation", "Charts", "Live data"],
+    purposeKey: "Stocks purpose",
+    resultKey: "Stocks result",
   },
-]
-
-interface Goal {
-  href: string
-  icon: LucideIcon
-  accent: Accent
-  goalKey: string
-}
-
-const GOALS: Goal[] = [
-  { href: "/calculator/compound", icon: LineChart, accent: ACCENTS.indigo, goalKey: "Goal savings" },
-  { href: "/calculator/realestate", icon: Building2, accent: ACCENTS.emerald, goalKey: "Goal rent" },
-  { href: "/calculator/stocks", icon: TrendingUp, accent: ACCENTS.sky, goalKey: "Goal stock" },
 ]
 
 export default function CalculatorHub() {
@@ -90,32 +86,15 @@ export default function CalculatorHub() {
   return (
     <div className="space-y-6">
       {/* ── Hero ── */}
-      <div className="relative overflow-hidden rounded-2xl border bg-card p-6 shadow-sm md:p-8">
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-transparent" />
-        <div className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-primary/10 blur-3xl" />
-        <div className="relative">
-          <div className="flex items-center gap-2">
-            <Calculator className="h-5 w-5 text-primary" />
-            <p className="text-sm font-medium text-muted-foreground">{t("Calculator")}</p>
-          </div>
-          <h1 className="mt-1 bg-gradient-to-r from-foreground to-primary bg-clip-text text-3xl font-bold tracking-tight text-transparent">
-            {t("Financial Calculators")}
-          </h1>
-          <p className="mt-2 max-w-xl text-sm text-muted-foreground">{t("Calculators intro")}</p>
-          <div className="mt-5 flex flex-wrap gap-2">
-            {TOOLS.map((tool) => (
-              <Link
-                key={tool.href}
-                href={tool.href}
-                className="group inline-flex items-center gap-1.5 rounded-full border bg-background px-3.5 py-1.5 text-sm font-medium text-foreground transition-colors hover:border-primary/50 hover:bg-secondary"
-              >
-                <tool.icon className={`h-4 w-4 ${tool.accent.check}`} />
-                {t(tool.nameKey)}
-                <ArrowRight className="h-3.5 w-3.5 opacity-40 transition-transform group-hover:translate-x-0.5" />
-              </Link>
-            ))}
-          </div>
+      <div className="rounded-2xl border bg-card p-6 shadow-sm md:p-8">
+        <div className="flex items-center gap-2">
+          <Calculator className="h-5 w-5 text-muted-foreground" />
+          <p className="text-sm font-medium text-muted-foreground">{t("Calculator")}</p>
         </div>
+        <h1 className="mt-1 text-3xl font-bold tracking-tight text-foreground">
+          {t("Financial Calculators")}
+        </h1>
+        <p className="mt-2 max-w-xl text-sm text-muted-foreground">{t("Calculators intro")}</p>
       </div>
 
       {/* ── Tools ── */}
@@ -154,30 +133,50 @@ export default function CalculatorHub() {
         ))}
       </div>
 
-      {/* ── Pick by goal ── */}
-      <Card className="overflow-hidden">
+      {/* ── Compare ── */}
+      <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base">
-            <Target className="h-4 w-4 text-primary" />
-            {t("Pick by goal")}
+            <GitCompareArrows className="h-4 w-4 text-muted-foreground" />
+            {t("Which tool")}
           </CardTitle>
+          <p className="text-sm text-muted-foreground">{t("Which tool hint")}</p>
         </CardHeader>
-        <CardContent className="space-y-1.5">
-          {GOALS.map((goal) => (
-            <Link
-              key={goal.href}
-              href={goal.href}
-              className="group flex items-center justify-between gap-4 rounded-lg px-3 py-3 transition-colors hover:bg-secondary"
-            >
-              <div className="flex items-center gap-3">
-                <div className={`rounded-lg p-2 ${goal.accent.chip}`}>
-                  <goal.icon className="h-4 w-4" />
-                </div>
-                <span className="text-sm font-medium text-foreground">{t(goal.goalKey)}</span>
-              </div>
-              <ArrowRight className="h-4 w-4 text-muted-foreground transition-all group-hover:translate-x-0.5 group-hover:text-primary" />
-            </Link>
-          ))}
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="min-w-[12rem]">{t("Column calculator")}</TableHead>
+                <TableHead className="min-w-[16rem]">{t("Column purpose")}</TableHead>
+                <TableHead className="min-w-[16rem]">{t("Column result")}</TableHead>
+                <TableHead className="text-right">{t("Try calculator")}</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {TOOLS.map((tool) => (
+                <TableRow key={tool.href}>
+                  <TableCell>
+                    <div className="flex items-center gap-2.5">
+                      <div className={`rounded-lg p-1.5 ${tool.accent.chip}`}>
+                        <tool.icon className="h-4 w-4" />
+                      </div>
+                      <span className="font-medium text-foreground">{t(tool.nameKey)}</span>
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-sm text-muted-foreground">{t(tool.purposeKey)}</TableCell>
+                  <TableCell className="text-sm text-muted-foreground">{t(tool.resultKey)}</TableCell>
+                  <TableCell className="text-right">
+                    <Link
+                      href={tool.href}
+                      className="group inline-flex items-center gap-1 text-sm font-medium text-foreground transition-colors hover:text-primary"
+                    >
+                      <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+                    </Link>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         </CardContent>
       </Card>
 
