@@ -252,6 +252,11 @@ const translations: Record<string, string> = {
   "Total Bizums": "Total Bizums",
   "Write a message": "Escribe un mensaje",
   "No messages yet": "Todavía no hay mensajes",
+  "Dismiss": "Descartar",
+  "AI is typing": "Escribiendo…",
+  "AI assistant unavailable": "El asistente de IA no está disponible. Inténtalo de nuevo.",
+  "AI assistant unconfigured":
+    "Falta la clave de IA (GEMINI_API_KEY) en el servidor. Pídela en https://aistudio.google.com/apikey y añádela en Vercel." ,
   "Notes": "Notas",
   "Add a note": "Añade una nota",
   "No notes yet": "Todavía no hay notas",

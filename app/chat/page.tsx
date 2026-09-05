@@ -4,12 +4,15 @@ import { useEffect, useRef, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Send, StickyNote, Trash2, MessageSquare, Plus } from "lucide-react"
+import { Send, StickyNote, Trash2, MessageSquare, Plus, Loader2 } from "lucide-react"
 import { useLanguage } from "@/lib/i18n"
 import { storageGetItem, storageSetItem } from "@/lib/auth"
+import { useTransactions, sortByDateDesc } from "@/lib/transactions"
+import { getCategoryFor } from "@/lib/categories"
 
 interface ChatMessage {
   id: string
+  role: "user" | "assistant"
   text: string
   time: string
 }
@@ -21,6 +24,7 @@ interface Note {
 
 const MESSAGES_KEY = "appChatMessages"
 const NOTES_KEY = "appChatNotes"
+const MAX_HISTORY = 12
 
 function load<T>(key: string): T[] {
   if (typeof window === "undefined") return []
@@ -40,12 +44,73 @@ function save<T>(key: string, value: T[]): void {
   }
 }
 
+function formatEuros(value: number): string {
+  return value.toLocaleString("es-ES", { style: "currency", currency: "EUR" })
+}
+
+// Resumen real de las transacciones del usuario para que el asistente
+// responda con sus datos reales sin subir el historial completo
+function buildFinancialContext(
+  transactions: ReturnType<typeof useTransactions>["transactions"],
+): string {
+  const now = new Date()
+  const year = now.getFullYear()
+  const monthPrefix = `${year}-${String(now.getMonth() + 1).padStart(2, "0")}`
+
+  let income = 0
+  let expense = 0
+  const byCategory: Record<string, number> = {}
+  for (const transaction of transactions) {
+    if (!transaction.date.startsWith(monthPrefix)) continue
+    if (transaction.amount > 0) {
+      income += transaction.amount
+    } else {
+      const value = -transaction.amount
+      expense += value
+      const category = getCategoryFor(transaction)
+      byCategory[category] = (byCategory[category] ?? 0) + value
+    }
+  }
+
+  const lines: string[] = [
+    `- Mes actual (${year}-${String(now.getMonth() + 1).padStart(2, "0")}): ingresos ${formatEuros(income)}, gastos ${formatEuros(expense)}, neto ${formatEuros(income - expense)}.`,
+  ]
+
+  const categories = Object.entries(byCategory)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 6)
+  if (categories.length > 0) {
+    lines.push("  Gastos del mes por categoria:")
+    for (const [category, value] of categories) {
+      lines.push(
+        `  * ${category}: ${formatEuros(value)} (${Math.round((value / expense) * 100)}%)`,
+      )
+    }
+  }
+
+  const recent = sortByDateDesc(transactions).slice(0, 15)
+  if (recent.length > 0) {
+    lines.push("  Movimientos recientes:")
+    for (const transaction of recent) {
+      const category = getCategoryFor(transaction)
+      lines.push(
+        `  - ${transaction.date} · ${transaction.description || category} · ${formatEuros(transaction.amount)}`,
+      )
+    }
+  }
+
+  return lines.join("\n")
+}
+
 export default function ChatPage() {
   const { t } = useLanguage()
+  const { transactions } = useTransactions()
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [notes, setNotes] = useState<Note[]>([])
   const [messageInput, setMessageInput] = useState("")
   const [noteInput, setNoteInput] = useState("")
+  const [sending, setSending] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -61,23 +126,67 @@ export default function ChatPage() {
     save(NOTES_KEY, notes)
   }, [notes])
 
+  // Los mensajes guardados antes de la IA no tienen rol: se muestran como del usuario
+  const normalizedMessages = messages.map((message) => ({
+    ...message,
+    role: message.role === "assistant" ? "assistant" : "user",
+  }))
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
-  }, [messages])
+  }, [messages, sending])
 
-  const sendMessage = () => {
+  const sendMessage = async () => {
     const text = messageInput.trim()
-    if (!text) return
+    if (!text || sending) return
 
-    setMessages((prev) => [
-      ...prev,
-      {
-        id: `msg-${Date.now()}-${Math.random().toString(36).slice(2)}`,
-        text,
-        time: new Date().toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" }),
-      },
-    ])
+    const userMessage: ChatMessage = {
+      id: `msg-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+      role: "user",
+      text,
+      time: new Date().toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" }),
+    }
+
+    const history = [...normalizedMessages, userMessage]
+      .slice(-MAX_HISTORY)
+      .map((message) => ({ role: message.role, content: message.text }))
+
+    setMessages((prev) => [...prev, userMessage])
     setMessageInput("")
+    setSending(true)
+    setError(null)
+
+    try {
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          messages: history,
+          context: buildFinancialContext(transactions),
+        }),
+      })
+      const data = await response.json().catch(() => null)
+
+      if (response.status === 503) {
+        setError(t("AI assistant unconfigured"))
+      } else if (!data?.reply) {
+        setError(t("AI assistant unavailable"))
+      } else {
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: `msg-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+            role: "assistant",
+            text: data.reply,
+            time: new Date().toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" }),
+          },
+        ])
+      }
+    } catch {
+      setError(t("AI assistant unavailable"))
+    } finally {
+      setSending(false)
+    }
   }
 
   const addNote = () => {
@@ -103,19 +212,44 @@ export default function ChatPage() {
         </CardHeader>
         <CardContent className="flex min-h-0 flex-1 flex-col gap-4">
           <div className="min-h-0 flex-1 space-y-3 overflow-y-auto pr-2">
-            {messages.map((message) => (
-              <div key={message.id} className="flex justify-end">
-                <div className="max-w-[75%] rounded-lg bg-primary px-3 py-2 text-primary-foreground">
-                  <p className="text-sm whitespace-pre-wrap break-words">{message.text}</p>
-                  <p className="mt-1 text-right text-xs opacity-70">{message.time}</p>
+            {normalizedMessages.map((message) =>
+              message.role === "assistant" ? (
+                <div key={message.id} className="flex justify-start">
+                  <div className="max-w-[75%] rounded-lg bg-secondary px-3 py-2">
+                    <p className="text-sm whitespace-pre-wrap break-words">{message.text}</p>
+                    <p className="mt-1 text-xs opacity-60">{message.time}</p>
+                  </div>
+                </div>
+              ) : (
+                <div key={message.id} className="flex justify-end">
+                  <div className="max-w-[75%] rounded-lg bg-primary px-3 py-2 text-primary-foreground">
+                    <p className="text-sm whitespace-pre-wrap break-words">{message.text}</p>
+                    <p className="mt-1 text-right text-xs opacity-70">{message.time}</p>
+                  </div>
+                </div>
+              ),
+            )}
+            {sending && (
+              <div className="flex justify-start">
+                <div className="flex items-center gap-2 rounded-lg bg-secondary px-3 py-2">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <span className="text-sm text-muted-foreground">{t("AI is typing")}</span>
                 </div>
               </div>
-            ))}
-            {messages.length === 0 && (
+            )}
+            {normalizedMessages.length === 0 && !sending && (
               <p className="py-8 text-center text-sm text-muted-foreground">{t("No messages yet")}</p>
             )}
             <div ref={messagesEndRef} />
           </div>
+          {error && (
+            <p className="flex items-center gap-2 text-xs text-destructive">
+              {error}
+              <button className="underline" onClick={() => setError(null)}>
+                {t("Dismiss")}
+              </button>
+            </p>
+          )}
           <div className="flex items-center gap-2 pt-2">
             <Input
               value={messageInput}
@@ -124,9 +258,10 @@ export default function ChatPage() {
               onKeyDown={(event) => {
                 if (event.key === "Enter") sendMessage()
               }}
+              disabled={sending}
             />
-            <Button size="icon" onClick={sendMessage}>
-              <Send className="h-4 w-4" />
+            <Button size="icon" onClick={sendMessage} disabled={sending}>
+              {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
               <span className="sr-only">{t("Send")}</span>
             </Button>
           </div>
