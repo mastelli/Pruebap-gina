@@ -1012,8 +1012,8 @@ export default function AdvancedRealEstateCalculator() {
           </div>
 
           {/* Qué mide / De dónde salen los números */}
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <div className="rounded-2xl bg-card p-6 shadow-sm">
+          <div className="flex flex-col gap-4 md:flex-row md:items-stretch md:gap-6">
+            <div className="flex-1 rounded-2xl bg-card p-6 shadow-sm">
               <div className="flex items-center gap-2">
                 <ClipboardList className="h-4 w-4 text-primary" />
                 <h3 className="font-semibold text-foreground">¿Qué mide el análisis?</h3>
@@ -1037,7 +1037,10 @@ export default function AdvancedRealEstateCalculator() {
                 </li>
               </ul>
             </div>
-            <div className="rounded-2xl bg-card p-6 shadow-sm">
+
+            <div aria-hidden="true" className="h-px shrink-0 bg-border md:h-auto md:w-px" />
+
+            <div className="flex-1 rounded-2xl bg-card p-6 shadow-sm">
               <div className="flex items-center gap-2">
                 <Target className="h-4 w-4 text-primary" />
                 <h3 className="font-semibold text-foreground">De dónde salen los resultados</h3>
