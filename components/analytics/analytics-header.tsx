@@ -9,7 +9,7 @@ import { parseBankMovements } from "@/lib/bank-import"
 import { useTransactions } from "@/lib/transactions"
 import { AddTransactionModal } from "@/components/add-transaction-modal"
 
-export function AnalyticsHeader() {
+export function AnalyticsHeader({ titleKey = "Analytics" }: { titleKey?: string }) {
   const { t } = useLanguage()
   const { addBankMovements, setCheckingBalance } = useTransactions()
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -46,7 +46,7 @@ export function AnalyticsHeader() {
 
   return (
     <div className="flex items-center justify-between space-y-2">
-      <h2 className="text-3xl font-bold tracking-tight">{t("Analytics")}</h2>
+      <h2 className="text-3xl font-bold tracking-tight">{t(titleKey)}</h2>
       <div className="flex items-center space-x-2">
         <Button
           variant="outline"

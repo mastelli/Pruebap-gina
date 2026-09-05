@@ -54,6 +54,7 @@ function getCurrentMonth(): string {
 
 interface MetricTabProps {
   titleKey: string
+  hideTitle?: boolean
   customBody?: (month: string, setMonth: (m: string) => void) => ReactNode
   firstCardTitleKey?: string
   firstCardAction?: ReactNode | ((month: string) => ReactNode)
@@ -71,6 +72,7 @@ interface MetricTabProps {
 // customBody sustituye las cuatro ventanas por un layout a medida
 export function MetricTab({
   titleKey,
+  hideTitle = false,
   customBody,
   firstCardTitleKey,
   firstCardAction,
@@ -98,9 +100,11 @@ export function MetricTab({
         customBody(selectedMonth, setSelectedMonth)
       ) : (
         <>
-          <div className="flex justify-between items-center">
-            <h3 className="text-2xl font-semibold">{t(titleKey)}</h3>
-          </div>
+          {!hideTitle && (
+            <div className="flex justify-between items-center">
+              <h3 className="text-2xl font-semibold">{t(titleKey)}</h3>
+            </div>
+          )}
           <div className="flex items-center justify-center gap-1">
             {MONTHS.map((m) => (
               <button

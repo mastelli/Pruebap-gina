@@ -10,9 +10,10 @@ import { IncomeList } from "@/components/analytics/income-list"
 export default function AnalyticsIncomePage() {
   return (
     <div className="flex-1 space-y-4 p-8 pt-6">
-      <AnalyticsHeader />
+      <AnalyticsHeader titleKey="Revenue" />
       <MetricTab
         titleKey="Revenue"
+        hideTitle
         firstCardTitleKey="Income Breakdown"
         firstCardAction={(month) => <IncomeTotal month={month} />}
         firstCard={(month) => <IncomeCategoriesChart scope="month" month={month} />}

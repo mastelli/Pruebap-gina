@@ -14,7 +14,6 @@ export function OverviewTab() {
 
   return (
     <>
-      <h3 className="mb-4 text-2xl font-semibold">{t("Dashboard Overview")}</h3>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <OverviewCards />
       </div>
