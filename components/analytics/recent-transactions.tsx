@@ -3,15 +3,14 @@
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { useLanguage } from "@/lib/i18n"
-import { useTransactions, sortByDateDesc } from "@/lib/transactions"
+import { useTransactions, getPeriodPrefix, sortByDateDesc } from "@/lib/transactions"
 
 export function RecentTransactions({ month }: { month?: string }) {
   const { t } = useLanguage()
   const { transactions } = useTransactions()
 
-  const prefix = month
-  const scoped = prefix
-    ? transactions.filter((transaction) => transaction.date.startsWith(prefix))
+  const scoped = month
+    ? transactions.filter((transaction) => transaction.date.startsWith(getPeriodPrefix(transactions, month)))
     : transactions
   const recent = sortByDateDesc(scoped).slice(0, 5)
 
