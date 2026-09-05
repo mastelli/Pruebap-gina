@@ -2,11 +2,11 @@
 
 import { Briefcase, PiggyBank, TrendingUp, Wallet } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { useLanguage } from "@/lib/i18n"
 import { useTransactions, getLatestPeriod } from "@/lib/transactions"
 import { usePortfolioEurTotal } from "@/components/portfolio-total"
-import { SavingsChart } from "@/components/analytics/savings-chart"
+import { InvestmentTips } from "@/components/analytics/investment-tips"
 import { FinanceNews } from "@/components/analytics/finance-news"
 
 const MONTHS = [
@@ -160,15 +160,8 @@ export function InvestmentOverview() {
         })}
       </div>
 
-      {/* Ahorro por mes */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg font-semibold">{t("Savings by month")}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <SavingsChart />
-        </CardContent>
-      </Card>
+      {/* Consejos para invertir */}
+      <InvestmentTips />
 
       {/* Noticias financieras actuales */}
       <FinanceNews />
