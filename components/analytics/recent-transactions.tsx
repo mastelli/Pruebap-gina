@@ -12,14 +12,14 @@ export function RecentTransactions({ month }: { month?: string }) {
   const scoped = month
     ? transactions.filter((transaction) => transaction.date.startsWith(getPeriodPrefix(transactions, month)))
     : transactions
-  const recent = sortByDateDesc(scoped).slice(0, 5)
+  const recent = sortByDateDesc(scoped)
 
   if (recent.length === 0) {
     return <p className="py-8 text-center text-sm text-muted-foreground">{t("No transactions yet")}</p>
   }
 
   return (
-    <div className="space-y-1">
+    <div className="max-h-[330px] space-y-1 overflow-y-auto pr-1">
       {recent.map((transaction) => (
         <div key={transaction.id} className="flex items-center py-2">
           <Badge variant={transaction.amount >= 0 ? "default" : "secondary"} className="mr-3">
