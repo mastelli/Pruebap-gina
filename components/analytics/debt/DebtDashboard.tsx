@@ -61,7 +61,7 @@ export function DebtDashboard() {
 
   return (
     <div className="flex-1 space-y-4 p-4 pt-6 sm:p-8">
-      <AnalyticsHeader />
+      <AnalyticsHeader titleKey="Debt" showActions={false} />
       <Kpis base={base} scenario={scenario} flags={flags} />
       <Diagnosis flags={flags} />
       <InputsSection items={items} onChange={setItems} />
