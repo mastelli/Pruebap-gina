@@ -268,7 +268,7 @@ export function CompoundInterestCalculator() {
         </p>
 
         {/* Callout motivacional */}
-        <div className="rounded-2xl border bg-card p-6 shadow-sm">
+        <div className="rounded-2xl bg-card p-6 shadow-sm">
           <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Ejemplo real</p>
           <p className="mt-2 text-xl font-bold text-foreground">
             Aportando <span className="text-primary">300 € al mes</span> durante <span className="text-primary">35 años</span> con una
