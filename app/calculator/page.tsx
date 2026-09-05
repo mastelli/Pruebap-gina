@@ -73,7 +73,6 @@ const TOOLS: Tool[] = [
 ]
 
 interface Lesson {
-  href: string
   icon: LucideIcon
   accent: Accent
   titleKey: string
@@ -83,7 +82,6 @@ interface Lesson {
 
 const LESSONS: Lesson[] = [
   {
-    href: "/calculator/compound",
     icon: LineChart,
     accent: ACCENTS.indigo,
     titleKey: "Compound Interest",
@@ -91,7 +89,6 @@ const LESSONS: Lesson[] = [
     lessonKey: "Compound lesson",
   },
   {
-    href: "/calculator/realestate",
     icon: Building2,
     accent: ACCENTS.emerald,
     titleKey: "Real Estate Assets",
@@ -99,7 +96,6 @@ const LESSONS: Lesson[] = [
     lessonKey: "Real estate lesson",
   },
   {
-    href: "/calculator/stocks",
     icon: TrendingUp,
     accent: ACCENTS.sky,
     titleKey: "Stocks",
@@ -171,7 +167,7 @@ export default function CalculatorHub() {
 
         <div className="mt-6 grid grid-cols-1 gap-8 md:grid-cols-3">
           {LESSONS.map((lesson) => (
-            <div key={lesson.href} className="flex flex-col">
+            <div key={lesson.titleKey} className="flex flex-col">
               <div className="flex items-center gap-2.5">
                 <div className={`rounded-xl p-2 ${lesson.accent.chip}`}>
                   <lesson.icon className="h-5 w-5" />
@@ -190,14 +186,6 @@ export default function CalculatorHub() {
                 <Lightbulb className={`mt-0.5 h-4 w-4 shrink-0 ${lesson.accent.check}`} />
                 <p className="text-sm text-foreground/85">{t(lesson.lessonKey)}</p>
               </div>
-
-              <Link
-                href={lesson.href}
-                className="group mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-foreground transition-colors hover:text-primary"
-              >
-                {t("Try it")}
-                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-              </Link>
             </div>
           ))}
         </div>
