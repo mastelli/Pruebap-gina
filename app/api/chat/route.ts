@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
         body: JSON.stringify({
           contents,
           systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
-          generationConfig: { temperature: 0.7, maxOutputTokens: 1024 },
+          generationConfig: { temperature: 0.7, maxOutputTokens: 8192 },
         }),
       },
     )
@@ -77,6 +77,11 @@ export async function POST(request: NextRequest) {
 
     if (!reply) {
       return NextResponse.json({ error: "empty_reply" }, { status: 502 })
+    }
+
+    // Si el modelo se queda sin presupuesto de tokens, la respuesta llega cortada
+    if (data?.candidates?.[0]?.finishReason === "MAX_TOKENS") {
+      return NextResponse.json({ reply, truncated: true })
     }
 
     return NextResponse.json({ reply })

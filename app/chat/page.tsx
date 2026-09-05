@@ -111,6 +111,7 @@ export default function ChatPage() {
   const [noteInput, setNoteInput] = useState("")
   const [sending, setSending] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [truncated, setTruncated] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -155,6 +156,7 @@ export default function ChatPage() {
     setMessageInput("")
     setSending(true)
     setError(null)
+    setTruncated(false)
 
     try {
       const response = await fetch("/api/chat", {
@@ -172,6 +174,7 @@ export default function ChatPage() {
       } else if (!data?.reply) {
         setError(t("AI assistant unavailable"))
       } else {
+        if (data.truncated) setTruncated(true)
         setMessages((prev) => [
           ...prev,
           {
@@ -246,6 +249,19 @@ export default function ChatPage() {
             <p className="flex items-center gap-2 text-xs text-destructive">
               {error}
               <button className="underline" onClick={() => setError(null)}>
+                {t("Dismiss")}
+              </button>
+            </p>
+          )}
+          {truncated && (
+            <p className="flex items-center gap-2 text-xs text-muted-foreground">
+              <span>
+                {t("AI response was cut off") + " — "}
+                <button className="underline" onClick={sendMessage}>
+                  {t("Continue")}
+                </button>
+              </span>
+              <button className="underline" onClick={() => setTruncated(false)}>
                 {t("Dismiss")}
               </button>
             </p>

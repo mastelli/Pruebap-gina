@@ -317,6 +317,9 @@ const translations: Record<string, string> = {
   "AI assistant unavailable": "El asistente de IA no está disponible. Inténtalo de nuevo.",
   "AI assistant unconfigured":
     "Falta la clave de IA (GEMINI_API_KEY) en el servidor. Pídela en https://aistudio.google.com/apikey y añádela en Vercel." ,
+  "AI response was cut off":
+    "La respuesta se ha cortado por el límite de longitud",
+  "Continue": "Continuar",
   "Notes": "Notas",
   "Add a note": "Añade una nota",
   "No notes yet": "Todavía no hay notas",
