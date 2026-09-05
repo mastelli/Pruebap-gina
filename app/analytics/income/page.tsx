@@ -2,10 +2,7 @@
 
 import { AnalyticsHeader } from "@/components/analytics/analytics-header"
 import { MetricTab } from "@/components/analytics/metric-tab"
-import { IncomeCategoriesChart, IncomeTotal } from "@/components/analytics/income-breakdown"
-import { IncomeHistory } from "@/components/analytics/income-history"
-import { IncomeMetrics } from "@/components/analytics/income-metrics"
-import { IncomeList } from "@/components/analytics/income-list"
+import { IncomeOverview } from "@/components/analytics/income-overview"
 
 export default function AnalyticsIncomePage() {
   return (
@@ -14,14 +11,7 @@ export default function AnalyticsIncomePage() {
       <MetricTab
         titleKey="Revenue"
         hideTitle
-        firstCardTitleKey="Income Breakdown"
-        firstCardAction={(month) => <IncomeTotal month={month} />}
-        firstCard={(month) => <IncomeCategoriesChart scope="month" month={month} />}
-        secondCardTitleKey="History"
-        secondCard={<IncomeHistory />}
-        thirdCardTitleKey="Movements"
-        thirdCard={(month) => <IncomeList month={month} />}
-        metricsCard={<IncomeMetrics />}
+        customBody={(month, setMonth) => <IncomeOverview month={month} setMonth={setMonth} />}
       />
     </div>
   )

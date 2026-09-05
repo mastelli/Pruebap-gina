@@ -124,20 +124,3 @@ export function IncomeCategoriesChart({ scope = "month", month }: IncomeCategori
     </ResponsiveContainer>
   )
 }
-
-// Total de ingresos del mes seleccionado, mostrado en la cabecera
-export function IncomeTotal({ month }: { month: string }) {
-  const { t } = useLanguage()
-  const { transactions } = useTransactions()
-
-  const prefix = getPeriodPrefix(transactions, month)
-  const { salary, transfers, bizum } = getIncomeBreakdown(transactions, prefix)
-  const total = salary + transfers + bizum
-
-  return (
-    <div className="text-right">
-      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{t("Total")}</p>
-      <p className="text-lg font-bold tabular-nums">{formatEuros(total)}</p>
-    </div>
-  )
-}

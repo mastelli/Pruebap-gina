@@ -169,6 +169,7 @@ const translations: Record<string, string> = {
   "Months": "Meses",
   "Annual Breakdown": "Desglose anual",
   Movements: "Movimientos",
+  "Average per day": "Media por día",
   "Monthly Remainder": "Resto mensual",
   "Total Investment": "Total inversión",
   "from last month": "desde el mes pasado",
