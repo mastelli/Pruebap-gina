@@ -1,20 +1,13 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server"
 
-// Rutas que NO requieren autenticación (públicas) - solo estas
-const isPublicRoute = createRouteMatcher([
-  "/",                       // inicio (raíz)
-  "/welcome",                // pantalla de bienvenida
-  "/calculator",             // calculadora
-  "/calculator/compound",    // interés compuesto
-  "/calculator/realestate",  // activos inmobiliarios
-  "/calculator/stocks",      // acciones
-  "/calculator/bonds",       // bonos
-])
+// Por este tiempo desactivamos el requisito de login en TODAS las rutas.
+// Si en el futuro se quiere proteger de nuevo, solo hay que quitar el comentario a auth.protect().
+const isPublicRoute = createRouteMatcher([".*"])
 
 export default clerkMiddleware(async (auth, request) => {
-  if (!isPublicRoute(request)) {
-    await auth.protect()
-  }
+  // No forzamos login: isPublicRoute siempre devuelve true.
+  // Si descomenta la línea de abajo, se reactiva el control de acceso.
+  // await auth.protect()
 })
 
 export const config = {
