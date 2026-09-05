@@ -40,14 +40,19 @@ export default function Welcome() {
           </Link>
 
           <nav className="hidden items-center gap-8 md:flex">
-            {["Producto", "Características", "Precios", "Blog"].map((label) => (
-              <a
+            {[
+              { label: "Producto", href: "#features" },
+              { label: "Características", href: "#features" },
+              { label: "Análisis", href: "/analytics" },
+              { label: "Blog", href: "#features" },
+            ].map(({ label, href }) => (
+              <Link
                 key={label}
-                href="#features"
+                href={href}
                 className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
               >
                 {label}
-              </a>
+              </Link>
             ))}
           </nav>
 
