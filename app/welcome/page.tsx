@@ -120,7 +120,7 @@ export default function Welcome() {
             </p>
             <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
               <Button size="lg" className="min-w-[220px]" asChild>
-                <Link href="/sign-up">
+                <Link href="/inicio">
                   Empieza gratis
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
