@@ -32,9 +32,19 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     return <>{children}</>
   }
 
-  // Rutas públicas: no exigimos sesión, se muestra el contenido sin el AuthScreen
+  // Rutas públicas: no exigimos sesión, pero se mantiene la cabecera y el sidebar
   if (isPublic) {
-    return <div className="min-h-screen">{children}</div>
+    return (
+      <div className="min-h-screen flex">
+        <Sidebar />
+        <div className="flex-1">
+          <TopNav />
+          <div className="container mx-auto p-6 max-w-7xl">
+            <main className="w-full">{children}</main>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   if (!ready) {
