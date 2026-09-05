@@ -63,7 +63,8 @@ export function NetWorth() {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col items-center gap-6 lg:flex-row lg:justify-between">
-        <div className="relative h-[240px] w-[240px] shrink-0">
+        <div className="flex shrink-0 flex-col items-center gap-3">
+          <div className="relative h-[240px] w-[240px]">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <defs>
@@ -109,9 +110,20 @@ export function NetWorth() {
             <p className="mt-1 text-2xl font-extrabold tabular-nums tracking-tight">
               {formatEuros(total)}
             </p>
-            <p className="mt-1.5 text-xs text-muted-foreground">
-              {cashPct}% {t("Cash")} · {investedPct}% {t("Invested")}
-            </p>
+          </div>
+        </div>
+          <div className="flex items-center gap-5">
+            <span className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+              <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: CASH_COLOR }} />
+              {t("Cash")} {cashPct}%
+            </span>
+            <span className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+              <span
+                className="h-2.5 w-2.5 rounded-full"
+                style={{ backgroundColor: INVESTED_COLOR }}
+              />
+              {t("Invested")} {investedPct}%
+            </span>
           </div>
         </div>
 
