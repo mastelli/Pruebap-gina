@@ -340,20 +340,20 @@ export default function AdvancedRealEstateCalculator() {
     <TooltipProvider>
       <div className="space-y-6">
         {/* ── Hero ── */}
-        <div className="rounded-2xl bg-gradient-to-r from-amber-500 via-orange-600 to-orange-700 text-white p-6 shadow-lg">
+        <div className="rounded-2xl border bg-card p-6 shadow-sm">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
               <div className="flex items-center gap-2">
-                <Building2 className="h-5 w-5" />
-                <p className="text-sm font-medium text-amber-100">Activos Inmobiliarios</p>
+                <Building2 className="h-5 w-5 text-primary" />
+                <p className="text-sm font-medium text-muted-foreground">Activos Inmobiliarios</p>
               </div>
-              <h2 className="text-2xl md:text-3xl font-bold mt-1">¿Cuánto rinde tu vivienda en alquiler?</h2>
-              <p className="text-amber-100/90 text-sm mt-1 max-w-xl">
+              <h2 className="text-2xl md:text-3xl font-bold mt-1 text-foreground">¿Cuánto rinde tu vivienda en alquiler?</h2>
+              <p className="text-muted-foreground text-sm mt-1 max-w-xl">
                 Cuenta real de la inversión: cuota hipotecaria, impuestos, comunidad, seguro, mantenimiento y revalorización.
               </p>
             </div>
             <Select value={input.currency} onValueChange={(v) => update("currency", v as Currency)}>
-              <SelectTrigger className="w-28 bg-white/15 border-white/25 text-white">
+              <SelectTrigger className="w-28">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -364,25 +364,25 @@ export default function AdvancedRealEstateCalculator() {
             </Select>
           </div>
           <div className="grid grid-cols-2 gap-3 md:grid-cols-4 mt-6">
-            <div className="rounded-xl bg-white/15 p-3">
-              <p className="text-xs text-amber-100">Capital invertido</p>
-              <p className="text-lg font-bold">{formatCurrency(kpis.cashInvested, input.currency)}</p>
+            <div className="rounded-xl bg-muted p-3">
+              <p className="text-xs text-muted-foreground">Capital invertido</p>
+              <p className="text-lg font-bold text-foreground">{formatCurrency(kpis.cashInvested, input.currency)}</p>
             </div>
-            <div className="rounded-xl bg-white/15 p-3">
-              <p className="text-xs text-amber-100">Cuota hipoteca</p>
-              <p className="text-lg font-bold">
+            <div className="rounded-xl bg-muted p-3">
+              <p className="text-xs text-muted-foreground">Cuota hipoteca</p>
+              <p className="text-lg font-bold text-foreground">
                 {input.financing.enabled ? `${formatCurrency(kpis.monthlyMortgage, input.currency)}/mes` : "Sin hipoteca"}
               </p>
             </div>
-            <div className="rounded-xl bg-white/15 p-3">
-              <p className="text-xs text-amber-100">Cash flow mensual</p>
-              <p className={`text-lg font-bold ${kpis.monthlyCashFlow >= 0 ? "" : "text-amber-100"}`}>
+            <div className="rounded-xl bg-muted p-3">
+              <p className="text-xs text-muted-foreground">Cash flow mensual</p>
+              <p className={`text-lg font-bold ${kpis.monthlyCashFlow >= 0 ? "text-emerald-600" : "text-red-600"}`}>
                 {formatCurrency(kpis.monthlyCashFlow, input.currency)}/mes
               </p>
             </div>
-            <div className="rounded-xl bg-white/15 p-3">
-              <p className="text-xs text-amber-100">ROI sobre capital</p>
-              <p className="text-lg font-bold">{formatPercent(kpis.yieldOnEquity)}</p>
+            <div className="rounded-xl bg-muted p-3">
+              <p className="text-xs text-muted-foreground">ROI sobre capital</p>
+              <p className="text-lg font-bold text-foreground">{formatPercent(kpis.yieldOnEquity)}</p>
             </div>
           </div>
         </div>
