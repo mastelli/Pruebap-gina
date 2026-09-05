@@ -6,6 +6,8 @@ export const PUBLIC_PATHS = [
   "/calculator/realestate",
   "/calculator/stocks",
   "/calculator/bonds",
+  "/sign-in",
+  "/sign-up",
 ]
 
 export function isPublicPath(pathname: string): boolean {
