@@ -5,7 +5,6 @@ export const PUBLIC_PATHS = [
   "/calculator/compound",
   "/calculator/realestate",
   "/calculator/stocks",
-  "/calculator/bonds",
   "/sign-in",
   "/sign-up",
 ]

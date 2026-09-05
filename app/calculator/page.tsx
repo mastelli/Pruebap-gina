@@ -2,14 +2,13 @@
 
 import Link from "next/link"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Calculator, LineChart, Building2, TrendingUp, Landmark } from "lucide-react"
+import { Calculator, LineChart, Building2, TrendingUp } from "lucide-react"
 import { useLanguage } from "@/lib/i18n"
 
 const sections = [
   { name: "Compound Interest", href: "/calculator/compound", icon: LineChart, desc: "Compound Interest Calculator" },
   { name: "Real Estate Assets", href: "/calculator/realestate", icon: Building2, desc: "Real Estate Calculator" },
   { name: "Stocks", href: "/calculator/stocks", icon: TrendingUp, desc: "Stock Analyzer" },
-  { name: "Bonds", href: "/calculator/bonds", icon: Landmark, desc: "Bond Calculator" },
 ]
 
 export default function CalculatorHub() {

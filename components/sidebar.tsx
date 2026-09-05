@@ -54,7 +54,6 @@ const navigation: NavItem[] = [
       { name: "Compound Interest", href: "/calculator/compound" },
       { name: "Real Estate Assets", href: "/calculator/realestate" },
       { name: "Stocks", href: "/calculator/stocks" },
-      { name: "Bonds", href: "/calculator/bonds" },
     ],
   },
   { name: "Chat", href: "/chat", icon: MessagesSquare },
