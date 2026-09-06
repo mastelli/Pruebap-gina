@@ -80,59 +80,40 @@ export default function Welcome() {
           </Link>
 
           <nav className="hidden items-center gap-8 md:flex">
+            <Link
+              href="/inicio"
+              className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+            >
+              {t("Dashboard")}
+            </Link>
+            <Link
+              href="/investment"
+              className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+            >
+              {t("Savings and Investment")}
+            </Link>
             <div className="group relative">
-              <button className="flex items-center gap-1 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
-                {t("Product")}
+              <Link
+                href="/calculator"
+                className="flex items-center gap-1 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+              >
+                {t("Financial Calculators")}
                 <ChevronDown className="h-3.5 w-3.5 transition-transform duration-200 group-hover:rotate-180" />
-              </button>
+              </Link>
               <div className="invisible absolute left-1/2 top-full z-50 -translate-x-1/2 pt-4 opacity-0 transition-all duration-200 group-hover:visible group-hover:opacity-100">
-                <div className="flex gap-8 rounded-xl border border-border bg-background p-6 shadow-lg">
-                  {/* Columna: Dashboard */}
-                  <div className="w-36 space-y-3">
-                    <Link href="/inicio" className="block text-sm font-semibold text-foreground transition-colors hover:text-primary">{t("Dashboard")}</Link>
-                  </div>
-                  {/* Columna: Análisis */}
-                  <div className="w-36 space-y-3">
-                    <Link href="/analytics" className="block text-sm font-semibold text-foreground transition-colors hover:text-primary">{t("Analytics")}</Link>
-                    <div className="space-y-1.5 border-l border-border pl-3">
-                      <Link href="/analytics/income" className="block text-sm text-muted-foreground transition-colors hover:text-foreground">{t("Revenue")}</Link>
-                      <Link href="/analytics/expenses" className="block text-sm text-muted-foreground transition-colors hover:text-foreground">{t("Expenses")}</Link>
-                      <Link href="/analytics/savings" className="block text-sm text-muted-foreground transition-colors hover:text-foreground">{t("Debt")}</Link>
-                    </div>
-                  </div>
-                  {/* Columna: Ahorro e Inversión */}
-                  <div className="w-36 space-y-3">
-                    <Link href="/investment" className="block text-sm font-semibold text-foreground transition-colors hover:text-primary">{t("Savings and Investment")}</Link>
-                  </div>
-                  {/* Columna: Calculadoras financieras */}
-                  <div className="w-36 space-y-3">
-                    <Link href="/calculator" className="block text-sm font-semibold text-foreground transition-colors hover:text-primary">{t("Financial Calculators")}</Link>
-                    <div className="space-y-1.5 border-l border-border pl-3">
-                      <Link href="/calculator/compound" className="block text-sm text-muted-foreground transition-colors hover:text-foreground">{t("Compound Interest")}</Link>
-                      <Link href="/calculator/realestate" className="block text-sm text-muted-foreground transition-colors hover:text-foreground">{t("Real Estate Assets")}</Link>
-                      <Link href="/calculator/stocks" className="block text-sm text-muted-foreground transition-colors hover:text-foreground">{t("Stocks")}</Link>
-                    </div>
-                  </div>
-                  {/* Columna: Chat con IA */}
-                  <div className="w-36 space-y-3">
-                    <Link href="/chat" className="block text-sm font-semibold text-foreground transition-colors hover:text-primary">{t("AI chat")}</Link>
-                  </div>
+                <div className="w-48 space-y-1.5 rounded-xl border border-border bg-background p-3 shadow-lg">
+                  <Link href="/calculator/compound" className="block rounded-md px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground">{t("Compound Interest")}</Link>
+                  <Link href="/calculator/realestate" className="block rounded-md px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground">{t("Real Estate Assets")}</Link>
+                  <Link href="/calculator/stocks" className="block rounded-md px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground">{t("Stocks")}</Link>
                 </div>
               </div>
             </div>
-            {[
-              { label: t("Features"), href: "#features" },
-              { label: t("Analytics"), href: "/analytics" },
-              { label: t("Blog"), href: "#features" },
-            ].map(({ label, href }) => (
-              <Link
-                key={label}
-                href={href}
-                className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-              >
-                {label}
-              </Link>
-            ))}
+            <Link
+              href="/chat"
+              className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+            >
+              {t("AI chat")}
+            </Link>
           </nav>
 
           <div className="hidden items-center gap-3 md:flex">
