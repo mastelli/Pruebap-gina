@@ -15,7 +15,10 @@ const inter = Inter({ subsets: ["latin"] })
 export const metadata = {
   title: "Make It Right Dashboard",
   description: "A modern, responsive financial dashboard",
-  generator: 'v0.app'
+  generator: 'v0.app',
+  other: {
+    "google-adsense-account": "ca-pub-5760615250143839",
+  },
 }
 
 export default function RootLayout({
