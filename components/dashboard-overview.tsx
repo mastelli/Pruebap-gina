@@ -21,7 +21,7 @@ import {
 import { useLanguage } from "@/lib/i18n"
 import { useTransactions } from "@/lib/transactions"
 import { usePortfolioEurTotal, usePortfolioCash } from "@/components/portfolio-total"
-import { getCategoryFor } from "@/lib/categories"
+import { getCategoryFor, isInternalTransferTransaction } from "@/lib/categories"
 import { computeDerived, type Derived, type Item } from "@/components/analytics/debt/debt-engine"
 
 const DEBT_STORAGE_KEY = "debt-dashboard-items"
@@ -38,6 +38,7 @@ function sumByMonth(transactions: ReturnType<typeof useTransactions>["transactio
   return transactions
     .filter((transaction) => transaction.date.startsWith(prefix))
     .filter((transaction) => (positive ? transaction.amount > 0 : transaction.amount < 0))
+    .filter((transaction) => !isInternalTransferTransaction(transaction))
     .reduce((sum, transaction) => sum + Math.abs(transaction.amount), 0)
 }
 
@@ -90,6 +91,7 @@ function buildInsightContext(
   const byCategory: Record<string, number> = {}
   for (const transaction of transactions) {
     if (!transaction.date.startsWith(mPrefix) || transaction.amount >= 0) continue
+    if (isInternalTransferTransaction(transaction)) continue
     const category = getCategoryFor(transaction)
     byCategory[category] = (byCategory[category] ?? 0) + Math.abs(transaction.amount)
   }
@@ -281,10 +283,12 @@ export function DashboardOverview() {
 
   const yearlyIncome = transactions
     .filter((transaction) => transaction.amount > 0 && transaction.date.startsWith(currentYear))
+    .filter((transaction) => !isInternalTransferTransaction(transaction))
     .reduce((sum, transaction) => sum + transaction.amount, 0)
 
   const yearlyExpenses = transactions
     .filter((transaction) => transaction.amount < 0 && transaction.date.startsWith(currentYear))
+    .filter((transaction) => !isInternalTransferTransaction(transaction))
     .reduce((sum, transaction) => sum + Math.abs(transaction.amount), 0)
 
   const incomeMonth = sumByMonth(transactions, mPrefix, true)

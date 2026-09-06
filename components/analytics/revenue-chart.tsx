@@ -15,6 +15,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { useTheme } from "next-themes"
 import { useLanguage } from "@/lib/i18n"
 import { useTransactions, getLatestPeriod } from "@/lib/transactions"
+import { isInternalTransferTransaction } from "@/lib/categories"
 import { usePortfolioEurTotal } from "@/components/portfolio-total"
 import { storageGetItem } from "@/lib/auth"
 
@@ -41,6 +42,7 @@ interface ChartPoint {
   expenses: number | null
   difference: number | null
   investment: number | null
+  transfers: number | null
 }
 
 function formatEuros(value: number): string {
@@ -78,8 +80,14 @@ export function RevenueChart() {
     const prefix = `${year}-${String(m + 1).padStart(2, "0")}`
     let income = 0
     let expenses = 0
+    let transfers = 0
     for (const transaction of transactions) {
       if (!transaction.date.startsWith(prefix)) continue
+      // Traspaso interno: ni ingreso ni gasto, se muestra aparte
+      if (isInternalTransferTransaction(transaction)) {
+        transfers += Math.abs(transaction.amount)
+        continue
+      }
       if (transaction.amount > 0) income += transaction.amount
       else expenses += -transaction.amount
     }
@@ -93,6 +101,7 @@ export function RevenueChart() {
       expenses,
       difference: income - expenses,
       investment,
+      transfers,
     })
   }
 
@@ -102,6 +111,8 @@ export function RevenueChart() {
         return t("Total Income")
       case "expenses":
         return t("Total Expenses")
+      case "transfers":
+        return t("Internal Transfer")
       case "difference":
         return t("Difference")
       default:
@@ -177,6 +188,14 @@ export function RevenueChart() {
           dataKey="expenses"
           name={t("Total Expenses")}
           fill={theme === "dark" ? "#e57373" : "#ef9a9a"}
+          maxBarSize={28}
+          radius={[3, 3, 0, 0]}
+        />
+        <Bar
+          yAxisId="left"
+          dataKey="transfers"
+          name={t("Internal Transfer")}
+          fill={theme === "dark" ? "#9575cd" : "#7e57c2"}
           maxBarSize={28}
           radius={[3, 3, 0, 0]}
         />

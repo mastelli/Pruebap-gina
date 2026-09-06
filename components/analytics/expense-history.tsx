@@ -3,6 +3,7 @@
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
 import { useLanguage } from "@/lib/i18n"
 import { useTransactions } from "@/lib/transactions"
+import { isInternalTransferTransaction } from "@/lib/categories"
 
 const MONTHS = [
   "January",
@@ -35,6 +36,7 @@ export function ExpenseHistory() {
     const prefix = `${currentYear}-${String(index + 1).padStart(2, "0")}`
     const total = transactions
       .filter((transaction) => transaction.amount < 0 && transaction.date.startsWith(prefix))
+      .filter((transaction) => !isInternalTransferTransaction(transaction))
       .reduce((sum, transaction) => sum + Math.abs(transaction.amount), 0)
 
     return { month: t(month), total }

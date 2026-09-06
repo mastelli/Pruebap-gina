@@ -3,6 +3,7 @@
 import { TrendingDown, TrendingUp } from "lucide-react"
 import { useLanguage } from "@/lib/i18n"
 import { useTransactions, getLatestPeriod, getPeriodPrefix } from "@/lib/transactions"
+import { isInternalTransferTransaction } from "@/lib/categories"
 
 function formatEuros(value: number): string {
   return value.toLocaleString("es-ES", { style: "currency", currency: "EUR" })
@@ -19,6 +20,7 @@ export function SavingsRate({ month }: { month?: string }) {
   let expenses = 0
   for (const transaction of transactions) {
     if (!transaction.date.startsWith(period)) continue
+    if (isInternalTransferTransaction(transaction)) continue
     if (transaction.amount > 0) income += transaction.amount
     else expenses += -transaction.amount
   }

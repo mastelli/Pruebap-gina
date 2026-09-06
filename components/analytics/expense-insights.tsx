@@ -5,7 +5,7 @@ import type { LucideIcon } from "lucide-react"
 import { useEffect, useState } from "react"
 import { useLanguage } from "@/lib/i18n"
 import { useTransactions, getPeriodPrefix } from "@/lib/transactions"
-import { getCategoryFor, getAllExpenseCategories } from "@/lib/categories"
+import { getCategoryFor, getAllExpenseCategories, INTERNAL_TRANSFER_CATEGORY, isInternalTransferTransaction } from "@/lib/categories"
 import { storageGetItem } from "@/lib/auth"
 
 const MONTHS = [
@@ -55,11 +55,12 @@ export function ExpenseInsights({ month }: { month: string }) {
   const yearNum = Number(prefix.slice(0, 4))
   const monthNum = Number(prefix.slice(5, 7))
 
-  const allDefs = getAllExpenseCategories()
+  const allDefs = getAllExpenseCategories().filter((def) => def.key !== INTERNAL_TRANSFER_CATEGORY)
   const spentByCategory: Record<string, number> = {}
   for (const def of allDefs) spentByCategory[def.key] = 0
   for (const transaction of transactions) {
     if (transaction.amount >= 0 || !transaction.date.startsWith(prefix)) continue
+    if (isInternalTransferTransaction(transaction)) continue
     spentByCategory[getCategoryFor(transaction)] += Math.abs(transaction.amount)
   }
 
@@ -84,6 +85,7 @@ export function ExpenseInsights({ month }: { month: string }) {
   )
   const prevTotal = transactions
     .filter((transaction) => transaction.amount < 0 && transaction.date.startsWith(prevPrefix))
+    .filter((transaction) => !isInternalTransferTransaction(transaction))
     .reduce((sum, transaction) => sum + Math.abs(transaction.amount), 0)
   const delta = prevTotal > 0 ? (total - prevTotal) / prevTotal : null
 

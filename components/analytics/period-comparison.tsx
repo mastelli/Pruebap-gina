@@ -13,6 +13,7 @@ import {
 import { TrendingUp } from "lucide-react"
 import { useLanguage } from "@/lib/i18n"
 import { useTransactions, getLatestPeriod, getPeriodPrefix } from "@/lib/transactions"
+import { isInternalTransferTransaction } from "@/lib/categories"
 
 const MONTHS = [
   "January",
@@ -38,6 +39,7 @@ function calcPeriod(transactions: ReturnType<typeof useTransactions>["transactio
   let expenses = 0
   for (const transaction of transactions) {
     if (!transaction.date.startsWith(prefix)) continue
+    if (isInternalTransferTransaction(transaction)) continue
     if (transaction.amount > 0) income += transaction.amount
     else expenses += -transaction.amount
   }

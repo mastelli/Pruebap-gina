@@ -5,6 +5,7 @@ import type { LucideIcon } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { useLanguage } from "@/lib/i18n"
 import { useTransactions, getLatestPeriod } from "@/lib/transactions"
+import { isInternalTransferTransaction } from "@/lib/categories"
 import { usePortfolioEurTotal, usePortfolioCash } from "@/components/portfolio-total"
 import { InvestmentTips } from "@/components/analytics/investment-tips"
 import { FinanceNews } from "@/components/analytics/finance-news"
@@ -49,6 +50,7 @@ export function InvestmentOverview() {
   let expenses = 0
   for (const transaction of transactions) {
     if (!transaction.date.startsWith(period)) continue
+    if (isInternalTransferTransaction(transaction)) continue
     if (transaction.amount > 0) income += transaction.amount
     else expenses += -transaction.amount
   }

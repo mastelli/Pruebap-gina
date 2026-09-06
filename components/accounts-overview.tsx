@@ -9,6 +9,7 @@ import { AddTransactionModal } from "./add-transaction-modal"
 import { useLanguage } from "@/lib/i18n"
 import { parseBankMovements } from "@/lib/bank-import"
 import { useTransactions } from "@/lib/transactions"
+import { isInternalTransferTransaction } from "@/lib/categories"
 
 function formatEuros(value: number): string {
   return value.toLocaleString("es-ES", { style: "currency", currency: "EUR" })
@@ -32,6 +33,7 @@ export function AccountsOverview() {
         transaction.date.startsWith(currentYear) &&
         transaction.date.slice(5, 7) === currentMonth,
     )
+    .filter((transaction) => !isInternalTransferTransaction(transaction))
     .reduce((sum, transaction) => sum + transaction.amount, 0)
 
   const monthlyExpenses = transactions
@@ -41,14 +43,17 @@ export function AccountsOverview() {
         transaction.date.startsWith(currentYear) &&
         transaction.date.slice(5, 7) === currentMonth,
     )
+    .filter((transaction) => !isInternalTransferTransaction(transaction))
     .reduce((sum, transaction) => sum + Math.abs(transaction.amount), 0)
 
   const yearlyIncome = transactions
     .filter((transaction) => transaction.amount > 0 && transaction.date.startsWith(currentYear))
+    .filter((transaction) => !isInternalTransferTransaction(transaction))
     .reduce((sum, transaction) => sum + transaction.amount, 0)
 
   const yearlyExpenses = transactions
     .filter((transaction) => transaction.amount < 0 && transaction.date.startsWith(currentYear))
+    .filter((transaction) => !isInternalTransferTransaction(transaction))
     .reduce((sum, transaction) => sum + Math.abs(transaction.amount), 0)
 
   const monthlyIncomeAverage = yearlyIncome / monthsElapsed

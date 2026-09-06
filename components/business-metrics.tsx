@@ -4,6 +4,7 @@ import { ArrowRight } from "lucide-react"
 import Link from "next/link"
 import { useLanguage } from "@/lib/i18n"
 import { useTransactions } from "@/lib/transactions"
+import { isInternalTransferTransaction } from "@/lib/categories"
 import { PortfolioTotal } from "@/components/portfolio-total"
 
 function formatEuros(value: number): string {
@@ -29,10 +30,12 @@ export function BusinessMetrics() {
 
   const yearlyIncome = transactions
     .filter((transaction) => transaction.amount > 0 && transaction.date.startsWith(currentYear))
+    .filter((transaction) => !isInternalTransferTransaction(transaction))
     .reduce((sum, transaction) => sum + transaction.amount, 0)
 
   const yearlyExpenses = transactions
     .filter((transaction) => transaction.amount < 0 && transaction.date.startsWith(currentYear))
+    .filter((transaction) => !isInternalTransferTransaction(transaction))
     .reduce((sum, transaction) => sum + Math.abs(transaction.amount), 0)
 
   const monthlyAverage = yearlyIncome / monthsElapsed

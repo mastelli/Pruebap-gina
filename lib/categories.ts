@@ -14,6 +14,11 @@ export const SALARY_KEYWORDS = [
 
 export const TRANSFER_KEYWORDS = ["transferencia", "traf"]
 
+// Traspasos entre cuentas propias: ni ingreso ni gasto, solo se
+// muestran en la grafica de Resumen junto a los gastos
+export const INTERNAL_TRANSFER_CATEGORY = "Internal Transfer"
+export const INTERNAL_TRANSFER_KEYWORDS = ["traspaso"]
+
 export type TransactionCategory = string
 
 export interface ExpenseCategoryDef {
@@ -46,12 +51,13 @@ const BUILTIN_EXPENSE_CATEGORIES: ExpenseCategoryDef[] = [
   { key: "Travel", color: "#00897b", keywords: ["hotel", "viaje", "avion", "vuelo", "ryanair", "vueling", "iberia", "airbnb", "booking", "expedia", "crucero"] },
   { key: "Gifts", color: "#d81b60", keywords: ["regalo", "floristeria", "joyeria"] },
   { key: "Leisure", color: "#ec407a", keywords: ["cine", "teatro", "concierto", "museo", "ocio", "steam", "playstation", "xbox", "nintendo", "entradas", "bolera"] },
+  { key: "Internal Transfer", color: "#8d6e63", keywords: INTERNAL_TRANSFER_KEYWORDS },
   { key: "Other", color: "#90a4ae", keywords: [] },
 ]
 
 const BIZUM_RE = /bizum/i
 
-export const INCOME_CATEGORIES: TransactionCategory[] = ["Salary", "Transfers", "Bizum"]
+export const INCOME_CATEGORIES: TransactionCategory[] = ["Salary", "Transfers", "Bizum", "Internal Transfer"]
 
 // Modificaciones manuales del tipo por movimiento (persistidas y
 // aisladas por cuenta de usuario)
@@ -94,8 +100,26 @@ export function getCategoryFor(transaction: { id: string; name: string; amount: 
   return isCategoryHidden(auto) ? "Other" : auto
 }
 
+// Traspaso entre cuentas propias: no es ingreso ni gasto, se excluye
+// de los totales pero se muestra aparte en la grafica de Resumen
+export function isInternalTransferTransaction(transaction: {
+  id: string
+  name: string
+  amount: number
+}): boolean {
+  return getCategoryFor(transaction) === INTERNAL_TRANSFER_CATEGORY
+}
+
 // Clasifica cualquier movimiento en una de las categorias del dashboard
 export function classifyTransaction(transaction: { name: string; amount: number }): TransactionCategory {
+  const normalizedName = normalize(transaction.name)
+
+  // Traspaso entre cuentas propias: ni ingreso ni gasto, se detecta
+  // por el nombre antes de mirar el signo del importe
+  if (INTERNAL_TRANSFER_KEYWORDS.some((keyword) => normalizedName.includes(keyword))) {
+    return INTERNAL_TRANSFER_CATEGORY
+  }
+
   const name = transaction.name.toLowerCase()
 
   if (transaction.amount > 0) {
@@ -110,7 +134,6 @@ export function classifyTransaction(transaction: { name: string; amount: number 
   if (isWaterBill(transaction.name)) return "Water"
   if (isSubscription(transaction.name)) return "Subscriptions"
 
-  const normalizedName = normalize(transaction.name)
   for (const def of EXPENSE_CATEGORY_DEFS) {
     if (def.keywords.some((keyword) => normalizedName.includes(keyword))) return def.key
   }

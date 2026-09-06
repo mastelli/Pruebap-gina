@@ -84,7 +84,7 @@ export default function TransactionsPage() {
 
   const allCategories = useMemo(() => {
     const expense = getAllExpenseCategories().map((def) => def.key)
-    const all = [...INCOME_CATEGORIES, ...expense]
+    const all = [...new Set([...INCOME_CATEGORIES, ...expense])]
     return all.sort((a, b) => t(a).localeCompare(t(b), "es"))
   }, [t, catVersion])
 

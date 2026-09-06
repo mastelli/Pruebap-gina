@@ -4,6 +4,7 @@ import { Cell, Pie, PieChart, ResponsiveContainer } from "recharts"
 import { PiggyBank, TrendingUp } from "lucide-react"
 import { useLanguage } from "@/lib/i18n"
 import { useTransactions, getLatestPeriod } from "@/lib/transactions"
+import { isInternalTransferTransaction } from "@/lib/categories"
 import { usePortfolioEurTotal, usePortfolioCash } from "@/components/portfolio-total"
 
 function formatEuros(value: number): string {
@@ -34,6 +35,7 @@ export function NetWorth() {
   let expenses = 0
   for (const transaction of transactions) {
     if (!transaction.date.startsWith(period)) continue
+    if (isInternalTransferTransaction(transaction)) continue
     if (transaction.amount > 0) income += transaction.amount
     else expenses += -transaction.amount
   }

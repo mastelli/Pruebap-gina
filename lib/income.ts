@@ -1,5 +1,5 @@
 import type { DetectableMovement } from "./bill-companies"
-import { getCategoryFor } from "./categories"
+import { getCategoryFor, INTERNAL_TRANSFER_CATEGORY } from "./categories"
 
 // Movimiento con identificador, necesario para consultar su tipo manual
 export interface IdentifiableMovement extends DetectableMovement {
@@ -30,6 +30,7 @@ export function getIncomeBreakdown(
     if (movement.amount <= 0 || !movement.date.startsWith(yearPrefix)) continue
 
     const category = getCategoryFor(movement)
+    if (category === INTERNAL_TRANSFER_CATEGORY) continue
     if (category === "Salary") {
       totals.salary += movement.amount
     } else if (category === "Transfers") {

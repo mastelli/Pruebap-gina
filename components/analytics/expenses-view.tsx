@@ -1,15 +1,18 @@
 "use client"
 
-import { TrendingUp } from "lucide-react"
+import { useState } from "react"
+import { Settings, TrendingUp } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
 import { MetricTab } from "@/components/analytics/metric-tab"
 import { ExpenseDoughnut } from "@/components/analytics/expense-doughnut"
 import { ExpenseTypes } from "@/components/analytics/expense-types"
 import { ExpenseHistory } from "@/components/analytics/expense-history"
 import { ExpenseInsights } from "@/components/analytics/expense-insights"
+import { CategoryManager } from "@/components/category-manager"
 import { useLanguage } from "@/lib/i18n"
 import { useTransactions, getPeriodPrefix, sortByDateDesc } from "@/lib/transactions"
-import { getCategoryFor, getAllExpenseCategories } from "@/lib/categories"
+import { getCategoryFor, getAllExpenseCategories, isInternalTransferTransaction } from "@/lib/categories"
 
 const MONTHS = [
   "January",
@@ -45,6 +48,7 @@ export function ExpensesView() {
 function ExpenseOverview({ month, setMonth }: { month: string; setMonth: (m: string) => void }) {
   const { t } = useLanguage()
   const { transactions } = useTransactions()
+  const [catVersion, setCatVersion] = useState(0)
 
   const prefix = getPeriodPrefix(transactions, month)
   const yearNum = Number(prefix.slice(0, 4))
@@ -58,6 +62,7 @@ function ExpenseOverview({ month, setMonth }: { month: string; setMonth: (m: str
   for (const def of allDefs) spentByCategory[def.key] = 0
   for (const transaction of transactions) {
     if (transaction.amount >= 0 || !transaction.date.startsWith(prefix)) continue
+    if (isInternalTransferTransaction(transaction)) continue
     spentByCategory[getCategoryFor(transaction)] += Math.abs(transaction.amount)
   }
 
@@ -70,11 +75,17 @@ function ExpenseOverview({ month, setMonth }: { month: string; setMonth: (m: str
   )
   const prevTotal = transactions
     .filter((transaction) => transaction.amount < 0 && transaction.date.startsWith(prevPrefix))
+    .filter((transaction) => !isInternalTransferTransaction(transaction))
     .reduce((sum, transaction) => sum + Math.abs(transaction.amount), 0)
   const delta = prevTotal > 0 ? ((total - prevTotal) / prevTotal) * 100 : null
 
   const expenses = sortByDateDesc(
-    transactions.filter((transaction) => transaction.amount < 0 && transaction.date.startsWith(prefix)),
+    transactions.filter(
+      (transaction) =>
+        transaction.amount < 0 &&
+        transaction.date.startsWith(prefix) &&
+        !isInternalTransferTransaction(transaction),
+    ),
   )
   const count = expenses.length
   const dayCount = new Date(yearNum, monthNum, 0).getDate()
@@ -172,8 +183,17 @@ function ExpenseOverview({ month, setMonth }: { month: string; setMonth: (m: str
       {/* Desglose + movimientos */}
       <div className="grid gap-4 lg:grid-cols-3">
         <Card>
-          <CardHeader>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0">
             <CardTitle className="text-lg font-semibold">{t("Expense Breakdown")}</CardTitle>
+            <CategoryManager
+              key={catVersion}
+              trigger={
+                <Button variant="ghost" size="icon" className="h-9 w-9" title={t("Categories")}>
+                  <Settings className="h-4 w-4" />
+                </Button>
+              }
+              onChange={() => setCatVersion((v) => v + 1)}
+            />
           </CardHeader>
           <CardContent>
             <ExpenseDoughnut month={month} />

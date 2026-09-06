@@ -5,6 +5,7 @@ import { Wallet, DollarSign, Receipt, LineChart, TrendingUp } from "lucide-react
 import type { LucideIcon } from "lucide-react"
 import { useLanguage } from "@/lib/i18n"
 import { useTransactions, getLatestPeriod, getPeriodPrefix } from "@/lib/transactions"
+import { isInternalTransferTransaction } from "@/lib/categories"
 import { usePortfolioEurTotal, usePortfolioCash } from "@/components/portfolio-total"
 
 function formatEuros(value: number, decimals = 2): string {
@@ -56,6 +57,8 @@ export function OverviewCards({ month }: { month?: string }) {
   let expCur = 0
   let expPrev = 0
   for (const transaction of transactions) {
+    // Traspaso interno: ni ingreso ni gasto
+    if (isInternalTransferTransaction(transaction)) continue
     if (transaction.date.startsWith(cur)) {
       if (transaction.amount > 0) incCur += transaction.amount
       else expCur += -transaction.amount

@@ -5,7 +5,12 @@ import { Input } from "@/components/ui/input"
 import { useLanguage } from "@/lib/i18n"
 import { useTransactions, getPeriodPrefix } from "@/lib/transactions"
 import { storageGetItem, storageSetItem } from "@/lib/auth"
-import { getCategoryFor, getAllExpenseCategories } from "@/lib/categories"
+import {
+  getCategoryFor,
+  getAllExpenseCategories,
+  INTERNAL_TRANSFER_CATEGORY,
+  isInternalTransferTransaction,
+} from "@/lib/categories"
 
 const BUDGETS_STORAGE_KEY = "appExpenseBudgets"
 
@@ -66,11 +71,12 @@ export function ExpenseTypes({ month }: { month: string }) {
 
   const prefix = getPeriodPrefix(transactions, month)
 
-  const allDefs = getAllExpenseCategories()
+  const allDefs = getAllExpenseCategories().filter((def) => def.key !== INTERNAL_TRANSFER_CATEGORY)
   const spentByCategory: Record<string, number> = {}
   for (const def of allDefs) spentByCategory[def.key] = 0
   for (const transaction of transactions) {
     if (transaction.amount >= 0 || !transaction.date.startsWith(prefix)) continue
+    if (isInternalTransferTransaction(transaction)) continue
     spentByCategory[getCategoryFor(transaction)] += Math.abs(transaction.amount)
   }
 

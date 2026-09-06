@@ -3,7 +3,7 @@
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts"
 import { useLanguage } from "@/lib/i18n"
 import { useTransactions } from "@/lib/transactions"
-import { getCategoryFor, getAllExpenseCategories } from "@/lib/categories"
+import { getCategoryFor, getAllExpenseCategories, isInternalTransferTransaction } from "@/lib/categories"
 import { getPeriodPrefix } from "@/lib/transactions"
 
 function formatEuros(value: number): string {
@@ -24,6 +24,7 @@ export function ExpenseDoughnut({ month }: { month: string }) {
   for (const def of allDefs) totals[def.key] = 0
   for (const transaction of transactions) {
     if (transaction.amount >= 0 || !transaction.date.startsWith(prefix)) continue
+    if (isInternalTransferTransaction(transaction)) continue
     const cat = getCategoryFor(transaction)
     if (!totals[cat]) totals[cat] = 0
     totals[cat] += Math.abs(transaction.amount)

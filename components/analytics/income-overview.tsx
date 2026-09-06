@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useLanguage } from "@/lib/i18n"
 import { useTransactions, getPeriodPrefix, sortByDateDesc } from "@/lib/transactions"
 import { getIncomeBreakdown } from "@/lib/income"
-import { getCategoryFor } from "@/lib/categories"
+import { getCategoryFor, isInternalTransferTransaction } from "@/lib/categories"
 import type { LucideIcon } from "lucide-react"
 import { IncomeCategoriesChart } from "./income-breakdown"
 import { IncomeHistory } from "./income-history"
@@ -72,7 +72,12 @@ export function IncomeOverview({
   const delta = prevTotal > 0 ? ((total - prevTotal) / prevTotal) * 100 : null
 
   const incomes = sortByDateDesc(
-    transactions.filter((transaction) => transaction.amount > 0 && transaction.date.startsWith(prefix)),
+    transactions.filter(
+      (transaction) =>
+        transaction.amount > 0 &&
+        transaction.date.startsWith(prefix) &&
+        !isInternalTransferTransaction(transaction),
+    ),
   )
   const count = incomes.length
   const dayCount = new Date(yearNum, monthNum, 0).getDate()

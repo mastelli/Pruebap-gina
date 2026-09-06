@@ -150,6 +150,15 @@ export function CategoryManager({ trigger, onChange }: { trigger?: React.ReactNo
                   onClick={() => setNewColor(color)}
                 />
               ))}
+              <label className="flex items-center gap-2 rounded-lg border px-2 py-1" title={t("All Colors")}>
+                <input
+                  type="color"
+                  value={/^#[0-9a-f]{6}$/i.test(newColor) ? newColor : "#000000"}
+                  onChange={(e) => setNewColor(e.target.value)}
+                  className="h-6 w-6 shrink-0 cursor-pointer appearance-none border-0 bg-transparent p-0"
+                />
+                <span className="text-xs text-muted-foreground">{t("All Colors")}</span>
+              </label>
             </div>
             <div className="flex gap-2">
               <Button size="sm" onClick={handleAdd} disabled={!newName.trim()}>

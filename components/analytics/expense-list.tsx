@@ -3,7 +3,7 @@
 import { Badge } from "@/components/ui/badge"
 import { useLanguage } from "@/lib/i18n"
 import { useTransactions, sortByDateDesc, getPeriodPrefix } from "@/lib/transactions"
-import { getCategoryFor } from "@/lib/categories"
+import { getCategoryFor, isInternalTransferTransaction } from "@/lib/categories"
 
 export function ExpenseList({ month }: { month: string }) {
   const { t } = useLanguage()
@@ -12,7 +12,12 @@ export function ExpenseList({ month }: { month: string }) {
   const prefix = getPeriodPrefix(transactions, month)
 
   const expenses = sortByDateDesc(
-    transactions.filter((transaction) => transaction.amount < 0 && transaction.date.startsWith(prefix)),
+    transactions.filter(
+      (transaction) =>
+        transaction.amount < 0 &&
+        transaction.date.startsWith(prefix) &&
+        !isInternalTransferTransaction(transaction),
+    ),
   )
 
   return (
