@@ -124,10 +124,9 @@ export function classifyTransaction(transaction: { name: string; amount: number 
 
   const name = transaction.name.toLowerCase()
 
-  if (transaction.amount > 0) {
-    if (BIZUM_RE.test(name)) return "Bizum"
-    if (SALARY_KEYWORDS.some((keyword) => name.includes(keyword))) return "Salary"
-    if (TRANSFER_KEYWORDS.some((keyword) => name.includes(keyword))) return "Transfers"
+if (transaction.amount > 0) {
+    if (BIZUM_RE.test(name)) return "Bizum/Transferencia"
+    if (TRANSFER_KEYWORDS.some((keyword) => normalizedName.includes(keyword))) return "Bizum/Transferencia"
     return "Transfers"
   }
 

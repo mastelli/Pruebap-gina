@@ -35,6 +35,7 @@ const SLICE_COLORS = {
 
 const CATEGORY_ICONS: Record<string, { icon: LucideIcon; color: string }> = {
   Salary: { icon: Wallet, color: SLICE_COLORS.salary },
+  "Bizum/Transferencia": { icon: Zap, color: SLICE_COLORS.bizum },
   Transfers: { icon: ArrowRightLeft, color: SLICE_COLORS.transfers },
   Bizum: { icon: Zap, color: SLICE_COLORS.bizum },
 }
@@ -89,8 +90,7 @@ export function IncomeOverview({
 
   const catTiles = [
     { key: "Salary", value: salary },
-    { key: "Transfers", value: transfers },
-    { key: "Bizum", value: bizum },
+    { key: "Bizum/Transferencia", value: transfers + bizum },
   ]
 
   return (

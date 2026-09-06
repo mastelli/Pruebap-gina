@@ -6,8 +6,9 @@ import { useTransactions, getPeriodPrefix } from "@/lib/transactions"
 import { getIncomeBreakdown } from "@/lib/income"
 
 // Tonos verdes, uno por categoria
-const SLICE_COLORS = ["#66bb6a", "#43a047", "#2e7d32"]
+const SLICE_COLORS = ["#66bb6a", "#2e7d32"] // Salary y Bizum/Transferencia (sin Transfers separado)
 
+// Rango en radianes
 const RADIAN = Math.PI / 180
 
 function formatEuros(value: number): string {
@@ -29,10 +30,12 @@ export function IncomeCategoriesChart({ scope = "month", month }: IncomeCategori
   const year = scope === "month" ? getPeriodPrefix(transactions, selectedMonth) : `${now.getFullYear()}`
   const { salary, transfers, bizum } = getIncomeBreakdown(transactions, year)
 
+  // Combinamos transfers y bizum en una única categoría "Bizum/Transferencia"
+  const combinedBizumTransfers = transfers + bizum
+
   const data = [
     { label: "Salary", total: salary, color: SLICE_COLORS[0] },
-    { label: "Transfers", total: transfers, color: SLICE_COLORS[1] },
-    { label: "Bizum", total: bizum, color: SLICE_COLORS[2] },
+    { label: "Bizum/Transferencia", total: combinedBizumTransfers, color: SLICE_COLORS[1] },
   ]
     .map((row) => ({ ...row, label: t(row.label) }))
     .filter((row) => row.total > 0)

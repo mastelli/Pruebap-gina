@@ -190,14 +190,16 @@ export function RevenueChart() {
           fill={theme === "dark" ? "#e57373" : "#ef9a9a"}
           maxBarSize={28}
           radius={[3, 3, 0, 0]}
+          stackId="expenses"
         />
         <Bar
           yAxisId="left"
           dataKey="transfers"
           name={t("Internal Transfer")}
-          fill={theme === "dark" ? "#9575cd" : "#7e57c2"}
+          fill={theme === "dark" ? "#b0bec5" : "#cfd8dc"}
           maxBarSize={28}
           radius={[3, 3, 0, 0]}
+          stackId="expenses"
         />
         <Line
           yAxisId="left"

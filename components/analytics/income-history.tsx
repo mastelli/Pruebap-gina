@@ -23,7 +23,6 @@ const MONTHS = [
 // Mismos colores que en Desglose de ingresos
 const STACK_COLORS = {
   salary: "#66bb6a",
-  transfers: "#43a047",
   bizum: "#2e7d32",
 }
 
@@ -45,8 +44,7 @@ export function IncomeHistory() {
     return {
       month: t(month),
       salary: totals.salary,
-      transfers: totals.transfers,
-      bizum: totals.bizum,
+      bizum: totals.transfers + totals.bizum, // agrupa transfers + bizum en un solo bloque
     }
   })
 
