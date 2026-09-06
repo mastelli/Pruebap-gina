@@ -1,5 +1,6 @@
 "use client"
 
+import { useState, FormEvent } from "react"
 import { useSignUp, useAuth } from "@clerk/nextjs"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
@@ -15,26 +16,54 @@ export default function SignUpPage() {
   const { isSignedIn } = useAuth()
   const router = useRouter()
 
-  const handleSubmit = async (formData: FormData) => {
-    const emailAddress = (formData.get("email") as string) || ""
-    const password = (formData.get("password") as string) || ""
-    const birthDate = (formData.get("birthDate") as string) || ""
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [birthDate, setBirthDate] = useState("")
+  const [code, setCode] = useState("")
+  const [submitError, setSubmitError] = useState<string | null>(null)
+
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    setSubmitError(null)
+
+    if (fetchStatus === "fetching" || !signUp) return
 
     const { error } = await signUp.password({
-      emailAddress,
+      emailAddress: email,
       password,
       unsafeMetadata: { birthDate },
     })
 
-    if (error) return
+    if (error) {
+      const msg = error.message || error.toString()
+      setSubmitError(msg)
+      return
+    }
 
-    await signUp.verifications.sendEmailCode()
+    const sendResult = await signUp.verifications.sendEmailCode()
+    if (sendResult.error) {
+      setSubmitError(sendResult.error.message || sendResult.error.toString())
+    }
   }
 
-  const handleVerify = async (formData: FormData) => {
-    const code = (formData.get("code") as string) || ""
+  const handleResend = async () => {
+    if (!signUp) return
+    const result = await signUp.verifications.sendEmailCode()
+    if (result.error) {
+      setSubmitError(result.error.message || result.error.toString())
+    }
+  }
 
-    await signUp.verifications.verifyEmailCode({ code })
+  const handleVerify = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    setSubmitError(null)
+    if (!signUp) return
+
+    const result = await signUp.verifications.verifyEmailCode({ code })
+    if (result.error) {
+      setSubmitError(result.error.message || result.error.toString())
+      return
+    }
 
     if (signUp.status === "complete") {
       await signUp.finalize({
@@ -51,12 +80,12 @@ export default function SignUpPage() {
     }
   }
 
-  if (signUp.status === "complete" || isSignedIn) {
+  if (signUp?.status === "complete" || isSignedIn) {
     return null
   }
 
   const awaitingVerification =
-    signUp.status === "missing_requirements" &&
+    signUp?.status === "missing_requirements" &&
     signUp.unverifiedFields.includes("email_address") &&
     signUp.missingFields.length === 0
 
@@ -88,18 +117,31 @@ export default function SignUpPage() {
 
       <div className="relative flex flex-col items-center justify-center px-4 pb-16 pt-8">
         <div className="mx-auto w-full max-w-md rounded-xl border border-border bg-card p-6 shadow-lg">
-          {awaitingVerification ? (
+          {!signUp ? (
+            <div className="flex items-center justify-center py-10">
+              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+            </div>
+          ) : awaitingVerification ? (
             <>
               <h1 className="text-2xl font-bold tracking-tight">{t("Verify account")}</h1>
               <p className="mt-1 text-sm text-muted-foreground">
                 {t("Enter the code we sent to")} {signUp.emailAddress}
               </p>
-              <form action={handleVerify} className="mt-6 space-y-4">
+              <form onSubmit={handleVerify} className="mt-6 space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="code">{t("Verification code")}</Label>
-                  <Input id="code" name="code" type="text" autoComplete="one-time-code" required />
-                  {errors.fields.code && (
-                    <p className="text-sm text-destructive">{errors.fields.code.message}</p>
+                  <Input
+                    id="code"
+                    type="text"
+                    value={code}
+                    onChange={(e) => setCode(e.target.value)}
+                    autoComplete="one-time-code"
+                    required
+                  />
+                  {(errors.fields.code || submitError) && (
+                    <p className="text-sm text-destructive">
+                      {errors.fields.code?.message ?? submitError}
+                    </p>
                   )}
                 </div>
                 <Button type="submit" className="w-full" disabled={fetchStatus === "fetching"}>
@@ -109,11 +151,7 @@ export default function SignUpPage() {
                   {t("Verify")}
                 </Button>
               </form>
-              <Button
-                variant="ghost"
-                className="mt-2 w-full"
-                onClick={() => signUp.verifications.sendEmailCode()}
-              >
+              <Button variant="ghost" className="mt-2 w-full" onClick={handleResend}>
                 {t("I need a new code")}
               </Button>
             </>
@@ -123,10 +161,17 @@ export default function SignUpPage() {
               <p className="mt-1 text-sm text-muted-foreground">
                 {t("Choose an email and password for the new account")}
               </p>
-              <form action={handleSubmit} className="mt-6 space-y-4">
+              <form onSubmit={handleSubmit} className="mt-6 space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="email">{t("Email address")}</Label>
-                  <Input id="email" name="email" type="email" required autoComplete="email" />
+                  <Input
+                    id="email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    autoComplete="email"
+                  />
                   {errors.fields.emailAddress && (
                     <p className="text-sm text-destructive">
                       {errors.fields.emailAddress.message}
@@ -137,8 +182,9 @@ export default function SignUpPage() {
                   <Label htmlFor="password">{t("Password")}</Label>
                   <Input
                     id="password"
-                    name="password"
                     type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
                     required
                     autoComplete="new-password"
                   />
@@ -151,11 +197,18 @@ export default function SignUpPage() {
                     <Cake className="h-4 w-4" />
                     {t("Date of Birth")}
                   </Label>
-                  <Input id="birthDate" name="birthDate" type="date" required />
+                  <Input
+                    id="birthDate"
+                    type="date"
+                    value={birthDate}
+                    onChange={(e) => setBirthDate(e.target.value)}
+                    required
+                  />
                   <p className="text-sm text-muted-foreground">
                     {t("You must be at least 18 years old")}
                   </p>
                 </div>
+                {submitError && <p className="text-sm text-destructive">{submitError}</p>}
                 <Button type="submit" className="w-full" disabled={fetchStatus === "fetching"}>
                   {fetchStatus === "fetching" ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
