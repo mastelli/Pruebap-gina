@@ -86,41 +86,36 @@ export default function Welcome() {
                 <ChevronDown className="h-3.5 w-3.5 transition-transform duration-200 group-hover:rotate-180" />
               </button>
               <div className="invisible absolute left-1/2 top-full z-50 -translate-x-1/2 pt-4 opacity-0 transition-all duration-200 group-hover:visible group-hover:opacity-100">
-                <div className="grid w-[560px] grid-cols-2 gap-x-8 rounded-xl border border-border bg-background p-6 shadow-lg">
-                  {/* Columna izquierda */}
-                  <div className="space-y-5">
-                    <Link href="/inicio" className="group/link block">
-                      <span className="text-sm font-semibold text-foreground transition-colors group-hover/link:text-primary">{t("Home")}</span>
-                    </Link>
-                    <div>
-                      <Link href="/analytics" className="group/link block">
-                        <span className="text-sm font-semibold text-foreground transition-colors group-hover/link:text-primary">{t("Analytics")}</span>
-                      </Link>
-                      <div className="mt-2 space-y-1.5 border-l border-border pl-3">
-                        <Link href="/analytics/income" className="block text-sm text-muted-foreground transition-colors hover:text-foreground">{t("Revenue")}</Link>
-                        <Link href="/analytics/expenses" className="block text-sm text-muted-foreground transition-colors hover:text-foreground">{t("Expenses")}</Link>
-                        <Link href="/analytics/savings" className="block text-sm text-muted-foreground transition-colors hover:text-foreground">{t("Debt")}</Link>
-                      </div>
+                <div className="flex gap-8 rounded-xl border border-border bg-background p-6 shadow-lg">
+                  {/* Columna: Dashboard */}
+                  <div className="w-36 space-y-3">
+                    <Link href="/inicio" className="block text-sm font-semibold text-foreground transition-colors hover:text-primary">{t("Dashboard")}</Link>
+                  </div>
+                  {/* Columna: Análisis */}
+                  <div className="w-36 space-y-3">
+                    <Link href="/analytics" className="block text-sm font-semibold text-foreground transition-colors hover:text-primary">{t("Analytics")}</Link>
+                    <div className="space-y-1.5 border-l border-border pl-3">
+                      <Link href="/analytics/income" className="block text-sm text-muted-foreground transition-colors hover:text-foreground">{t("Revenue")}</Link>
+                      <Link href="/analytics/expenses" className="block text-sm text-muted-foreground transition-colors hover:text-foreground">{t("Expenses")}</Link>
+                      <Link href="/analytics/savings" className="block text-sm text-muted-foreground transition-colors hover:text-foreground">{t("Debt")}</Link>
                     </div>
                   </div>
-                  {/* Columna derecha */}
-                  <div className="space-y-5">
-                    <Link href="/investment" className="group/link block">
-                      <span className="text-sm font-semibold text-foreground transition-colors group-hover/link:text-primary">{t("Savings and Investment")}</span>
-                    </Link>
-                    <div>
-                      <Link href="/calculator" className="group/link block">
-                        <span className="text-sm font-semibold text-foreground transition-colors group-hover/link:text-primary">{t("Financial Calculators")}</span>
-                      </Link>
-                      <div className="mt-2 space-y-1.5 border-l border-border pl-3">
-                        <Link href="/calculator/compound" className="block text-sm text-muted-foreground transition-colors hover:text-foreground">{t("Compound Interest")}</Link>
-                        <Link href="/calculator/realestate" className="block text-sm text-muted-foreground transition-colors hover:text-foreground">{t("Real Estate Assets")}</Link>
-                        <Link href="/calculator/stocks" className="block text-sm text-muted-foreground transition-colors hover:text-foreground">{t("Stocks")}</Link>
-                      </div>
+                  {/* Columna: Ahorro e Inversión */}
+                  <div className="w-36 space-y-3">
+                    <Link href="/investment" className="block text-sm font-semibold text-foreground transition-colors hover:text-primary">{t("Savings and Investment")}</Link>
+                  </div>
+                  {/* Columna: Calculadoras financieras */}
+                  <div className="w-36 space-y-3">
+                    <Link href="/calculator" className="block text-sm font-semibold text-foreground transition-colors hover:text-primary">{t("Financial Calculators")}</Link>
+                    <div className="space-y-1.5 border-l border-border pl-3">
+                      <Link href="/calculator/compound" className="block text-sm text-muted-foreground transition-colors hover:text-foreground">{t("Compound Interest")}</Link>
+                      <Link href="/calculator/realestate" className="block text-sm text-muted-foreground transition-colors hover:text-foreground">{t("Real Estate Assets")}</Link>
+                      <Link href="/calculator/stocks" className="block text-sm text-muted-foreground transition-colors hover:text-foreground">{t("Stocks")}</Link>
                     </div>
-                    <Link href="/chat" className="group/link block">
-                      <span className="text-sm font-semibold text-foreground transition-colors group-hover/link:text-primary">{t("AI chat")}</span>
-                    </Link>
+                  </div>
+                  {/* Columna: Chat con IA */}
+                  <div className="w-36 space-y-3">
+                    <Link href="/chat" className="block text-sm font-semibold text-foreground transition-colors hover:text-primary">{t("AI chat")}</Link>
                   </div>
                 </div>
               </div>
