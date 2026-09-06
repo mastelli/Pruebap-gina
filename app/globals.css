@@ -85,14 +85,18 @@
   body {
     @apply bg-background text-foreground;
     background-image:
-      radial-gradient(ellipse 60% 45% at 50% -12%, hsl(var(--primary) / 0.06), transparent 62%),
-      radial-gradient(circle 520px at 12% -8%, hsl(222 92% 56% / 0.07), transparent 62%),
-      radial-gradient(circle 460px at 90% 18%, hsl(262 83% 62% / 0.05), transparent 62%),
-      radial-gradient(circle 560px at 85% 105%, hsl(222 92% 56% / 0.05), transparent 62%),
-      radial-gradient(circle 420px at 5% 90%, hsl(262 83% 62% / 0.04), transparent 62%),
-      radial-gradient(circle at 1px 1px, hsl(var(--primary) / 0.025) 1px, transparent 1.5px);
-    background-size: 100% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%, 26px 26px;
-    background-attachment: fixed, fixed, fixed, fixed, fixed, fixed;
+      radial-gradient(ellipse 60% 45% at 50% -12%, hsl(var(--primary) / 0.07), transparent 62%),
+      radial-gradient(circle 560px at 12% -10%, hsl(222 92% 56% / 0.1), transparent 60%),
+      radial-gradient(circle 480px at 90% 16%, hsl(262 83% 62% / 0.08), transparent 60%),
+      radial-gradient(circle 600px at 86% 106%, hsl(222 92% 56% / 0.08), transparent 60%),
+      radial-gradient(circle 440px at 4% 92%, hsl(262 83% 62% / 0.06), transparent 60%),
+      radial-gradient(circle 660px at 90% 100%, transparent 0 74%, hsl(222 92% 56% / 0.08) 74% 77%, transparent 77%),
+      radial-gradient(circle 660px at 90% 100%, transparent 0 84%, hsl(222 92% 56% / 0.06) 84% 86.5%, transparent 86.5%),
+      radial-gradient(circle 400px at 80% -8%, transparent 0 66%, hsl(262 83% 62% / 0.07) 66% 69%, transparent 69%),
+      radial-gradient(circle 240px at 72% 52%, transparent 0 58%, hsl(160 84% 39% / 0.06) 58% 62%, transparent 62%),
+      radial-gradient(circle at 1px 1px, hsl(var(--primary) / 0.03) 1px, transparent 1.5px);
+    background-size: 100% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%, 26px 26px;
+    background-attachment: fixed, fixed, fixed, fixed, fixed, fixed, fixed, fixed, fixed, fixed;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 }
