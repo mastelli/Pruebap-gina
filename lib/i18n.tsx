@@ -153,6 +153,7 @@ const translations: Record<string, string> = {
   "Subscriptions": "Suscripciones",
   "Invoices": "Facturas",
   "Add Invoice": "Añadir Factura",
+  "Upload PDF invoices for easy tracking. Data entered here does not affect other pages.": "Sube PDFs de tus facturas para tener un seguimiento sencillo. Los datos que añadas aquí no alteran ninguna otra página.",
   "Invoice type": "Tipo de factura",
   "Internet Bill": "Factura de internet",
   "Other": "Otros",

@@ -22,7 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { PlusCircle, Receipt, Trash2, Paperclip } from "lucide-react"
+import { PlusCircle, Receipt, Trash2, Paperclip, Info } from "lucide-react"
 import { useLanguage } from "@/lib/i18n"
 
 interface Invoice {
@@ -225,7 +225,13 @@ export default function InvoicesPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-4">
-        <h1 className="text-3xl font-bold tracking-tight">{t("Invoices")}</h1>
+        <div className="flex flex-col gap-1">
+          <h1 className="text-3xl font-bold tracking-tight">{t("Invoices")}</h1>
+          <p className="text-sm text-muted-foreground flex items-center gap-2">
+            <Info className="h-4 w-4 shrink-0" />
+            {t("Upload PDF invoices for easy tracking. Data entered here does not affect other pages.")}
+          </p>
+        </div>
         <Button onClick={() => setIsModalOpen(true)}>
           <PlusCircle className="mr-2 h-4 w-4" /> {t("Add Invoice")}
         </Button>
