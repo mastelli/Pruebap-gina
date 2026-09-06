@@ -40,9 +40,10 @@ export function AnalyticsHeader({
         setCheckingBalance(firstBalance)
       }
 
-      addBankMovements(movements)
-
-      toast.success(`${movements.length} ${t("movements imported")}`)
+      const addedTransactions = addBankMovements(movements)
+      if (addedTransactions.length > 0) {
+        toast.success(`${addedTransactions.length} ${t("movements imported")}`)
+      }
     } catch {
       toast.error(t("Error reading the file"))
     } finally {

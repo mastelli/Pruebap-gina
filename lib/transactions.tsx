@@ -21,7 +21,7 @@ const DEFAULT_TRANSACTIONS: Transaction[] = []
 interface TransactionsContextValue {
   transactions: Transaction[]
   checkingBalance: number | null
-  addBankMovements: (movements: BankMovementInput[]) => number
+  addBankMovements: (movements: BankMovementInput[]) => Transaction[]
   updateCheckingBalance: (delta: number) => void
   setCheckingBalance: (value: number) => void
   removeTransaction: (id: string) => void
@@ -83,14 +83,14 @@ export function TransactionsProvider({ children }: { children: React.ReactNode }
     } catch {}
   }, [transactions, checkingBalance, hydrated])
 
-  const addBankMovements = (movements: BankMovementInput[]): number => {
-    let added = 0
+  const addBankMovements = (movements: BankMovementInput[]): Transaction[] => {
+    let fresh: Transaction[] = []
     setTransactions((prev) => {
       const existingKeys = new Set(
         prev.map((transaction) => `${transaction.date}|${transaction.name}|${transaction.amount}`),
       )
 
-      const fresh: Transaction[] = []
+      fresh = []
       movements.forEach((movement, index) => {
         const transaction: Transaction = {
           id: `bank-${Date.now()}-${index}`,
@@ -105,10 +105,9 @@ export function TransactionsProvider({ children }: { children: React.ReactNode }
         }
       })
 
-      added = fresh.length
       return [...fresh, ...prev]
     })
-    return added
+    return fresh
   }
 
   const updateCheckingBalance = (delta: number) => {

@@ -23,6 +23,8 @@ const translations: Record<string, string> = {
   "All categories": "Todas las categorías",
   Categories: "Categorías",
   "Add category": "Añadir categoría",
+  Subcategory: "Subcategoría",
+  "Select subcategory": "Seleccionar subcategoría",
   "Category name": "Nombre de categoría",
   "All Colors": "Todos los colores",
   Default: "Por defecto",

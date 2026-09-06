@@ -21,6 +21,8 @@ import {
 } from "@/components/ui/select"
 import { useLanguage } from "@/lib/i18n"
 import { useTransactions, BankMovementInput } from "@/lib/transactions"
+import { INCOME_CATEGORIES, getAllExpenseCategories } from "@/lib/categories"
+import { storeCategory } from "@/lib/categories"
 
 interface AddTransactionModalProps {
   isOpen: boolean
@@ -32,6 +34,7 @@ const EMPTY_FORM = {
   amount: "",
   date: "",
   concept: "",
+  subcategory: "",
 }
 
 export function AddTransactionModal({ isOpen, onClose }: AddTransactionModalProps) {
@@ -65,8 +68,13 @@ export function AddTransactionModal({ isOpen, onClose }: AddTransactionModalProp
       amount: form.type === "expense" ? -value : value,
     }
 
-    const added = addBankMovements([movement])
-    if (added > 0) {
+    const addedTransactions = addBankMovements([movement])
+    if (addedTransactions.length > 0) {
+      // Si se seleccionó una subcategoría, guardarla como override de categoría
+      if (form.subcategory) {
+        const newTransaction = addedTransactions[0]
+        storeCategory(newTransaction.id, form.subcategory)
+      }
       // El gasto resta del saldo de Corriente; el ingreso suma
       updateCheckingBalance(movement.amount)
       toast.success(t("Transaction added"))
@@ -85,7 +93,7 @@ export function AddTransactionModal({ isOpen, onClose }: AddTransactionModalProp
             <Label htmlFor="transaction-type">{t("Type")}</Label>
             <Select
               value={form.type}
-              onValueChange={(value) => setForm((prev) => ({ ...prev, type: value as "expense" | "income" }))}
+              onValueChange={(value) => setForm((prev) => ({ ...prev, type: value as "expense" | "income", subcategory: "" }))}
             >
               <SelectTrigger id="transaction-type">
                 <SelectValue />
@@ -93,6 +101,31 @@ export function AddTransactionModal({ isOpen, onClose }: AddTransactionModalProp
               <SelectContent>
                 <SelectItem value="expense">{t("Expense")}</SelectItem>
                 <SelectItem value="income">{t("Income")}</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="transaction-subcategory">{t("Subcategory")}</Label>
+            <Select
+              value={form.subcategory}
+              onValueChange={(value) => setForm((prev) => ({ ...prev, subcategory: value }))}
+              disabled={!form.type}
+            >
+              <SelectTrigger id="transaction-subcategory">
+                <SelectValue placeholder={t("Select subcategory")} />
+              </SelectTrigger>
+              <SelectContent>
+                {form.type === "expense"
+                  ? getAllExpenseCategories().map((def) => (
+                      <SelectItem key={def.key} value={def.key}>
+                        {t(def.key)}
+                      </SelectItem>
+                    ))
+                  : INCOME_CATEGORIES.map((cat) => (
+                      <SelectItem key={cat} value={cat}>
+                        {t(cat)}
+                      </SelectItem>
+                    ))}
               </SelectContent>
             </Select>
           </div>
