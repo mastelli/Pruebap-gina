@@ -14,6 +14,8 @@ import {
 } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useLanguage } from "@/lib/i18n"
+import { AdsenseScript } from "@/components/ads/adsense-script"
+import { AdSlot } from "@/components/ads/ad-slot"
 import type { LucideIcon } from "lucide-react"
 
 type Accent = { chip: string; bar: string; check: string }
@@ -109,6 +111,10 @@ export default function CalculatorHub() {
 
   return (
     <div className="space-y-6">
+      <AdsenseScript />
+
+      {/* ── Anuncio ── */}
+      <AdSlot className="min-h-[90px] w-full" />
       {/* ── Hero ── */}
       <div className="rounded-2xl border bg-card p-6 shadow-sm md:p-8">
         <div className="flex items-center gap-2">
