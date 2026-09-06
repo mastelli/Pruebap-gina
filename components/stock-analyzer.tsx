@@ -797,7 +797,7 @@ export function StockAnalyzer() {
           <p className="mt-2 text-xl font-bold text-foreground">
             Invertir <span className="text-primary">10.000 €</span> en el índice S&P 500 hace{" "}
             <span className="text-primary">20 años</span> (≈ <span className="text-primary">8% anual</span> histórico)
-            te habría convertido hoy en casi <span className="text-emerald-600">47.000 €</span>.
+            habría alcanzado hoy un valor cercano a <span className="text-emerald-600">47.000 €</span>.
           </p>
           <p className="mt-2 text-sm text-muted-foreground">
             No por acertar el momento, sino por permanecer invertido: el mercado sube y baja a corto plazo, pero a
