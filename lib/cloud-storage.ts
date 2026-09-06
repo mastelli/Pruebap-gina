@@ -1,5 +1,4 @@
 import { getSupabaseClient } from "./supabase"
-import { getAuthUserId } from "./auth"
 
 const TABLE = "user_data"
 
@@ -7,19 +6,14 @@ function getClient() {
   return getSupabaseClient()
 }
 
-function getUserId(): string | null {
-  return getAuthUserId()
-}
-
-export async function cloudGet(key: string): Promise<unknown | null> {
+export async function cloudGet(userId: string | null, key: string): Promise<unknown | null> {
   try {
-    const uid = getUserId()
-    if (!uid) return null
+    if (!userId) return null
     const db = getClient()
     const { data, error } = await db
       .from(TABLE)
       .select("value")
-      .eq("user_id", uid)
+      .eq("user_id", userId)
       .eq("key", key)
       .maybeSingle()
     if (error) {
@@ -33,14 +27,13 @@ export async function cloudGet(key: string): Promise<unknown | null> {
   }
 }
 
-export async function cloudSet(key: string, value: unknown): Promise<void> {
+export async function cloudSet(userId: string | null, key: string, value: unknown): Promise<void> {
   try {
-    const uid = getUserId()
-    if (!uid) return
+    if (!userId) return
     const db = getClient()
     const { error } = await db
       .from(TABLE)
-      .upsert({ user_id: uid, key, value }, { onConflict: "user_id,key" })
+      .upsert({ user_id: userId, key, value }, { onConflict: "user_id,key" })
     if (error) {
       console.error("[cloud] SET failed:", error.message)
     }
@@ -49,15 +42,14 @@ export async function cloudSet(key: string, value: unknown): Promise<void> {
   }
 }
 
-export async function cloudGetAll(): Promise<Record<string, unknown>> {
+export async function cloudGetAll(userId: string | null): Promise<Record<string, unknown>> {
   try {
-    const uid = getUserId()
-    if (!uid) return {}
+    if (!userId) return {}
     const db = getClient()
     const { data, error } = await db
       .from(TABLE)
       .select("key, value")
-      .eq("user_id", uid)
+      .eq("user_id", userId)
     if (error) {
       console.error("[cloud] GET_ALL failed:", error.message)
       return {}
@@ -71,14 +63,13 @@ export async function cloudGetAll(): Promise<Record<string, unknown>> {
   }
 }
 
-export async function cloudSetBatch(items: { key: string; value: unknown }[]): Promise<void> {
+export async function cloudSetBatch(userId: string | null, items: { key: string; value: unknown }[]): Promise<void> {
   try {
-    const uid = getUserId()
-    if (!uid) return
+    if (!userId) return
     if (items.length === 0) return
     const db = getClient()
     const rows = items.map((item) => ({
-      user_id: uid,
+      user_id: userId,
       key: item.key,
       value: item.value,
     }))
