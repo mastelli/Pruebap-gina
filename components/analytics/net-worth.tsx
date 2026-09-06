@@ -4,7 +4,7 @@ import { Cell, Pie, PieChart, ResponsiveContainer } from "recharts"
 import { PiggyBank, TrendingUp } from "lucide-react"
 import { useLanguage } from "@/lib/i18n"
 import { useTransactions, getLatestPeriod } from "@/lib/transactions"
-import { usePortfolioEurTotal } from "@/components/portfolio-total"
+import { usePortfolioEurTotal, usePortfolioCash } from "@/components/portfolio-total"
 
 function formatEuros(value: number): string {
   return value.toLocaleString("es-ES", { style: "currency", currency: "EUR" })
@@ -22,8 +22,9 @@ export function NetWorth() {
   const { t } = useLanguage()
   const { checkingBalance, transactions } = useTransactions()
   const { total: investment, momPct } = usePortfolioEurTotal()
+  const portfolioCash = usePortfolioCash()
 
-  const cash = checkingBalance ?? 0
+  const cash = (checkingBalance ?? 0) + portfolioCash
   const invested = typeof investment === "number" ? investment : 0
   const total = cash + invested
 

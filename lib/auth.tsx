@@ -86,6 +86,7 @@ export function writeStorage(base: string, value: string): void {
 const MIGRATE_KEYS = [
   "appTransactions",
   "appPortfolio",
+  "appPortfolioCash",
   "appPortfolioPrices",
   "appPortfolioHistory",
   "userSettings",

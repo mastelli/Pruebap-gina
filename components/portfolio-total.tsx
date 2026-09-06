@@ -6,6 +6,7 @@ import { storageGetItem, storageSetItem, onStorageVersionChange } from "@/lib/au
 const PORTFOLIO_STORAGE_KEY = "appPortfolio"
 const PRICES_STORAGE_KEY = "appPortfolioPrices"
 const HISTORY_STORAGE_KEY = "appPortfolioHistory"
+const CASH_STORAGE_KEY = "appPortfolioCash"
 const REFRESH_MS = 30 * 1000
 
 interface StoredAsset {
@@ -128,6 +129,36 @@ export function usePortfolioEurTotal(): { total: number | null; momPct: number |
   }, [computeTotal])
 
   return { total, momPct }
+}
+
+// Efectivo (cash) detectado al importar la cartera desde el CSV del broker.
+// Vive en localStorage y se suma a la cuenta corriente y a la cartera.
+export function usePortfolioCash(): number {
+  const [cash, setCash] = useState(0)
+
+  const [storageVer, setStorageVer] = useState(0)
+
+  useEffect(() => {
+    return onStorageVersionChange(() => setStorageVer((v) => v + 1))
+  }, [])
+
+  const readCash = useCallback(() => {
+    try {
+      const raw = storageGetItem(CASH_STORAGE_KEY)
+      const value = raw === null ? 0 : Number.parseFloat(raw)
+      setCash(Number.isFinite(value) ? value : 0)
+    } catch {
+      setCash(0)
+    }
+  }, [])
+
+  useEffect(() => {
+    readCash()
+    const id = setInterval(readCash, REFRESH_MS)
+    return () => clearInterval(id)
+  }, [storageVer, readCash])
+
+  return cash
 }
 
 // Suma de los totales de la cartera en euros, con conversion de divisa

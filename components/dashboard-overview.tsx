@@ -20,7 +20,7 @@ import {
 } from "lucide-react"
 import { useLanguage } from "@/lib/i18n"
 import { useTransactions } from "@/lib/transactions"
-import { usePortfolioEurTotal } from "@/components/portfolio-total"
+import { usePortfolioEurTotal, usePortfolioCash } from "@/components/portfolio-total"
 import { getCategoryFor } from "@/lib/categories"
 import { computeDerived, type Derived, type Item } from "@/components/analytics/debt/debt-engine"
 
@@ -205,6 +205,7 @@ export function DashboardOverview() {
   const { t, lang } = useLanguage()
   const { transactions, checkingBalance } = useTransactions()
   const { total: portfolio, momPct } = usePortfolioEurTotal()
+  const portfolioCash = usePortfolioCash()
 
   const now = useMemo(() => new Date(), [])
 
@@ -297,7 +298,7 @@ export function DashboardOverview() {
 
   const debtTotal = debt?.pasivoTotal ?? 0
   const monthlyInterest = debt && debt.annualDebtService > 0 ? debt.annualDebtService / 12 : null
-  const liquid = checkingBalance ?? 0
+  const liquid = (checkingBalance ?? 0) + portfolioCash
   const netWorth = liquid + (portfolio ?? 0) - debtTotal
 
   const recent = useMemo(
@@ -339,11 +340,13 @@ export function DashboardOverview() {
       value:
         portfolio === null
           ? "…"
-          : portfolio.toLocaleString("es-ES", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }),
+          : (portfolio + portfolioCash).toLocaleString("es-ES", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }),
       sub:
-        portfolio !== null && momPct !== null
-          ? `${formatDelta(momPct)} ${t("vs last month")}`
-          : `${t("Savings Rate")}: ${savingsRate.toLocaleString("es-ES", { maximumFractionDigits: 1 })}%`,
+        portfolioCash > 0
+          ? `${t("Cash")}: ${formatEuros(portfolioCash)}`
+          : portfolio !== null && momPct !== null
+            ? `${formatDelta(momPct)} ${t("vs last month")}`
+            : `${t("Savings Rate")}: ${savingsRate.toLocaleString("es-ES", { maximumFractionDigits: 1 })}%`,
       iconClass: "bg-sky-500/10 text-sky-600 dark:text-sky-400",
       icon: <PieChart className="h-5 w-5" />,
     },

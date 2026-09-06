@@ -5,7 +5,7 @@ import type { LucideIcon } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { useLanguage } from "@/lib/i18n"
 import { useTransactions, getLatestPeriod } from "@/lib/transactions"
-import { usePortfolioEurTotal } from "@/components/portfolio-total"
+import { usePortfolioEurTotal, usePortfolioCash } from "@/components/portfolio-total"
 import { InvestmentTips } from "@/components/analytics/investment-tips"
 import { FinanceNews } from "@/components/analytics/finance-news"
 
@@ -34,8 +34,9 @@ export function InvestmentOverview() {
   const { t } = useLanguage()
   const { checkingBalance, transactions } = useTransactions()
   const { total: investment, momPct } = usePortfolioEurTotal()
+  const portfolioCash = usePortfolioCash()
 
-  const cash = checkingBalance ?? 0
+  const cash = (checkingBalance ?? 0) + portfolioCash
   const invested = typeof investment === "number" ? investment : 0
   const wealth = cash + invested
 
@@ -82,7 +83,7 @@ export function InvestmentOverview() {
       color: "#2563eb",
       label: t("Invested portfolio"),
       value: formatEuros(invested),
-      sub: momPctText ?? t("Investment portfolio"),
+      sub: portfolioCash > 0 ? `${t("Cash")}: ${formatEuros(portfolioCash)}` : momPctText ?? t("Investment portfolio"),
       valueClass: "text-blue-600 dark:text-blue-400",
     },
     {
@@ -122,6 +123,9 @@ export function InvestmentOverview() {
             )}
             <span className="rounded-full bg-white/15 px-3 py-1 font-medium backdrop-blur">
               {t("Checking account")}: {formatEuros(cash)}
+            </span>
+            <span className="rounded-full bg-white/15 px-3 py-1 font-medium backdrop-blur">
+              {t("Cash")}: {formatEuros(portfolioCash)}
             </span>
             <span className="rounded-full bg-white/15 px-3 py-1 font-medium backdrop-blur">
               {t("Invested portfolio")}: {formatEuros(invested)}

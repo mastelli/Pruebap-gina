@@ -5,7 +5,7 @@ import { Wallet, DollarSign, Receipt, LineChart, TrendingUp } from "lucide-react
 import type { LucideIcon } from "lucide-react"
 import { useLanguage } from "@/lib/i18n"
 import { useTransactions, getLatestPeriod, getPeriodPrefix } from "@/lib/transactions"
-import { usePortfolioEurTotal } from "@/components/portfolio-total"
+import { usePortfolioEurTotal, usePortfolioCash } from "@/components/portfolio-total"
 
 function formatEuros(value: number, decimals = 2): string {
   return value.toLocaleString("es-ES", {
@@ -48,6 +48,7 @@ export function OverviewCards({ month }: { month?: string }) {
   const { t } = useLanguage()
   const { transactions } = useTransactions()
   const { total: investment, momPct } = usePortfolioEurTotal()
+  const portfolioCash = usePortfolioCash()
 
   const { cur, prev } = monthPrefixes(transactions, month)
   let incCur = 0
@@ -94,7 +95,7 @@ export function OverviewCards({ month }: { month?: string }) {
     {
       title: "Total Investment",
       icon: LineChart,
-      amount: investment === null ? "…" : formatEuros(investment, 0),
+      amount: investment === null ? "…" : formatEuros(investment + portfolioCash, 0),
       pct: momPct,
     },
   ]

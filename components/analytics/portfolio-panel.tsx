@@ -10,6 +10,7 @@ import { exchangeFromSymbol } from "@/lib/exchanges"
 
 const PORTFOLIO_STORAGE_KEY = "appPortfolio"
 const PRICES_STORAGE_KEY = "appPortfolioPrices"
+const CASH_STORAGE_KEY = "appPortfolioCash"
 const PRICE_TTL = 5 * 1000
 // Sondeo agresivo solo como respaldo si no hay streaming; con streaming se
 // sondea unicamente lo que lleva demasiado tiempo sin recibir ticks
@@ -94,21 +95,46 @@ function splitCsvLine(line: string, delimiter: string): string[] {
   return cells.map((cell) => cell.trim().replace(/^"|"$/g, ""))
 }
 
-export function parsePortfolioCsv(text: string): Asset[] {
+export interface ParsedPortfolio {
+  assets: Asset[]
+  cash: number
+}
+
+export function parsePortfolioCsv(text: string): ParsedPortfolio {
   const lines = text.split(/\r?\n/).filter((line) => line.trim().length > 0)
-  if (lines.length < 2) return []
+  if (lines.length < 2) return { assets: [], cash: 0 }
 
   const firstLine = lines[0]
-  const delimiter =
-    (firstLine.match(/;/g)?.length ?? 0) > (firstLine.match(/,/g)?.length ?? 0) ? ";" : ","
+  const tabs = firstLine.match(/\t/g)?.length ?? 0
+  const semis = firstLine.match(/;/g)?.length ?? 0
+  const commas = firstLine.match(/,/g)?.length ?? 0
+  const delimiter = tabs > semis && tabs > commas ? "\t" : semis > commas ? ";" : ","
 
   const assets: Asset[] = []
+  let cash = 0
 
   for (const line of lines.slice(1)) {
     const cells = splitCsvLine(line, delimiter)
+    const product = (cells[0] ?? "").trim()
     const isin = (cells[1] ?? "").trim().toUpperCase()
 
-    // Lineas sin ISIN valido (cabecera repetida, efectivo, etc.) se ignoran
+    // Linea de efectivo/cash: sin ISIN y con un texto que lo identifica.
+    // Ej.: "CASH & CASH FUND & FTX CASH (EUR)" con su valor en las ultimas columnas.
+    if (!/^[A-Z]{2}[A-Z0-9]{9}\d$/.test(isin) && /cash/i.test(product)) {
+      // valor EUR = ultimo campo numerico de la linea
+      let amount = NaN
+      for (let i = cells.length - 1; i >= 0; i--) {
+        const parsed = parseNumber(cells[i] ?? "")
+        if (Number.isFinite(parsed) && parsed !== 0) {
+          amount = parsed
+          break
+        }
+      }
+      if (Number.isFinite(amount) && amount !== 0) cash += amount
+      continue
+    }
+
+    // El resto de lineas sin ISIN valido (cabecera repetida, etc.) se ignoran
     if (!/^[A-Z]{2}[A-Z0-9]{9}\d$/.test(isin)) continue
 
     const quantity = parseNumber(cells[2] ?? "")
@@ -118,7 +144,7 @@ export function parsePortfolioCsv(text: string): Asset[] {
 
     assets.push({
       id: `${isin}-${Date.now()}-${assets.length}`,
-      product: (cells[0] ?? "").trim() || isin,
+      product: product || isin,
       isin,
       quantity,
       currency: (cells[4] ?? "").trim().toUpperCase() || undefined,
@@ -127,7 +153,7 @@ export function parsePortfolioCsv(text: string): Asset[] {
     })
   }
 
-  return assets
+  return { assets, cash }
 }
 
 const CURRENCY_SYMBOLS: Record<string, string> = {
@@ -553,7 +579,7 @@ export function PortfolioPanel() {
 
   const handleFile = async (file: File) => {
     const text = await file.text()
-    const parsed = parsePortfolioCsv(text)
+    const { assets: parsed, cash } = parsePortfolioCsv(text)
     if (parsed.length === 0) return
 
     // anade los nuevos sustituyendo los que repiten ISIN
@@ -561,6 +587,11 @@ export function PortfolioPanel() {
     for (const asset of [...assets, ...parsed]) byIsin.set(asset.isin, asset)
     const next = Array.from(byIsin.values())
     persistAssets(next)
+    try {
+      storageSetItem(CASH_STORAGE_KEY, String(cash))
+    } catch {
+      // almacenamiento no disponible
+    }
     void refreshPrices(next, true)
   }
 
