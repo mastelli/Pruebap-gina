@@ -1,6 +1,6 @@
 "use client"
 
-import { LegalPage } from "@/components/legal-page"
+import { LegalPage, ContactLink } from "@/components/legal-page"
 
 export default function TermsPage() {
   return (
@@ -51,8 +51,8 @@ export default function TermsPage() {
       </Section>
       <Section title="7. Contacto">
         <p>
-          Para cualquier consulta relacionada con estos términos, puedes escribirnos a{" "}
-          <b>legal@makeitright.com</b>.
+          Para cualquier consulta relacionada con estos términos, puedes escribirnos{" "}
+          <ContactLink />.
         </p>
       </Section>
     </LegalPage>

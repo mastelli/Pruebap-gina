@@ -18,6 +18,17 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { UserAvatar } from "@/components/user-avatar"
 
+export function ContactLink() {
+  return (
+    <Link
+      href="/help"
+      className="font-medium text-foreground underline underline-offset-4 transition-colors hover:text-primary"
+    >
+      aquí
+    </Link>
+  )
+}
+
 export function LegalPage({ title, children }: { title: string; children: React.ReactNode }) {
   const { t } = useLanguage()
   const { ready, userId, name, email, logout } = useAuth()

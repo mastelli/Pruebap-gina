@@ -1,6 +1,6 @@
 "use client"
 
-import { LegalPage } from "@/components/legal-page"
+import { LegalPage, ContactLink } from "@/components/legal-page"
 
 export default function PrivacyPage() {
   return (
@@ -51,15 +51,15 @@ export default function PrivacyPage() {
         <p>
           De acuerdo con la legislación de protección de datos (RGPD), tienes derecho a acceder,
           rectificar, suprimir, limitar el tratamiento y solicitar la portabilidad de tus datos. Para
-          ejercer cualquiera de estos derechos, escríbenos a{" "}
-          <b>privacidad@makeitright.com</b>. También puedes eliminar tu cuenta y todos sus datos en
+          ejercer cualquiera de estos derechos, escríbenos{" "}
+          <ContactLink />. También puedes eliminar tu cuenta y todos sus datos en
           cualquier momento desde los ajustes de la aplicación.
         </p>
       </Section>
       <Section title="6. Contacto">
         <p>
           Si tienes dudas sobre esta política o sobre el tratamiento de tus datos personales, puedes
-          contactarnos en <b>privacidad@makeitright.com</b>.
+          contactarnos <ContactLink />.
         </p>
       </Section>
     </LegalPage>

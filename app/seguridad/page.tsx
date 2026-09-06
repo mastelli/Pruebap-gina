@@ -1,6 +1,6 @@
 "use client"
 
-import { LegalPage } from "@/components/legal-page"
+import { LegalPage, ContactLink } from "@/components/legal-page"
 
 export default function SecurityPage() {
   return (
@@ -45,7 +45,7 @@ export default function SecurityPage() {
       <Section title="6. Comunicar una vulnerabilidad">
         <p>
           Si descubres una vulnerabilidad de seguridad en la plataforma, agradecemos que nos la
-          comuniques de forma responsable en <b>security@makeitright.com</b> antes de divulgarla
+          comuniques de forma responsable <ContactLink /> antes de divulgarla
           públicamente.
         </p>
       </Section>

@@ -1,6 +1,6 @@
 "use client"
 
-import { LegalPage } from "@/components/legal-page"
+import { LegalPage, ContactLink } from "@/components/legal-page"
 
 export default function CookiesPage() {
   return (
@@ -44,8 +44,8 @@ export default function CookiesPage() {
       </Section>
       <Section title="5. Contacto">
         <p>
-          Si tienes preguntas sobre el uso de cookies, escríbenos a{" "}
-          <b>privacidad@makeitright.com</b>.
+          Si tienes preguntas sobre el uso de cookies, escríbenos{" "}
+          <ContactLink />.
         </p>
       </Section>
     </LegalPage>

@@ -9,6 +9,7 @@ export const PUBLIC_PATHS = [
   "/terminos",
   "/cookies",
   "/seguridad",
+  "/help",
   "/sign-in",
   "/sign-up",
 ]
