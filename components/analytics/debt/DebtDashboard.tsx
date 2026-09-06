@@ -18,6 +18,9 @@ import {
   type Item,
   type SimulatorState,
 } from "./debt-engine"
+import { usePortfolioEurTotal, usePortfolioCash } from "@/components/portfolio-total"
+import { useTransactions, getLatestPeriod } from "@/lib/transactions"
+import { isInternalTransferTransaction } from "@/lib/categories"
 
 const STORAGE_KEY = "debt-dashboard-items"
 
@@ -37,6 +40,9 @@ export function DebtDashboard() {
   const [sim, setSim] = useState<SimulatorState>({ incomeLoss: 0, rateRise: 0, unexpectedExpense: 0 })
   const [monthlySavings, setMonthlySavings] = useState(0)
   const [months, setMonths] = useState(12)
+  const { checkingBalance, transactions } = useTransactions()
+  const { total: investment } = usePortfolioEurTotal()
+  const portfolioCash = usePortfolioCash()
 
   useEffect(() => {
     setItems(loadItems())
@@ -50,7 +56,24 @@ export function DebtDashboard() {
     }
   }, [items])
 
-  const base = useMemo(() => computeDerived(items), [items])
+  const period = getLatestPeriod(transactions)
+  const monthlyNet = useMemo(() => {
+    if (!period) return 0
+    let net = 0
+    for (const tx of transactions) {
+      if (!tx.date.startsWith(period)) continue
+      if (tx.amount > 0 && isInternalTransferTransaction(tx)) continue
+      net += tx.amount
+    }
+    return net
+  }, [transactions, period])
+
+  const extraAC = useMemo(() => {
+    const inv = typeof investment === "number" ? investment : 0
+    return inv + portfolioCash + monthlyNet
+  }, [investment, portfolioCash, monthlyNet])
+
+  const base = useMemo(() => computeDerived(items, extraAC), [items, extraAC])
   const scenario = useMemo(() => applyScenario(base, items, sim), [base, items, sim])
   const flags = useMemo(() => diagnose(base, scenario, sim, items), [base, scenario, sim, items])
   const recs = useMemo(() => recommend(base, scenario, items, sim), [base, scenario, items, sim])
@@ -61,7 +84,7 @@ export function DebtDashboard() {
 
   return (
     <div className="flex-1 space-y-4 p-4 pt-6 sm:p-8">
-      <AnalyticsHeader titleKey="Debt" showActions={false} />
+      <AnalyticsHeader titleKey="Balance" showActions={false} />
       <Kpis base={base} scenario={scenario} flags={flags} />
       <Diagnosis flags={flags} />
       <InputsSection items={items} onChange={setItems} />

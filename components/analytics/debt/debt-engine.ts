@@ -53,8 +53,8 @@ export function sumBy(items: Item[], cat: Category): number {
     .reduce((acc, i) => acc + (Number.isFinite(i.value) ? i.value : 0), 0)
 }
 
-export function computeDerived(items: Item[]): Derived {
-  const AC = sumBy(items, "AC")
+export function computeDerived(items: Item[], extraAC: number = 0): Derived {
+  const AC = sumBy(items, "AC") + extraAC
   const ANC = sumBy(items, "ANC")
   const PC = sumBy(items, "PC")
   const PNC = sumBy(items, "PNC")

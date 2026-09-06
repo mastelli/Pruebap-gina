@@ -190,7 +190,7 @@ export function DebtCharts({
       </ChartCard>
 
       <ChartCard
-        title="Evolución (Patrimonio Neto, Deuda, Liquidez)"
+        title="Evolución (Patrimonio Neto, Balance, Liquidez)"
         action={
           <Tabs value={String(months)} onValueChange={(v) => onMonthsChange(Number(v))}>
             <TabsList className="grid grid-cols-2">
@@ -224,7 +224,7 @@ export function DebtCharts({
               />
               <Legend />
               <Line yAxisId="left" type="monotone" dataKey="patrimonioNeto" name="Patrimonio Neto" stroke="#16a34a" strokeWidth={2} dot={false} />
-              <Line yAxisId="left" type="monotone" dataKey="deuda" name="Deuda" stroke="#dc2626" strokeWidth={2} dot={false} />
+              <Line yAxisId="left" type="monotone" dataKey="deuda" name="Balance" stroke="#dc2626" strokeWidth={2} dot={false} />
               {d.PC > 0 && (
                 <Line yAxisId="right" type="monotone" dataKey="liquidez" name="Liquidez" stroke="#2563eb" strokeWidth={2} dot={false} connectNulls />
               )}

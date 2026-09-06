@@ -23,7 +23,7 @@ export function DebtCalendar({ items }: { items: Item[] }) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Calendario de deudas y vencimientos</CardTitle>
+        <CardTitle>Calendario de balances y vencimientos</CardTitle>
       </CardHeader>
       <CardContent>
         {withDates.length === 0 ? (
