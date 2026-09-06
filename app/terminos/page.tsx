@@ -1,58 +1,107 @@
 "use client"
 
-import { LegalPage, ContactLink, BoldLink } from "@/components/legal-page"
+import { LegalPage, ContactLink } from "@/components/legal-page"
 
 export default function TermsPage() {
   return (
-    <LegalPage title="Términos de Servicio" updated="6 de septiembre de 2026">
-      <Section title="1. Aceptación de los términos">
+    <LegalPage title="Términos de Servicio">
+      <p>
+        Estos Términos de Servicio ("Términos") rigen el uso de MakeItRight, operado por MakeItRight
+        ("nosotros"). Al crear una cuenta o utilizar el servicio, aceptas estos Términos.
+      </p>
+
+      <Section title="1. Descripción del servicio">
         <p>
-          Al acceder o utilizar MakeItRight aceptas los presentes términos y condiciones, así como
-          nuestra <BoldLink href="/privacidad">Política de Privacidad</BoldLink>. Si no estás de
-          acuerdo con ellos, te pedimos que no utilices el servicio.
+          MakeItRight es una plataforma de gestión de finanzas personales por suscripción que facilita
+          el control del patrimonio, el registro y análisis de ingresos y gastos, la evaluación de
+          inversiones y el uso de calculadoras financieras, además de respuestas asistidas por IA.
         </p>
       </Section>
-      <Section title="2. Uso del servicio">
+      <Section title="2. Registro de cuenta">
         <p>
-          MakeItRight te otorga una licencia personal, no transferible y no exclusiva para usar la
-          plataforma con fines legítimos. No está permitido utilizar el servicio para actividades
-          ilícitas, intentar vulnerar su seguridad, realizar ingeniería inversa ni extraer o
-          reproducir de forma masiva su contenido sin autorización.
+          Debes facilitar información veraz al crear tu cuenta, mantener tus credenciales seguras y
+          responder de la actividad que se realice bajo tu cuenta. Debes tener la edad legal para
+          contratar en tu país de residencia.
         </p>
       </Section>
-      <Section title="3. Cuentas y seguridad">
+      <Section title="3. Suscripciones, facturación y pruebas gratuitas">
         <p>
-          Eres responsable de mantener la confidencialidad de tus credenciales de acceso y de toda
-          la actividad que se realice en tu cuenta. Si detectas un uso no autorizado, debes
-          informarnos de inmediato y cambiar tu contraseña.
+          Los planes y precios se muestran antes de completar la compra. Las suscripciones se
+          renuevan automáticamente por el mismo periodo salvo que se cancelen antes de la fecha de
+          renovación. Cuando se ofrezcan, las pruebas gratuitas se convierten automáticamente en una
+          suscripción de pago salvo que se cancelen antes del fin del periodo de prueba. Los precios
+          se muestran en la moneda aplicable y pueden incluir o no impuestos según tu ubicación.
         </p>
       </Section>
-      <Section title="4. Planes y pagos">
+      <Section title="4. Cancelación y reembolsos">
         <p>
-          La plataforma ofrece un plan Estándar gratuito y planes de pago (Premium y Pro). Los
-          precios y las condiciones vigentes se muestran en la sección de Planes. Puedes cancelar o
-          cambiar tu plan en cualquier momento sin permanencia ni costes ocultos; los pagos ya
-          realizados no son reembolsables salvo que lo exija la legislación aplicable.
+          Puedes cancelar tu suscripción en cualquier momento desde los ajustes de tu cuenta; la
+          cancelación surte efecto al final del periodo de facturación en curso y mantienes el acceso
+          hasta entonces. Como el acceso se concede por el periodo completo ya pagado, por lo general
+          no ofrecemos reembolsos prorrateados por periodos parciales, salvo cuando la ley lo exija
+          (por ejemplo, el derecho de desistimiento de los consumidores de la UE, con las excepciones
+          aplicables cuando consientas el acceso inmediato a un servicio o a contenido digital).
         </p>
       </Section>
-      <Section title="5. Limitación de responsabilidad">
+      <Section title="5. Uso aceptable">
         <p>
-          MakeItRight ofrece herramientas de análisis y cálculo con fines informativos.{" "}
-          <b>No constituye asesoramiento financiero, fiscal ni de inversión</b>. Las decisiones que
-          tomes basándote en la información de la plataforma son de tu exclusiva responsabilidad.
+          Te comprometes a no extraer datos (scraping), realizar ingeniería inversa ni revender
+          nuestros datos o la plataforma sin nuestro permiso por escrito, a no usar el servicio con
+          fines ilícitos, abusivos o fraudulentos, y a no intentar eludir los límites de uso o las
+          medidas de seguridad.
         </p>
       </Section>
-      <Section title="6. Cambios en los términos">
+      <Section title="6. Exactitud de los datos y ausencia de asesoramiento de inversión">
         <p>
-          Podemos actualizar estos términos periódicamente para reflejar cambios en el servicio o
-          por motivos legales. Las modificaciones entrarán en vigor desde su publicación en esta
-          página, por lo que te recomendamos revisarla con regularidad.
+          Parte de los datos financieros y de mercado mostrados en el servicio puede proceder de
+          fuentes públicas o de terceros. Estos datos pueden ser incompletos, estar desactualizados o
+          contener errores, y no estamos afiliados ni respaldados por ninguno de esos proveedores.
+          Todo el contenido, incluida la asistencia prestada con IA, se ofrece con fines meramente
+          informativos y no constituye asesoramiento financiero, legal, fiscal ni de inversión. Eres
+          el único responsable de tus decisiones de inversión y debes verificar de forma independiente
+          los datos y buscar asesoramiento profesional antes de actuar en base a ellos.
         </p>
       </Section>
-      <Section title="7. Contacto">
+      <Section title="7. Propiedad intelectual">
         <p>
-          Para cualquier consulta relacionada con estos términos, puedes escribirnos{" "}
-          <ContactLink />.
+          La plataforma, el software, el diseño y las marcas son propiedad nuestra o de nuestros
+          licenciantes. Al suscribirte se te concede una licencia limitada, no exclusiva e
+          intransferible para usar el servicio con fines internos propios.
+        </p>
+      </Section>
+      <Section title="8. Limitación de responsabilidad">
+        <p>
+          En la máxima medida permitida por la ley, no seremos responsables de daños indirectos,
+          incidentales o consecuentes, ni de pérdidas de inversión derivadas de la confianza
+          depositada en los datos o respuestas del servicio. Nada en estos Términos limita la
+          responsabilidad que no pueda excluirse conforme a la ley aplicable, incluida la
+          responsabilidad por fraude o, para los consumidores de la UE, los derechos imperativos de
+          protección al consumidor.
+        </p>
+      </Section>
+      <Section title="9. Terminación">
+        <p>
+          Podemos suspender o cancelar cuentas que incumplan estos Términos. Puedes dejar de usar el
+          servicio y cancelar tu suscripción en cualquier momento.
+        </p>
+      </Section>
+      <Section title="10. Cambios en estos Términos">
+        <p>
+          Podemos actualizar estos Términos periódicamente. El uso continuado del servicio tras la
+          entrada en vigor de los cambios constituye la aceptación de los Términos actualizados. Te
+          notificaremos los cambios sustanciales a través del sitio web o por correo electrónico.
+        </p>
+      </Section>
+      <Section title="11. Legislación aplicable">
+        <p>
+          Estos Términos se rigen por la legislación española, sin perjuicio de las normas imperativas
+          de protección de los consumidores de tu país de residencia que puedan resultar aplicables si
+          tienes la condición de consumidor conforme al Derecho de la UE.
+        </p>
+      </Section>
+      <Section title="12. Contacto">
+        <p>
+          Para cualquier consulta sobre estos Términos, contáctanos <ContactLink />.
         </p>
       </Section>
     </LegalPage>
