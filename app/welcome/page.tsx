@@ -3,7 +3,6 @@
 import Link from "next/link"
 import {
   ArrowRight,
-  Lock,
   TrendingUp,
   PieChart,
   Wallet,
@@ -12,7 +11,6 @@ import {
   LineChart,
   Landmark,
   Globe,
-  Smartphone,
   Menu,
   X,
   CheckCircle2,
@@ -574,82 +572,28 @@ export default function Welcome() {
 
       {/* ======================= FOOTER ======================= */}
       <footer className="border-t border-border/60 bg-card/40">
-        <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-          <div className="grid gap-8 md:grid-cols-[2fr_1fr_1fr_1fr]">
-            <div>
-              <Link href="/" className="flex items-center gap-2">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                  <LineChart className="h-4 w-4" />
-                </div>
-                <span className="font-bold tracking-tight">MakeItRight</span>
-              </Link>
-              <p className="mt-4 max-w-xs text-sm text-muted-foreground">
-                Gestión financiera inteligente para personas.
-              </p>
-              <div className="mt-6 flex items-center gap-2 text-xs text-muted-foreground">
-                <Lock className="h-4 w-4" />
-                <span>Cifrado de extremo a extremo</span>
-              </div>
-            </div>
-            <div>
-              <h4 className="text-sm font-semibold">Producto</h4>
-              <ul className="mt-4 space-y-2.5">
-                <li>
-                  <Link href="/calculator" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
-                    Calculadoras
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/analytics" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
-                    Análisis
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/investment" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
-                    Inversiones
-                  </Link>
-                </li>
-                <li>
-                  <Link href="#planes" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
-                    Precios
-                  </Link>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="text-sm font-semibold">Recursos</h4>
-              <ul className="mt-4 space-y-2.5">
-                {["Centro de ayuda", "Preguntas frecuentes", "Blog", "Estado"].map((link) => (
-                  <li key={link}>
-                    <a href="#" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
-                      {link}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div>
-              <h4 className="text-sm font-semibold">Legal</h4>
-              <ul className="mt-4 space-y-2.5">
-                {["Privacidad", "Términos", "Cookies", "Seguridad"].map((link) => (
-                  <li key={link}>
-                    <a href="#" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
-                      {link}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-          <div className="mt-10 flex flex-col items-center justify-between gap-4 border-t border-border/60 pt-6 sm:flex-row">
+        <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+          <div className="flex flex-col items-center justify-between gap-3 sm:flex-row">
             <p className="text-sm text-muted-foreground">
               © {new Date().getFullYear()} MakeItRight. Todos los derechos reservados.
             </p>
-            <div className="flex items-center gap-4">
-              <Globe className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm text-muted-foreground">Español</span>
-              <Smartphone className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm text-muted-foreground">App móvil</span>
+            <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
+              <Link href="/privacidad" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
+                Privacidad
+              </Link>
+              <Link href="/terminos" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
+                Términos
+              </Link>
+              <Link href="/cookies" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
+                Cookies
+              </Link>
+              <Link href="/seguridad" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
+                Seguridad
+              </Link>
+              <span className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                <Globe className="h-4 w-4" />
+                Español
+              </span>
             </div>
           </div>
         </div>
