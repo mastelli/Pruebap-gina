@@ -5,9 +5,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { Button } from "@/components/ui/button"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { UserAvatar } from "@/components/user-avatar"
 import { ageFromBirthDate } from "@/lib/auth"
 import { useUser } from "@clerk/nextjs"
@@ -240,74 +238,45 @@ export default function SettingsPage() {
           <section id="privacy" className="scroll-mt-24 py-8 last:pb-0">
             <h2 className="text-xl font-semibold mb-4">{t("Privacy Settings")}</h2>
             <div className="space-y-6">
-              <div className="grid gap-4 md:grid-cols-2">
-                <div className="space-y-3">
-                  <h3 className="text-lg font-medium">{t("Data Sharing")}</h3>
-                  <div className="flex items-center justify-between">
-                    <Label htmlFor="analytics-sharing">{t("Share analytics data")}</Label>
-                    <Switch
-                      id="analytics-sharing"
-                      checked={settings.privacy.analyticsSharing}
-                      onCheckedChange={(checked) =>
-                        updatePrivacySettings({ ...settings.privacy, analyticsSharing: !!checked })
-                      }
-                    />
+              <div className="space-y-3">
+                <h3 className="text-lg font-medium">{t("Cookie Preferences")}</h3>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label>{t("Essential cookies are always active")}</Label>
+                    <p className="text-sm text-muted-foreground">{t("They are required for the service to work.")}</p>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <Label htmlFor="personalized-ads">{t("Allow personalized ads")}</Label>
-                    <Switch
-                      id="personalized-ads"
-                      checked={settings.privacy.personalizedAds}
-                      onCheckedChange={(checked) =>
-                        updatePrivacySettings({ ...settings.privacy, personalizedAds: !!checked })
-                      }
-                    />
-                  </div>
+                  <Switch checked disabled />
                 </div>
-                <div className="space-y-3">
-                  <h3 className="text-lg font-medium">{t("Account Visibility")}</h3>
-                  <RadioGroup
-                    value={settings.privacy.visibility}
-                    onValueChange={(value: "public" | "private") => updatePrivacySettings({ ...settings.privacy, visibility: value })}
-                  >
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="public" id="visibility-public" />
-                      <Label htmlFor="visibility-public">{t("Public")}</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="private" id="visibility-private" />
-                      <Label htmlFor="visibility-private">{t("Private")}</Label>
-                    </div>
-                  </RadioGroup>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="analytics-cookies">{t("Cookie type analytics")}</Label>
+                  <Switch
+                    id="analytics-cookies"
+                    checked={
+                      settings.privacy.cookies?.analytics ?? true
+                    }
+                    onCheckedChange={(checked) =>
+                      updatePrivacySettings({ ...settings.privacy, cookies: { ...settings.privacy.cookies, analytics: !!checked } })
+                    }
+                  />
                 </div>
-              </div>
-              <div className="grid gap-4 md:grid-cols-2">
-                <div className="space-y-3">
-                  <h3 className="text-lg font-medium">{t("Data Retention")}</h3>
-                  <Select
-                    value={settings.privacy.dataRetention}
-                    onValueChange={(value) => updatePrivacySettings({ ...settings.privacy, dataRetention: value as "6-months" | "1-year" | "2-years" | "indefinite" })}
-                  >
-                    <SelectTrigger id="data-retention">
-                      <SelectValue placeholder={t("Select Data Retention Period")} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="6-months">{t("6 Months")}</SelectItem>
-                      <SelectItem value="1-year">{t("1 Year")}</SelectItem>
-                      <SelectItem value="2-years">{t("2 Years")}</SelectItem>
-                      <SelectItem value="indefinite">{t("Indefinite")}</SelectItem>
-                    </SelectContent>
-                  </Select>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="marketing-cookies">{t("Cookie type marketing")}</Label>
+                  <Switch
+                    id="marketing-cookies"
+                    checked={
+                      settings.privacy.cookies?.marketing ?? false
+                    }
+                    onCheckedChange={(checked) =>
+                      updatePrivacySettings({ ...settings.privacy, cookies: { ...settings.privacy.cookies, marketing: !!checked } })
+                    }
+                  />
                 </div>
-                <div className="space-y-3">
-                  <h3 className="text-lg font-medium">{t("Third-Party Integrations")}</h3>
-                  <p className="text-sm text-muted-foreground">{t("Connected: Google Analytics, Facebook Pixel")}</p>
-                  <Button variant="outline">{t("Manage Integrations")}</Button>
-                </div>
-              </div>
-              <div className="flex justify-between">
-                <Button variant="outline">{t("Download Your Data")}</Button>
-                <Button variant="destructive">{t("Delete My Account")}</Button>
+                <p className="text-sm text-muted-foreground">
+                  {t("You can see more details in our")}{" "}
+                  <a className="text-primary underline underline-offset-4 hover:text-primary/80" href="/cookies">
+                    {t("Cookie Policy")}
+                  </a>
+                </p>
               </div>
               <Button onClick={() => { updatePrivacySettings(settings.privacy); toast.success(t("Privacy settings saved successfully")) }}>
                 {t("Save Privacy Settings")}

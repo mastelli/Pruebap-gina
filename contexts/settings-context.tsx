@@ -30,6 +30,10 @@ export interface UserSettings {
     personalizedAds: boolean
     visibility: "public" | "private"
     dataRetention: "6-months" | "1-year" | "2-years" | "indefinite"
+    cookies: {
+      analytics: boolean
+      marketing: boolean
+    }
   }
 }
 
@@ -60,6 +64,10 @@ const defaultSettings: UserSettings = {
     personalizedAds: false,
     visibility: "public",
     dataRetention: "1-year",
+    cookies: {
+      analytics: true,
+      marketing: false,
+    },
   },
 }
 

@@ -565,23 +565,13 @@ const translations: Record<string, string> = {
   "Save Notification Settings": "Guardar configuración de notificaciones",
   "Privacy Settings": "Configuración de privacidad",
   "Manage your privacy and data settings": "Gestiona tu privacidad y configuración de datos",
-  "Data Sharing": "Compartición de datos",
-  "Share analytics data": "Compartir datos de analíticas",
-  "Allow personalized ads": "Permitir anuncios personalizados",
-  "Account Visibility": "Visibilidad de la cuenta",
-  Public: "Público",
-  Private: "Privado",
-  "Data Retention": "Retención de datos",
-  "6 Months": "6 meses",
-  "1 Year": "1 año",
-  "2 Years": "2 años",
-  Indefinite: "Indefinido",
-  "Select Data Retention Period": "Selecciona el período de retención",
-  "Third-Party Integrations": "Integraciones de terceros",
-  "Connected: Google Analytics, Facebook Pixel": "Conectado: Google Analytics, Facebook Pixel",
-  "Manage Integrations": "Gestionar integraciones",
-  "Download Your Data": "Descarga tus datos",
-  "Delete My Account": "Eliminar mi cuenta",
+  "Cookie Preferences": "Preferencias de cookies",
+  "Cookie type analytics": "Cookies analíticas",
+  "Cookie type marketing": "Cookies de marketing",
+  "Essential cookies are always active": "Las cookies esenciales están siempre activas",
+  "They are required for the service to work.": "Son necesarias para el funcionamiento del servicio.",
+  "You can see more details in our": "Puedes ver más detalles en nuestra",
+  "Cookie Policy": "Política de cookies",
   "Save Privacy Settings": "Guardar configuración de privacidad",
   "Account settings saved successfully": "Configuración de la cuenta guardada correctamente",
   "Notification settings saved successfully": "Configuración de notificaciones guardada correctamente",
@@ -899,7 +889,6 @@ const translations: Record<string, string> = {
   "Legal Notice": "Aviso Legal",
   "Privacy Policy": "Política de Privacidad",
   "Terms of Service": "Términos de Servicio",
-  "Cookie Policy": "Política de Cookies",
 
   // Aviso Legal
   "Legal intro prefix": "Este documento, junto con la",
@@ -1130,6 +1119,10 @@ const spanishToEnglish = Object.fromEntries(
 // Textos en inglés para las páginas de bienvenida y legales.
 // Las claves usadas con t() deben mostrarse en inglés cuando lang === "en".
 const englishOverrides: Record<string, string> = {
+  // Ajustes
+  "Cookie type analytics": "Analytics cookies",
+  "Cookie type marketing": "Marketing cookies",
+
   // Bienvenida
   "Hero intro":
     "MakeItRight brings your wealth, your investments and your calculations together in one place. Analyze, simulate and plan your financial future with professional-grade tools.",
