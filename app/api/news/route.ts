@@ -3,9 +3,7 @@ import { NextResponse } from "next/server"
 // Fuentes de noticias economicas internacionales y espanolas que se prueban en orden
 // hasta encontrar una que responda con articulos
 const FEEDS = [
-  // Espanolas
-  "https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/section/economia/portada",
-  "https://feeds.elpais.com/mrss-s/pages/ep/site/cincodias.elpais.com/portada",
+  // Espanolas (sin El Pais)
   "https://www.expansion.com/rss/economia.html",
   "https://www.eleconomista.es/rss/rss-economia.php",
   // Internacionales (ingles)
