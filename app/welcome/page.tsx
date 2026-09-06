@@ -21,10 +21,13 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { useLanguage } from "@/lib/i18n"
+import { useAuth } from "@/lib/auth"
 
 export default function Welcome() {
   const { t } = useLanguage()
+  const { ready, userId } = useAuth()
   const [mobileOpen, setMobileOpen] = useState(false)
+  const signedIn = ready && Boolean(userId)
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -56,12 +59,20 @@ export default function Welcome() {
           </nav>
 
           <div className="hidden items-center gap-3 md:flex">
-            <Button variant="outline" size="sm" asChild>
-              <Link href="/sign-in">{t("Sign in")}</Link>
-            </Button>
-            <Button size="sm" asChild>
-              <Link href="/sign-up">{t("Create account")}</Link>
-            </Button>
+            {signedIn ? (
+              <Button size="sm" asChild>
+                <Link href="/inicio">Ir a la app</Link>
+              </Button>
+            ) : (
+              <>
+                <Button variant="outline" size="sm" asChild>
+                  <Link href="/sign-in">{t("Sign in")}</Link>
+                </Button>
+                <Button size="sm" asChild>
+                  <Link href="/sign-up">{t("Create account")}</Link>
+                </Button>
+              </>
+            )}
           </div>
 
           <button
@@ -80,12 +91,20 @@ export default function Welcome() {
                 Producto
               </a>
               <div className="flex gap-3 pt-2">
-                <Button variant="outline" size="sm" className="flex-1" asChild>
-                  <Link href="/sign-in">{t("Sign in")}</Link>
-                </Button>
-                <Button size="sm" className="flex-1" asChild>
-                  <Link href="/sign-up">{t("Create account")}</Link>
-                </Button>
+                {signedIn ? (
+                  <Button size="sm" className="flex-1" asChild>
+                    <Link href="/inicio">Ir a la app</Link>
+                  </Button>
+                ) : (
+                  <>
+                    <Button variant="outline" size="sm" className="flex-1" asChild>
+                      <Link href="/sign-in">{t("Sign in")}</Link>
+                    </Button>
+                    <Button size="sm" className="flex-1" asChild>
+                      <Link href="/sign-up">{t("Create account")}</Link>
+                    </Button>
+                  </>
+                )}
               </div>
             </nav>
           </div>
