@@ -1,6 +1,6 @@
 "use client"
 
-import { Briefcase, PiggyBank, TrendingUp, Wallet } from "lucide-react"
+import { Briefcase, PiggyBank, TrendingUp, Wallet, AlertCircle } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { useLanguage } from "@/lib/i18n"
@@ -175,6 +175,12 @@ export function InvestmentOverview() {
 
       {/* Noticias financieras actuales */}
       <FinanceNews />
+
+      {/* Disclaimer de actualización de datos */}
+      <p className="mt-6 flex items-center justify-center gap-2 text-xs text-muted-foreground">
+        <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+        {t("Data may not be perfectly up to date")}
+      </p>
     </div>
   )
 }

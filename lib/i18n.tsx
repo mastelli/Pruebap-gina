@@ -85,6 +85,7 @@ const translations: Record<string, string> = {
   Checking: "Corriente",
   "Savings/Investment": "Ahorro/Inversión",
   "Savings and Investment": "Ahorro e Inversión",
+  "Data may not be perfectly up to date": "Los datos pueden no estar perfectamente actualizados",
   Debt: "Deuda",
   "Total Income": "Total ingresos",
   "Average Income": "Media Ingresos",
