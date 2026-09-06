@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useMemo, useState, type ReactNode } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react"
 import Link from "next/link"
 import {
   ArrowRight,
@@ -9,8 +9,11 @@ import {
   CreditCard,
   LineChart,
   List,
+  Loader2,
   MessageSquare,
   PieChart,
+  RefreshCw,
+  Sparkles,
   TrendingDown,
   TrendingUp,
   Wallet,
@@ -18,6 +21,7 @@ import {
 import { useLanguage } from "@/lib/i18n"
 import { useTransactions } from "@/lib/transactions"
 import { usePortfolioEurTotal } from "@/components/portfolio-total"
+import { getCategoryFor } from "@/lib/categories"
 import { computeDerived, type Derived, type Item } from "@/components/analytics/debt/debt-engine"
 
 const DEBT_STORAGE_KEY = "debt-dashboard-items"
@@ -57,6 +61,70 @@ function loadDebtItems(): Item[] {
   } catch {
     return []
   }
+}
+
+// Resumen de datos del mes para que la IA genere el análisis con cifras reales
+function buildInsightContext(
+  transactions: ReturnType<typeof useTransactions>["transactions"],
+  debt: Derived | null,
+  portfolio: number | null,
+  momPct: number | null,
+  checkingBalance: number | null,
+): string {
+  const now = new Date()
+  const mPrefix = monthPrefix(now)
+  const prev = new Date(now.getFullYear(), now.getMonth() - 1, 1)
+  const pPrefix = monthPrefix(prev)
+
+  const income = sumByMonth(transactions, mPrefix, true)
+  const expense = sumByMonth(transactions, mPrefix, false)
+  const incomePrev = sumByMonth(transactions, pPrefix, true)
+  const expensePrev = sumByMonth(transactions, pPrefix, false)
+  const savingsRate = income > 0 ? ((income - expense) / income) * 100 : 0
+
+  const lines: string[] = [
+    `- Mes actual (${mPrefix}): ingresos ${formatEuros(income)}, gastos ${formatEuros(expense)}, neto ${formatEuros(income - expense)}, tasa de ahorro ${savingsRate.toLocaleString("es-ES", { maximumFractionDigits: 1 })}%.`,
+    `- Mes anterior (${pPrefix}): ingresos ${formatEuros(incomePrev)}, gastos ${formatEuros(expensePrev)}, neto ${formatEuros(incomePrev - expensePrev)}.`,
+  ]
+
+  const byCategory: Record<string, number> = {}
+  for (const transaction of transactions) {
+    if (!transaction.date.startsWith(mPrefix) || transaction.amount >= 0) continue
+    const category = getCategoryFor(transaction)
+    byCategory[category] = (byCategory[category] ?? 0) + Math.abs(transaction.amount)
+  }
+  const categories = Object.entries(byCategory).sort((a, b) => b[1] - a[1]).slice(0, 5)
+  if (categories.length > 0) {
+    lines.push("  Gastos del mes por categoria:")
+    for (const [category, value] of categories) {
+      lines.push(
+        `  * ${category}: ${formatEuros(value)} (${expense > 0 ? Math.round((value / expense) * 100) : 0}%)`,
+      )
+    }
+  }
+
+  const liquid = checkingBalance ?? 0
+  if (debt) {
+    const interest = debt.annualDebtService > 0 ? debt.annualDebtService / 12 : null
+    lines.push(
+      `- Deuda total: ${formatEuros(debt.pasivoTotal)}${interest !== null ? ` (intereses ${formatEuros(interest)}/mes)` : ""}.`,
+    )
+  }
+  if (portfolio !== null) {
+    const mom = momPct !== null ? `${momPct >= 0 ? "+" : ""}${momPct.toLocaleString("es-ES", { maximumFractionDigits: 1 })}%` : "n/d"
+    lines.push(`- Cartera de inversión: ${formatEuros(portfolio)} (variación vs mes anterior: ${mom}).`)
+  }
+  lines.push(`- Cuenta disponible: ${formatEuros(liquid)}.`)
+
+  const recent = [...transactions].sort((a, b) => (a.date < b.date ? 1 : -1)).slice(0, 10)
+  if (recent.length > 0) {
+    lines.push("  Movimientos recientes:")
+    for (const transaction of recent) {
+      lines.push(`  - ${transaction.date} · ${transaction.name} · ${formatEuros(transaction.amount)}`)
+    }
+  }
+
+  return lines.join("\n")
 }
 
 interface StatRowProps {
@@ -146,6 +214,61 @@ export function DashboardOverview() {
     setDebt(computeDerived(items))
     setDebtCount(items.length)
   }, [])
+
+  const [insight, setInsight] = useState<string | null>(null)
+  const [insightLoading, setInsightLoading] = useState(false)
+  const [insightError, setInsightError] = useState<string | null>(null)
+  const insightRequestedRef = useRef(false)
+
+  const requestInsight = useCallback(async () => {
+    if (insightLoading) return
+    setInsightLoading(true)
+    setInsightError(null)
+
+    const monthName = new Intl.DateTimeFormat(lang === "es" ? "es-ES" : "en-GB", {
+      month: "long",
+    }).format(now)
+
+    const ask =
+      lang === "en"
+        ? `Analyze my finances for the current month (${monthName} ${now.getFullYear()}) and write a short summary (3-5 sentences) covering: how the month went (income vs expenses, savings rate, comparison with last month), something relevant about my spending, and one practical tip. Do not invent figures, use only the provided context.`
+        : `Analiza mis finanzas del mes actual (${monthName} ${now.getFullYear()}) y redacta un resumen breve (3-5 frases) que cubra: cómo ha ido el mes (ingresos vs gastos, tasa de ahorro, comparación con el mes anterior), algo relevante de mis gastos y un consejo práctico. No inventes cifras, usa solo el contexto proporcionado.`
+
+    try {
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          messages: [{ role: "user", content: ask }],
+          context: buildInsightContext(transactions, debt, portfolio, momPct, checkingBalance),
+        }),
+      })
+      const data = await response.json().catch(() => null)
+
+      if (response.status === 503) {
+        setInsightError(t("AI assistant unconfigured"))
+      } else if (!data?.reply) {
+        setInsightError(t("AI assistant unavailable"))
+      } else {
+        setInsight(data.reply)
+      }
+    } catch {
+      setInsightError(t("AI assistant unavailable"))
+    } finally {
+      setInsightLoading(false)
+    }
+  }, [transactions, debt, portfolio, momPct, checkingBalance, now, lang, t, insightLoading])
+
+  useEffect(() => {
+    // espera breve para que los datos se carguen antes de pedir el análisis
+    const id = window.setTimeout(() => {
+      if (!insightRequestedRef.current) {
+        insightRequestedRef.current = true
+        void requestInsight()
+      }
+    }, 800)
+    return () => window.clearTimeout(id)
+  }, [requestInsight])
 
   const now = useMemo(() => new Date(), [])
   const currentYear = `${now.getFullYear()}`
@@ -261,6 +384,50 @@ export function DashboardOverview() {
             </Link>
           ))}
         </div>
+      </section>
+
+      <section className="rounded-2xl border bg-card p-5 shadow-sm">
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <Sparkles className="h-4 w-4 text-amber-500" />
+            <h3 className="text-sm font-semibold">{t("AI Insight")}</h3>
+            <span className="text-xs text-muted-foreground">· {t("This month")}</span>
+          </div>
+          <button
+            onClick={() => void requestInsight()}
+            disabled={insightLoading}
+            className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground disabled:opacity-50"
+          >
+            <RefreshCw className={`h-3 w-3 ${insightLoading ? "animate-spin" : ""}`} />
+            {t("Regenerate")}
+          </button>
+        </div>
+        {insightLoading ? (
+          <div className="flex items-center gap-2 py-4 text-sm text-muted-foreground">
+            <Loader2 className="h-4 w-4 animate-spin" />
+            {t("AI is typing")}
+          </div>
+        ) : insightError ? (
+          <div className="flex flex-col gap-2 py-2">
+            <p className="text-sm text-destructive">{insightError}</p>
+            <button onClick={() => void requestInsight()} className="self-start text-xs underline">
+              {t("Try again")}
+            </button>
+          </div>
+        ) : insight ? (
+          <>
+            <p className="text-sm leading-relaxed whitespace-pre-wrap">{insight}</p>
+            <div className="mt-3">
+              <Link
+                href="/chat"
+                className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
+              >
+                <MessageSquare className="h-3.5 w-3.5" />
+                {t("Ask Aurora about this")}
+              </Link>
+            </div>
+          </>
+        ) : null}
       </section>
 
       <section className="grid gap-6 lg:grid-cols-2">

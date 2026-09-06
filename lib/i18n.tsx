@@ -1105,6 +1105,10 @@ const translations: Record<string, string> = {
   "Open analytics": "Abrir análisis",
   "Need to understand your numbers?": "¿Necesitas entender tus números?",
   "GenAI Financial Advisor": "Asesor Financiero GenAI",
+  "AI Insight": "Análisis de la IA",
+  Regenerate: "Regenerar",
+  "Try again": "Volver a intentarlo",
+  "Ask Aurora about this": "Pregunta a Aurora sobre esto",
 }
 
 interface LanguageContextType {
