@@ -1088,6 +1088,166 @@ const spanishToEnglish = Object.fromEntries(
   Object.entries(translations).map(([english, spanish]) => [spanish, english]),
 )
 
+// Textos en inglés para las páginas de bienvenida y legales.
+// Las claves usadas con t() deben mostrarse en inglés cuando lang === "en".
+const englishOverrides: Record<string, string> = {
+  // Bienvenida
+  "Hero intro":
+    "MakeItRight brings your wealth, your investments and your calculations together in one place. Analyze, simulate and plan your financial future with professional-grade tools.",
+  "Track your net worth desc":
+    "Sync your accounts and keep your net worth up to date every day. Income, expenses and savings in a single dashboard.",
+  "Financial calculators desc":
+    "Compound interest, real estate and stocks. Simulate scenarios before making decisions.",
+  "Advanced analytics desc":
+    "Charts, metrics and an automatic diagnosis of your financial health with personalized recommendations.",
+  "Smart investing desc":
+    "Track your portfolio with real-time quotes and analyze each asset with our own model.",
+  "Bank-grade security desc":
+    "Secure authentication and end-to-end encryption. Your data protected with the highest standards.",
+  "Long-term planning desc":
+    "Return projections, debt analysis and mortgage simulations to plan your future.",
+  "Calculators highlight intro":
+    "You don't need an account to get started. Access all our calculators for free and get a feel for what's possible.",
+  "What is MakeItRight? answer":
+    "It is a personal finance platform that brings your wealth, income and expenses, investments and financial calculators together in one place. Analyze, simulate and plan your financial future with professional-grade tools.",
+  "Who is MakeItRight designed for? answer":
+    "For anyone who wants to take control of their finances: from people just starting to save to profiles that invest in real estate and stocks. You don't need to be an expert to use it.",
+  "Is my financial data safe? answer":
+    "Yes. We use secure authentication and end-to-end encryption. Your data is not shared with third parties and you can export or delete it whenever you want.",
+  "Can I use the calculators without signing up? answer":
+    "Yes. All our calculators are free to access and don't require an account. You can try them to get an idea of what the platform offers.",
+  "Can I cancel or change plans anytime? answer":
+    "Yes, with no commitment or hidden costs. You can change or cancel your plan at any time from your account.",
+  "Is my data synced across devices? answer":
+    "Yes. When you sign in, your net worth, transactions and settings sync across all your devices.",
+  "Do I need a credit card to try the app? answer":
+    "No. The Standard plan is free and doesn't ask for a card. You'll only need it if you decide to upgrade to Premium or Pro.",
+
+  // Aviso Legal
+  "Legal intro prefix": "This document, together with the",
+  "Legal intro between": ", the",
+  "Legal intro between2": " and the",
+  "Legal intro suffix":
+    ", governs the use of the MakeItRight website (the \"Website\") and all the services we offer through it.",
+  "Legal provider text":
+    "The Website and the MakeItRight service are operated by MakeItRight, acting as an information society service provider.",
+  "Legal registry prefix":
+    "The company registration details and registered office can be requested at any time; get in touch through the link",
+  "Legal registry suffix": "and we will provide them.",
+  "Legal purpose text":
+    "MakeItRight is a platform focused on managing personal finances: it lets you track your net worth, record and analyze income and expenses, evaluate investments and use financial calculators, in addition to getting AI-powered assistance. Some of these features require a paid subscription.",
+  "Legal access prefix":
+    "Most of the content is freely accessible, but some features are only available after registering and having an active subscription, as detailed in the",
+  "Legal access suffix":
+    "By using the Website you agree to do so honestly and within the legal framework, respecting the conditions set out in this Notice.",
+  "Legal IP text":
+    "The software, design, texts, graphics, logos and trademarks that appear on the Website belong to us or our licensors and are protected by intellectual property regulations. Their reproduction, distribution or commercial exploitation without our prior written authorization is prohibited, except in the cases expressly permitted by applicable law.",
+  "Legal liability text":
+    "Part of the financial and market information we show comes from public or third-party sources and may contain errors, be incomplete or be outdated. The content, including AI-generated reports, is for informational purposes only and in no case constitutes financial, legal, tax or investment advice. Therefore, we cannot guarantee the accuracy or timeliness of the data presented.",
+  "Legal links text":
+    "The Website may include links to external pages. We have no control over their content or policies, so we decline any responsibility in connection with those sites.",
+  "Legal law text":
+    "The relationships arising from the use of the Website are governed by Spanish law, without prejudice to the mandatory consumer protection rules that apply to you when you act as a consumer under European Union law.",
+  "Legal contact prefix": "If you have any questions about this Legal Notice, you can write to us from the link",
+
+  // Política de Privacidad
+  "Privacy intro":
+    "This policy explains how MakeItRight collects, uses and protects your personal data when you use our website and the related services.",
+  "Privacy controller text":
+    "The data controller is MakeItRight. The company registration details are available upon request; you can ask for them by writing to us through the link",
+  "Account data desc":
+    "name, email address, phone number (optional), password (stored encrypted), language and regional preferences.",
+  "Usage data desc":
+    "saved transactions, data entered in the calculators and the dashboard, configured alerts, pages visited, device and browser information, and IP address.",
+  "Payment data desc":
+    "payments are processed through an external provider. We do not store full card numbers; we only receive the subscription status, the plan and billing metadata.",
+  "Communications desc":
+    "messages you send us through support, the chat assistant or comments on shared tools.",
+  "Privacy basis service": "Provide the service and manage your account (performance of a contract).",
+  "Privacy basis payments":
+    "Process payments and manage subscriptions (performance of a contract).",
+  "Privacy basis emails":
+    "Send transactional emails and, if you set them up, alerts (performance of a contract).",
+  "Privacy basis chat": "Chat responses based on your queries (performance of a contract).",
+  "Privacy basis analytics": "Analyze usage and improve the product (legitimate interest).",
+  "Privacy basis marketing":
+    "Marketing communications and non-essential cookies, only with your consent (consent).",
+  "Privacy basis legal":
+    "Comply with legal obligations, such as invoicing and taxes (legal obligation).",
+  "Privacy sharing intro":
+    "We share data with providers that help us operate, limited to what each one needs for its function:",
+  "Shared Supabase": "Supabase — database, authentication and storage.",
+  "Shared Clerk": "Clerk — user authentication.",
+  "Shared Stripe": "Stripe — payment processing and subscription billing.",
+  "Shared Google": "Google (Gemini) — AI-assisted reports and chat.",
+  "Shared Vercel": "Vercel and Vercel Analytics — hosting and site analytics.",
+  "Shared Sentry": "Sentry — error monitoring.",
+  "Privacy sharing outro":
+    "We require these providers to protect your data in line with their own privacy commitments and, where applicable, through standard contractual clauses. We do not sell your personal data.",
+  "Privacy transfers text":
+    "Some of these providers may process data outside the European Economic Area, for example in the United States. In those cases we rely on adequate safeguards, such as the EU Standard Contractual Clauses or the provider's participation in an approved data protection framework (such as the EU-US Data Privacy Framework).",
+  "Privacy retention text":
+    "We keep your account data while the account remains active and for a reasonable period afterwards to comply with legal, tax and dispute resolution obligations. You can request its early deletion; see the \"Your rights\" section.",
+  "Privacy rights text":
+    "Under applicable law, you have the right to access, rectify, erase, restrict or object to the processing of your data, to data portability and to withdraw your consent at any time. You may also lodge a complaint with your data protection authority (in Spain, the AEPD). To exercise any of these rights, write to us",
+  "Privacy security text":
+    "We apply reasonable technical and organizational measures — including encryption in transit, access controls and encrypted passwords — to protect your data. However, no method of transmission or storage is 100% secure.",
+  "Privacy minors text":
+    "The service is not directed to people under 18, and we do not knowingly collect data from minors.",
+  "Privacy changes text":
+    "We may update this policy periodically. Substantial changes will be notified through the website or by email.",
+  "Privacy contact text": "For any questions about this policy or about your data, contact us",
+
+  // Términos de Servicio
+  "Terms intro":
+    "These Terms of Service (\"Terms\") govern the use of MakeItRight, operated by MakeItRight. By creating an account or using the service, you accept these Terms.",
+  "Terms description text":
+    "MakeItRight is a subscription-based personal finance management platform that makes it easy to track your net worth, record and analyze income and expenses, evaluate investments and use financial calculators, in addition to AI-assisted responses.",
+  "Terms registration text":
+    "You must provide true information when creating your account, keep your credentials secure and be responsible for the activity carried out under your account. You must be of legal age to contract in your country of residence.",
+  "Terms subscriptions text":
+    "Plans and prices are shown before completing the purchase. Subscriptions renew automatically for the same period unless canceled before the renewal date. Where offered, free trials automatically become a paid subscription unless canceled before the end of the trial period. Prices are shown in the applicable currency and may or may not include taxes depending on your location.",
+  "Terms cancellation text":
+    "You can cancel your subscription at any time from your account settings; cancellation takes effect at the end of the current billing period and you keep access until then. Since access is granted for the full period already paid, we generally do not offer prorated refunds for partial periods, except where the law requires it (for example, the withdrawal right of EU consumers, subject to the applicable exceptions when you consent to immediate access to a service or digital content).",
+  "Terms acceptable use text":
+    "You agree not to scrape data, reverse engineer or resell our data or platform without our written permission, not to use the service for unlawful, abusive or fraudulent purposes, and not to attempt to circumvent usage limits or security measures.",
+  "Terms accuracy text":
+    "Some of the financial and market data shown in the service may come from public or third-party sources. This data may be incomplete, outdated or contain errors, and we are not affiliated with or endorsed by any of those providers. All content, including AI-provided assistance, is offered for informational purposes only and does not constitute financial, legal, tax or investment advice. You are solely responsible for your investment decisions and should independently verify the data and seek professional advice before acting on it.",
+  "Terms IP text":
+    "The platform, software, design and trademarks are owned by us or our licensors. When you subscribe, you are granted a limited, non-exclusive and non-transferable license to use the service for your own internal purposes.",
+  "Terms liability text":
+    "To the maximum extent permitted by law, we will not be liable for indirect, incidental or consequential damages, or for investment losses arising from reliance on the data or responses of the service. Nothing in these Terms limits liability that cannot be excluded under applicable law, including liability for fraud or, for EU consumers, mandatory consumer protection rights.",
+  "Terms termination text":
+    "We may suspend or cancel accounts that breach these Terms. You can stop using the service and cancel your subscription at any time.",
+  "Terms changes text":
+    "We may update these Terms periodically. Continued use of the service after the changes take effect constitutes acceptance of the updated Terms. We will notify you of substantial changes through the website or by email.",
+  "Terms law text":
+    "These Terms are governed by Spanish law, without prejudice to the mandatory consumer protection rules of your country of residence that may apply if you are a consumer under EU law.",
+  "Terms contact text": "For any questions about these Terms, contact us",
+
+  // Política de Cookies
+  "Cookies intro":
+    "This Cookie Policy explains how MakeItRight uses cookies and similar technologies on our website.",
+  "Cookies what text":
+    "Cookies are small files stored on your device that help a website work and allow us to understand how it is used.",
+  "Essential cookies":
+    "Essential or strictly necessary — authentication and session management, security and saved preferences such as your language. They cannot be disabled because they are necessary for the service to work.",
+  "Analytics cookies":
+    "Analytics or performance — they help us understand usage and improve the product.",
+  "Marketing cookies":
+    "Advertising or marketing — they are used to measure and improve the performance of our ads; they are only loaded when allowed.",
+  "Cookie Google": "Google Analytics (Google) — analytics.",
+  "Cookie Vercel": "Vercel Analytics / Speed Insights (Vercel) — analytics and performance.",
+  "Cookie Stripe": "Stripe — fraud prevention during payment.",
+  "Cookie Supabase": "Supabase — authentication and session management.",
+  "Cookie Clerk": "Clerk — authentication and session management.",
+  "Cookies manage text":
+    "You can adjust your browser settings to block or delete cookies at any time. Note that blocking essential cookies may affect key features, such as keeping you signed in.",
+  "Cookies changes text":
+    "We may update this Cookie Policy periodically and will notify you through the website or by email.",
+  "Cookies contact text": "For any questions about this Cookie Policy, contact us",
+}
+
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
   const [lang, setLangState] = useState<Language>("es")
 
@@ -1109,7 +1269,9 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
 
   const t = useCallback(
     (key: string) =>
-      lang === "es" ? translations[key] ?? key : spanishToEnglish[key] ?? key,
+      lang === "es"
+        ? translations[key] ?? key
+        : englishOverrides[key] ?? spanishToEnglish[key] ?? key,
     [lang],
   )
 
