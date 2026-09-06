@@ -101,3 +101,16 @@
   }
 }
 
+@keyframes blob-drift {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(24px, -18px) scale(1.05);
+  }
+  66% {
+    transform: translate(-18px, 20px) scale(0.97);
+  }
+}
+

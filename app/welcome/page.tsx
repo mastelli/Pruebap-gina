@@ -42,7 +42,33 @@ export default function Welcome() {
   const displayName = name ?? settings.fullName
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="isolate min-h-screen bg-background text-foreground">
+      {/* ======================= FONDO DECORATIVO ======================= */}
+      <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden" aria-hidden>
+        <div
+          className="absolute -right-32 -top-32 h-[460px] w-[460px] rounded-full bg-indigo-400/15 blur-3xl"
+          style={{ animation: "blob-drift 14s ease-in-out infinite" }}
+        />
+        <div
+          className="absolute -left-36 top-1/3 h-[380px] w-[380px] rounded-full bg-sky-400/10 blur-3xl"
+          style={{ animation: "blob-drift 18s ease-in-out infinite reverse" }}
+        />
+        <div
+          className="absolute -bottom-24 left-1/4 h-[340px] w-[340px] rounded-full bg-emerald-400/10 blur-3xl"
+          style={{ animation: "blob-drift 16s ease-in-out infinite" }}
+        />
+        <div
+          className="absolute bottom-1/4 right-1/3 h-[280px] w-[280px] rounded-full bg-violet-400/10 blur-3xl"
+          style={{ animation: "blob-drift 20s ease-in-out infinite reverse" }}
+        />
+        <div className="absolute -bottom-40 -right-36 h-[560px] w-[560px] rounded-full border border-primary/10" />
+        <div className="absolute -bottom-28 -right-20 h-[340px] w-[340px] rounded-full border border-primary/10" />
+        <div className="absolute -top-24 left-1/2 h-40 w-40 -translate-x-1/2 rounded-full border border-emerald-400/20" />
+        <div className="absolute left-8 top-1/4 h-3 w-3 rounded-full bg-primary/15" />
+        <div className="absolute left-56 top-2/3 h-2 w-2 rounded-full bg-indigo-400/25" />
+        <div className="absolute right-14 top-1/2 h-2 w-2 rounded-full bg-emerald-400/25" />
+        <div className="absolute bottom-16 left-1/3 h-2.5 w-2.5 rounded-full bg-violet-400/25" />
+      </div>
       {/* ======================= NAVBAR ======================= */}
       <header className="sticky top-0 z-50 border-b border-border/60 bg-background/80 backdrop-blur-md">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
@@ -174,7 +200,7 @@ export default function Welcome() {
       </header>
 
       {/* ======================= HERO ======================= */}
-      <section className="relative overflow-hidden">
+      <section className="isolate relative overflow-hidden">
         <div
           className="pointer-events-none absolute inset-0 -z-10"
           style={{
