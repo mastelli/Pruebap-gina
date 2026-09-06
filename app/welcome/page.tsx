@@ -138,23 +138,6 @@ export default function Welcome() {
         </div>
       </section>
 
-      {/* ======================= TRUST BAR ======================= */}
-      <section className="border-y border-border/60 bg-card/40">
-        <div className="mx-auto grid max-w-7xl grid-cols-2 gap-8 px-4 py-10 sm:px-6 md:grid-cols-4 lg:px-8">
-          {[
-            { value: "+12.000", label: "Usuarios activos" },
-            { value: "+350M€", label: "Gestionados" },
-            { value: "99,9%", label: "Uptime" },
-            { value: "4,9/5", label: "Valoración" },
-          ].map((stat) => (
-            <div key={stat.label} className="text-center">
-              <div className="text-2xl font-bold tracking-tight sm:text-3xl">{stat.value}</div>
-              <div className="mt-1 text-sm text-muted-foreground">{stat.label}</div>
-            </div>
-          ))}
-        </div>
-      </section>
-
       {/* ======================= FEATURES ======================= */}
       <section id="features" className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-2xl text-center">
@@ -176,7 +159,7 @@ export default function Welcome() {
             {
               icon: Calculator,
               title: "Calculadoras financieras",
-              desc: "Interés compuesto, inmuebles, acciones y bonos. Simula escenarios antes de tomar decisiones.",
+              desc: "Interés compuesto, inmuebles y acciones. Simula escenarios antes de tomar decisiones.",
             },
             {
               icon: TrendingUp,
