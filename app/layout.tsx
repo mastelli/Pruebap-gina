@@ -5,7 +5,6 @@ import { LanguageProvider } from "@/lib/i18n"
 import { ClerkProvider } from "@/components/clerk-provider"
 import { AppShell } from "@/components/app-shell"
 import { TooltipProvider } from "@/components/ui/tooltip"
-import { Toaster } from "@/components/ui/sonner"
 import { SettingsProvider } from "@/contexts/settings-context"
 import { TransactionsProvider } from "@/lib/transactions"
 import type React from "react"
@@ -39,7 +38,6 @@ export default function RootLayout({
                   </TooltipProvider>
                 </TransactionsProvider>
               </SettingsProvider>
-              <Toaster />
             </LanguageProvider>
           </ThemeProvider>
         </ClerkProvider>
