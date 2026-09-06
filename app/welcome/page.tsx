@@ -86,12 +86,22 @@ export default function Welcome() {
             >
               {t("Dashboard")}
             </Link>
-            <Link
-              href="/analytics"
-              className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-            >
-              {t("Analytics")}
-            </Link>
+            <div className="group relative">
+              <Link
+                href="/analytics"
+                className="flex items-center gap-1 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+              >
+                {t("Analytics")}
+                <ChevronDown className="h-3.5 w-3.5 transition-transform duration-200 group-hover:rotate-180" />
+              </Link>
+              <div className="invisible absolute left-1/2 top-full z-50 -translate-x-1/2 pt-4 opacity-0 transition-all duration-200 group-hover:visible group-hover:opacity-100">
+                <div className="w-48 space-y-1.5 rounded-xl border border-border bg-background p-3 shadow-lg">
+                  <Link href="/analytics/income" className="block rounded-md px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground">{t("Revenue")}</Link>
+                  <Link href="/analytics/expenses" className="block rounded-md px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground">{t("Expenses")}</Link>
+                  <Link href="/analytics/savings" className="block rounded-md px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground">{t("Debt")}</Link>
+                </div>
+              </div>
+            </div>
             <Link
               href="/investment"
               className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
