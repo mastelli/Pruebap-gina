@@ -515,7 +515,7 @@ export default function Welcome() {
       <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
         <div
           className="relative overflow-hidden rounded-2xl border border-border text-white shadow-2xl"
-          style={{ background: "linear-gradient(135deg, hsl(222 47% 14%), hsl(221 83% 28%) 55%, hsl(214 80% 18%))" }}
+          style={{ background: "linear-gradient(135deg, hsl(222 47% 7%), hsl(221 70% 16%) 55%, hsl(218 72% 6%))" }}
         >
           <div className="pointer-events-none absolute inset-0" aria-hidden>
             <div
@@ -555,7 +555,7 @@ export default function Welcome() {
       {/* ======================= FOOTER ======================= */}
       <footer className="border-t border-border/60 bg-card/40">
         <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-          <div className="grid gap-8 md:grid-cols-3">
+          <div className="grid gap-8 md:grid-cols-[2fr_1fr_1fr_1fr]">
             <div>
               <Link href="/" className="flex items-center gap-2">
                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
@@ -563,43 +563,60 @@ export default function Welcome() {
                 </div>
                 <span className="font-bold tracking-tight">MakeItRight</span>
               </Link>
-              <p className="mt-4 text-sm text-muted-foreground">
+              <p className="mt-4 max-w-xs text-sm text-muted-foreground">
                 Gestión financiera inteligente para personas.
               </p>
-            </div>
-            {[
-              {
-                title: "Producto",
-                links: ["Calculadoras", "Análisis", "Inversiones", "Precios"],
-              },
-              {
-                title: "Legal",
-                links: ["Privacidad", "Términos", "Cookies", "Seguridad"],
-              },
-            ].map((col) => (
-              <div key={col.title}>
-                <h4 className="text-sm font-semibold">{col.title}</h4>
-                <ul className="mt-4 space-y-2">
-                  {col.links.map((link) => (
-                    <li key={link}>
-                      <a href="#" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
-                        {link}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
+              <div className="mt-6 flex items-center gap-2 text-xs text-muted-foreground">
+                <Lock className="h-4 w-4" />
+                <span>Cifrado de extremo a extremo</span>
               </div>
-            ))}
+            </div>
+            <div>
+              <h4 className="text-sm font-semibold">Producto</h4>
+              <ul className="mt-4 space-y-2.5">
+                {["Calculadoras", "Análisis", "Inversiones", "Precios"].map((link) => (
+                  <li key={link}>
+                    <a href="#" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
+                      {link}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <h4 className="text-sm font-semibold">Recursos</h4>
+              <ul className="mt-4 space-y-2.5">
+                {["Centro de ayuda", "Preguntas frecuentes", "Blog", "Estado"].map((link) => (
+                  <li key={link}>
+                    <a href="#" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
+                      {link}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <h4 className="text-sm font-semibold">Legal</h4>
+              <ul className="mt-4 space-y-2.5">
+                {["Privacidad", "Términos", "Cookies", "Seguridad"].map((link) => (
+                  <li key={link}>
+                    <a href="#" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
+                      {link}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
           <div className="mt-10 flex flex-col items-center justify-between gap-4 border-t border-border/60 pt-6 sm:flex-row">
             <p className="text-sm text-muted-foreground">
               © {new Date().getFullYear()} MakeItRight. Todos los derechos reservados.
             </p>
             <div className="flex items-center gap-4">
-              <Lock className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm text-muted-foreground">Cifrado de extremo a extremo</span>
               <Globe className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm text-muted-foreground">Español</span>
               <Smartphone className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm text-muted-foreground">App móvil</span>
             </div>
           </div>
         </div>
