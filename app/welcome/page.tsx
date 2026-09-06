@@ -22,12 +22,24 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { useLanguage } from "@/lib/i18n"
 import { useAuth } from "@/lib/auth"
+import { useSettings } from "@/contexts/settings-context"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { UserAvatar } from "@/components/user-avatar"
 
 export default function Welcome() {
   const { t } = useLanguage()
-  const { ready, userId } = useAuth()
+  const { ready, userId, name, email, logout } = useAuth()
+  const { settings } = useSettings()
   const [mobileOpen, setMobileOpen] = useState(false)
   const signedIn = ready && Boolean(userId)
+  const displayName = name ?? settings.fullName
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -60,9 +72,34 @@ export default function Welcome() {
 
           <div className="hidden items-center gap-3 md:flex">
             {signedIn ? (
-              <Button size="sm" asChild>
-                <Link href="/inicio">Ir a la app</Link>
-              </Button>
+              <>
+                <Button size="sm" asChild>
+                  <Link href="/inicio">Ir a la app</Link>
+                </Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                      <UserAvatar name={displayName || "?"} className="h-8 w-8 text-xs" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-56" align="end" forceMount>
+                    <DropdownMenuLabel className="font-normal">
+                      <div className="flex flex-col space-y-1">
+                        <p className="text-sm font-medium leading-none">{displayName}</p>
+                        <p className="text-xs leading-none text-muted-foreground">{email}</p>
+                      </div>
+                    </DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild>
+                      <Link href="/settings">{t("Profile")}</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/settings">{t("Settings")}</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onSelect={(e) => { e.preventDefault(); logout() }}>{t("Log out")}</DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </>
             ) : (
               <>
                 <Button variant="outline" size="sm" asChild>
@@ -92,9 +129,34 @@ export default function Welcome() {
               </a>
               <div className="flex gap-3 pt-2">
                 {signedIn ? (
-                  <Button size="sm" className="flex-1" asChild>
-                    <Link href="/inicio">Ir a la app</Link>
-                  </Button>
+                  <>
+                    <Button size="sm" className="flex-1" asChild>
+                      <Link href="/inicio">Ir a la app</Link>
+                    </Button>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" className="relative h-8 w-8 shrink-0 rounded-full">
+                          <UserAvatar name={displayName || "?"} className="h-8 w-8 text-xs" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent className="w-56" align="end" forceMount>
+                        <DropdownMenuLabel className="font-normal">
+                          <div className="flex flex-col space-y-1">
+                            <p className="text-sm font-medium leading-none">{displayName}</p>
+                            <p className="text-xs leading-none text-muted-foreground">{email}</p>
+                          </div>
+                        </DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem asChild>
+                          <Link href="/settings">{t("Profile")}</Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Link href="/settings">{t("Settings")}</Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onSelect={(e) => { e.preventDefault(); logout() }}>{t("Log out")}</DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </>
                 ) : (
                   <>
                     <Button variant="outline" size="sm" className="flex-1" asChild>
