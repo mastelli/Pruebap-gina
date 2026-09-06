@@ -10,7 +10,6 @@ import {
   Calculator,
   LineChart,
   Landmark,
-  Globe,
   Menu,
   X,
   CheckCircle2,
@@ -31,6 +30,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { UserAvatar } from "@/components/user-avatar"
+import { LanguageSwitcher } from "@/components/language-switcher"
 
 export default function Welcome() {
   const { t } = useLanguage()
@@ -81,10 +81,10 @@ export default function Welcome() {
 
           <nav className="hidden items-center gap-8 md:flex">
             {[
-              { label: "Producto", href: "#features" },
-              { label: "Características", href: "#features" },
-              { label: "Análisis", href: "/analytics" },
-              { label: "Blog", href: "#features" },
+              { label: t("Product"), href: "#features" },
+              { label: t("Features"), href: "#features" },
+              { label: t("Analytics"), href: "/analytics" },
+              { label: t("Blog"), href: "#features" },
             ].map(({ label, href }) => (
               <Link
                 key={label}
@@ -100,7 +100,7 @@ export default function Welcome() {
             {signedIn ? (
               <>
                 <Button size="sm" asChild>
-                  <Link href="/inicio">Ir a la app</Link>
+                  <Link href="/inicio">{t("Go to app")}</Link>
                 </Button>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -151,13 +151,13 @@ export default function Welcome() {
           <div className="border-t border-border bg-background px-4 py-4 md:hidden">
             <nav className="flex flex-col gap-3">
               <a href="#features" onClick={() => setMobileOpen(false)} className="text-sm font-medium text-muted-foreground hover:text-foreground">
-                Producto
+                {t("Product")}
               </a>
               <div className="flex gap-3 pt-2">
                 {signedIn ? (
                   <>
                     <Button size="sm" className="flex-1" asChild>
-                      <Link href="/inicio">Ir a la app</Link>
+                      <Link href="/inicio">{t("Go to app")}</Link>
                     </Button>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
@@ -212,33 +212,31 @@ export default function Welcome() {
           <div className="mx-auto max-w-3xl text-center">
             <Badge variant="secondary" className="mb-5 px-3 py-1">
               <ShieldCheck className="mr-1.5 h-3.5 w-3.5" />
-              La plataforma financiera de confianza
+              {t("The trusted financial platform")}
             </Badge>
             <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl lg:text-6xl">
-              Controla tus finanzas.
+              {t("Take control of your finances.")}
               <br />
-              Decide con <span className="text-primary/70">inteligencia</span>.
+              {t("Decide with")} <span className="text-primary/70">{t("intelligence")}</span>.
             </h1>
             <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground">
-              MakeItRight reúne tu patrimonio, tus inversiones y tus cálculos en un solo
-              lugar. Analiza, simula y planifica tu futuro financiero con herramientas de
-              nivel profesional.
+              {t("Hero intro")}
             </p>
             <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
               <Button size="lg" className="min-w-[220px]" asChild>
                 <Link href="/inicio">
-                  Empieza gratis
+                  {t("Start for free")}
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
               <Button size="lg" variant="outline" className="min-w-[220px]" asChild>
                 <Link href="/calculator">
-                  Ver calculadoras
+                  {t("View calculators")}
                 </Link>
               </Button>
             </div>
             <p className="mt-4 text-sm text-muted-foreground">
-              14 días de prueba gratuita · Sin tarjeta de crédito
+              {t("14-day free trial · No credit card required")}
             </p>
           </div>
         </div>
@@ -248,10 +246,10 @@ export default function Welcome() {
       <section id="features" className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-2xl text-center">
           <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-            Todo tu dinero, bajo control
+            {t("All your money, under control")}
           </h2>
           <p className="mt-4 text-lg text-muted-foreground">
-            Herramientas que antes solo estaban al alcance de asesores profesionales.
+            {t("Tools that were once reserved for professional financial advisors.")}
           </p>
         </div>
 
@@ -259,33 +257,33 @@ export default function Welcome() {
           {[
             {
               icon: Wallet,
-              title: "Control de patrimonio",
-              desc: "Sincroniza tus cuentas y sigue tu patrimonio neto al día. Ingresos, gastos y ahorro en un solo panel.",
+              title: t("Track your net worth"),
+              desc: t("Track your net worth desc"),
             },
             {
               icon: Calculator,
-              title: "Calculadoras financieras",
-              desc: "Interés compuesto, inmuebles y acciones. Simula escenarios antes de tomar decisiones.",
+              title: t("Financial Calculators"),
+              desc: t("Financial calculators desc"),
             },
             {
               icon: TrendingUp,
-              title: "Análisis avanzado",
-              desc: "Gráficos, métricas y diagnóstico automático de tu salud financiera con recomendaciones personalizadas.",
+              title: t("Advanced analytics"),
+              desc: t("Advanced analytics desc"),
             },
             {
               icon: PieChart,
-              title: "Inversión inteligente",
-              desc: "Sigue tu cartera con cotizaciones en tiempo real y analiza cada activo con nuestro modelo propio.",
+              title: t("Smart investing"),
+              desc: t("Smart investing desc"),
             },
             {
               icon: ShieldCheck,
-              title: "Seguridad bancaria",
-              desc: "Autenticación segura y cifrado de extremo a extremo. Tus datos protegidos con los estándares más exigentes.",
+              title: t("Bank-grade security"),
+              desc: t("Bank-grade security desc"),
             },
             {
               icon: Landmark,
-              title: "Planificación a largo plazo",
-              desc: "Proyecciones de rentabilidad, análisis de deuda y simulación de hipotecas para planificar tu futuro.",
+              title: t("Long-term planning"),
+              desc: t("Long-term planning desc"),
             },
           ].map(({ icon: Icon, title, desc }) => (
             <div
@@ -308,22 +306,19 @@ export default function Welcome() {
           <div>
             <Badge variant="secondary" className="mb-4">
               <Calculator className="mr-1.5 h-3.5 w-3.5" />
-              Prueba sin registro
+              {t("Try without signing up")}
             </Badge>
             <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-              Nuestras calculadoras,
-              <br />
-              a tu alcance
+              {t("Our calculators, at your fingertips")}
             </h2>
             <p className="mt-4 text-lg text-muted-foreground">
-              No necesitas crear una cuenta para empezar. Accede gratis a todas nuestras
-              calculadoras y hazte una idea de lo que es posible.
+              {t("Calculators highlight intro")}
             </p>
             <ul className="mt-6 space-y-3">
               {[
-                "Interés compuesto con aportaciones periódicas",
-                "Rentabilidad real de propiedades en alquiler",
-                "Análisis fundamental de acciones con objetivo de precio",
+                t("Compound interest with periodic contributions"),
+                t("Real rental yield of investment properties"),
+                t("Fundamental stock analysis with a price target"),
               ].map((feature) => (
                 <li key={feature} className="flex items-start gap-3">
                   <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
@@ -333,13 +328,13 @@ export default function Welcome() {
             </ul>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <Button variant="outline" asChild>
-                <Link href="/calculator/compound">Interés compuesto</Link>
+                <Link href="/calculator/compound">{t("Compound Interest")}</Link>
               </Button>
               <Button variant="outline" asChild>
-                <Link href="/calculator/realestate">Activos inmobiliarios</Link>
+                <Link href="/calculator/realestate">{t("Real Estate Assets")}</Link>
               </Button>
               <Button variant="outline" asChild>
-                <Link href="/calculator/stocks">Acciones</Link>
+                <Link href="/calculator/stocks">{t("Stocks")}</Link>
               </Button>
             </div>
           </div>
@@ -354,9 +349,9 @@ export default function Welcome() {
             />
             <div className="space-y-4">
               {[
-                { label: "Interés compuesto", value: "10.000 € → 43.178 €", sub: "en 15 años al 8% anual" },
-                { label: "Inmueble en alquiler", value: "8,7% ROI", sub: "rentabilidad neta anual" },
-                { label: "Cartera de acciones", value: "+23,4%", sub: "potencial alcista del consenso" },
+                { label: t("Compound Interest"), value: "10.000 € → 43.178 €", sub: t("in 15 years at 8% annual") },
+                { label: t("Rental property"), value: "8,7% ROI", sub: t("net annual yield") },
+                { label: t("Stock portfolio"), value: "+23,4%", sub: t("consensus upside potential") },
               ].map((card) => (
                 <div
                   key={card.label}
@@ -375,40 +370,40 @@ export default function Welcome() {
       {/* ======================= FAQ ======================= */}
       <section className="mx-auto max-w-3xl px-4 py-20 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-2xl text-center">
-          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">Preguntas frecuentes</h2>
+          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">{t("Frequently asked questions")}</h2>
           <p className="mt-4 text-lg text-muted-foreground">
-            Resolvemos las dudas más comunes antes de que empieces.
+            {t("We answer the most common questions before you get started.")}
           </p>
         </div>
         <div className="mt-10 space-y-3">
           {[
             {
-              q: "¿Qué es MakeItRight?",
-              a: "Es una plataforma de finanzas personales que reúne tu patrimonio, tus ingresos y gastos, tus inversiones y calculadoras financieras en un solo lugar. Analiza, simula y planifica tu futuro financiero con herramientas de nivel profesional.",
+              q: t("What is MakeItRight?"),
+              a: t("What is MakeItRight? answer"),
             },
             {
-              q: "¿Para quién está pensado el uso de MakeItRight?",
-              a: "Para cualquier persona que quiera controlar sus finanzas: desde quienes empiezan a ahorrar hasta perfiles que invierten en inmuebles y acciones. No necesitas ser experto para usarla.",
+              q: t("Who is MakeItRight designed for?"),
+              a: t("Who is MakeItRight designed for? answer"),
             },
             {
-              q: "¿Mis datos financieros están seguros?",
-              a: "Sí. Usamos autenticación segura y cifrado de extremo a extremo. Tus datos no se comparten con terceros y puedes exportarlos o eliminarlos cuando quieras.",
+              q: t("Is my financial data safe?"),
+              a: t("Is my financial data safe? answer"),
             },
             {
-              q: "¿Puedo usar las calculadoras sin registrarme?",
-              a: "Sí. Todas nuestras calculadoras son de acceso libre y no requieren crear una cuenta. Puedes probarlas para hacerte una idea de lo que ofrece la plataforma.",
+              q: t("Can I use the calculators without signing up?"),
+              a: t("Can I use the calculators without signing up? answer"),
             },
             {
-              q: "¿Puedo cancelar o cambiar de plan cuando quiera?",
-              a: "Sí, sin permanencia ni costes ocultos. Puedes cambiar o cancelar tu plan en cualquier momento desde tu cuenta.",
+              q: t("Can I cancel or change plans anytime?"),
+              a: t("Can I cancel or change plans anytime? answer"),
             },
             {
-              q: "¿Mis datos se sincronizan entre dispositivos?",
-              a: "Sí. Al iniciar sesión, tu patrimonio, movimientos y configuración se sincronizan en todos tus dispositivos.",
+              q: t("Is my data synced across devices?"),
+              a: t("Is my data synced across devices? answer"),
             },
             {
-              q: "¿Necesito una tarjeta de crédito para probar la app?",
-              a: "No. El plan Estándar es gratuito y no pide tarjeta. Solo la necesitarás si decides pasar a Premium o Pro.",
+              q: t("Do I need a credit card to try the app?"),
+              a: t("Do I need a credit card to try the app? answer"),
             },
           ].map(({ q, a }, i) => (
             <div key={q} className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
@@ -437,21 +432,21 @@ export default function Welcome() {
       <section id="planes" className="border-y border-border/60 bg-card/40">
         <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-2xl text-center">
-            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">Planes</h2>
+            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">{t("Plans")}</h2>
             <p className="mt-4 text-lg text-muted-foreground">
-              Empieza gratis y escala cuando lo necesites.
+              {t("Start for free and scale when you need it.")}
             </p>
           </div>
 
           <div className="mt-12 grid gap-6 md:grid-cols-3">
             <div className="flex flex-col rounded-xl border border-border bg-card p-6 shadow-sm">
-              <h3 className="text-lg font-semibold">Estándar</h3>
+              <h3 className="text-lg font-semibold">{t("Standard")}</h3>
               <div className="mt-3 flex items-baseline gap-1">
                 <span className="text-4xl font-bold">0€</span>
-                <span className="text-muted-foreground">/mes</span>
+                <span className="text-muted-foreground">{t("/month")}</span>
               </div>
               <ul className="mt-6 flex-1 space-y-3">
-                {["Calculadoras ilimitadas", "Panel básico de patrimonio", "1 cuenta sincronizada", "Soporte por email"].map(
+                {[t("Unlimited calculators"), t("Basic net worth dashboard"), t("1 synced account"), t("Email support")].map(
                   (f) => (
                     <li key={f} className="flex items-start gap-2 text-sm text-muted-foreground">
                       <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
@@ -461,24 +456,24 @@ export default function Welcome() {
                 )}
               </ul>
               <Button variant="outline" className="mt-8" asChild>
-                <Link href="/sign-up">Comenzar gratis</Link>
+                <Link href="/sign-up">{t("Start free")}</Link>
               </Button>
             </div>
 
             <div className="flex flex-col rounded-xl border border-border bg-card p-6 shadow-sm">
-              <h3 className="text-lg font-semibold">Premium</h3>
+              <h3 className="text-lg font-semibold">{t("Premium")}</h3>
               <div className="mt-3 flex items-baseline gap-1">
                 <span className="text-4xl font-bold">3,99€</span>
-                <span className="text-muted-foreground">/mes</span>
+                <span className="text-muted-foreground">{t("/month")}</span>
               </div>
               <ul className="mt-6 flex-1 space-y-3">
                 {[
-                  "Todas las funciones Estándar",
-                  "Chat con IA",
-                  "Análisis y diagnóstico avanzado",
-                  "Cartera en tiempo real",
-                  "Informes y exportación",
-                  "Soporte prioritario",
+                  t("All Standard features"),
+                  t("AI chat"),
+                  t("Advanced analytics and diagnosis"),
+                  t("Real-time portfolio"),
+                  t("Reports and exports"),
+                  t("Priority support"),
                 ].map((f) => (
                   <li key={f} className="flex items-start gap-2 text-sm text-muted-foreground">
                     <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
@@ -487,33 +482,33 @@ export default function Welcome() {
                 ))}
               </ul>
               <Button className="mt-8" asChild>
-                <Link href="/sign-up">Empezar ahora</Link>
+                <Link href="/sign-up">{t("Start now")}</Link>
               </Button>
             </div>
 
             <div className="relative flex flex-col rounded-xl border-2 border-primary bg-card p-6 shadow-lg">
               <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                <Badge>Más popular</Badge>
+                <Badge>{t("Most popular")}</Badge>
               </div>
-              <h3 className="text-lg font-semibold">Pro</h3>
+              <h3 className="text-lg font-semibold">{t("Pro")}</h3>
               <div className="mt-3 flex items-baseline gap-1">
                 <span className="text-4xl font-bold">2,50€</span>
-                <span className="text-muted-foreground">/mes</span>
+                <span className="text-muted-foreground">{t("/month")}</span>
               </div>
               <p className="mt-1 text-xs text-muted-foreground">
-                Un solo pago anual de 29,99€
+                {t("A single annual payment of 29.99€")}
               </p>
               <span className="mt-2 inline-flex w-fit items-center rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
-                Ahorra 18€ al año
+                {t("Save €18 per year")}
               </span>
               <ul className="mt-6 flex-1 space-y-3">
                 {[
-                  "Todas las funciones Estándar",
-                  "Chat con IA",
-                  "Análisis y diagnóstico avanzado",
-                  "Cartera en tiempo real",
-                  "Informes y exportación",
-                  "Soporte prioritario",
+                  t("All Standard features"),
+                  t("AI chat"),
+                  t("Advanced analytics and diagnosis"),
+                  t("Real-time portfolio"),
+                  t("Reports and exports"),
+                  t("Priority support"),
                 ].map((f) => (
                   <li key={f} className="flex items-start gap-2 text-sm text-muted-foreground">
                     <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
@@ -522,7 +517,7 @@ export default function Welcome() {
                 ))}
               </ul>
               <Button className="mt-8" asChild>
-                <Link href="/sign-up">Empezar ahora</Link>
+                <Link href="/sign-up">{t("Start now")}</Link>
               </Button>
             </div>
           </div>
@@ -553,15 +548,15 @@ export default function Welcome() {
           </div>
           <div className="relative px-6 py-16 text-center sm:px-16">
             <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-              Empieza a tomar mejores decisiones financieras hoy
+              {t("Start making better financial decisions today")}
             </h2>
             <p className="mx-auto mt-4 max-w-xl text-lg text-white/80">
-              Únete a miles de usuarios que ya controlan su futuro financiero con MakeItRight.
+              {t("Join thousands of users who already take control of their financial future with MakeItRight.")}
             </p>
             <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
               <Button size="lg" className="min-w-[220px] bg-white text-slate-950 hover:bg-white/90" asChild>
                 <Link href="/sign-up">
-                  Crear cuenta gratuita
+                  {t("Create free account")}
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
@@ -575,25 +570,22 @@ export default function Welcome() {
         <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
           <div className="flex flex-col items-center justify-between gap-3 sm:flex-row">
             <p className="text-sm text-muted-foreground">
-              © {new Date().getFullYear()} MakeItRight. Todos los derechos reservados.
+              © {new Date().getFullYear()} MakeItRight. {t("All rights reserved.")}
             </p>
             <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
               <Link href="/aviso-legal" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
-                Aviso Legal
+                {t("Legal Notice")}
               </Link>
               <Link href="/privacidad" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
-                Política de Privacidad
+                {t("Privacy Policy")}
               </Link>
               <Link href="/terminos" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
-                Términos de Servicio
+                {t("Terms of Service")}
               </Link>
               <Link href="/cookies" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
-                Política de Cookies
+                {t("Cookie Policy")}
               </Link>
-              <span className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                <Globe className="h-4 w-4" />
-                Español
-              </span>
+              <LanguageSwitcher />
             </div>
           </div>
         </div>

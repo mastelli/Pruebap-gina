@@ -790,6 +790,286 @@ const translations: Record<string, string> = {
     "Puede añadir y eliminar miembros de la familia",
   "Permissions saved": "Permisos guardados",
   "Save": "Guardar",
+
+  // Página de bienvenida (landing)
+  "Go to app": "Ir a la app",
+  Features: "Características",
+  Blog: "Blog",
+  "The trusted financial platform": "La plataforma financiera de confianza",
+  "Take control of your finances.": "Controla tus finanzas.",
+  "Decide with": "Decide con",
+  intelligence: "inteligencia",
+  "Hero intro":
+    "MakeItRight reúne tu patrimonio, tus inversiones y tus cálculos en un solo lugar. Analiza, simula y planifica tu futuro financiero con herramientas de nivel profesional.",
+  "Start for free": "Empieza gratis",
+  "View calculators": "Ver calculadoras",
+  "14-day free trial · No credit card required":
+    "14 días de prueba gratuita · Sin tarjeta de crédito",
+  "All your money, under control": "Todo tu dinero, bajo control",
+  "Tools that were once reserved for professional financial advisors.":
+    "Herramientas que antes solo estaban al alcance de asesores profesionales.",
+  "Track your net worth": "Control de patrimonio",
+  "Track your net worth desc":
+    "Sincroniza tus cuentas y sigue tu patrimonio neto al día. Ingresos, gastos y ahorro en un solo panel.",
+  "Financial calculators desc":
+    "Interés compuesto, inmuebles y acciones. Simula escenarios antes de tomar decisiones.",
+  "Advanced analytics": "Análisis avanzado",
+  "Advanced analytics desc":
+    "Gráficos, métricas y diagnóstico automático de tu salud financiera con recomendaciones personalizadas.",
+  "Smart investing": "Inversión inteligente",
+  "Smart investing desc":
+    "Sigue tu cartera con cotizaciones en tiempo real y analiza cada activo con nuestro modelo propio.",
+  "Bank-grade security": "Seguridad bancaria",
+  "Bank-grade security desc":
+    "Autenticación segura y cifrado de extremo a extremo. Tus datos protegidos con los estándares más exigentes.",
+  "Long-term planning": "Planificación a largo plazo",
+  "Long-term planning desc":
+    "Proyecciones de rentabilidad, análisis de deuda y simulación de hipotecas para planificar tu futuro.",
+  "Try without signing up": "Prueba sin registro",
+  "Our calculators, at your fingertips": "Nuestras calculadoras, a tu alcance",
+  "Calculators highlight intro":
+    "No necesitas crear una cuenta para empezar. Accede gratis a todas nuestras calculadoras y hazte una idea de lo que es posible.",
+  "Compound interest with periodic contributions":
+    "Interés compuesto con aportaciones periódicas",
+  "Real rental yield of investment properties": "Rentabilidad real de propiedades en alquiler",
+  "Fundamental stock analysis with a price target":
+    "Análisis fundamental de acciones con objetivo de precio",
+  "Rental property": "Inmueble en alquiler",
+  "Stock portfolio": "Cartera de acciones",
+  "in 15 years at 8% annual": "en 15 años al 8% anual",
+  "net annual yield": "rentabilidad neta anual",
+  "consensus upside potential": "potencial alcista del consenso",
+  "Frequently asked questions": "Preguntas frecuentes",
+  "We answer the most common questions before you get started.":
+    "Resolvemos las dudas más comunes antes de que empieces.",
+  "What is MakeItRight?": "¿Qué es MakeItRight?",
+  "What is MakeItRight? answer":
+    "Es una plataforma de finanzas personales que reúne tu patrimonio, tus ingresos y gastos, tus inversiones y calculadoras financieras en un solo lugar. Analiza, simula y planifica tu futuro financiero con herramientas de nivel profesional.",
+  "Who is MakeItRight designed for?": "¿Para quién está pensado el uso de MakeItRight?",
+  "Who is MakeItRight designed for? answer":
+    "Para cualquier persona que quiera controlar sus finanzas: desde quienes empiezan a ahorrar hasta perfiles que invierten en inmuebles y acciones. No necesitas ser experto para usarla.",
+  "Is my financial data safe?": "¿Mis datos financieros están seguros?",
+  "Is my financial data safe? answer":
+    "Sí. Usamos autenticación segura y cifrado de extremo a extremo. Tus datos no se comparten con terceros y puedes exportarlos o eliminarlos cuando quieras.",
+  "Can I use the calculators without signing up?":
+    "¿Puedo usar las calculadoras sin registrarme?",
+  "Can I use the calculators without signing up? answer":
+    "Sí. Todas nuestras calculadoras son de acceso libre y no requieren crear una cuenta. Puedes probarlas para hacerte una idea de lo que ofrece la plataforma.",
+  "Can I cancel or change plans anytime?": "¿Puedo cancelar o cambiar de plan cuando quiera?",
+  "Can I cancel or change plans anytime? answer":
+    "Sí, sin permanencia ni costes ocultos. Puedes cambiar o cancelar tu plan en cualquier momento desde tu cuenta.",
+  "Is my data synced across devices?": "¿Mis datos se sincronizan entre dispositivos?",
+  "Is my data synced across devices? answer":
+    "Sí. Al iniciar sesión, tu patrimonio, movimientos y configuración se sincronizan en todos tus dispositivos.",
+  "Do I need a credit card to try the app?":
+    "¿Necesito una tarjeta de crédito para probar la app?",
+  "Do I need a credit card to try the app? answer":
+    "No. El plan Estándar es gratuito y no pide tarjeta. Solo la necesitarás si decides pasar a Premium o Pro.",
+  Plans: "Planes",
+  "Start for free and scale when you need it.":
+    "Empieza gratis y escala cuando lo necesites.",
+  Standard: "Estándar",
+  "/month": "/mes",
+  "Unlimited calculators": "Calculadoras ilimitadas",
+  "Basic net worth dashboard": "Panel básico de patrimonio",
+  "1 synced account": "1 cuenta sincronizada",
+  "Email support": "Soporte por email",
+  "Start free": "Comenzar gratis",
+  "All Standard features": "Todas las funciones Estándar",
+  "AI chat": "Chat con IA",
+  "Advanced analytics and diagnosis": "Análisis y diagnóstico avanzado",
+  "Real-time portfolio": "Cartera en tiempo real",
+  "Reports and exports": "Informes y exportación",
+  "Priority support": "Soporte prioritario",
+  "Start now": "Empezar ahora",
+  Pro: "Pro",
+  "Most popular": "Más popular",
+  "A single annual payment of 29.99€": "Un solo pago anual de 29,99€",
+  "Save €18 per year": "Ahorra 18€ al año",
+  "Start making better financial decisions today":
+    "Empieza a tomar mejores decisiones financieras hoy",
+  "Join thousands of users who already take control of their financial future with MakeItRight.":
+    "Únete a miles de usuarios que ya controlan su futuro financiero con MakeItRight.",
+  "Create free account": "Crear cuenta gratuita",
+
+  // Páginas legales y pie de página
+  here: "aquí",
+  "Last updated": "Última actualización",
+  "All rights reserved.": "Todos los derechos reservados.",
+  "Legal Notice": "Aviso Legal",
+  "Privacy Policy": "Política de Privacidad",
+  "Terms of Service": "Términos de Servicio",
+  "Cookie Policy": "Política de Cookies",
+
+  // Aviso Legal
+  "Legal intro prefix": "Este documento, junto con la",
+  "Legal intro between": ", los",
+  "Legal intro between2": " y la",
+  "Legal intro suffix":
+    ", regula el uso del sitio web MakeItRight (a partir de ahora, el \"Sitio Web\") y de todos los servicios que ofrecemos a través de él.",
+  "1. Service provider identification": "1. Identificación del prestador",
+  "Legal provider text":
+    "El Sitio Web y el servicio MakeItRight están operados por MakeItRight, que actúa como prestador de servicios de la sociedad de la información.",
+  "Legal registry prefix":
+    "Los datos registrales de la sociedad y su domicilio social pueden solicitarse en cualquier momento; ponte en contacto a través del enlace de",
+  "Legal registry suffix": "y te los facilitaremos.",
+  "2. Purpose of the Website": "2. Objeto del Sitio Web",
+  "Legal purpose text":
+    "MakeItRight es una plataforma orientada a la gestión de las finanzas personales: permite llevar el control del patrimonio, registrar y analizar ingresos y gastos, evaluar inversiones y utilizar calculadoras financieras, además de obtener asistencia con inteligencia artificial. Parte de estas funciones requieren una suscripción de pago.",
+  "3. Access and use conditions": "3. Condiciones de acceso y uso",
+  "Legal access prefix":
+    "La mayor parte del contenido es de acceso libre, pero algunas funciones solo están disponibles tras registrarse y contar con una suscripción activa, tal y como se detalla en los",
+  "Legal access suffix":
+    "Al utilizar el Sitio Web te comprometes a hacerlo de forma honesta y dentro del marco legal, respetando las condiciones que establece este Aviso.",
+  "4. Intellectual property": "4. Propiedad intelectual",
+  "Legal IP text":
+    "El software, el diseño, los textos, los gráficos, los logotipos y las marcas que aparecen en el Sitio Web son de nuestra titularidad o de nuestros licenciantes y están protegidos por la normativa de propiedad intelectual. Queda prohibida su reproducción, distribución o explotación comercial sin nuestra autorización previa y por escrito, salvo en los casos que permita expresamente la normativa aplicable.",
+  "5. Liability": "5. Responsabilidad",
+  "Legal liability text":
+    "Parte de la información financiera y de mercado que mostramos procede de fuentes públicas o de terceros y puede contener errores, estar incompleta o haber quedado desactualizada. Los contenidos, incluidos los informes elaborados con IA, tienen una finalidad exclusivamente divulgativa y en ningún caso suponen asesoramiento financiero, legal, fiscal o de inversión. Por tanto, no podemos garantizar la exactitud ni la vigencia de los datos que se presentan.",
+  "6. Links to third-party sites": "6. Enlaces a sitios de terceros",
+  "Legal links text":
+    "Es posible que el Sitio Web incluya enlaces a páginas externas. No tenemos ningún control sobre su contenido ni sobre sus políticas, por lo que declinamos cualquier responsabilidad en relación con esos sitios.",
+  "7. Governing law and jurisdiction": "7. Legislación aplicable y jurisdicción",
+  "Legal law text":
+    "Las relaciones derivadas del uso del Sitio Web se rigen por la legislación española, sin perjuicio de las normas imperativas de protección de los consumidores que te resulten de aplicación cuando actúes como consumidor conforme al Derecho de la Unión Europea.",
+  "8. Contact": "8. Contacto",
+  "Legal contact prefix":
+    "Si tienes alguna duda sobre este Aviso Legal, puedes escribirnos desde el enlace de",
+
+  // Política de Privacidad
+  "Privacy intro":
+    "Esta política explica cómo MakeItRight recopila, utiliza y protege tus datos personales cuando usas nuestro sitio web y los servicios asociados.",
+  "1. Data controller": "1. Responsable del tratamiento",
+  "Privacy controller text":
+    "El responsable del tratamiento es MakeItRight. Los datos de registro de la sociedad están disponibles bajo solicitud; puedes pedirlos escribiéndonos a través del enlace de",
+  "2. Data we collect": "2. Qué datos recopilamos",
+  "Account data": "Datos de cuenta",
+  "Account data desc":
+    "nombre, correo electrónico, teléfono (opcional), contraseña (almacenada cifrada), idioma y preferencias de región.",
+  "Usage data": "Datos de uso",
+  "Usage data desc":
+    "operaciones guardadas, datos introducidos en las calculadoras y el panel, alertas configuradas, páginas visitadas, información del dispositivo y navegador, y dirección IP.",
+  "Payment data": "Datos de pago",
+  "Payment data desc":
+    "los pagos se procesan a través de un proveedor externo. No almacenamos los números completos de tarjeta; recibimos únicamente el estado de la suscripción, el plan y los metadatos de facturación.",
+  Communications: "Comunicaciones",
+  "Communications desc":
+    "mensajes que nos envías por soporte, por el asistente de chat o en los comentarios de herramientas compartidas.",
+  "3. Why we process your data and legal basis":
+    "3. Por qué tratamos tus datos y base legal",
+  "Privacy basis service": "Prestar el servicio y gestionar tu cuenta (ejecución de un contrato).",
+  "Privacy basis payments":
+    "Procesar pagos y gestionar las suscripciones (ejecución de un contrato).",
+  "Privacy basis emails":
+    "Enviar correos transaccionales y, si las configuras, alertas (ejecución de un contrato).",
+  "Privacy basis chat":
+    "Respuestas de chat basadas en tus consultas (ejecución de un contrato).",
+  "Privacy basis analytics":
+    "Analizar el uso y mejorar el producto (interés legítimo).",
+  "Privacy basis marketing":
+    "Comunicaciones de marketing y cookies no esenciales, solo con tu consentimiento (consentimiento).",
+  "Privacy basis legal": "Cumplir obligaciones legales, como facturación e impuestos (obligación legal).",
+  "4. Who we share your data with": "4. Con quién compartimos tus datos",
+  "Privacy sharing intro":
+    "Compartimos datos con proveedores que nos ayudan a operar, limitado a lo que cada uno necesita para su función:",
+  "Shared Supabase": "Supabase — base de datos, autenticación y almacenamiento.",
+  "Shared Clerk": "Clerk — autenticación de usuarios.",
+  "Shared Stripe": "Stripe — procesamiento de pagos y facturación de suscripciones.",
+  "Shared Google": "Google (Gemini) — generación de informes asistidos por IA y chat.",
+  "Shared Vercel": "Vercel y Vercel Analytics — alojamiento y analítica del sitio.",
+  "Shared Sentry": "Sentry — monitorización de errores.",
+  "Privacy sharing outro":
+    "Exigimos a estos proveedores que protejan tus datos conforme a sus propios compromisos de privacidad y, cuando corresponde, mediante cláusulas contractuales tipo. No vendemos tus datos personales.",
+  "5. International transfers": "5. Transferencias internacionales",
+  "Privacy transfers text":
+    "Algunos de los proveedores podrían tratar datos fuera del Espacio Económico Europeo, por ejemplo en Estados Unidos. En esos casos nos apoyamos en garantías adecuadas, como las Cláusulas Contractuales Tipo de la UE o la participación del proveedor en un marco de protección de datos aprobado (como el Data Privacy Framework UE-EE. UU.).",
+  "6. How long we keep your data": "6. Cuánto tiempo conservamos tus datos",
+  "Privacy retention text":
+    "Conservamos los datos de tu cuenta mientras siga activa y durante un plazo razonable posterior para cumplir obligaciones legales, fiscales y de resolución de controversias. Puedes solicitar su eliminación anticipada; consulta la sección \"Tus derechos\".",
+  "7. Your rights": "7. Tus derechos",
+  "Privacy rights text":
+    "Conforme a la normativa aplicable, tienes derecho a acceder, rectificar, suprimir, limitar u oponerte al tratamiento de tus datos, a la portabilidad de los mismos y a retirar tu consentimiento en cualquier momento. También puedes presentar una reclamación ante tu autoridad de protección de datos (en España, la AEPD). Para ejercer cualquiera de estos derechos, escríbenos",
+  "8. Security": "8. Seguridad",
+  "Privacy security text":
+    "Aplicamos medidas técnicas y organizativas razonables —entre ellas cifrado en tránsito, controles de acceso y contraseñas cifradas— para proteger tus datos. No obstante, ningún método de transmisión o almacenamiento es seguro al 100%.",
+  "9. Minors": "9. Menores",
+  "Privacy minors text":
+    "El servicio no está dirigido a menores de 18 años y no recopilamos conscientemente datos de menores.",
+  "10. Changes to this policy": "10. Cambios en esta política",
+  "Privacy changes text":
+    "Podemos actualizar esta política periódicamente. Los cambios sustanciales se notificarán a través del sitio web o por correo electrónico.",
+  "11. Contact": "11. Contacto",
+  "Privacy contact text": "Para cualquier consulta sobre esta política o sobre tus datos, contáctanos",
+
+  // Términos de Servicio
+  "Terms intro":
+    "Estos Términos de Servicio (\"Términos\") rigen el uso de MakeItRight, operado por MakeItRight. Al crear una cuenta o utilizar el servicio, aceptas estos Términos.",
+  "1. Service description": "1. Descripción del servicio",
+  "Terms description text":
+    "MakeItRight es una plataforma de gestión de finanzas personales por suscripción que facilita el control del patrimonio, el registro y análisis de ingresos y gastos, la evaluación de inversiones y el uso de calculadoras financieras, además de respuestas asistidas por IA.",
+  "2. Account registration": "2. Registro de cuenta",
+  "Terms registration text":
+    "Debes facilitar información veraz al crear tu cuenta, mantener tus credenciales seguras y responder de la actividad que se realice bajo tu cuenta. Debes tener la edad legal para contratar en tu país de residencia.",
+  "3. Subscriptions, billing and free trials":
+    "3. Suscripciones, facturación y pruebas gratuitas",
+  "Terms subscriptions text":
+    "Los planes y precios se muestran antes de completar la compra. Las suscripciones se renuevan automáticamente por el mismo periodo salvo que se cancelen antes de la fecha de renovación. Cuando se ofrezcan, las pruebas gratuitas se convierten automáticamente en una suscripción de pago salvo que se cancelen antes del fin del periodo de prueba. Los precios se muestran en la moneda aplicable y pueden incluir o no impuestos según tu ubicación.",
+  "4. Cancellation and refunds": "4. Cancelación y reembolsos",
+  "Terms cancellation text":
+    "Puedes cancelar tu suscripción en cualquier momento desde los ajustes de tu cuenta; la cancelación surte efecto al final del periodo de facturación en curso y mantienes el acceso hasta entonces. Como el acceso se concede por el periodo completo ya pagado, por lo general no ofrecemos reembolsos prorrateados por periodos parciales, salvo cuando la ley lo exija (por ejemplo, el derecho de desistimiento de los consumidores de la UE, con las excepciones aplicables cuando consientas el acceso inmediato a un servicio o a contenido digital).",
+  "5. Acceptable use": "5. Uso aceptable",
+  "Terms acceptable use text":
+    "Te comprometes a no extraer datos (scraping), realizar ingeniería inversa ni revender nuestros datos o la plataforma sin nuestro permiso por escrito, a no usar el servicio con fines ilícitos, abusivos o fraudulentos, y a no intentar eludir los límites de uso o las medidas de seguridad.",
+  "6. Data accuracy and no investment advice":
+    "6. Exactitud de los datos y ausencia de asesoramiento de inversión",
+  "Terms accuracy text":
+    "Parte de los datos financieros y de mercado mostrados en el servicio puede proceder de fuentes públicas o de terceros. Estos datos pueden ser incompletos, estar desactualizados o contener errores, y no estamos afiliados ni respaldados por ninguno de esos proveedores. Todo el contenido, incluida la asistencia prestada con IA, se ofrece con fines meramente informativos y no constituye asesoramiento financiero, legal, fiscal ni de inversión. Eres el único responsable de tus decisiones de inversión y debes verificar de forma independiente los datos y buscar asesoramiento profesional antes de actuar en base a ellos.",
+  "7. Intellectual property": "7. Propiedad intelectual",
+  "Terms IP text":
+    "La plataforma, el software, el diseño y las marcas son propiedad nuestra o de nuestros licenciantes. Al suscribirte se te concede una licencia limitada, no exclusiva e intransferible para usar el servicio con fines internos propios.",
+  "8. Limitation of liability": "8. Limitación de responsabilidad",
+  "Terms liability text":
+    "En la máxima medida permitida por la ley, no seremos responsables de daños indirectos, incidentales o consecuentes, ni de pérdidas de inversión derivadas de la confianza depositada en los datos o respuestas del servicio. Nada en estos Términos limita la responsabilidad que no pueda excluirse conforme a la ley aplicable, incluida la responsabilidad por fraude o, para los consumidores de la UE, los derechos imperativos de protección al consumidor.",
+  "9. Termination": "9. Terminación",
+  "Terms termination text":
+    "Podemos suspender o cancelar cuentas que incumplan estos Términos. Puedes dejar de usar el servicio y cancelar tu suscripción en cualquier momento.",
+  "10. Changes to these Terms": "10. Cambios en estos Términos",
+  "Terms changes text":
+    "Podemos actualizar estos Términos periódicamente. El uso continuado del servicio tras la entrada en vigor de los cambios constituye la aceptación de los Términos actualizados. Te notificaremos los cambios sustanciales a través del sitio web o por correo electrónico.",
+  "11. Governing law": "11. Legislación aplicable",
+  "Terms law text":
+    "Estos Términos se rigen por la legislación española, sin perjuicio de las normas imperativas de protección de los consumidores de tu país de residencia que puedan resultar aplicables si tienes la condición de consumidor conforme al Derecho de la UE.",
+  "12. Contact": "12. Contacto",
+  "Terms contact text": "Para cualquier consulta sobre estos Términos, contáctanos",
+
+  // Política de Cookies
+  "Cookies intro":
+    "Esta Política de Cookies explica cómo MakeItRight utiliza cookies y tecnologías similares en nuestro sitio web.",
+  "1. What cookies are": "1. Qué son las cookies",
+  "Cookies what text":
+    "Las cookies son pequeños archivos almacenados en tu dispositivo que ayudan a que un sitio web funcione y nos permiten entender cómo se utiliza.",
+  "2. Types of cookies we use": "2. Tipos de cookies que utilizamos",
+  "Essential cookies":
+    "Esenciales o estrictamente necesarias — autenticación y gestión de sesión, seguridad y preferencias guardadas como tu idioma. No se pueden desactivar porque son necesarias para el funcionamiento del servicio.",
+  "Analytics cookies":
+    "Analíticas o de rendimiento — nos ayudan a entender el uso y a mejorar el producto.",
+  "Marketing cookies":
+    "Publicitarias o de marketing — se usan para medir y mejorar el rendimiento de nuestros anuncios; solo se cargan cuando está permitido.",
+  "3. Third-party cookies we use": "3. Cookies de terceros que utilizamos",
+  "Cookie Google": "Google Analytics (Google) — analítica.",
+  "Cookie Vercel": "Vercel Analytics / Speed Insights (Vercel) — analítica y rendimiento.",
+  "Cookie Stripe": "Stripe — prevención de fraude durante el pago.",
+  "Cookie Supabase": "Supabase — autenticación y gestión de sesión.",
+  "Cookie Clerk": "Clerk — autenticación y gestión de sesión.",
+  "4. Managing cookies": "4. Gestión de cookies",
+  "Cookies manage text":
+    "Puedes ajustar la configuración de tu navegador para bloquear o eliminar cookies en cualquier momento. Ten en cuenta que bloquear las cookies esenciales puede afectar funcionalidades clave, como mantener tu sesión iniciada.",
+  "5. Changes to this policy": "5. Cambios en esta política",
+  "Cookies changes text":
+    "Podemos actualizar esta Política de Cookies periódicamente y te lo notificaremos a través del sitio web o por correo electrónico.",
+  "6. Contact": "6. Contacto",
+  "Cookies contact text": "Para cualquier consulta sobre esta Política de Cookies, contáctanos",
 }
 
 interface LanguageContextType {

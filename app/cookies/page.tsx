@@ -1,63 +1,42 @@
 "use client"
 
 import { LegalPage, ContactLink } from "@/components/legal-page"
+import { useLanguage } from "@/lib/i18n"
 
 export default function CookiesPage() {
+  const { t } = useLanguage()
   return (
-    <LegalPage title="Política de Cookies">
-      <p>
-        Esta Política de Cookies explica cómo MakeItRight utiliza cookies y tecnologías similares en
-        nuestro sitio web.
-      </p>
+    <LegalPage title="Cookie Policy">
+      <p>{t("Cookies intro")}</p>
 
-      <Section title="1. Qué son las cookies">
-        <p>
-          Las cookies son pequeños archivos almacenados en tu dispositivo que ayudan a que un sitio
-          web funcione y nos permiten entender cómo se utiliza.
-        </p>
+      <Section title={t("1. What cookies are")}>
+        <p>{t("Cookies what text")}</p>
       </Section>
-      <Section title="2. Tipos de cookies que utilizamos">
+      <Section title={t("2. Types of cookies we use")}>
         <ul className="space-y-2">
-          <li>
-            <b>Esenciales o estrictamente necesarias</b> — autenticación y gestión de sesión,
-            seguridad y preferencias guardadas como tu idioma. No se pueden desactivar porque son
-            necesarias para el funcionamiento del servicio.
-          </li>
-          <li>
-            <b>Analíticas o de rendimiento</b> — nos ayudan a entender el uso y a mejorar el
-            producto.
-          </li>
-          <li>
-            <b>Publicitarias o de marketing</b> — se usan para medir y mejorar el rendimiento de
-            nuestros anuncios; solo se cargan cuando está permitido.
-          </li>
+          <li>{t("Essential cookies")}</li>
+          <li>{t("Analytics cookies")}</li>
+          <li>{t("Marketing cookies")}</li>
         </ul>
       </Section>
-      <Section title="3. Cookies de terceros que utilizamos">
+      <Section title={t("3. Third-party cookies we use")}>
         <ul className="space-y-2">
-          <li><b>Google Analytics (Google)</b> — analítica.</li>
-          <li><b>Vercel Analytics / Speed Insights (Vercel)</b> — analítica y rendimiento.</li>
-          <li><b>Stripe</b> — prevención de fraude durante el pago.</li>
-          <li><b>Supabase</b> — autenticación y gestión de sesión.</li>
-          <li><b>Clerk</b> — autenticación y gestión de sesión.</li>
+          <li>{t("Cookie Google")}</li>
+          <li>{t("Cookie Vercel")}</li>
+          <li>{t("Cookie Stripe")}</li>
+          <li>{t("Cookie Supabase")}</li>
+          <li>{t("Cookie Clerk")}</li>
         </ul>
       </Section>
-      <Section title="4. Gestión de cookies">
-        <p>
-          Puedes ajustar la configuración de tu navegador para bloquear o eliminar cookies en
-          cualquier momento. Ten en cuenta que bloquear las cookies esenciales puede afectar
-          funcionalidades clave, como mantener tu sesión iniciada.
-        </p>
+      <Section title={t("4. Managing cookies")}>
+        <p>{t("Cookies manage text")}</p>
       </Section>
-      <Section title="5. Cambios en esta política">
-        <p>
-          Podemos actualizar esta Política de Cookies periódicamente y te lo notificaremos a través
-          del sitio web o por correo electrónico.
-        </p>
+      <Section title={t("5. Changes to this policy")}>
+        <p>{t("Cookies changes text")}</p>
       </Section>
-      <Section title="6. Contacto">
+      <Section title={t("6. Contact")}>
         <p>
-          Para cualquier consulta sobre esta Política de Cookies, contáctanos <ContactLink />.
+          {t("Cookies contact text")} <ContactLink />.
         </p>
       </Section>
     </LegalPage>

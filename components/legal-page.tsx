@@ -3,11 +3,12 @@
 import Link from "next/link"
 import { useState } from "react"
 import type React from "react"
-import { LineChart, Menu, X, Globe } from "lucide-react"
+import { LineChart, Menu, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useLanguage } from "@/lib/i18n"
 import { useAuth } from "@/lib/auth"
 import { useSettings } from "@/contexts/settings-context"
+import { LanguageSwitcher } from "@/components/language-switcher"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,12 +20,13 @@ import {
 import { UserAvatar } from "@/components/user-avatar"
 
 export function ContactLink() {
+  const { t } = useLanguage()
   return (
     <Link
       href="/help"
       className="font-medium text-foreground underline underline-offset-4 transition-colors hover:text-primary"
     >
-      aquí
+      {t("here")}
     </Link>
   )
 }
@@ -57,10 +59,10 @@ export function LegalPage({
   const displayName = name ?? settings.fullName
 
   const navLinks = [
-    { label: "Producto", href: "/#features" },
-    { label: "Características", href: "/#features" },
-    { label: "Análisis", href: "/analytics" },
-    { label: "Blog", href: "/#features" },
+    { label: t("Product"), href: "/#features" },
+    { label: t("Features"), href: "/#features" },
+    { label: t("Analytics"), href: "/analytics" },
+    { label: t("Blog"), href: "/#features" },
   ]
 
   return (
@@ -90,7 +92,7 @@ export function LegalPage({
             {signedIn ? (
               <>
                 <Button size="sm" asChild>
-                  <Link href="/inicio">Ir a la app</Link>
+                  <Link href="/inicio">{t("Go to app")}</Link>
                 </Button>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -154,7 +156,7 @@ export function LegalPage({
                 {signedIn ? (
                   <>
                     <Button size="sm" className="flex-1" asChild>
-                      <Link href="/inicio">Ir a la app</Link>
+                      <Link href="/inicio">{t("Go to app")}</Link>
                     </Button>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
@@ -197,8 +199,8 @@ export function LegalPage({
       </header>
 
       <main className="mx-auto max-w-3xl px-4 py-16 sm:px-6 lg:px-8">
-        <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">{title}</h1>
-        {updated && <p className="mt-3 text-sm text-muted-foreground">Última actualización: {updated}</p>}
+        <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">{t(title)}</h1>
+        {updated && <p className="mt-3 text-sm text-muted-foreground">{t("Last updated")}: {updated}</p>}
         <div className="mt-10 space-y-10">{children}</div>
       </main>
 
@@ -206,17 +208,14 @@ export function LegalPage({
         <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
           <div className="flex flex-col items-center justify-between gap-3 sm:flex-row">
             <p className="text-sm text-muted-foreground">
-              © {new Date().getFullYear()} MakeItRight. Todos los derechos reservados.
+              © {new Date().getFullYear()} MakeItRight. {t("All rights reserved.")}
             </p>
             <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
-              <Link href="/aviso-legal" className="text-sm text-muted-foreground transition-colors hover:text-foreground">Aviso Legal</Link>
-              <Link href="/privacidad" className="text-sm text-muted-foreground transition-colors hover:text-foreground">Política de Privacidad</Link>
-              <Link href="/terminos" className="text-sm text-muted-foreground transition-colors hover:text-foreground">Términos de Servicio</Link>
-              <Link href="/cookies" className="text-sm text-muted-foreground transition-colors hover:text-foreground">Política de Cookies</Link>
-              <span className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                <Globe className="h-4 w-4" />
-                Español
-              </span>
+              <Link href="/aviso-legal" className="text-sm text-muted-foreground transition-colors hover:text-foreground">{t("Legal Notice")}</Link>
+              <Link href="/privacidad" className="text-sm text-muted-foreground transition-colors hover:text-foreground">{t("Privacy Policy")}</Link>
+              <Link href="/terminos" className="text-sm text-muted-foreground transition-colors hover:text-foreground">{t("Terms of Service")}</Link>
+              <Link href="/cookies" className="text-sm text-muted-foreground transition-colors hover:text-foreground">{t("Cookie Policy")}</Link>
+              <LanguageSwitcher />
             </div>
           </div>
         </div>
