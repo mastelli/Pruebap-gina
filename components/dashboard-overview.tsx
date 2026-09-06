@@ -38,7 +38,7 @@ function sumByMonth(transactions: ReturnType<typeof useTransactions>["transactio
   return transactions
     .filter((transaction) => transaction.date.startsWith(prefix))
     .filter((transaction) => (positive ? transaction.amount > 0 : transaction.amount < 0))
-    .filter((transaction) => !isInternalTransferTransaction(transaction))
+    .filter((positive ? transaction => !isInternalTransferTransaction(transaction) : () => true))
     .reduce((sum, transaction) => sum + Math.abs(transaction.amount), 0)
 }
 

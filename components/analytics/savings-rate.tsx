@@ -20,9 +20,13 @@ export function SavingsRate({ month }: { month?: string }) {
   let expenses = 0
   for (const transaction of transactions) {
     if (!transaction.date.startsWith(period)) continue
-    if (isInternalTransferTransaction(transaction)) continue
-    if (transaction.amount > 0) income += transaction.amount
-    else expenses += -transaction.amount
+    if (transaction.amount > 0) {
+      if (isInternalTransferTransaction(transaction)) continue
+      income += transaction.amount
+    } else if (transaction.amount < 0) {
+      if (isInternalTransferTransaction(transaction)) expenses += -transaction.amount
+      else expenses += -transaction.amount
+    }
   }
 
   const net = income - expenses

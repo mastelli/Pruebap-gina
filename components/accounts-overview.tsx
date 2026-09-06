@@ -43,7 +43,6 @@ export function AccountsOverview() {
         transaction.date.startsWith(currentYear) &&
         transaction.date.slice(5, 7) === currentMonth,
     )
-    .filter((transaction) => !isInternalTransferTransaction(transaction))
     .reduce((sum, transaction) => sum + Math.abs(transaction.amount), 0)
 
   const yearlyIncome = transactions
@@ -53,7 +52,6 @@ export function AccountsOverview() {
 
   const yearlyExpenses = transactions
     .filter((transaction) => transaction.amount < 0 && transaction.date.startsWith(currentYear))
-    .filter((transaction) => !isInternalTransferTransaction(transaction))
     .reduce((sum, transaction) => sum + Math.abs(transaction.amount), 0)
 
   const monthlyIncomeAverage = yearlyIncome / monthsElapsed

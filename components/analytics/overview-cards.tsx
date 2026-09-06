@@ -57,14 +57,22 @@ export function OverviewCards({ month }: { month?: string }) {
   let expCur = 0
   let expPrev = 0
   for (const transaction of transactions) {
-    // Traspaso interno: ni ingreso ni gasto
-    if (isInternalTransferTransaction(transaction)) continue
     if (transaction.date.startsWith(cur)) {
-      if (transaction.amount > 0) incCur += transaction.amount
-      else expCur += -transaction.amount
+      if (transaction.amount > 0) {
+        if (isInternalTransferTransaction(transaction)) continue
+        incCur += transaction.amount
+      } else if (transaction.amount < 0) {
+        if (isInternalTransferTransaction(transaction)) expCur += -transaction.amount
+        else expCur += -transaction.amount
+      }
     } else if (transaction.date.startsWith(prev)) {
-      if (transaction.amount > 0) incPrev += transaction.amount
-      else expPrev += -transaction.amount
+      if (transaction.amount > 0) {
+        if (isInternalTransferTransaction(transaction)) continue
+        incPrev += transaction.amount
+      } else if (transaction.amount < 0) {
+        if (isInternalTransferTransaction(transaction)) expPrev += -transaction.amount
+        else expPrev += -transaction.amount
+      }
     }
   }
 

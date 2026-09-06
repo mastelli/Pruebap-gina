@@ -35,7 +35,6 @@ export function BusinessMetrics() {
 
   const yearlyExpenses = transactions
     .filter((transaction) => transaction.amount < 0 && transaction.date.startsWith(currentYear))
-    .filter((transaction) => !isInternalTransferTransaction(transaction))
     .reduce((sum, transaction) => sum + Math.abs(transaction.amount), 0)
 
   const monthlyAverage = yearlyIncome / monthsElapsed

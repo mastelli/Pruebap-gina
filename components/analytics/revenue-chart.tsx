@@ -83,9 +83,10 @@ export function RevenueChart() {
     let transfers = 0
     for (const transaction of transactions) {
       if (!transaction.date.startsWith(prefix)) continue
-      // Traspaso interno: ni ingreso ni gasto, se muestra aparte
+      // Traspaso interno: si es gasto (importe negativo), se muestra en la gráfica;
+      // si es ingreso, se ignora completamente
       if (isInternalTransferTransaction(transaction)) {
-        transfers += Math.abs(transaction.amount)
+        if (transaction.amount < 0) transfers += Math.abs(transaction.amount)
         continue
       }
       if (transaction.amount > 0) income += transaction.amount

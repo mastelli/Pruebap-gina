@@ -62,7 +62,6 @@ function ExpenseOverview({ month, setMonth }: { month: string; setMonth: (m: str
   for (const def of allDefs) spentByCategory[def.key] = 0
   for (const transaction of transactions) {
     if (transaction.amount >= 0 || !transaction.date.startsWith(prefix)) continue
-    if (isInternalTransferTransaction(transaction)) continue
     spentByCategory[getCategoryFor(transaction)] += Math.abs(transaction.amount)
   }
 
@@ -75,7 +74,6 @@ function ExpenseOverview({ month, setMonth }: { month: string; setMonth: (m: str
   )
   const prevTotal = transactions
     .filter((transaction) => transaction.amount < 0 && transaction.date.startsWith(prevPrefix))
-    .filter((transaction) => !isInternalTransferTransaction(transaction))
     .reduce((sum, transaction) => sum + Math.abs(transaction.amount), 0)
   const delta = prevTotal > 0 ? ((total - prevTotal) / prevTotal) * 100 : null
 
