@@ -206,6 +206,8 @@ export function DashboardOverview() {
   const { transactions, checkingBalance } = useTransactions()
   const { total: portfolio, momPct } = usePortfolioEurTotal()
 
+  const now = useMemo(() => new Date(), [])
+
   const [debt, setDebt] = useState<Derived | null>(null)
   const [debtCount, setDebtCount] = useState(0)
 
@@ -270,7 +272,6 @@ export function DashboardOverview() {
     return () => window.clearTimeout(id)
   }, [requestInsight])
 
-  const now = useMemo(() => new Date(), [])
   const currentYear = `${now.getFullYear()}`
   const monthsElapsed = now.getMonth() + 1
   const mPrefix = monthPrefix(now)
