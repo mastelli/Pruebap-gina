@@ -325,6 +325,7 @@ export default function Welcome() {
               <ul className="mt-6 flex-1 space-y-3">
                 {[
                   "Todas las funciones Estándar",
+                  "Chat con IA",
                   "Análisis y diagnóstico avanzado",
                   "Cartera en tiempo real",
                   "Informes y exportación",
@@ -359,6 +360,7 @@ export default function Welcome() {
               <ul className="mt-6 flex-1 space-y-3">
                 {[
                   "Todas las funciones Estándar",
+                  "Chat con IA",
                   "Análisis y diagnóstico avanzado",
                   "Cartera en tiempo real",
                   "Informes y exportación",
