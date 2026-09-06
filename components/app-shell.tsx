@@ -34,8 +34,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   // Rutas públicas: no exigimos sesión
   if (isPublic) {
-    // Welcome: página independiente, sin sidebar ni cabecera de la app
-    if (pathname === "/welcome") {
+    // Páginas independientes (welcome y legales): sin sidebar ni cabecera de la app
+    const standalonePublic = ["/welcome", "/aviso-legal", "/privacidad", "/terminos", "/cookies"]
+    if (standalonePublic.some((p) => pathname === p)) {
       return <div className="min-h-screen">{children}</div>
     }
     // Resto de rutas públicas (calculadoras): se mantiene la cabecera y el sidebar
