@@ -11,7 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Trash2, RotateCcw, Calendar, Settings } from "lucide-react"
+import { Trash2, RotateCcw, Calendar, Settings, Search } from "lucide-react"
 import { useLanguage } from "@/lib/i18n"
 import { useTransactions, sortByDateDesc } from "@/lib/transactions"
 import { CategoryManager } from "@/components/category-manager"
@@ -48,6 +48,7 @@ export default function TransactionsPage() {
   const [dateFrom, setDateFrom] = useState(defaultRange.from)
   const [dateTo, setDateTo] = useState(defaultRange.to)
   const [categoryFilter, setCategoryFilter] = useState<string>("all")
+  const [search, setSearch] = useState("")
   const [overrides, setOverrides] = useState<Record<string, TransactionCategory>>({})
   const [catVersion, setCatVersion] = useState(0)
 
@@ -66,6 +67,7 @@ export default function TransactionsPage() {
   const filteredTransactions = useMemo(() => {
     const from = toISODate(dateFrom)
     const to = toISODate(dateTo)
+    const query = search.trim().toLowerCase()
     return sortByDateDesc(
       transactions.filter((transaction) => {
         const d = toISODate(transaction.date)
@@ -74,10 +76,11 @@ export default function TransactionsPage() {
           const cat = overrides[transaction.id] ?? getStoredCategory(transaction.id) ?? classifyTransaction(transaction)
           if (cat !== categoryFilter) return false
         }
+        if (query && !transaction.name.toLowerCase().includes(query)) return false
         return true
       }),
     )
-  }, [transactions, dateFrom, dateTo, categoryFilter, overrides])
+  }, [transactions, dateFrom, dateTo, categoryFilter, overrides, search])
 
   const allCategories = useMemo(() => {
     const expense = getAllExpenseCategories().map((def) => def.key)
@@ -114,6 +117,16 @@ export default function TransactionsPage() {
                 <RotateCcw className="h-4 w-4" />
               </Button>
             )}
+            <div className="relative">
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder={t("Search")}
+                className="h-9 w-[200px] rounded-md border bg-background pl-9 pr-3 text-sm placeholder:text-muted-foreground"
+              />
+            </div>
             <Select value={categoryFilter} onValueChange={setCategoryFilter}>
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder={t("All categories")} />
