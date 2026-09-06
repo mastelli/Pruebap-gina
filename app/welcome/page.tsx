@@ -271,9 +271,6 @@ export default function Welcome() {
                 </Link>
               </Button>
             </div>
-            <p className="mt-4 text-sm text-muted-foreground">
-              {t("14-day free trial · No credit card required")}
-            </p>
           </div>
         </div>
       </section>
