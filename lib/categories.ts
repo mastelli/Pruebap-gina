@@ -17,9 +17,9 @@ export const TRANSFER_KEYWORDS = ["transferencia", "traf"]
 // Traspasos entre cuentas propias: ni ingreso ni gasto, solo se
 // muestran en la grafica de Resumen junto a los gastos
 export const INTERNAL_TRANSFER_CATEGORY = "Internal Transfer"
-// Acepta "traspaso" y el marcador ^^ que el usuario anade al nombre
-// (p. ej. "Revolut^^") para marcar traslados entre cuentas propias
-export const INTERNAL_TRANSFER_KEYWORDS = ["traspaso", "^^"]
+// Acepta "traspaso" y los movimientos que empiezan por "Revolut**",
+// el marcador que usa el usuario para traslados entre cuentas propias
+export const INTERNAL_TRANSFER_KEYWORDS = ["traspaso", "revolut**", "^^"]
 
 export type TransactionCategory = string
 
