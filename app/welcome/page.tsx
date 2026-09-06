@@ -374,7 +374,7 @@ export default function Welcome() {
         </div>
       </section>
 
-      /* ======================= FAQ ======================= */}
+      {/* ======================= FAQ ======================= */}
       <section className="mx-auto max-w-3xl px-4 py-20 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-2xl text-center">
           <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">Preguntas frecuentes</h2>
