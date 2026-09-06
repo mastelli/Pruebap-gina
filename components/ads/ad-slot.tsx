@@ -16,7 +16,7 @@ interface AdSlotProps {
   className?: string
 }
 
-export function AdSlot({ slot, format = "auto", className = "" }: AdSlotProps) {
+export function AdSlot({ slot = "3096723540", format = "auto", className = "" }: AdSlotProps) {
   const client = process.env.NEXT_PUBLIC_ADSENSE_CLIENT
   const pushedRef = useRef(false)
 
