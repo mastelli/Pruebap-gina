@@ -87,6 +87,12 @@ export default function Welcome() {
               {t("Dashboard")}
             </Link>
             <Link
+              href="/analytics"
+              className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+            >
+              {t("Analytics")}
+            </Link>
+            <Link
               href="/investment"
               className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
             >
