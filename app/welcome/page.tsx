@@ -471,7 +471,7 @@ export default function Welcome() {
       {/* ======================= FINAL CTA ======================= */}
       <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
         <div
-          className="relative overflow-hidden rounded-2xl border border-border text-primary-foreground shadow-2xl"
+          className="relative overflow-hidden rounded-2xl border border-border text-white shadow-2xl"
           style={{ background: "linear-gradient(135deg, hsl(222 47% 9%), hsl(262 83% 13%) 55%, hsl(222 60% 6%))" }}
         >
           <div className="pointer-events-none absolute inset-0" aria-hidden>
@@ -483,9 +483,9 @@ export default function Welcome() {
               className="absolute -bottom-28 -left-16 h-72 w-72 rounded-full bg-violet-500/25 blur-3xl"
               style={{ animation: "blob-drift 20s ease-in-out infinite reverse" }}
             />
-            <div className="absolute -left-10 -top-16 h-96 w-96 rounded-full border border-primary-foreground/10" />
-            <div className="absolute -left-4 -top-36 h-64 w-64 rounded-full border border-primary-foreground/10" />
-            <div className="absolute inset-x-1/3 top-0 h-[1px] bg-gradient-to-r from-transparent via-primary-foreground/25 to-transparent" />
+            <div className="absolute -left-10 -top-16 h-96 w-96 rounded-full border border-white/10" />
+            <div className="absolute -left-4 -top-36 h-64 w-64 rounded-full border border-white/10" />
+            <div className="absolute inset-x-1/3 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/25 to-transparent" />
             <div className="absolute bottom-10 left-1/4 h-2 w-2 rounded-full bg-emerald-400/60" />
             <div className="absolute right-1/4 top-1/3 h-2 w-2 rounded-full bg-sky-400/60" />
             <div className="absolute left-1/5 bottom-1/3 h-1.5 w-1.5 rounded-full bg-violet-300/60" />
@@ -494,11 +494,11 @@ export default function Welcome() {
             <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
               Empieza a tomar mejores decisiones financieras hoy
             </h2>
-            <p className="mx-auto mt-4 max-w-xl text-lg text-primary-foreground/80">
+            <p className="mx-auto mt-4 max-w-xl text-lg text-white/80">
               Únete a miles de usuarios que ya controlan su futuro financiero con MakeItRight.
             </p>
             <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-              <Button size="lg" variant="secondary" className="min-w-[220px]" asChild>
+              <Button size="lg" className="min-w-[220px] bg-white text-slate-950 hover:bg-white/90" asChild>
                 <Link href="/sign-up">
                   Crear cuenta gratuita
                   <ArrowRight className="ml-2 h-4 w-4" />
