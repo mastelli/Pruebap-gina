@@ -4,7 +4,7 @@ import { LegalPage, ContactLink } from "@/components/legal-page"
 
 export default function PrivacyPage() {
   return (
-    <LegalPage title="Política de Privacidad" updated="6 de septiembre de 2026">
+    <LegalPage title="Política de Privacidad">
       <p>
         Esta política explica cómo MakeItRight recopila, utiliza y protege tus datos personales
         cuando usas nuestro sitio web y los servicios asociados.
@@ -25,8 +25,8 @@ export default function PrivacyPage() {
           </li>
           <li>
             <b>Datos de uso:</b> operaciones guardadas, datos introducidos en las calculadoras y el
-            panel, alertas configuradas, informes generados, páginas visitadas, información del
-            dispositivo y navegador, y dirección IP.
+            panel, alertas configuradas, páginas visitadas, información del dispositivo y
+            navegador, y dirección IP.
           </li>
           <li>
             <b>Datos de pago:</b> los pagos se procesan a través de un proveedor externo. No
@@ -44,7 +44,7 @@ export default function PrivacyPage() {
           <li>Prestar el servicio y gestionar tu cuenta (ejecución de un contrato).</li>
           <li>Procesar pagos y gestionar las suscripciones (ejecución de un contrato).</li>
           <li>Enviar correos transaccionales y, si las configuras, alertas (ejecución de un contrato).</li>
-          <li>Generar informes asistidos por IA y respuestas de chat basadas en tus consultas (ejecución de un contrato).</li>
+          <li>Respuestas de chat basadas en tus consultas (ejecución de un contrato).</li>
           <li>Analizar el uso y mejorar el producto (interés legítimo).</li>
           <li>Comunicaciones de marketing y cookies no esenciales, solo con tu consentimiento (consentimiento).</li>
           <li>Cumplir obligaciones legales, como facturación e impuestos (obligación legal).</li>
@@ -109,8 +109,7 @@ export default function PrivacyPage() {
       <Section title="10. Cambios en esta política">
         <p>
           Podemos actualizar esta política periódicamente. Los cambios sustanciales se notificarán a
-          través del sitio web o por correo electrónico. La fecha de "última actualización" en la
-          parte superior de esta página refleja la versión vigente.
+          través del sitio web o por correo electrónico.
         </p>
       </Section>
       <Section title="11. Contacto">
