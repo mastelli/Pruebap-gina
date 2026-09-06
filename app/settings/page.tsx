@@ -7,7 +7,6 @@ import { Switch } from "@/components/ui/switch"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { UserAvatar } from "@/components/user-avatar"
-import { ageFromBirthDate } from "@/lib/auth"
 import { useUser } from "@clerk/nextjs"
 import { useState } from "react"
 import { toast } from "sonner"
@@ -143,22 +142,7 @@ export default function SettingsPage() {
                   onChange={(e) => updateSettings({ email: e.target.value })}
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="birth-date">{t("Date of Birth")}</Label>
-                <Input
-                  id="birth-date"
-                  type="date"
-                  value={settings.birthDate ?? ""}
-                  onChange={(e) => updateSettings({ birthDate: e.target.value })}
-                />
-                <p className="text-sm text-muted-foreground">
-                  {t("Age")}:{" "}
-                  {ageFromBirthDate(settings.birthDate ?? "") !== null
-                    ? ageFromBirthDate(settings.birthDate!)
-                    : "—"}
-                </p>
-              </div>
-              <Button onClick={() => { updateSettings({ avatar: settings.avatar, fullName: settings.fullName, email: settings.email, birthDate: settings.birthDate ?? "" }); toast.success(t("Account settings saved successfully")) }}>
+              <Button onClick={() => { updateSettings({ avatar: settings.avatar, fullName: settings.fullName, email: settings.email }); toast.success(t("Account settings saved successfully")) }}>
                 {t("Save Account Settings")}
               </Button>
             </div>

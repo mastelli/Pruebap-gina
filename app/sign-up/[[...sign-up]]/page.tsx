@@ -44,7 +44,11 @@ export default function SignUpPage() {
             },
           }}
         />
-        <p className="mt-6 flex items-center gap-1.5 text-xs text-muted-foreground">
+        <p className="mt-6 max-w-md px-4 text-center text-xs leading-relaxed text-muted-foreground">
+          Al registrarse en la página, el usuario declara y acepta que es mayor de 18 años y que
+          cumple con los requisitos legales necesarios para utilizar el servicio.
+        </p>
+        <p className="mt-4 flex items-center gap-1.5 text-xs text-muted-foreground">
           <Lock className="h-3.5 w-3.5" />
           Conexión cifrada de extremo a extremo
         </p>

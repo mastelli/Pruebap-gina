@@ -998,7 +998,7 @@ const translations: Record<string, string> = {
     "Aplicamos medidas técnicas y organizativas razonables —entre ellas cifrado en tránsito, controles de acceso y contraseñas cifradas— para proteger tus datos. No obstante, ningún método de transmisión o almacenamiento es seguro al 100%.",
   "9. Minors": "9. Menores",
   "Privacy minors text":
-    "El servicio no está dirigido a menores de 18 años y no recopilamos conscientemente datos de menores.",
+    "El servicio no está dirigido a menores de 18 años y no recopilamos conscientemente datos de menores. Al registrarse en la página, el usuario declara y acepta que es mayor de 18 años y que cumple con los requisitos legales necesarios para utilizar el servicio.",
   "10. Changes to this policy": "10. Cambios en esta política",
   "Privacy changes text":
     "Podemos actualizar esta política periódicamente. Los cambios sustanciales se notificarán a través del sitio web o por correo electrónico.",
@@ -1255,7 +1255,7 @@ const englishOverrides: Record<string, string> = {
   "Privacy security text":
     "We apply reasonable technical and organizational measures — including encryption in transit, access controls and encrypted passwords — to protect your data. However, no method of transmission or storage is 100% secure.",
   "Privacy minors text":
-    "The service is not directed to people under 18, and we do not knowingly collect data from minors.",
+    "The service is not directed to people under 18, and we do not knowingly collect data from minors. By registering on the site, you declare and accept that you are over 18 years old and meet the legal requirements necessary to use the service.",
   "Privacy changes text":
     "We may update this policy periodically. Substantial changes will be notified through the website or by email.",
   "Privacy contact text": "For any questions about this policy or about your data, contact us",
