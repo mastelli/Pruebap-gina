@@ -328,12 +328,15 @@ export default function Welcome() {
               </div>
               <h3 className="text-lg font-semibold">Pro</h3>
               <div className="mt-3 flex items-baseline gap-1">
-                <span className="text-4xl font-bold">2,49€</span>
+                <span className="text-4xl font-bold">2,50€</span>
                 <span className="text-muted-foreground">/mes</span>
               </div>
               <p className="mt-1 text-xs text-muted-foreground">
-                Un solo pago anual de 29,88€
+                Un solo pago anual de 29,99€
               </p>
+              <span className="mt-2 inline-flex w-fit items-center rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+                Ahorra 18€ al año
+              </span>
               <ul className="mt-6 flex-1 space-y-3">
                 {[
                   "Todas las funciones Estándar",
