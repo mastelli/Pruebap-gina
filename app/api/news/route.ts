@@ -1,9 +1,8 @@
 import { NextResponse } from "next/server"
 
-// Fuentes de noticias economicas internacionales y espanolas que se prueban en orden
-// hasta encontrar una que responda con articulos
+// Fuentes de noticias economicas internacionales y espanolas
 const FEEDS = [
-  // Espanolas (sin El Pais)
+  // Espanolas
   "https://www.expansion.com/rss/economia.html",
   "https://www.eleconomista.es/rss/rss-economia.php",
   // Internacionales (ingles)
@@ -22,11 +21,11 @@ export interface NewsItem {
   link: string
   date?: string
   description?: string
+  source?: string
 }
 
 interface CachedFeed {
   at: number
-  source: string
   items: NewsItem[]
 }
 
@@ -35,11 +34,11 @@ let cache: CachedFeed | null = null
 function decodeXml(value: string): string {
   return value
     .replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, "$1")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
-    .replace(/&amp;/g, "&")
+    .replace(/</g, "<")
+    .replace(/>/g, ">")
+    .replace(/"/g, '"')
+    .replace(/'/g, "'")
+    .replace(/&/g, "&")
 }
 
 function stripHtml(value: string): string {
@@ -51,7 +50,7 @@ function extractTag(block: string, name: string): string | undefined {
   return match ? decodeXml(match[1]).trim() : undefined
 }
 
-function parseFeed(xml: string): NewsItem[] {
+function parseFeed(xml: string, sourceUrl: string): NewsItem[] {
   const items: NewsItem[] = []
   const blocks = xml.match(/<(item|entry)[^>]*>([\s\S]*?)<\/(item|entry)>/gi) ?? []
 
@@ -59,7 +58,6 @@ function parseFeed(xml: string): NewsItem[] {
     const title = extractTag(block, "title")
     if (!title) continue
 
-    // enlaces: <link>URL</link> (RSS) o <link href="URL"/> (Atom)
     let link: string | undefined
     const linkInline = block.match(/<link[^>]*href="([^"]+)"/i)
     const linkTag = extractTag(block, "link")
@@ -73,6 +71,7 @@ function parseFeed(xml: string): NewsItem[] {
       link: link ?? "#",
       date: pubDate ? new Date(pubDate).toISOString() : undefined,
       description: description ? stripHtml(decodeXml(description)) : undefined,
+      source: sourceUrl,
     })
   }
 
@@ -91,33 +90,54 @@ async function fetchFeed(url: string, signal: AbortSignal): Promise<string> {
   return res.text()
 }
 
+function deduplicateItems(items: NewsItem[]): NewsItem[] {
+  const seen = new Set<string>()
+  return items.filter((item) => {
+    const key = item.title.toLowerCase().replace(/\s+/g, " ")
+    if (seen.has(key)) return false
+    seen.add(key)
+    return true
+  })
+}
+
 export async function GET() {
   if (cache && Date.now() - cache.at < CACHE_TTL_MS) {
     return NextResponse.json({
-      source: cache.source,
       items: cache.items,
       cachedAt: cache.at,
     })
   }
 
-  for (const url of FEEDS) {
-    try {
-      const controller = new AbortController()
-      const timeout = setTimeout(() => controller.abort(), 8000)
-      try {
-        const xml = await fetchFeed(url, controller.signal)
-        const items = parseFeed(xml)
-        if (items.length > 0) {
-          cache = { at: Date.now(), source: url, items }
-          return NextResponse.json({ source: url, items, cachedAt: cache.at })
-        }
-      } finally {
-        clearTimeout(timeout)
-      }
-    } catch {
-      // pasa a la siguiente fuente
+  const controllers = FEEDS.map(() => new AbortController())
+  const timeouts = controllers.map((c) => setTimeout(() => c.abort(), 8000))
+
+  const results = await Promise.allSettled(
+    FEEDS.map((url, i) =>
+      fetchFeed(url, controllers[i].signal)
+        .then((xml) => parseFeed(xml, url))
+        .catch(() => [])
+    )
+  )
+
+  timeouts.forEach(clearTimeout)
+
+  // Combinar todos los items de todas las fuentes exitosas
+  const allItems: NewsItem[] = []
+  for (const result of results) {
+    if (result.status === "fulfilled") {
+      allItems.push(...result.value)
     }
   }
 
-  return NextResponse.json({ source: null, items: [], cachedAt: Date.now() })
+  // Ordenar por fecha (mas recientes primero) y deduplicar
+  const sorted = allItems
+    .filter((item) => item.link !== "#")
+    .sort((a, b) => (b.date ?? "").localeCompare(a.date ?? ""))
+  const unique = deduplicateItems(sorted).slice(0, 20)
+
+  if (unique.length > 0) {
+    cache = { at: Date.now(), items: unique }
+  }
+
+  return NextResponse.json({ items: unique, cachedAt: cache?.at ?? Date.now() })
 }
