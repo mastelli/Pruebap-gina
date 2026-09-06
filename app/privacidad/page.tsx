@@ -5,60 +5,118 @@ import { LegalPage, ContactLink } from "@/components/legal-page"
 export default function PrivacyPage() {
   return (
     <LegalPage title="Política de Privacidad" updated="6 de septiembre de 2026">
-      <Section title="1. Introducción">
+      <p>
+        Esta política explica cómo MakeItRight recopila, utiliza y protege tus datos personales
+        cuando usas nuestro sitio web y los servicios asociados.
+      </p>
+
+      <Section title="1. Responsable del tratamiento">
         <p>
-          En MakeItRight nos tomamos muy en serio tu privacidad. Esta política explica qué
-          datos recopilamos, cómo los usamos y qué derechos tienes sobre ellos cuando utilizas
-          nuestra plataforma y sus servicios.
+          El responsable del tratamiento es MakeItRight. Los datos de registro de la sociedad están
+          disponibles bajo solicitud; puedes pedirlos escribiéndonos a través del enlace de{" "}
+          <ContactLink />.
         </p>
       </Section>
-      <Section title="2. Datos que recopilamos">
-        <p>
-          Recopilamos la información mínima necesaria para ofrecerte el servicio:
-        </p>
-        <ul className="mt-3 space-y-2">
+      <Section title="2. Qué datos recopilamos">
+        <ul className="space-y-2">
           <li>
-            <b>Datos de cuenta:</b> nombre, apellidos y dirección de correo electrónico que usas
-            para registrarte e iniciar sesión.
+            <b>Datos de cuenta:</b> nombre, correo electrónico, teléfono (opcional), contraseña
+            (almacenada cifrada), idioma y preferencias de región.
           </li>
           <li>
-            <b>Datos financieros que introduces:</b> transacciones, saldos, inversiones y cualquier
-            otra información que añadas voluntariamente en la aplicación.
+            <b>Datos de uso:</b> operaciones guardadas, datos introducidos en las calculadoras y el
+            panel, alertas configuradas, informes generados, páginas visitadas, información del
+            dispositivo y navegador, y dirección IP.
           </li>
           <li>
-            <b>Datos de uso:</b> páginas visitadas, calculadoras utilizadas y preferencias de
-            configuración para mejorar la experiencia.
+            <b>Datos de pago:</b> los pagos se procesan a través de un proveedor externo. No
+            almacenamos los números completos de tarjeta; recibimos únicamente el estado de la
+            suscripción, el plan y los metadatos de facturación.
+          </li>
+          <li>
+            <b>Comunicaciones:</b> mensajes que nos envías por soporte, por el asistente de chat o
+            en los comentarios de herramientas compartidas.
           </li>
         </ul>
       </Section>
-      <Section title="3. Cómo usamos tus datos">
+      <Section title="3. Por qué tratamos tus datos y base legal">
+        <ul className="space-y-2">
+          <li>Prestar el servicio y gestionar tu cuenta (ejecución de un contrato).</li>
+          <li>Procesar pagos y gestionar las suscripciones (ejecución de un contrato).</li>
+          <li>Enviar correos transaccionales y, si las configuras, alertas (ejecución de un contrato).</li>
+          <li>Generar informes asistidos por IA y respuestas de chat basadas en tus consultas (ejecución de un contrato).</li>
+          <li>Analizar el uso y mejorar el producto (interés legítimo).</li>
+          <li>Comunicaciones de marketing y cookies no esenciales, solo con tu consentimiento (consentimiento).</li>
+          <li>Cumplir obligaciones legales, como facturación e impuestos (obligación legal).</li>
+        </ul>
+      </Section>
+      <Section title="4. Con quién compartimos tus datos">
         <p>
-          Utilizamos tus datos exclusivamente para prestar el servicio: mostrarte tu patrimonio y
-          movimientos, sincronizar tu información entre dispositivos, mejorar nuestros productos y
-          ofrecerte soporte técnico.{" "}
-          <b>Nunca vendemos tus datos a terceros</b> y no los compartimos con anunciantes.
+          Compartimos datos con proveedores que nos ayudan a operar, limitado a lo que cada uno
+          necesita para su función:
+        </p>
+        <ul className="mt-3 space-y-2">
+          <li><b>Supabase</b> — base de datos, autenticación y almacenamiento.</li>
+          <li><b>Clerk</b> — autenticación de usuarios.</li>
+          <li><b>Stripe</b> — procesamiento de pagos y facturación de suscripciones.</li>
+          <li><b>Google (Gemini)</b> — generación de informes asistidos por IA y chat.</li>
+          <li><b>Vercel y Vercel Analytics</b> — alojamiento y analítica del sitio.</li>
+          <li><b>Sentry</b> — monitorización de errores.</li>
+        </ul>
+        <p className="mt-3">
+          Exigimos a estos proveedores que protejan tus datos conforme a sus propios compromisos de
+          privacidad y, cuando corresponde, mediante cláusulas contractuales tipo.{" "}
+          <b>No vendemos tus datos personales.</b>
         </p>
       </Section>
-      <Section title="4. Almacenamiento y seguridad">
+      <Section title="5. Transferencias internacionales">
         <p>
-          Tus datos se almacenan con cifrado tanto en tránsito como en reposo. Limitamos el acceso
-          a la información al personal estrictamente necesario y aplicamos los estándares de
-          seguridad más exigentes de la industria.
+          Algunos de los proveedores podrían tratar datos fuera del Espacio Económico Europeo, por
+          ejemplo en Estados Unidos. En esos casos nos apoyamos en garantías adecuadas, como las
+          Cláusulas Contractuales Tipo de la UE o la participación del proveedor en un marco de
+          protección de datos aprobado (como el Data Privacy Framework UE-EE. UU.).
         </p>
       </Section>
-      <Section title="5. Tus derechos">
+      <Section title="6. Cuánto tiempo conservamos tus datos">
         <p>
-          De acuerdo con la legislación de protección de datos (RGPD), tienes derecho a acceder,
-          rectificar, suprimir, limitar el tratamiento y solicitar la portabilidad de tus datos. Para
-          ejercer cualquiera de estos derechos, escríbenos{" "}
-          <ContactLink />. También puedes eliminar tu cuenta y todos sus datos en
-          cualquier momento desde los ajustes de la aplicación.
+          Conservamos los datos de tu cuenta mientras siga activa y durante un plazo razonable
+          posterior para cumplir obligaciones legales, fiscales y de resolución de controversias.
+          Puedes solicitar su eliminación anticipada; consulta la sección "Tus derechos".
         </p>
       </Section>
-      <Section title="6. Contacto">
+      <Section title="7. Tus derechos">
         <p>
-          Si tienes dudas sobre esta política o sobre el tratamiento de tus datos personales, puedes
-          contactarnos <ContactLink />.
+          Conforme a la normativa aplicable, tienes derecho a acceder, rectificar, suprimir, limitar
+          u oponerte al tratamiento de tus datos, a la portabilidad de los mismos y a retirar tu
+          consentimiento en cualquier momento. También puedes presentar una reclamación ante tu
+          autoridad de protección de datos (en España, la AEPD). Para ejercer cualquiera de estos
+          derechos, escríbenos <ContactLink />.
+        </p>
+      </Section>
+      <Section title="8. Seguridad">
+        <p>
+          Aplicamos medidas técnicas y organizativas razonables —entre ellas cifrado en tránsito,
+          controles de acceso y contraseñas cifradas— para proteger tus datos. No obstante, ningún
+          método de transmisión o almacenamiento es seguro al 100%.
+        </p>
+      </Section>
+      <Section title="9. Menores">
+        <p>
+          El servicio no está dirigido a menores de 18 años y no recopilamos conscientemente datos
+          de menores.
+        </p>
+      </Section>
+      <Section title="10. Cambios en esta política">
+        <p>
+          Podemos actualizar esta política periódicamente. Los cambios sustanciales se notificarán a
+          través del sitio web o por correo electrónico. La fecha de "última actualización" en la
+          parte superior de esta página refleja la versión vigente.
+        </p>
+      </Section>
+      <Section title="11. Contacto">
+        <p>
+          Para cualquier consulta sobre esta política o sobre tus datos, contáctanos{" "}
+          <ContactLink />.
         </p>
       </Section>
     </LegalPage>
