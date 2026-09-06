@@ -1070,6 +1070,28 @@ const translations: Record<string, string> = {
     "Podemos actualizar esta Política de Cookies periódicamente y te lo notificaremos a través del sitio web o por correo electrónico.",
   "6. Contact": "6. Contacto",
   "Cookies contact text": "Para cualquier consulta sobre esta Política de Cookies, contáctanos",
+
+  // Centro de ayuda
+  "Help Center": "Centro de ayuda",
+  "Tell us your question or issue and we will get back to you as soon as possible.":
+    "Cuéntanos tu consulta o problema y te responderemos lo antes posible.",
+  "Send us a message": "Envíanos un mensaje",
+  "Fill in the form and your message will reach us directly.":
+    "Rellena el formulario y tu mensaje nos llegará directamente.",
+  Name: "Nombre",
+  "Your name": "Tu nombre",
+  "Your email": "Tu correo",
+  "you@email.com": "tu@correo.com",
+  Subject: "Asunto",
+  "What is this about?": "¿Sobre qué nos escribes?",
+  Message: "Mensaje",
+  "Write your question here...": "Escribe aquí tu consulta…",
+  "Sending...": "Enviando…",
+  "Send message": "Enviar mensaje",
+  "Message sent! We will get back to you as soon as possible.":
+    "¡Mensaje enviado! Te responderemos lo antes posible.",
+  "The message could not be sent. Please try again in a few minutes.":
+    "No se ha podido enviar el mensaje. Inténtalo de nuevo en unos minutos.",
 }
 
 interface LanguageContextType {

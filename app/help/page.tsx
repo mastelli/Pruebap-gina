@@ -7,8 +7,10 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { useLanguage } from "@/lib/i18n"
 
 export default function HelpPage() {
+  const { t } = useLanguage()
   const [name, setName] = useState("")
   const [email, setEmail] = useState("")
   const [subject, setSubject] = useState("")
@@ -37,59 +39,59 @@ export default function HelpPage() {
 
   return (
     <div className="mx-auto max-w-xl">
-      <h1 className="text-2xl font-bold tracking-tight">Centro de ayuda</h1>
+      <h1 className="text-2xl font-bold tracking-tight">{t("Help Center")}</h1>
       <p className="mt-2 text-sm text-muted-foreground">
-        Cuéntanos tu consulta o problema y te responderemos lo antes posible.
+        {t("Tell us your question or issue and we will get back to you as soon as possible.")}
       </p>
 
       <Card className="mt-6">
         <CardHeader>
-          <CardTitle>Envíanos un mensaje</CardTitle>
+          <CardTitle>{t("Send us a message")}</CardTitle>
           <CardDescription>
-            Rellena el formulario y tu mensaje nos llegará directamente.
+            {t("Fill in the form and your message will reach us directly.")}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="name">Nombre</Label>
-                <Input id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Tu nombre" required />
+                <Label htmlFor="name">{t("Name")}</Label>
+                <Input id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder={t("Your name")} required />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="email">Tu correo</Label>
-                <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="tu@correo.com" required />
+                <Label htmlFor="email">{t("Your email")}</Label>
+                <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder={t("you@email.com")} required />
               </div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="subject">Asunto</Label>
-              <Input id="subject" value={subject} onChange={(e) => setSubject(e.target.value)} placeholder="¿Sobre qué nos escribes?" />
+              <Label htmlFor="subject">{t("Subject")}</Label>
+              <Input id="subject" value={subject} onChange={(e) => setSubject(e.target.value)} placeholder={t("What is this about?")} />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="message">Mensaje</Label>
-              <Textarea id="message" value={message} onChange={(e) => setMessage(e.target.value)} placeholder="Escribe aquí tu consulta…" rows={5} required />
+              <Label htmlFor="message">{t("Message")}</Label>
+              <Textarea id="message" value={message} onChange={(e) => setMessage(e.target.value)} placeholder={t("Write your question here...")} rows={5} required />
             </div>
             <Button type="submit" className="w-full" disabled={status === "sending"}>
               {status === "sending" ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Enviando…
+                  {t("Sending...")}
                 </>
               ) : (
                 <>
                   <Send className="mr-2 h-4 w-4" />
-                  Enviar mensaje
+                  {t("Send message")}
                 </>
               )}
             </Button>
             {status === "sent" && (
               <p className="text-center text-sm text-emerald-600 dark:text-emerald-400">
-                ¡Mensaje enviado! Te responderemos lo antes posible.
+                {t("Message sent! We will get back to you as soon as possible.")}
               </p>
             )}
             {status === "error" && (
               <p className="text-center text-sm text-destructive">
-                No se ha podido enviar el mensaje. Inténtalo de nuevo en unos minutos.
+                {t("The message could not be sent. Please try again in a few minutes.")}
               </p>
             )}
           </form>
