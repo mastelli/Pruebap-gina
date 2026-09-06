@@ -275,7 +275,7 @@ export default function Welcome() {
             </p>
           </div>
 
-          <div className="mt-12 grid gap-6 md:grid-cols-2">
+          <div className="mt-12 grid gap-6 md:grid-cols-3">
             <div className="flex flex-col rounded-xl border border-border bg-card p-6 shadow-sm">
               <h3 className="text-lg font-semibold">Estándar</h3>
               <div className="mt-3 flex items-baseline gap-1">
@@ -297,13 +297,10 @@ export default function Welcome() {
               </Button>
             </div>
 
-            <div className="relative flex flex-col rounded-xl border-2 border-primary bg-card p-6 shadow-lg">
-              <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                <Badge>Más popular</Badge>
-              </div>
-              <h3 className="text-lg font-semibold">Pro</h3>
+            <div className="flex flex-col rounded-xl border border-border bg-card p-6 shadow-sm">
+              <h3 className="text-lg font-semibold">Premium</h3>
               <div className="mt-3 flex items-baseline gap-1">
-                <span className="text-4xl font-bold">9,90€</span>
+                <span className="text-4xl font-bold">3,99€</span>
                 <span className="text-muted-foreground">/mes</span>
               </div>
               <ul className="mt-6 flex-1 space-y-3">
@@ -312,7 +309,37 @@ export default function Welcome() {
                   "Análisis y diagnóstico avanzado",
                   "Cartera en tiempo real",
                   "Informes y exportación",
-                  "Miembro de familia (máx. 5)",
+                  "Soporte prioritario",
+                ].map((f) => (
+                  <li key={f} className="flex items-start gap-2 text-sm text-muted-foreground">
+                    <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                    {f}
+                  </li>
+                ))}
+              </ul>
+              <Button className="mt-8" asChild>
+                <Link href="/sign-up">Empezar ahora</Link>
+              </Button>
+            </div>
+
+            <div className="relative flex flex-col rounded-xl border-2 border-primary bg-card p-6 shadow-lg">
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                <Badge>Más popular</Badge>
+              </div>
+              <h3 className="text-lg font-semibold">Pro</h3>
+              <div className="mt-3 flex items-baseline gap-1">
+                <span className="text-4xl font-bold">2,49€</span>
+                <span className="text-muted-foreground">/mes</span>
+              </div>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Un solo pago anual de 29,88€
+              </p>
+              <ul className="mt-6 flex-1 space-y-3">
+                {[
+                  "Todas las funciones Estándar",
+                  "Análisis y diagnóstico avanzado",
+                  "Cartera en tiempo real",
+                  "Informes y exportación",
                   "Soporte prioritario",
                 ].map((f) => (
                   <li key={f} className="flex items-start gap-2 text-sm text-muted-foreground">
