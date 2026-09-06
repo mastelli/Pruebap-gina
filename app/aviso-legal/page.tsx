@@ -4,52 +4,73 @@ import { LegalPage, ContactLink } from "@/components/legal-page"
 
 export default function LegalNoticePage() {
   return (
-    <LegalPage title="Aviso Legal">
-      <Section title="1. Identificación del responsable">
+    <LegalPage title="Aviso Legal" updated="22 de agosto de 2026">
+      <p>
+        Este Aviso Legal, junto con nuestra Política de Privacidad, nuestros Términos de Servicio y
+        nuestra Política de Cookies, se aplica al sitio web de MakeItRight (el "Sitio Web") y al
+        servicio MakeItRight.
+      </p>
+
+      <Section title="1. Identificación del prestador">
         <p>
-          Este sitio web es operado por <b>MakeItRight</b>, plataforma de gestión de finanzas
-          personales, con domicilio en España. Puedes ponerte en contacto con nosotros a través del{" "}
-          <ContactLink />.
-        </p>
-      </Section>
-      <Section title="2. Objeto">
-        <p>
-          El presente aviso legal regula el acceso y el uso del sitio web de MakeItRight, que ofrece
-          herramientas de análisis financiero, calculadoras y contenido educativo para la gestión de
-          finanzas personales.
-        </p>
-      </Section>
-      <Section title="3. Responsabilidad">
-        <p>
-          Los contenidos publicados tienen carácter meramente informativo y educativo.{" "}
-          <b>No constituyen asesoramiento financiero, fiscal, legal ni de inversión</b>. La
-          utilización de la plataforma y las decisiones que se deriven de ella son responsabilidad
-          exclusiva del usuario.
+          El Sitio Web y el servicio MakeItRight son operados por MakeItRight ("nosotros" o
+          "nuestro").
         </p>
         <p className="mt-3">
-          MakeItRight no garantiza la absoluta disponibilidad, exactitud o actualidad de los
-          servicios, y no se hace responsable de los daños derivados del mal uso de la plataforma o
-          de interrupciones del servicio por causas ajenas a su control.
+          Los datos corporativos completos (número de registro y domicilio social) están disponibles
+          bajo solicitud — escríbenos <ContactLink /> y te los enviaremos.
+        </p>
+      </Section>
+      <Section title="2. Objeto del Sitio Web">
+        <p>
+          MakeItRight ofrece una plataforma de gestión de finanzas personales e inversiones, que
+          incluye control de patrimonio, análisis de ingresos y gastos, calculadoras financieras
+          (interés compuesto, alquiler de inmuebles y acciones) e informes asistidos por IA,
+          disponible mediante suscripción de pago.
+        </p>
+      </Section>
+      <Section title="3. Condiciones de acceso y uso">
+        <p>
+          El acceso al Sitio Web es en general gratuito; determinadas funcionalidades requieren
+          registro y una suscripción activa, tal como se describe en nuestros Términos de Servicio.
+          Al usar el Sitio Web, aceptas utilizarlo de buena fe y conforme a los términos aplicables.
         </p>
       </Section>
       <Section title="4. Propiedad intelectual">
         <p>
-          Los contenidos, marcas, logos y diseño del sitio son propiedad de MakeItRight o de sus
-          titulares legítimos. Queda prohibida su reproducción, distribución o transformación sin
-          autorización previa por escrito.
+          Todo el contenido del Sitio Web —software, diseño, textos, gráficos, logotipos y marcas—
+          es propiedad nuestra o de nuestros licenciantes y está protegido por la legislación de
+          propiedad intelectual. Ninguna parte puede reproducirse, distribuirse o utilizarse
+          comercialmente sin nuestro consentimiento previo por escrito, salvo lo expresamente
+          permitido en nuestros Términos de Servicio.
         </p>
       </Section>
-      <Section title="5. Legislación aplicable y jurisdicción">
+      <Section title="5. Responsabilidad">
         <p>
-          El presente aviso legal se rige por la legislación española. Para cualquier controversia
-          derivada del uso de esta plataforma, las partes se someten a los juzgados y tribunales del
-          domicilio del responsable.
+          Los datos financieros, de mercado y demográficos mostrados en el Sitio Web pueden proceder,
+          en parte, de fuentes públicas y de terceros. Estos datos pueden ser incompletos, estar
+          desactualizados o contener errores. Todo el contenido, incluidos los informes generados con
+          IA, se ofrece con fines meramente informativos y no constituye asesoramiento financiero,
+          legal, fiscal ni de inversión. No garantizamos la exactitud, integridad ni actualidad de
+          los datos mostrados.
         </p>
       </Section>
-      <Section title="6. Contacto">
+      <Section title="6. Enlaces a sitios de terceros">
         <p>
-          Para cualquier consulta sobre este aviso legal, puedes escribirnos{" "}
-          <ContactLink />.
+          El Sitio Web puede contener enlaces a sitios web de terceros. No nos hacemos responsables
+          del contenido, exactitud o prácticas de dichos sitios.
+        </p>
+      </Section>
+      <Section title="7. Legislación aplicable y jurisdicción">
+        <p>
+          Este Aviso Legal se rige por la legislación española, sin perjuicio de las normas
+          imperativas de protección de los consumidores de tu país de residencia que puedan resultar
+          aplicables si tienes la condición de consumidor conforme al Derecho de la UE.
+        </p>
+      </Section>
+      <Section title="8. Contacto">
+        <p>
+          Para cualquier consulta sobre este Aviso Legal, contáctanos <ContactLink />.
         </p>
       </Section>
     </LegalPage>
