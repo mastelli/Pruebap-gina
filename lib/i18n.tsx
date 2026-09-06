@@ -1092,6 +1092,19 @@ const translations: Record<string, string> = {
     "¡Mensaje enviado! Te responderemos lo antes posible.",
   "The message could not be sent. Please try again in a few minutes.":
     "No se ha podido enviar el mensaje. Inténtalo de nuevo en unos minutos.",
+
+  // Panel principal (Dashboard)
+  "This month": "Este mes",
+  "Last month": "El mes pasado",
+  "Expenses this month": "Gastos del mes",
+  "Income this month": "Ingresos del mes",
+  "Total debt": "Deuda total",
+  debts: "deudas",
+  "Quick actions": "Acciones rápidas",
+  estimated: "estimado",
+  "Open analytics": "Abrir análisis",
+  "Need to understand your numbers?": "¿Necesitas entender tus números?",
+  "GenAI Financial Advisor": "Asesor Financiero GenAI",
 }
 
 interface LanguageContextType {

@@ -1,7 +1,7 @@
 "use client"
 
 import { useLanguage } from "@/lib/i18n"
-import { BusinessMetrics } from "@/components/business-metrics"
+import { DashboardOverview } from "@/components/dashboard-overview"
 
 export default function InicioPage() {
   const { t } = useLanguage()
@@ -12,7 +12,7 @@ export default function InicioPage() {
         <h1 className="text-2xl font-bold tracking-tight">{t("Dashboard")}</h1>
         <p className="text-sm text-muted-foreground">{t("Accounts Overview")}</p>
       </div>
-      <BusinessMetrics />
+      <DashboardOverview />
     </div>
   )
 }
