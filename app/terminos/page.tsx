@@ -6,8 +6,8 @@ export default function TermsPage() {
   return (
     <LegalPage title="Términos de Servicio">
       <p>
-        Estos Términos de Servicio ("Términos") rigen el uso de MakeItRight, operado por MakeItRight
-        ("nosotros"). Al crear una cuenta o utilizar el servicio, aceptas estos Términos.
+        Estos Términos de Servicio ("Términos") rigen el uso de MakeItRight, operado por MakeItRight.
+        Al crear una cuenta o utilizar el servicio, aceptas estos Términos.
       </p>
 
       <Section title="1. Descripción del servicio">
