@@ -13,7 +13,6 @@ import {
   Landmark,
   Globe,
   Smartphone,
-  Star,
   Menu,
   X,
   CheckCircle2,
@@ -218,7 +217,6 @@ export default function Welcome() {
                 "Interés compuesto con aportaciones periódicas",
                 "Rentabilidad real de propiedades en alquiler",
                 "Análisis fundamental de acciones con objetivo de precio",
-                "Evaluación de bonos y renta fija",
               ].map((feature) => (
                 <li key={feature} className="flex items-start gap-3">
                   <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
@@ -267,70 +265,19 @@ export default function Welcome() {
         </div>
       </section>
 
-      {/* ======================= TESTIMONIALS ======================= */}
-      <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-2xl text-center">
-          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-            Lo que dicen nuestros usuarios
-          </h2>
-        </div>
-        <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {[
-            {
-              quote:
-                "Por fin una herramienta que une mis cuentas, mis inversiones y mis cálculos. He dejado de usar tres aplicaciones distintas.",
-              name: "Carlos M.",
-              role: "Inversor particular",
-            },
-            {
-              quote:
-                "La calculadora de inmuebles me ayudó a decidir no comprar un piso que únicamente habría perdido dinero.",
-              name: "Elena R.",
-              role: "Propietaria y gestora",
-            },
-            {
-              quote:
-                "El diagnóstico financiero automático es oro. Me señala problemas que ni mis números me decían.",
-              name: "Javier T.",
-              role: "Autónomo",
-            },
-          ].map(({ quote, name, role }) => (
-            <div key={name} className="flex flex-col justify-between rounded-xl border border-border bg-card p-6 shadow-sm">
-              <div>
-                <div className="flex gap-1 text-amber-500">
-                  {Array.from({ length: 5 }).map((_, i) => (
-                    <Star key={i} className="h-4 w-4 fill-current" />
-                  ))}
-                </div>
-                <p className="mt-4 text-sm leading-relaxed text-muted-foreground">“{quote}”</p>
-              </div>
-              <div className="mt-6 flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary">
-                  {name.charAt(0)}
-                </div>
-                <div>
-                  <div className="text-sm font-semibold">{name}</div>
-                  <div className="text-xs text-muted-foreground">{role}</div>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
       {/* ======================= PRICING ======================= */}
       <section className="border-y border-border/60 bg-card/40">
         <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-2xl text-center">
-            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">Precios sencillos</h2>
+            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">Planes</h2>
             <p className="mt-4 text-lg text-muted-foreground">
               Empieza gratis y escala cuando lo necesites.
             </p>
           </div>
 
-          <div className="mt-12 grid gap-6 md:grid-cols-3">
+          <div className="mt-12 grid gap-6 md:grid-cols-2">
             <div className="flex flex-col rounded-xl border border-border bg-card p-6 shadow-sm">
-              <h3 className="text-lg font-semibold">Gratis</h3>
+              <h3 className="text-lg font-semibold">Estándar</h3>
               <div className="mt-3 flex items-baseline gap-1">
                 <span className="text-4xl font-bold">0€</span>
                 <span className="text-muted-foreground">/mes</span>
@@ -361,7 +308,7 @@ export default function Welcome() {
               </div>
               <ul className="mt-6 flex-1 space-y-3">
                 {[
-                  "Todo lo del plan Gratis",
+                  "Todas las funciones Estándar",
                   "Análisis y diagnóstico avanzado",
                   "Cartera en tiempo real",
                   "Informes y exportación",
@@ -376,31 +323,6 @@ export default function Welcome() {
               </ul>
               <Button className="mt-8" asChild>
                 <Link href="/sign-up">Empezar ahora</Link>
-              </Button>
-            </div>
-
-            <div className="flex flex-col rounded-xl border border-border bg-card p-6 shadow-sm">
-              <h3 className="text-lg font-semibold">Familiar</h3>
-              <div className="mt-3 flex items-baseline gap-1">
-                <span className="text-4xl font-bold">19,90€</span>
-                <span className="text-muted-foreground">/mes</span>
-              </div>
-              <ul className="mt-6 flex-1 space-y-3">
-                {[
-                  "Todo lo del plan Pro",
-                  "Hasta 10 miembros",
-                  "Resúmenes compartidos",
-                  "Permisos granulares",
-                  "Gestión de invitaciones",
-                ].map((f) => (
-                  <li key={f} className="flex items-start gap-2 text-sm text-muted-foreground">
-                    <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                    {f}
-                  </li>
-                ))}
-              </ul>
-              <Button variant="outline" className="mt-8" asChild>
-                <Link href="/sign-up">Elegir plan</Link>
               </Button>
             </div>
           </div>
