@@ -479,7 +479,7 @@ export default function Welcome() {
                 <span className="text-muted-foreground">{t("/month")}</span>
               </div>
               <ul className="mt-6 flex-1 space-y-3">
-                {[t("Unlimited calculators"), t("Basic net worth dashboard"), t("1 synced account"), t("Email support")].map(
+                {[t("Unlimited calculators"), t("Basic net worth dashboard"), t("Email support")].map(
                   (f) => (
                     <li key={f} className="flex items-start gap-2 text-sm text-muted-foreground">
                       <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
