@@ -564,7 +564,7 @@ export default function Welcome() {
                 <span className="font-bold tracking-tight">MakeItRight</span>
               </Link>
               <p className="mt-4 text-sm text-muted-foreground">
-                Gestión financiera inteligente para personas y empresas.
+                Gestión financiera inteligente para personas.
               </p>
             </div>
             {[
