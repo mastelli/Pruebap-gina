@@ -16,6 +16,7 @@ import {
   Menu,
   X,
   CheckCircle2,
+  ChevronDown,
 } from "lucide-react"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
@@ -38,6 +39,7 @@ export default function Welcome() {
   const { ready, userId, name, email, logout } = useAuth()
   const { settings } = useSettings()
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [openFaq, setOpenFaq] = useState<number | null>(null)
   const signedIn = ready && Boolean(userId)
   const displayName = name ?? settings.fullName
 
@@ -372,31 +374,31 @@ export default function Welcome() {
         </div>
       </section>
 
-      {/* ======================= FAQ ======================= */}
-      <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
+      /* ======================= FAQ ======================= */}
+      <section className="mx-auto max-w-3xl px-4 py-20 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-2xl text-center">
           <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">Preguntas frecuentes</h2>
           <p className="mt-4 text-lg text-muted-foreground">
             Resolvemos las dudas más comunes antes de que empieces.
           </p>
         </div>
-        <div className="mt-12 grid gap-4 md:grid-cols-2">
+        <div className="mt-10 space-y-3">
           {[
             {
-              q: "¿Necesito una tarjeta de crédito para probar la app?",
-              a: "No. El plan Estándar es gratuito y no pide tarjeta. Solo la necesitarás si decides pasar a Premium o Pro.",
+              q: "¿Qué es MakeItRight?",
+              a: "Es una plataforma de finanzas personales que reúne tu patrimonio, tus ingresos y gastos, tus inversiones y calculadoras financieras en un solo lugar. Analiza, simula y planifica tu futuro financiero con herramientas de nivel profesional.",
+            },
+            {
+              q: "¿Para quién está pensado el uso de MakeItRight?",
+              a: "Para cualquier persona que quiera controlar sus finanzas: desde quienes empiezan a ahorrar hasta perfiles que invierten en inmuebles y acciones. No necesitas ser experto para usarla.",
             },
             {
               q: "¿Mis datos financieros están seguros?",
-              a: "Sí. Usamos autenticación segura y cifrado de extremo a extremo. Tus datos no se comparten con terceros.",
+              a: "Sí. Usamos autenticación segura y cifrado de extremo a extremo. Tus datos no se comparten con terceros y puedes exportarlos o eliminarlos cuando quieras.",
             },
             {
               q: "¿Puedo usar las calculadoras sin registrarme?",
-              a: "Sí. Todas nuestras calculadoras son de acceso libre y no requieren crear una cuenta.",
-            },
-            {
-              q: "¿Qué diferencia hay entre Premium y Pro?",
-              a: "Premium incluye el chat con IA y el análisis avanzado. Pro añade facturación anual con descuento y es la opción ideal para un uso intensivo.",
+              a: "Sí. Todas nuestras calculadoras son de acceso libre y no requieren crear una cuenta. Puedes probarlas para hacerte una idea de lo que ofrece la plataforma.",
             },
             {
               q: "¿Puedo cancelar o cambiar de plan cuando quiera?",
@@ -406,10 +408,28 @@ export default function Welcome() {
               q: "¿Mis datos se sincronizan entre dispositivos?",
               a: "Sí. Al iniciar sesión, tu patrimonio, movimientos y configuración se sincronizan en todos tus dispositivos.",
             },
-          ].map(({ q, a }) => (
-            <div key={q} className="rounded-xl border border-border bg-card p-6 shadow-sm">
-              <h3 className="font-semibold">{q}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{a}</p>
+            {
+              q: "¿Necesito una tarjeta de crédito para probar la app?",
+              a: "No. El plan Estándar es gratuito y no pide tarjeta. Solo la necesitarás si decides pasar a Premium o Pro.",
+            },
+          ].map(({ q, a }, i) => (
+            <div key={q} className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
+              <button
+                onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left"
+              >
+                <span className="font-medium">{q}</span>
+                <ChevronDown
+                  className={`h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200 ${
+                    openFaq === i ? "rotate-180" : ""
+                  }`}
+                />
+              </button>
+              {openFaq === i && (
+                <div className="border-t border-border/60 px-5 pb-4 pt-3 text-sm leading-relaxed text-muted-foreground">
+                  {a}
+                </div>
+              )}
             </div>
           ))}
         </div>
@@ -515,7 +535,7 @@ export default function Welcome() {
       <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
         <div
           className="relative overflow-hidden rounded-2xl border border-border text-white shadow-2xl"
-          style={{ background: "linear-gradient(135deg, hsl(222 47% 7%), hsl(221 70% 16%) 55%, hsl(218 72% 6%))" }}
+          style={{ background: "linear-gradient(135deg, hsl(222 47% 6%), hsl(221 70% 13%) 55%, hsl(218 72% 5%))" }}
         >
           <div className="pointer-events-none absolute inset-0" aria-hidden>
             <div
