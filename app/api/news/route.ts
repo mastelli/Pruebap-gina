@@ -1,11 +1,20 @@
 import { NextResponse } from "next/server"
 
-// Fuentes de noticias economicas en espanol que se prueban en orden
+// Fuentes de noticias economicas internacionales y espanolas que se prueban en orden
 // hasta encontrar una que responda con articulos
 const FEEDS = [
+  // Espanolas
   "https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/section/economia/portada",
   "https://feeds.elpais.com/mrss-s/pages/ep/site/cincodias.elpais.com/portada",
   "https://www.expansion.com/rss/economia.html",
+  "https://www.eleconomista.es/rss/rss-economia.php",
+  // Internacionales (ingles)
+  "https://feeds.bloomberg.com/markets/news.rss",
+  "https://feeds.wsjonline.com/wsj/marketspulse",
+  "https://www.ft.com/rss/markets",
+  "https://www.ft.com/rss/home/uk",
+  "https://www.reuters.com/business/finance/rss",
+  "https://www.marketwatch.com/rss/topstories",
 ]
 
 const CACHE_TTL_MS = 10 * 60 * 1000
