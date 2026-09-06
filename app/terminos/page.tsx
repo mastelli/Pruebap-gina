@@ -1,6 +1,6 @@
 "use client"
 
-import { LegalPage, ContactLink } from "@/components/legal-page"
+import { LegalPage, ContactLink, BoldLink } from "@/components/legal-page"
 
 export default function TermsPage() {
   return (
@@ -8,8 +8,8 @@ export default function TermsPage() {
       <Section title="1. Aceptación de los términos">
         <p>
           Al acceder o utilizar MakeItRight aceptas los presentes términos y condiciones, así como
-          nuestra política de privacidad. Si no estás de acuerdo con ellos, te pedimos que no
-          utilices el servicio.
+          nuestra <BoldLink href="/privacidad">Política de Privacidad</BoldLink>. Si no estás de
+          acuerdo con ellos, te pedimos que no utilices el servicio.
         </p>
       </Section>
       <Section title="2. Uso del servicio">

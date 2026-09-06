@@ -1,14 +1,17 @@
 "use client"
 
-import { LegalPage, ContactLink } from "@/components/legal-page"
+import { LegalPage, ContactLink, BoldLink } from "@/components/legal-page"
 
 export default function LegalNoticePage() {
   return (
     <LegalPage title="Aviso Legal">
       <p>
-        Este documento, junto con la Política de Privacidad, los Términos de Servicio y la Política
-        de Cookies, regula el uso del sitio web MakeItRight (a partir de ahora, el "Sitio Web") y de
-        todos los servicios que ofrecemos a través de él.
+        Este documento, junto con la{" "}
+        <BoldLink href="/privacidad">Política de Privacidad</BoldLink>, los{" "}
+        <BoldLink href="/terminos">Términos de Servicio</BoldLink> y la{" "}
+        <BoldLink href="/cookies">Política de Cookies</BoldLink>, regula el uso del sitio web
+        MakeItRight (a partir de ahora, el "Sitio Web") y de todos los servicios que ofrecemos a
+        través de él.
       </p>
 
       <Section title="1. Identificación del prestador">
@@ -33,7 +36,8 @@ export default function LegalNoticePage() {
         <p>
           La mayor parte del contenido es de acceso libre, pero algunas funciones solo están
           disponibles tras registrarse y contar con una suscripción activa, tal y como se detalla en
-          los Términos de Servicio. Al utilizar el Sitio Web te comprometes a hacerlo de forma
+          los <BoldLink href="/terminos">Términos de Servicio</BoldLink>. Al utilizar el Sitio Web te
+          comprometes a hacerlo de forma
           honesta y dentro del marco legal, respetando las condiciones que establece este Aviso.
         </p>
       </Section>

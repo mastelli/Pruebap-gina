@@ -29,6 +29,17 @@ export function ContactLink() {
   )
 }
 
+export function BoldLink({ href, children }: { href: string; children: React.ReactNode }) {
+  return (
+    <Link
+      href={href}
+      className="font-medium text-foreground underline underline-offset-4 transition-colors hover:text-primary"
+    >
+      {children}
+    </Link>
+  )
+}
+
 export function LegalPage({
   title,
   updated,
