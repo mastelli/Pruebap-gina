@@ -416,7 +416,7 @@ export default function Welcome() {
       </section>
 
       {/* ======================= PRICING ======================= */}
-      <section className="border-y border-border/60 bg-card/40">
+      <section id="planes" className="border-y border-border/60 bg-card/40">
         <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-2xl text-center">
             <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">Planes</h2>
@@ -574,13 +574,26 @@ export default function Welcome() {
             <div>
               <h4 className="text-sm font-semibold">Producto</h4>
               <ul className="mt-4 space-y-2.5">
-                {["Calculadoras", "Análisis", "Inversiones", "Precios"].map((link) => (
-                  <li key={link}>
-                    <a href="#" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
-                      {link}
-                    </a>
-                  </li>
-                ))}
+                <li>
+                  <Link href="/calculator" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
+                    Calculadoras
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/analytics" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
+                    Análisis
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/investment" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
+                    Inversiones
+                  </Link>
+                </li>
+                <li>
+                  <Link href="#planes" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
+                    Precios
+                  </Link>
+                </li>
               </ul>
             </div>
             <div>
