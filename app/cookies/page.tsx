@@ -4,7 +4,7 @@ import { LegalPage, ContactLink } from "@/components/legal-page"
 
 export default function CookiesPage() {
   return (
-    <LegalPage title="Política de cookies">
+    <LegalPage title="Política de Cookies">
       <Section title="1. ¿Qué son las cookies?">
         <p>
           Las cookies son pequeños archivos de texto que se almacenan en tu dispositivo cuando

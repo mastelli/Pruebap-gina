@@ -4,7 +4,7 @@ import { LegalPage, ContactLink } from "@/components/legal-page"
 
 export default function PrivacyPage() {
   return (
-    <LegalPage title="Política de privacidad">
+    <LegalPage title="Política de Privacidad">
       <Section title="1. Introducción">
         <p>
           En MakeItRight nos tomamos muy en serio tu privacidad. Esta política explica qué
@@ -43,8 +43,7 @@ export default function PrivacyPage() {
         <p>
           Tus datos se almacenan con cifrado tanto en tránsito como en reposo. Limitamos el acceso
           a la información al personal estrictamente necesario y aplicamos los estándares de
-          seguridad más exigentes de la industria. Puedes consultar más detalles en nuestra página
-          de Seguridad.
+          seguridad más exigentes de la industria.
         </p>
       </Section>
       <Section title="5. Tus derechos">

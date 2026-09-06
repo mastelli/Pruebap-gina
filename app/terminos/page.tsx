@@ -4,7 +4,7 @@ import { LegalPage, ContactLink } from "@/components/legal-page"
 
 export default function TermsPage() {
   return (
-    <LegalPage title="Términos y condiciones">
+    <LegalPage title="Términos de Servicio">
       <Section title="1. Aceptación de los términos">
         <p>
           Al acceder o utilizar MakeItRight aceptas los presentes términos y condiciones, así como

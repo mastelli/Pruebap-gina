@@ -578,17 +578,17 @@ export default function Welcome() {
               © {new Date().getFullYear()} MakeItRight. Todos los derechos reservados.
             </p>
             <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
+              <Link href="/aviso-legal" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
+                Aviso Legal
+              </Link>
               <Link href="/privacidad" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
-                Privacidad
+                Política de Privacidad
               </Link>
               <Link href="/terminos" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
-                Términos
+                Términos de Servicio
               </Link>
               <Link href="/cookies" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
-                Cookies
-              </Link>
-              <Link href="/seguridad" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
-                Seguridad
+                Política de Cookies
               </Link>
               <span className="flex items-center gap-1.5 text-sm text-muted-foreground">
                 <Globe className="h-4 w-4" />
