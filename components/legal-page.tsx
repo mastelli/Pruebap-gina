@@ -31,7 +31,7 @@ export function ContactLink() {
 
 export function LegalPage({
   title,
-  updated = "6 de septiembre de 2026",
+  updated,
   children,
 }: {
   title: string
@@ -187,7 +187,7 @@ export function LegalPage({
 
       <main className="mx-auto max-w-3xl px-4 py-16 sm:px-6 lg:px-8">
         <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">{title}</h1>
-        <p className="mt-3 text-sm text-muted-foreground">Última actualización: {updated}</p>
+        {updated && <p className="mt-3 text-sm text-muted-foreground">Última actualización: {updated}</p>}
         <div className="mt-10 space-y-10">{children}</div>
       </main>
 

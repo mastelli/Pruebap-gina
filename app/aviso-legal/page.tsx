@@ -4,7 +4,7 @@ import { LegalPage, ContactLink } from "@/components/legal-page"
 
 export default function LegalNoticePage() {
   return (
-    <LegalPage title="Aviso Legal" updated="22 de agosto de 2026">
+    <LegalPage title="Aviso Legal">
       <p>
         Este documento, junto con la Política de Privacidad, los Términos de Servicio y la Política
         de Cookies, regula el uso del sitio web MakeItRight (a partir de ahora, el "Sitio Web") y de
@@ -13,8 +13,8 @@ export default function LegalNoticePage() {
 
       <Section title="1. Identificación del prestador">
         <p>
-          El Sitio Web y el servicio MakeItRight están operados por MakeItRight (en adelante,
-          "nosotros"), que actúa como prestador de servicios de la sociedad de la información.
+          El Sitio Web y el servicio MakeItRight están operados por MakeItRight, que actúa como
+          prestador de servicios de la sociedad de la información.
         </p>
         <p className="mt-3">
           Los datos registrales de la sociedad y su domicilio social pueden solicitarse en cualquier
@@ -25,7 +25,7 @@ export default function LegalNoticePage() {
         <p>
           MakeItRight es una plataforma orientada a la gestión de las finanzas personales: permite
           llevar el control del patrimonio, registrar y analizar ingresos y gastos, evaluar
-          inversiones y utilizar calculadoras financieras, además de obtener informes generados con
+          inversiones y utilizar calculadoras financieras, además de obtener asistencia con
           inteligencia artificial. Parte de estas funciones requieren una suscripción de pago.
         </p>
       </Section>
