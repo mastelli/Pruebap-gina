@@ -372,6 +372,49 @@ export default function Welcome() {
         </div>
       </section>
 
+      {/* ======================= FAQ ======================= */}
+      <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-2xl text-center">
+          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">Preguntas frecuentes</h2>
+          <p className="mt-4 text-lg text-muted-foreground">
+            Resolvemos las dudas más comunes antes de que empieces.
+          </p>
+        </div>
+        <div className="mt-12 grid gap-4 md:grid-cols-2">
+          {[
+            {
+              q: "¿Necesito una tarjeta de crédito para probar la app?",
+              a: "No. El plan Estándar es gratuito y no pide tarjeta. Solo la necesitarás si decides pasar a Premium o Pro.",
+            },
+            {
+              q: "¿Mis datos financieros están seguros?",
+              a: "Sí. Usamos autenticación segura y cifrado de extremo a extremo. Tus datos no se comparten con terceros.",
+            },
+            {
+              q: "¿Puedo usar las calculadoras sin registrarme?",
+              a: "Sí. Todas nuestras calculadoras son de acceso libre y no requieren crear una cuenta.",
+            },
+            {
+              q: "¿Qué diferencia hay entre Premium y Pro?",
+              a: "Premium incluye el chat con IA y el análisis avanzado. Pro añade facturación anual con descuento y es la opción ideal para un uso intensivo.",
+            },
+            {
+              q: "¿Puedo cancelar o cambiar de plan cuando quiera?",
+              a: "Sí, sin permanencia ni costes ocultos. Puedes cambiar o cancelar tu plan en cualquier momento desde tu cuenta.",
+            },
+            {
+              q: "¿Mis datos se sincronizan entre dispositivos?",
+              a: "Sí. Al iniciar sesión, tu patrimonio, movimientos y configuración se sincronizan en todos tus dispositivos.",
+            },
+          ].map(({ q, a }) => (
+            <div key={q} className="rounded-xl border border-border bg-card p-6 shadow-sm">
+              <h3 className="font-semibold">{q}</h3>
+              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{a}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
       {/* ======================= PRICING ======================= */}
       <section className="border-y border-border/60 bg-card/40">
         <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
@@ -472,7 +515,7 @@ export default function Welcome() {
       <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
         <div
           className="relative overflow-hidden rounded-2xl border border-border text-white shadow-2xl"
-          style={{ background: "linear-gradient(135deg, hsl(222 47% 9%), hsl(262 83% 13%) 55%, hsl(222 60% 6%))" }}
+          style={{ background: "linear-gradient(135deg, hsl(222 47% 14%), hsl(221 83% 28%) 55%, hsl(214 80% 18%))" }}
         >
           <div className="pointer-events-none absolute inset-0" aria-hidden>
             <div
@@ -512,7 +555,7 @@ export default function Welcome() {
       {/* ======================= FOOTER ======================= */}
       <footer className="border-t border-border/60 bg-card/40">
         <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-          <div className="grid gap-8 md:grid-cols-4">
+          <div className="grid gap-8 md:grid-cols-3">
             <div>
               <Link href="/" className="flex items-center gap-2">
                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
@@ -528,10 +571,6 @@ export default function Welcome() {
               {
                 title: "Producto",
                 links: ["Calculadoras", "Análisis", "Inversiones", "Precios"],
-              },
-              {
-                title: "Compañía",
-                links: ["Sobre nosotros", "Blog", "Empleo", "Contacto"],
               },
               {
                 title: "Legal",
