@@ -470,14 +470,26 @@ export default function Welcome() {
 
       {/* ======================= FINAL CTA ======================= */}
       <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
-        <div className="relative overflow-hidden rounded-2xl border border-border bg-primary text-primary-foreground">
-          <div
-            className="pointer-events-none absolute inset-0"
-            style={{
-              background:
-                "radial-gradient(circle at 20% 20%, hsl(var(--primary-foreground) / 0.1), transparent 50%)",
-            }}
-          />
+        <div
+          className="relative overflow-hidden rounded-2xl border border-border text-primary-foreground shadow-2xl"
+          style={{ background: "linear-gradient(135deg, hsl(222 47% 9%), hsl(262 83% 13%) 55%, hsl(222 60% 6%))" }}
+        >
+          <div className="pointer-events-none absolute inset-0" aria-hidden>
+            <div
+              className="absolute -right-20 -top-24 h-80 w-80 rounded-full bg-indigo-500/25 blur-3xl"
+              style={{ animation: "blob-drift 16s ease-in-out infinite" }}
+            />
+            <div
+              className="absolute -bottom-28 -left-16 h-72 w-72 rounded-full bg-violet-500/25 blur-3xl"
+              style={{ animation: "blob-drift 20s ease-in-out infinite reverse" }}
+            />
+            <div className="absolute -left-10 -top-16 h-96 w-96 rounded-full border border-primary-foreground/10" />
+            <div className="absolute -left-4 -top-36 h-64 w-64 rounded-full border border-primary-foreground/10" />
+            <div className="absolute inset-x-1/3 top-0 h-[1px] bg-gradient-to-r from-transparent via-primary-foreground/25 to-transparent" />
+            <div className="absolute bottom-10 left-1/4 h-2 w-2 rounded-full bg-emerald-400/60" />
+            <div className="absolute right-1/4 top-1/3 h-2 w-2 rounded-full bg-sky-400/60" />
+            <div className="absolute left-1/5 bottom-1/3 h-1.5 w-1.5 rounded-full bg-violet-300/60" />
+          </div>
           <div className="relative px-6 py-16 text-center sm:px-16">
             <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
               Empieza a tomar mejores decisiones financieras hoy
