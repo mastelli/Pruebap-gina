@@ -1,9 +1,13 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import { useBalanceStore } from "@/lib/balance-store"
 import { computeDerived, computeRatios, fmtEuro, pct, CASHFLOW_INCOME_CATEGORIES, CASHFLOW_EXPENSE_CATEGORIES, ASSET_CURRENT_CATEGORIES, ASSET_NONCURRENT_CATEGORIES, LIABILITY_CURRENT_CATEGORIES, LIABILITY_NONCURRENT_CATEGORIES, CATEGORY_LABELS, generateId } from "@/lib/balance-engine"
 import type { BalanceItem, CashFlowEntry } from "@/lib/balance-engine"
+import { useTransactions, getPeriodPrefix } from "@/lib/transactions"
+import { usePortfolioEurTotal, usePortfolioCash } from "@/components/portfolio-total"
+import { getCategoryFor, isInternalTransferTransaction } from "@/lib/categories"
+import { getIncomeBreakdown } from "@/lib/income"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -14,7 +18,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { Textarea } from "@/components/ui/textarea"
 import { Progress } from "@/components/ui/progress"
-import { Plus, Trash2, TrendingUp, TrendingDown, Wallet, CreditCard, Activity, Target, Landmark, CircleDollarSign, PiggyBank, ShieldCheck, BarChart3, ArrowUpRight, ArrowDownRight, RefreshCcw } from "lucide-react"
+import { Plus, Trash2, TrendingUp, TrendingDown, Wallet, CreditCard, Activity, Target, Landmark, CircleDollarSign, PiggyBank, ShieldCheck, BarChart3, ArrowUpRight, ArrowDownRight, RefreshCcw, RefreshCw } from "lucide-react"
 import { Balance2Charts } from "./balance2-charts"
 import { useLanguage } from "@/lib/i18n"
 
@@ -170,17 +174,60 @@ export function Balance2Dashboard() {
   const [showAddCashFlow, setShowAddCashFlow] = useState(false)
   const { t } = useLanguage()
 
+  const { transactions, checkingBalance } = useTransactions()
+  const portfolioTotal = usePortfolioEurTotal()
+  const portfolioCash = usePortfolioCash()
+
+  const autoData = useMemo(() => {
+    const cash = (checkingBalance ?? 0) + portfolioCash
+    const investments = portfolioTotal.total ?? 0
+
+    const latestPeriod = getPeriodPrefix(transactions, new Date().getMonth() + 1)
+    const incomeBreakdown = getIncomeBreakdown(transactions, latestPeriod)
+    const salary = incomeBreakdown.salary
+
+    const currentMonth = new Date().toISOString().slice(0, 7)
+    const monthExpenses = transactions
+      .filter((t) => {
+        if (t.amount >= 0) return false
+        if (isInternalTransferTransaction(t)) return false
+        return t.date.startsWith(currentMonth)
+      })
+      .reduce((sum, t) => sum + Math.abs(t.amount), 0)
+
+    const autoAssets: BalanceItem[] = []
+    if (cash > 0) {
+      autoAssets.push({ id: "auto-cash", name: "Efectivo y cuentas", category: "Checking Account", value: cash, type: "current", notes: "Sincronizado desde Análisis" })
+    }
+    if (investments > 0) {
+      autoAssets.push({ id: "auto-investments", name: "Inversiones", category: "Stocks/ETFs", value: investments, type: "current", notes: "Sincronizado desde Análisis" })
+    }
+
+    const autoCashFlow: CashFlowEntry[] = []
+    if (salary > 0) {
+      autoCashFlow.push({ id: "auto-salary", type: "income", category: "Salary", amount: salary, date: new Date().toISOString().slice(0, 10), notes: "Sincronizado desde Análisis" })
+    }
+    if (monthExpenses > 0) {
+      autoCashFlow.push({ id: "auto-expenses", type: "expense", category: "Other Expenses", amount: monthExpenses, date: new Date().toISOString().slice(0, 10), notes: "Sincronizado desde Análisis" })
+    }
+
+    return { cash, investments, salary, monthExpenses, autoAssets, autoCashFlow }
+  }, [checkingBalance, portfolioCash, portfolioTotal.total, transactions])
+
+  const allAssets = useMemo(() => [...autoData.autoAssets, ...(snapshot?.assets ?? [])], [autoData.autoAssets, snapshot?.assets])
+  const allCashFlow = useMemo(() => [...autoData.autoCashFlow, ...(snapshot?.cashFlow ?? [])], [autoData.autoCashFlow, snapshot?.cashFlow])
+
   if (!snapshot) return null
 
-  const d = computeDerived(snapshot.assets, snapshot.liabilities, snapshot.cashFlow, snapshot.essentialMonthlyExpenses)
+  const d = computeDerived(allAssets, snapshot.liabilities, allCashFlow, snapshot.essentialMonthlyExpenses)
   const ratios = computeRatios(d)
 
   const healthColor = (h: "good" | "warning" | "critical") => h === "good" ? "text-green-500" : h === "warning" ? "text-yellow-500" : "text-red-500"
   const healthBg = (h: "good" | "warning" | "critical") => h === "good" ? "bg-green-500" : h === "warning" ? "bg-yellow-500" : "bg-red-500"
   const healthBadge = (h: "good" | "warning" | "critical") => h === "good" ? "bg-green-500/10 text-green-500" : h === "warning" ? "bg-yellow-500/10 text-yellow-500" : "bg-red-500/10 text-red-500"
 
-  const assetCurrent = snapshot.assets.filter((a) => a.type === "current")
-  const assetNonCurrent = snapshot.assets.filter((a) => a.type === "noncurrent")
+  const assetCurrent = allAssets.filter((a) => a.type === "current")
+  const assetNonCurrent = allAssets.filter((a) => a.type === "noncurrent")
   const liabCurrent = snapshot.liabilities.filter((l) => l.type === "current")
   const liabNonCurrent = snapshot.liabilities.filter((l) => l.type === "noncurrent")
 
@@ -192,6 +239,10 @@ export function Balance2Dashboard() {
           <p className="text-muted-foreground">{t("Personal financial balance")}</p>
         </div>
         <div className="flex gap-2">
+          <div className="flex items-center gap-1 text-xs text-muted-foreground bg-secondary/50 px-2 py-1 rounded-md">
+            <RefreshCw className="h-3 w-3" />
+            {t("Synced from Analytics")}
+          </div>
           <Button variant="outline" size="sm" onClick={saveSnapshot}><BarChart3 className="h-4 w-4 mr-1" />{t("Save Snapshot")}</Button>
           <Button variant="outline" size="sm" onClick={resetToDemo}><RefreshCcw className="h-4 w-4 mr-1" />{t("Reset Demo")}</Button>
         </div>
@@ -306,12 +357,15 @@ export function Balance2Dashboard() {
                     {items.map((item) => (
                       <div key={item.id} className="flex items-center justify-between p-2 rounded-lg bg-secondary/50">
                         <div>
-                          <p className="text-sm font-medium">{item.name}</p>
+                          <div className="flex items-center gap-2">
+                            <p className="text-sm font-medium">{item.name}</p>
+                            {item.id.startsWith("auto-") && <Badge variant="outline" className="text-[10px] px-1 py-0 h-4">{t("Synced")}</Badge>}
+                          </div>
                           <p className="text-xs text-muted-foreground">{CATEGORY_LABELS[item.category] || item.category}</p>
                         </div>
                         <div className="flex items-center gap-2">
                           <span className="font-mono text-sm font-bold">{fmtEuro(item.value)}</span>
-                          <Button variant="ghost" size="sm" onClick={() => removeAsset(item.id)}><Trash2 className="h-3 w-3" /></Button>
+                          {!item.id.startsWith("auto-") && <Button variant="ghost" size="sm" onClick={() => removeAsset(item.id)}><Trash2 className="h-3 w-3" /></Button>}
                         </div>
                       </div>
                     ))}
@@ -383,19 +437,22 @@ export function Balance2Dashboard() {
             </Dialog>
           </div>
           <div className="grid md:grid-cols-3 gap-4">
-            <Card><CardContent className="p-4 text-center"><p className="text-xs text-muted-foreground">{t("Total Income")}</p><p className="text-2xl font-bold text-green-500">{fmtEuro(snapshot.cashFlow.filter((e) => e.type === "income").reduce((s, e) => s + e.amount, 0))}</p></CardContent></Card>
-            <Card><CardContent className="p-4 text-center"><p className="text-xs text-muted-foreground">{t("Total Expenses")}</p><p className="text-2xl font-bold text-red-500">{fmtEuro(snapshot.cashFlow.filter((e) => e.type === "expense").reduce((s, e) => s + e.amount, 0))}</p></CardContent></Card>
+            <Card><CardContent className="p-4 text-center"><p className="text-xs text-muted-foreground">{t("Total Income")}</p><p className="text-2xl font-bold text-green-500">{fmtEuro(allCashFlow.filter((e) => e.type === "income").reduce((s, e) => s + e.amount, 0))}</p></CardContent></Card>
+            <Card><CardContent className="p-4 text-center"><p className="text-xs text-muted-foreground">{t("Total Expenses")}</p><p className="text-2xl font-bold text-red-500">{fmtEuro(allCashFlow.filter((e) => e.type === "expense").reduce((s, e) => s + e.amount, 0))}</p></CardContent></Card>
             <Card><CardContent className="p-4 text-center"><p className="text-xs text-muted-foreground">{t("Net Cash Flow")}</p><p className={`text-2xl font-bold ${d.monthlyCashFlow >= 0 ? "text-green-500" : "text-red-500"}`}>{fmtEuro(d.monthlyCashFlow)}</p></CardContent></Card>
           </div>
           <div className="grid md:grid-cols-2 gap-4">
             <Card>
               <CardHeader><CardTitle className="text-base text-green-600">{t("Incomes")}</CardTitle></CardHeader>
               <CardContent>
-                {snapshot.cashFlow.filter((e) => e.type === "income").length === 0 ? <p className="text-sm text-muted-foreground">{t("No entries")}</p> : (
+                {allCashFlow.filter((e) => e.type === "income").length === 0 ? <p className="text-sm text-muted-foreground">{t("No entries")}</p> : (
                   <div className="space-y-2">
-                    {snapshot.cashFlow.filter((e) => e.type === "income").map((e) => (
+                    {allCashFlow.filter((e) => e.type === "income").map((e) => (
                       <div key={e.id} className="flex items-center justify-between p-2 rounded-lg bg-green-500/5">
-                        <span className="text-sm">{CATEGORY_LABELS[e.category] || e.category}</span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm">{CATEGORY_LABELS[e.category] || e.category}</span>
+                          {e.id.startsWith("auto-") && <Badge variant="outline" className="text-[10px] px-1 py-0 h-4">{t("Synced")}</Badge>}
+                        </div>
                         <div className="flex items-center gap-2">
                           <span className="font-mono text-sm font-bold text-green-500">{fmtEuro(e.amount)}</span>
                           <Button variant="ghost" size="sm" onClick={() => removeCashFlow(e.id)}><Trash2 className="h-3 w-3" /></Button>
@@ -409,11 +466,14 @@ export function Balance2Dashboard() {
             <Card>
               <CardHeader><CardTitle className="text-base text-red-600">{t("Expenses")}</CardTitle></CardHeader>
               <CardContent>
-                {snapshot.cashFlow.filter((e) => e.type === "expense").length === 0 ? <p className="text-sm text-muted-foreground">{t("No entries")}</p> : (
+                {allCashFlow.filter((e) => e.type === "expense").length === 0 ? <p className="text-sm text-muted-foreground">{t("No entries")}</p> : (
                   <div className="space-y-2">
-                    {snapshot.cashFlow.filter((e) => e.type === "expense").map((e) => (
+                    {allCashFlow.filter((e) => e.type === "expense").map((e) => (
                       <div key={e.id} className="flex items-center justify-between p-2 rounded-lg bg-red-500/5">
-                        <span className="text-sm">{CATEGORY_LABELS[e.category] || e.category}</span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm">{CATEGORY_LABELS[e.category] || e.category}</span>
+                          {e.id.startsWith("auto-") && <Badge variant="outline" className="text-[10px] px-1 py-0 h-4">{t("Synced")}</Badge>}
+                        </div>
                         <div className="flex items-center gap-2">
                           <span className="font-mono text-sm font-bold text-red-500">{fmtEuro(e.amount)}</span>
                           <Button variant="ghost" size="sm" onClick={() => removeCashFlow(e.id)}><Trash2 className="h-3 w-3" /></Button>
@@ -428,7 +488,7 @@ export function Balance2Dashboard() {
         </TabsContent>
 
         <TabsContent value="charts">
-          <Balance2Charts snapshot={snapshot} derived={d} />
+          <Balance2Charts snapshot={{ ...snapshot, assets: allAssets, cashFlow: allCashFlow }} derived={d} />
         </TabsContent>
       </Tabs>
     </div>

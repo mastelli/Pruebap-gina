@@ -143,6 +143,8 @@ const translations: Record<string, string> = {
   Liquidez: "Liquidez",
   Solvencia: "Solvencia",
   Endeudamiento: "Endeudamiento",
+  "Synced from Analytics": "Sincronizado desde Análisis",
+  Synced: "Sincronizado",
 
   // Modales de dinero
   Amount: "Importe",
