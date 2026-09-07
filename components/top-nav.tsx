@@ -2,6 +2,7 @@
 import { ThemeToggle } from "./theme-toggle"
 import { LanguageToggle } from "./language-toggle"
 import Link from "next/link"
+import { LineChart } from "lucide-react"
 import { useSettings } from "@/contexts/settings-context"
 import {
   DropdownMenu,
@@ -26,7 +27,13 @@ export function TopNav() {
 
   return (
     <header className="sticky top-0 z-40 border-b bg-sidebar">
-      <div className="container flex h-16 items-center justify-end px-4 md:px-6">
+      <div className="container flex h-16 items-center justify-between px-4 md:px-6">
+        <Link href="/" className="flex items-center gap-2">
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+            <LineChart className="h-5 w-5" />
+          </div>
+          <span className="text-lg font-bold tracking-tight">MakeItRight</span>
+        </Link>
         <div className="flex items-center gap-4">
           <ThemeToggle />
           <LanguageToggle />
