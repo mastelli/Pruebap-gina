@@ -3,8 +3,9 @@
 import Link from "next/link"
 import { useState } from "react"
 import type React from "react"
-import { LineChart, Menu, X } from "lucide-react"
+import { LineChart, Menu, X, ChevronDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
 import { useLanguage } from "@/lib/i18n"
 import { useAuth } from "@/lib/auth"
 import { useSettings } from "@/contexts/settings-context"
@@ -42,6 +43,23 @@ export function BoldLink({ href, children }: { href: string; children: React.Rea
   )
 }
 
+function MobileNavItem({ label, href, onClick, children }: { label: string; href: string; onClick: () => void; children: React.ReactNode }) {
+  const [open, setOpen] = useState(false)
+  return (
+    <div>
+      <div className="flex items-center justify-between">
+        <a href={href} onClick={onClick} className="text-sm font-medium text-muted-foreground hover:text-foreground">
+          {label}
+        </a>
+        <button onClick={() => setOpen(!open)} className="p-1 text-muted-foreground hover:text-foreground">
+          <ChevronDown className={cn("h-4 w-4 transition-transform", open && "rotate-180")} />
+        </button>
+      </div>
+      {open && <div className="ml-3 mt-1 flex flex-col gap-1 border-l border-border pl-3">{children}</div>}
+    </div>
+  )
+}
+
 export function LegalPage({
   title,
   updated,
@@ -58,14 +76,6 @@ export function LegalPage({
   const signedIn = ready && Boolean(userId)
   const displayName = name ?? settings.fullName
 
-  const navLinks = [
-    { label: t("Dashboard"), href: "/inicio" },
-    { label: t("Analytics"), href: "/analytics" },
-    { label: t("Savings and Investment"), href: "/investment" },
-    { label: t("Financial Calculators"), href: "/calculator" },
-    { label: t("AI chat"), href: "/chat" },
-  ]
-
   return (
     <div className="isolate min-h-screen bg-background text-foreground">
       <header className="sticky top-0 z-50 border-b border-border/60 bg-background/80 backdrop-blur-md">
@@ -78,15 +88,41 @@ export function LegalPage({
           </Link>
 
           <nav className="hidden items-center gap-8 md:flex">
-            {navLinks.map(({ label, href }) => (
-              <Link
-                key={label}
-                href={href}
-                className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-              >
-                {label}
+            <Link href="/inicio" className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
+              {t("Dashboard")}
+            </Link>
+            <div className="group relative">
+              <Link href="/analytics" className="flex items-center gap-1 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
+                {t("Analytics")}
+                <ChevronDown className="h-3.5 w-3.5 transition-transform duration-200 group-hover:rotate-180" />
               </Link>
-            ))}
+              <div className="invisible absolute left-1/2 top-full z-50 -translate-x-1/2 pt-4 opacity-0 transition-all duration-200 group-hover:visible group-hover:opacity-100">
+                <div className="w-48 space-y-1.5 rounded-xl border border-border bg-background p-3 shadow-lg">
+                  <Link href="/analytics/income" className="block rounded-md px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground">{t("Revenue")}</Link>
+                  <Link href="/analytics/expenses" className="block rounded-md px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground">{t("Expenses")}</Link>
+                  <Link href="/analytics/savings" className="block rounded-md px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground">{t("Debt")}</Link>
+                </div>
+              </div>
+            </div>
+            <Link href="/investment" className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
+              {t("Savings and Investment")}
+            </Link>
+            <div className="group relative">
+              <Link href="/calculator" className="flex items-center gap-1 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
+                {t("Financial Calculators")}
+                <ChevronDown className="h-3.5 w-3.5 transition-transform duration-200 group-hover:rotate-180" />
+              </Link>
+              <div className="invisible absolute left-1/2 top-full z-50 -translate-x-1/2 pt-4 opacity-0 transition-all duration-200 group-hover:visible group-hover:opacity-100">
+                <div className="w-48 space-y-1.5 rounded-xl border border-border bg-background p-3 shadow-lg">
+                  <Link href="/calculator/compound" className="block rounded-md px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground">{t("Compound Interest")}</Link>
+                  <Link href="/calculator/realestate" className="block rounded-md px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground">{t("Real Estate Assets")}</Link>
+                  <Link href="/calculator/stocks" className="block rounded-md px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground">{t("Stocks")}</Link>
+                </div>
+              </div>
+            </div>
+            <Link href="/chat" className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
+              {t("AI chat")}
+            </Link>
           </nav>
 
           <div className="hidden items-center gap-3 md:flex">
@@ -143,16 +179,25 @@ export function LegalPage({
         {mobileOpen && (
           <div className="border-t border-border bg-background px-4 py-4 md:hidden">
             <nav className="flex flex-col gap-3">
-              {navLinks.map(({ label, href }) => (
-                <a
-                  key={label}
-                  href={href}
-                  onClick={() => setMobileOpen(false)}
-                  className="text-sm font-medium text-muted-foreground hover:text-foreground"
-                >
-                  {label}
-                </a>
-              ))}
+              <a href="/inicio" onClick={() => setMobileOpen(false)} className="text-sm font-medium text-muted-foreground hover:text-foreground">
+                {t("Dashboard")}
+              </a>
+              <MobileNavItem label={t("Analytics")} href="/analytics" onClick={() => setMobileOpen(false)}>
+                <a href="/analytics/income" onClick={() => setMobileOpen(false)} className="block rounded-md px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground">{t("Revenue")}</a>
+                <a href="/analytics/expenses" onClick={() => setMobileOpen(false)} className="block rounded-md px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground">{t("Expenses")}</a>
+                <a href="/analytics/savings" onClick={() => setMobileOpen(false)} className="block rounded-md px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground">{t("Debt")}</a>
+              </MobileNavItem>
+              <a href="/investment" onClick={() => setMobileOpen(false)} className="text-sm font-medium text-muted-foreground hover:text-foreground">
+                {t("Savings and Investment")}
+              </a>
+              <MobileNavItem label={t("Financial Calculators")} href="/calculator" onClick={() => setMobileOpen(false)}>
+                <a href="/calculator/compound" onClick={() => setMobileOpen(false)} className="block rounded-md px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground">{t("Compound Interest")}</a>
+                <a href="/calculator/realestate" onClick={() => setMobileOpen(false)} className="block rounded-md px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground">{t("Real Estate Assets")}</a>
+                <a href="/calculator/stocks" onClick={() => setMobileOpen(false)} className="block rounded-md px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground">{t("Stocks")}</a>
+              </MobileNavItem>
+              <a href="/chat" onClick={() => setMobileOpen(false)} className="text-sm font-medium text-muted-foreground hover:text-foreground">
+                {t("AI chat")}
+              </a>
               <div className="flex gap-3 pt-2">
                 {signedIn ? (
                   <>
