@@ -140,17 +140,12 @@ export function Sidebar() {
           )}
         >
           <div className="border-b border-border">
-            <div
-              className={cn(
-                "flex min-h-16 items-center gap-2 px-4 py-2",
-                isCollapsed && "flex-col justify-center px-2",
-              )}
-            >
-              <Link href="/" className={cn("flex items-center gap-2 justify-center font-semibold", isCollapsed && "flex-col")}>
-                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+            <div className="flex min-h-16 items-center gap-2 px-4 py-2">
+              <Link href="/" className="flex items-center gap-2 justify-center font-semibold">
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground shrink-0">
                   <LineChart className="h-5 w-5" />
                 </div>
-                <span className={cn("leading-tight", isCollapsed ? "text-center text-xs" : "text-lg")}>
+                <span className={cn("leading-tight text-lg whitespace-nowrap", isCollapsed && "hidden")}>
                   MakeItRight
                 </span>
               </Link>
