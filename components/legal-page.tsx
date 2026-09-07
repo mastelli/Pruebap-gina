@@ -59,10 +59,11 @@ export function LegalPage({
   const displayName = name ?? settings.fullName
 
   const navLinks = [
-    { label: t("Product"), href: "/#features" },
-    { label: t("Features"), href: "/#features" },
+    { label: t("Dashboard"), href: "/inicio" },
     { label: t("Analytics"), href: "/analytics" },
-    { label: t("Blog"), href: "/#features" },
+    { label: t("Savings and Investment"), href: "/investment" },
+    { label: t("Financial Calculators"), href: "/calculator" },
+    { label: t("AI chat"), href: "/chat" },
   ]
 
   return (
