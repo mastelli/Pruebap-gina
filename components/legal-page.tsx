@@ -101,6 +101,7 @@ export function LegalPage({
                   <Link href="/analytics/income" className="block rounded-md px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground">{t("Revenue")}</Link>
                   <Link href="/analytics/expenses" className="block rounded-md px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground">{t("Expenses")}</Link>
                   <Link href="/analytics/savings" className="block rounded-md px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground">{t("Debt")}</Link>
+                  <Link href="/analytics/balance2" className="block rounded-md px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground">{t("Balance 2")}</Link>
                 </div>
               </div>
             </div>
@@ -186,6 +187,7 @@ export function LegalPage({
                 <a href="/analytics/income" onClick={() => setMobileOpen(false)} className="block rounded-md px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground">{t("Revenue")}</a>
                 <a href="/analytics/expenses" onClick={() => setMobileOpen(false)} className="block rounded-md px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground">{t("Expenses")}</a>
                 <a href="/analytics/savings" onClick={() => setMobileOpen(false)} className="block rounded-md px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground">{t("Debt")}</a>
+                <a href="/analytics/balance2" onClick={() => setMobileOpen(false)} className="block rounded-md px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground">{t("Balance 2")}</a>
               </MobileNavItem>
               <a href="/investment" onClick={() => setMobileOpen(false)} className="text-sm font-medium text-muted-foreground hover:text-foreground">
                 {t("Savings and Investment")}

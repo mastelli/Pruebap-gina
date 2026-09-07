@@ -41,6 +41,7 @@ const navigation: NavItem[] = [
       { name: "Revenue", href: "/analytics/income" },
       { name: "Expenses", href: "/analytics/expenses" },
       { name: "Debt", href: "/analytics/savings" },
+      { name: "Balance 2", href: "/analytics/balance2" },
     ],
   },
   { name: "Savings and Investment", href: "/investment", icon: PiggyBank },
