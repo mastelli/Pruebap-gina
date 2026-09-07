@@ -33,7 +33,7 @@ export function getIncomeBreakdown(
     if (category === INTERNAL_TRANSFER_CATEGORY) continue
     if (category === "Salary") {
       totals.salary += movement.amount
-    } else if (category === "Transfers") {
+    } else if (category === "Bizum/Transferencia") {
       totals.transfers += movement.amount
     } else {
       totals.bizum += movement.amount

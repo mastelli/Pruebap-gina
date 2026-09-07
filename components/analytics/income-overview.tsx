@@ -1,6 +1,6 @@
 "use client"
 
-import { ArrowRightLeft, TrendingUp, Wallet, Zap } from "lucide-react"
+import { TrendingUp, Wallet, Zap } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useLanguage } from "@/lib/i18n"
 import { useTransactions, getPeriodPrefix, sortByDateDesc } from "@/lib/transactions"
@@ -36,8 +36,6 @@ const SLICE_COLORS = {
 const CATEGORY_ICONS: Record<string, { icon: LucideIcon; color: string }> = {
   Salary: { icon: Wallet, color: SLICE_COLORS.salary },
   "Bizum/Transferencia": { icon: Zap, color: SLICE_COLORS.bizum },
-  Transfers: { icon: ArrowRightLeft, color: SLICE_COLORS.transfers },
-  Bizum: { icon: Zap, color: SLICE_COLORS.bizum },
 }
 
 function formatEuros(value: number): string {
@@ -60,8 +58,8 @@ export function IncomeOverview({
   const yearNum = Number(prefix.slice(0, 4))
   const monthNum = Number(prefix.slice(5, 7))
 
-  const { salary, transfers, bizum } = getIncomeBreakdown(transactions, prefix)
-  const total = salary + transfers + bizum
+  const { salary, transfers } = getIncomeBreakdown(transactions, prefix)
+  const total = salary + transfers
 
   const prevDate = new Date(yearNum, monthNum - 2, 1)
   const prevPrefix = getPeriodPrefix(
@@ -69,7 +67,7 @@ export function IncomeOverview({
     String(prevDate.getMonth() + 1).padStart(2, "0"),
   )
   const prevTotals = getIncomeBreakdown(transactions, prevPrefix)
-  const prevTotal = prevTotals.salary + prevTotals.transfers + prevTotals.bizum
+  const prevTotal = prevTotals.salary + prevTotals.transfers
   const delta = prevTotal > 0 ? ((total - prevTotal) / prevTotal) * 100 : null
 
   const incomes = sortByDateDesc(
@@ -90,7 +88,7 @@ export function IncomeOverview({
 
   const catTiles = [
     { key: "Salary", value: salary },
-    { key: "Bizum/Transferencia", value: transfers + bizum },
+    { key: "Bizum/Transferencia", value: transfers },
   ]
 
   return (
@@ -186,7 +184,7 @@ export function IncomeOverview({
             <div className="max-h-[330px] overflow-y-auto pr-1">
               {incomes.map((transaction) => {
                 const category = getCategoryFor(transaction)
-                const meta = CATEGORY_ICONS[category] ?? CATEGORY_ICONS.Bizum
+                const meta = CATEGORY_ICONS[category] ?? CATEGORY_ICONS["Bizum/Transferencia"]
                 const Icon = meta.icon
                 return (
                   <div

@@ -28,14 +28,11 @@ export function IncomeCategoriesChart({ scope = "month", month }: IncomeCategori
   const currentMonth = String(now.getMonth() + 1).padStart(2, "0")
   const selectedMonth = month ?? currentMonth
   const year = scope === "month" ? getPeriodPrefix(transactions, selectedMonth) : `${now.getFullYear()}`
-  const { salary, transfers, bizum } = getIncomeBreakdown(transactions, year)
-
-  // Combinamos transfers y bizum en una única categoría "Bizum/Transferencia"
-  const combinedBizumTransfers = transfers + bizum
+  const { salary, transfers } = getIncomeBreakdown(transactions, year)
 
   const data = [
     { label: "Salary", total: salary, color: SLICE_COLORS[0] },
-    { label: "Bizum/Transferencia", total: combinedBizumTransfers, color: SLICE_COLORS[1] },
+    { label: "Bizum/Transferencia", total: transfers, color: SLICE_COLORS[1] },
   ]
     .map((row) => ({ ...row, label: t(row.label) }))
     .filter((row) => row.total > 0)

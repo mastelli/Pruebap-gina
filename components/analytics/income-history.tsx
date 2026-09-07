@@ -30,7 +30,7 @@ function formatEuros(value: number): string {
   return value.toLocaleString("es-ES", { style: "currency", currency: "EUR" })
 }
 
-// Columnas apiladas por mes con nomina, transferencias y bizum
+// Columnas apiladas por mes con nomina y transferencias/bizum combinadas
 export function IncomeHistory() {
   const { t } = useLanguage()
   const { transactions } = useTransactions()
@@ -44,7 +44,7 @@ export function IncomeHistory() {
     return {
       month: t(month),
       salary: totals.salary,
-      bizum: totals.transfers + totals.bizum, // agrupa transfers + bizum en un solo bloque
+      bizum: totals.transfers, // agrupa transfers en un solo bloque
     }
   })
 
@@ -62,8 +62,7 @@ export function IncomeHistory() {
         />
         <Legend />
         <Bar dataKey="salary" name={t("Salary")} stackId="income" fill={STACK_COLORS.salary} />
-        <Bar dataKey="transfers" name={t("Transfers")} stackId="income" fill={STACK_COLORS.transfers} />
-        <Bar dataKey="bizum" name={t("Bizum")} stackId="income" fill={STACK_COLORS.bizum} radius={[4, 4, 0, 0]} />
+        <Bar dataKey="bizum" name={t("Bizum/Transferencia")} stackId="income" fill={STACK_COLORS.bizum} radius={[4, 4, 0, 0]} />
       </BarChart>
     </ResponsiveContainer>
   )

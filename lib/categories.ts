@@ -59,7 +59,7 @@ const BUILTIN_EXPENSE_CATEGORIES: ExpenseCategoryDef[] = [
 
 const BIZUM_RE = /bizum/i
 
-export const INCOME_CATEGORIES: TransactionCategory[] = ["Salary", "Transfers", "Bizum", "Internal Transfer"]
+export const INCOME_CATEGORIES: TransactionCategory[] = ["Salary", "Bizum/Transferencia", "Internal Transfer"]
 
 // Modificaciones manuales del tipo por movimiento (persistidas y
 // aisladas por cuenta de usuario)
@@ -127,7 +127,7 @@ export function classifyTransaction(transaction: { name: string; amount: number 
 if (transaction.amount > 0) {
     if (BIZUM_RE.test(name)) return "Bizum/Transferencia"
     if (TRANSFER_KEYWORDS.some((keyword) => normalizedName.includes(keyword))) return "Bizum/Transferencia"
-    return "Transfers"
+    return "Bizum/Transferencia"
   }
 
   if (isElectricityBill(transaction.name)) return "Electricity"
