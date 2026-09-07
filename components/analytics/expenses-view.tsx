@@ -253,7 +253,7 @@ function ExpenseOverview({ month, setMonth }: { month: string; setMonth: (m: str
           <CardHeader>
             <CardTitle className="text-lg font-semibold">{t("Budget")}</CardTitle>
           </CardHeader>
-          <CardContent className="pb-2">
+          <CardContent className="pb-6">
             <ExpenseTypes month={month} />
           </CardContent>
         </Card>

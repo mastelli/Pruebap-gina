@@ -160,7 +160,7 @@ export function ExpenseTypes({ month }: { month: string }) {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-x-6 gap-y-4 px-2 md:grid-cols-2">
+      <div className="grid grid-cols-1 gap-x-6 gap-y-4 px-2 pb-4 md:grid-cols-2">
         {sortedDefs.map((def) => {
           const spent = spentByCategory[def.key]
           const budget = budgets[def.key] ?? 0

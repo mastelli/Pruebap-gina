@@ -10,8 +10,6 @@ function formatEuros(value: number): string {
   return value.toLocaleString("es-ES", { style: "currency", currency: "EUR" })
 }
 
-const RADIAN = Math.PI / 180
-
 export function ExpenseDoughnut({ month }: { month: string }) {
   const { t } = useLanguage()
   const { transactions } = useTransactions()
@@ -49,31 +47,16 @@ export function ExpenseDoughnut({ month }: { month: string }) {
   }
 
   return (
-    <ResponsiveContainer width="100%" height={500}>
+    <ResponsiveContainer width="100%" height={300}>
       <PieChart>
         <Pie
           data={data}
           dataKey="total"
           nameKey="label"
-          cx="50%"
-          cy="50%"
-          innerRadius={100}
-          outerRadius={160}
+          innerRadius={75}
+          outerRadius={118}
           paddingAngle={2}
-          label={(props: any) => {
-            const { cx, cy, midAngle, outerRadius, percent, label: nameLabel, total: entryTotal } = props
-            if (!percent || percent < 0.02 || !midAngle) return null
-            const radius = outerRadius + 38
-            const x = cx + radius * Math.cos(-midAngle * RADIAN)
-            const y = cy + radius * Math.sin(-midAngle * RADIAN)
-            const anchor = x > cx ? "start" : "end"
-            return (
-              <text x={x} y={y} fill="currentColor" textAnchor={anchor} dominantBaseline="central" fontSize={11}>
-                <tspan x={x} dy={-6} fontWeight={600}>{nameLabel}</tspan>
-                <tspan x={x} dy={14} fill="currentColor" opacity={0.6}>{formatEuros(entryTotal)}</tspan>
-              </text>
-            )
-          }}
+          cy="50%"
         >
           {data.map((entry) => (
             <Cell key={entry.label} fill={entry.color} />
