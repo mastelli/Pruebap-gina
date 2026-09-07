@@ -120,7 +120,7 @@ export function IncomeOverview({
               </span>
             </div>
           </div>
-          <div className="grid shrink-0 grid-cols-3 gap-3">
+          <div className="grid shrink-0 grid-cols-2 gap-3 justify-items-center">
             {catTiles.map(({ key, value }) => (
               <div key={key} className="min-w-[96px] rounded-xl border bg-secondary/40 p-3">
                 <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
