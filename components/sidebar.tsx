@@ -16,6 +16,7 @@ import {
   ChevronLeft,
   PiggyBank,
   Calculator,
+  LineChart,
   type LucideIcon,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -145,9 +146,10 @@ export function Sidebar() {
                 isCollapsed && "flex-col justify-center px-2",
               )}
             >
-              <Link href="/" className="flex items-center justify-center font-semibold">
+              <Link href="/" className="flex items-center gap-2 justify-center font-semibold">
+                <LineChart className="h-4 w-4" />
                 <span className={cn("leading-tight", isCollapsed ? "text-center text-xs" : "text-lg")}>
-                  Make It Right
+                  MakeItRight
                 </span>
               </Link>
               <Button
