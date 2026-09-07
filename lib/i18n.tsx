@@ -34,8 +34,7 @@ const translations: Record<string, string> = {
   Save: "Guardar",
   "Add Category": "Añadir categoría",
   "Category name": "Nombre de categoría",
-  "Keywords": "Palabras clave",
-  "comma separated": "separadas por comas",
+
   Color: "Color",
   "Click on a category to set its monthly budget": "Haz clic en una categoría para establecer su presupuesto mensual",
   Send: "Enviar",

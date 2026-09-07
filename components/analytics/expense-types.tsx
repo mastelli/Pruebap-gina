@@ -58,7 +58,6 @@ export function ExpenseTypes({ month }: { month: string }) {
   const [budgets, setBudgets] = useState<Budgets>({})
   const [open, setOpen] = useState(false)
   const [newName, setNewName] = useState("")
-  const [newKeywords, setNewKeywords] = useState("")
   const [newColor, setNewColor] = useState("#66bb6a")
 
   useEffect(() => {
@@ -83,20 +82,15 @@ export function ExpenseTypes({ month }: { month: string }) {
   }
 
   const handleAddCategory = () => {
-    const keywords = newKeywords
-      .split(",")
-      .map((k) => k.trim().toLowerCase())
-      .filter((k) => k.length > 0)
-    if (!newName.trim() || keywords.length === 0) return
+    if (!newName.trim()) return
     const cat: CustomCategoryDef = {
       key: newName.trim(),
       color: newColor,
-      keywords,
+      keywords: [],
     }
     addCustomCategory(cat)
     setBudgets((prev) => ({ ...prev, [newName.trim()]: 0 }))
     setNewName("")
-    setNewKeywords("")
     setNewColor("#66bb6a")
     setOpen(false)
   }
@@ -116,7 +110,7 @@ export function ExpenseTypes({ month }: { month: string }) {
 
   return (
     <>
-      <div className="space-y-4">
+      <div className="space-y-6">
         <div className="flex items-center justify-between">
           <span className="text-sm font-medium text-muted-foreground">{t("Click on a category to set its monthly budget")}</span>
           <Dialog open={open} onOpenChange={setOpen}>
@@ -137,15 +131,6 @@ export function ExpenseTypes({ month }: { month: string }) {
                     value={newName}
                     onChange={(event) => setNewName(event.target.value)}
                     placeholder="Ej: Ocio digital"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="new-cat-keywords">{t("Keywords")} ({t("comma separated")})</Label>
-                  <Input
-                    id="new-cat-keywords"
-                    value={newKeywords}
-                    onChange={(event) => setNewKeywords(event.target.value)}
-                    placeholder="Ej: steam, nintendo, playstation"
                   />
                 </div>
                 <div className="space-y-2">
