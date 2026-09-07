@@ -1,9 +1,19 @@
 "use client"
 
-import { useState } from "react"
-import { Settings, TrendingUp } from "lucide-react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { useState, useEffect } from "react"
+import { Settings, TrendingUp, PlusCircle } from "lucide-react"
+import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
+import { Label } from "@/components/ui/label"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { MetricTab } from "@/components/analytics/metric-tab"
 import { ExpenseDoughnut } from "@/components/analytics/expense-doughnut"
 import { ExpenseTypes } from "@/components/analytics/expense-types"
@@ -12,7 +22,9 @@ import { ExpenseInsights } from "@/components/analytics/expense-insights"
 import { CategoryManager } from "@/components/category-manager"
 import { useLanguage } from "@/lib/i18n"
 import { useTransactions, getPeriodPrefix, sortByDateDesc } from "@/lib/transactions"
-import { getCategoryFor, getAllExpenseCategories, isInternalTransferTransaction } from "@/lib/categories"
+import { getCategoryFor, getAllExpenseCategories, isInternalTransferTransaction, addCustomCategory } from "@/lib/categories"
+import type { CustomCategoryDef } from "@/lib/categories"
+import { storageGetItem } from "@/lib/auth"
 
 const MONTHS = [
   "January",
@@ -49,6 +61,19 @@ function ExpenseOverview({ month, setMonth }: { month: string; setMonth: (m: str
   const { t } = useLanguage()
   const { transactions } = useTransactions()
   const [catVersion, setCatVersion] = useState(0)
+  const [open, setOpen] = useState(false)
+  const [newName, setNewName] = useState("")
+  const [newColor, setNewColor] = useState("#66bb6a")
+
+  const handleAddCategory = () => {
+    if (!newName.trim()) return
+    const cat: CustomCategoryDef = { key: newName.trim(), color: newColor, keywords: [] }
+    addCustomCategory(cat)
+    setNewName("")
+    setNewColor("#66bb6a")
+    setOpen(false)
+    setCatVersion((v) => v + 1)
+  }
 
   const prefix = getPeriodPrefix(transactions, month)
   const yearNum = Number(prefix.slice(0, 4))
@@ -250,13 +275,57 @@ function ExpenseOverview({ month, setMonth }: { month: string; setMonth: (m: str
       {/* Presupuestos + historial anual */}
       <div className="space-y-4">
         <Card className="flex flex-col">
-          <CardHeader>
-            <CardTitle className="text-lg font-semibold">{t("Budget")}</CardTitle>
-          </CardHeader>
-          <CardContent className="pb-6">
-            <ExpenseTypes month={month} />
-          </CardContent>
-        </Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle className="text-lg font-semibold">{t("Budget")}</CardTitle>
+              <Dialog open={open} onOpenChange={setOpen}>
+                <DialogTrigger asChild>
+                  <Button variant="outline" size="sm">
+                    <PlusCircle className="mr-1.5 h-4 w-4" /> {t("Add Category")}
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-md">
+                  <DialogHeader>
+                    <DialogTitle>{t("Add Category")}</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4 py-2">
+                    <div className="space-y-2">
+                      <Label htmlFor="new-cat-name">{t("Category name")}</Label>
+                      <Input
+                        id="new-cat-name"
+                        value={newName}
+                        onChange={(event) => setNewName(event.target.value)}
+                        placeholder="Ej: Ocio digital"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="new-cat-color">{t("Color")}</Label>
+                      <div className="flex items-center gap-3">
+                        <input
+                          id="new-cat-color"
+                          type="color"
+                          value={newColor}
+                          onChange={(event) => setNewColor(event.target.value)}
+                          className="h-10 w-10 cursor-pointer rounded border border-border"
+                        />
+                        <span className="text-sm text-muted-foreground">{newColor}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <DialogFooter>
+                    <Button variant="outline" onClick={() => setOpen(false)}>
+                      {t("Cancel")}
+                    </Button>
+                    <Button onClick={handleAddCategory}>
+                      {t("Add")}
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            </CardHeader>
+            <CardContent className="pb-6">
+              <ExpenseTypes month={month} />
+            </CardContent>
+          </Card>
         <Card>
           <CardHeader>
             <CardTitle className="text-lg font-semibold">{t("History")}</CardTitle>
