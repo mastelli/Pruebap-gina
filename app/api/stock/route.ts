@@ -126,9 +126,10 @@ async function getChart(symbol: string, range: string = "6mo"): Promise<any> {
 }
 
 export async function GET(req: NextRequest) {
-  const symbol = req.nextUrl.searchParams.get("symbol")
-  const query = req.nextUrl.searchParams.get("query")
-  const range = req.nextUrl.searchParams.get("range") || "6mo"
+  try {
+    const symbol = req.nextUrl.searchParams.get("symbol")
+    const query = req.nextUrl.searchParams.get("query")
+    const range = req.nextUrl.searchParams.get("range") || "6mo"
 
   if (query) {
     const session = await getYahooSession()
@@ -337,4 +338,8 @@ export async function GET(req: NextRequest) {
         .filter((d: any) => d.price != null)
     })(),
   })
+  } catch (e) {
+    console.error("Stock API error:", e)
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+  }
 }

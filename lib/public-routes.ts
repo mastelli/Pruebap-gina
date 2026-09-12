@@ -12,6 +12,7 @@ export const PUBLIC_PATHS = [
   "/help",
   "/sign-in",
   "/sign-up",
+  "/api/stock",
 ]
 
 export function isPublicPath(pathname: string): boolean {

@@ -283,8 +283,12 @@ export function StockAnalyzer() {
         analystData: stockData.analystData,
       }
       setValuation(calculateValuation(input))
-    } catch {
-      setError("Error fetching data")
+    } catch (e: any) {
+      if (e?.message === "Failed to fetch") {
+        setError("Could not connect to the server. Please try again.")
+      } else {
+        setError("Error fetching data. Please try again later.")
+      }
     } finally {
       setLoading(false)
     }
