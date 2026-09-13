@@ -198,7 +198,7 @@ export function StockAnalyzer() {
   const [chartHistory, setChartHistory] = useState<{ date: string; price: number; open: number; high: number; low: number }[]>([])
   const [suggestions, setSuggestions] = useState<{ symbol: string; name: string; exchange: string; marketCap: number }[]>([])
   const [showSuggestions, setShowSuggestions] = useState(false)
-  const [companyNews, setCompanyNews] = useState<{ title: string; link: string; date?: string; description?: string }[]>([])
+  const [companyNews, setCompanyNews] = useState<{ title: string; link: string; date?: string; description?: string; source?: string }[]>([])
   const [newsLoading, setNewsLoading] = useState(false)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const suggestionsRef = useRef<HTMLDivElement>(null)
@@ -829,11 +829,13 @@ export function StockAnalyzer() {
                     <a href={item.link} target="_blank" rel="noopener noreferrer" className="group block">
                       <p className="text-sm font-medium text-foreground group-hover:text-primary transition-colors line-clamp-2">{item.title}</p>
                       {item.description && <p className="mt-1 text-xs text-muted-foreground line-clamp-2">{item.description}</p>}
-                      {item.date && (
-                        <p className="mt-1 text-xs text-muted-foreground">
-                          {new Date(item.date).toLocaleDateString("es-ES", { day: "numeric", month: "short", year: "numeric" })}
-                        </p>
-                      )}
+                      <div className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
+                        {item.source && <span className="font-medium">{item.source}</span>}
+                        {item.source && item.date && <span>·</span>}
+                        {item.date && (
+                          <span>{new Date(item.date).toLocaleDateString("es-ES", { day: "numeric", month: "short", year: "numeric" })}</span>
+                        )}
+                      </div>
                     </a>
                   </li>
                 ))}
