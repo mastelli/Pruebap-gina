@@ -145,6 +145,8 @@ const translations: Record<string, string> = {
   Endeudamiento: "Endeudamiento",
   "Synced from Analytics": "Sincronizado desde Análisis",
   Synced: "Sincronizado",
+  "Latest News": "Últimas noticias",
+  "No news available for this company": "No hay noticias disponibles para esta compañía",
 
   // Modales de dinero
   Amount: "Importe",

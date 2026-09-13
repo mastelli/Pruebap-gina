@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Search, TrendingUp, TrendingDown, AlertTriangle, CheckCircle, XCircle, Loader2, HelpCircle, BookOpen, ClipboardList, Target, Lightbulb, Info, Sparkles } from "lucide-react"
+import { Search, TrendingUp, TrendingDown, AlertTriangle, CheckCircle, XCircle, Loader2, HelpCircle, BookOpen, ClipboardList, Target, Lightbulb, Info, Sparkles, Newspaper } from "lucide-react"
 import { useLanguage } from "@/lib/i18n"
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip"
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Legend, Tooltip as RechartsTooltip } from "recharts"
@@ -198,6 +198,8 @@ export function StockAnalyzer() {
   const [chartHistory, setChartHistory] = useState<{ date: string; price: number; open: number; high: number; low: number }[]>([])
   const [suggestions, setSuggestions] = useState<{ symbol: string; name: string; exchange: string; marketCap: number }[]>([])
   const [showSuggestions, setShowSuggestions] = useState(false)
+  const [companyNews, setCompanyNews] = useState<{ title: string; link: string; date?: string; description?: string }[]>([])
+  const [newsLoading, setNewsLoading] = useState(false)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const suggestionsRef = useRef<HTMLDivElement>(null)
 
@@ -210,6 +212,18 @@ export function StockAnalyzer() {
     document.addEventListener("mousedown", handleClickOutside)
     return () => document.removeEventListener("mousedown", handleClickOutside)
   }, [])
+
+  useEffect(() => {
+    if (!data) { setCompanyNews([]); return }
+    const controller = new AbortController()
+    setNewsLoading(true)
+    fetch(`/api/news/company?q=${encodeURIComponent(data.profile.name)}`, { signal: controller.signal })
+      .then((res) => res.json())
+      .then((json) => setCompanyNews(json.items ?? []))
+      .catch(() => {})
+      .finally(() => setNewsLoading(false))
+    return () => controller.abort()
+  }, [data?.profile.name])
 
   const handleTickerChange = (value: string) => {
     setTicker(value)
@@ -783,6 +797,50 @@ export function StockAnalyzer() {
             </CardContent>
           </Card>
         </>
+      )}
+
+      {/* ── Noticias de la compañía ── */}
+      {data && (
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <div className="rounded-lg bg-indigo-500/10 p-1.5">
+                <Newspaper className="h-4 w-4 text-indigo-500" />
+              </div>
+              {t("Latest News")} — {data.profile.name}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {newsLoading ? (
+              <div className="space-y-3">
+                {[1, 2, 3, 4].map((i) => (
+                  <div key={i} className="space-y-2">
+                    <div className="h-4 bg-muted rounded w-3/4 animate-pulse" />
+                    <div className="h-3 bg-muted rounded w-1/2 animate-pulse" />
+                  </div>
+                ))}
+              </div>
+            ) : companyNews.length === 0 ? (
+              <p className="text-sm text-muted-foreground">{t("No news available for this company")}</p>
+            ) : (
+              <ul className="divide-y divide-border">
+                {companyNews.map((item, i) => (
+                  <li key={i} className="py-3 first:pt-0 last:pb-0">
+                    <a href={item.link} target="_blank" rel="noopener noreferrer" className="group block">
+                      <p className="text-sm font-medium text-foreground group-hover:text-primary transition-colors line-clamp-2">{item.title}</p>
+                      {item.description && <p className="mt-1 text-xs text-muted-foreground line-clamp-2">{item.description}</p>}
+                      {item.date && (
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          {new Date(item.date).toLocaleDateString("es-ES", { day: "numeric", month: "short", year: "numeric" })}
+                        </p>
+                      )}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </CardContent>
+        </Card>
       )}
 
       {/* ── Sección educativa ── */}
