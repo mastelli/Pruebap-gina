@@ -173,7 +173,7 @@ export async function GET(req: NextRequest) {
   const chartRange = validRanges.includes(range) ? range : "6mo"
 
   const [summary, chart] = await Promise.all([
-    fetchYahoo(ticker, "assetProfile,defaultKeyStatistics,financialData,earningsTrend,summaryDetail,recommendationTrend,price,growthEstimates,cashflowStatementHistory"),
+    fetchYahoo(ticker, "assetProfile,defaultKeyStatistics,financialData,earningsTrend,summaryDetail,recommendationTrend,price,growthEstimates,cashflowStatementHistory,incomeStatementHistory"),
     getChart(ticker, chartRange),
   ])
 
@@ -246,7 +246,7 @@ export async function GET(req: NextRequest) {
   const growthEst = summary?.growthEstimates ?? {}
   const trend0q = trend.find((t: any) => t?.period === "0q")
   statsMap.salesGrowthQoQ = raw(trend0q?.revenueEstimate?.growth) ?? raw(growthEst.currentQtr) ?? null
-  statsMap.salesGrowth5Y = raw(growthEst.earnings5Y) ?? null
+  statsMap.salesGrowth5Y = null
 
   const currentYear = new Date().getFullYear()
   for (const t of trend) {
@@ -267,6 +267,26 @@ export async function GET(req: NextRequest) {
     if (currentFCF && prevFCF && prevFCF !== 0) {
       statsMap.fcfGrowth = ((currentFCF - prevFCF) / Math.abs(prevFCF)) * 100
     }
+  }
+
+  // Calculate 5-year revenue CAGR from income statement history
+  const incomeHistory = summary?.incomeStatementHistory?.incomeStatementHistory ?? []
+  if (incomeHistory.length >= 2) {
+    const currentRevenue = raw(incomeHistory[0]?.totalRevenue)
+    // Find the oldest revenue entry (up to 5 years back)
+    const oldestRevenue = raw(incomeHistory[incomeHistory.length - 1]?.totalRevenue)
+    const oldestDate = incomeHistory[incomeHistory.length - 1]?.endDate?.raw
+    const currentDate = incomeHistory[0]?.endDate?.raw
+    if (currentRevenue && oldestRevenue && oldestRevenue > 0 && oldestDate && currentDate) {
+      const yearsDiff = (currentDate - oldestDate) / (365.25 * 24 * 60 * 60)
+      if (yearsDiff >= 1) {
+        statsMap.salesGrowth5Y = (Math.pow(currentRevenue / oldestRevenue, 1 / yearsDiff) - 1)
+      }
+    }
+  }
+  // Fallback: use growthEstimates if available and we couldn't compute from history
+  if (statsMap.salesGrowth5Y == null) {
+    statsMap.salesGrowth5Y = raw(growthEst.past5Years) ?? raw(growthEst.earnings5Y) ?? null
   }
 
   const recTrend = summary?.recommendationTrend?.trend ?? []
