@@ -72,10 +72,12 @@ interface ManualStock {
   id: string
   name: string
   exchange: string
+  currency: string
   purchases: Purchase[]
 }
 
 const EXCHANGES = ["NASDAQ", "NYSE", "LSE", "BME", "Euronext", "XETRA", "Other"]
+const CURRENCIES = ["EUR", "USD", "GBP", "CHF", "JPY"]
 
 // Formato del csv del broker (por posicion):
 // Producto, ISIN, Cantidad, Precio actual, Moneda, Valor local total, Valor EUR total
@@ -287,9 +289,11 @@ export function PortfolioPanel() {
   const [showAddManual, setShowAddManual] = useState(false)
   const [manualName, setManualName] = useState("")
   const [manualExchange, setManualExchange] = useState("")
+  const [manualCurrency, setManualCurrency] = useState("EUR")
   const [manualPrice, setManualPrice] = useState("")
   const [manualQuantity, setManualQuantity] = useState("")
   const [expandedManual, setExpandedManual] = useState<string | null>(null)
+  const [manualPrices, setManualPrices] = useState<Record<string, { price: number; previousClose: number | null; currency: string }>>({})
   const fileInputRef = useRef<HTMLInputElement>(null)
   const wsRef = useRef<WebSocket | null>(null)
   const fhRef = useRef<WebSocket | null>(null)
@@ -377,12 +381,14 @@ export function PortfolioPanel() {
         id: `manual-${Date.now()}`,
         name: manualName.toUpperCase(),
         exchange: manualExchange,
+        currency: manualCurrency,
         purchases: [purchase],
       }
       setManualStocks([...manualStocks, newStock])
     }
     setManualName("")
     setManualExchange("")
+    setManualCurrency("EUR")
     setManualPrice("")
     setManualQuantity("")
     setShowAddManual(false)
@@ -705,6 +711,64 @@ export function PortfolioPanel() {
 
   const removeAsset = (id: string) => persistAssets(assets.filter((asset) => asset.id !== id))
 
+  const refreshManualPrices = useCallback(async () => {
+    if (manualStocks.length === 0) return
+    try {
+      const symbols = manualStocks.map((s) => s.name)
+      const currencies = [...new Set(manualStocks.map((s) => s.currency).filter((c) => c !== "EUR"))]
+      const fxSymbols = currencies.map((c) => `${c}EUR=X`)
+      const allSymbols = [...symbols, ...fxSymbols]
+
+      const res = await fetch(
+        `https://query1.finance.yahoo.com/v7/finance/spark?symbols=${encodeURIComponent(allSymbols.join(","))}&range=1d&interval=5m`,
+        { headers: { "User-Agent": "Mozilla/5.0" } }
+      )
+      if (!res.ok) return
+      const json = await res.json()
+
+      const newPrices: Record<string, { price: number; previousClose: number | null; currency: string }> = {}
+      const fxRates: Record<string, number> = {}
+
+      for (const item of json?.spark?.result ?? []) {
+        const meta = item?.response?.[0]?.meta
+        if (!item?.symbol || !meta || typeof meta.regularMarketPrice !== "number") continue
+        const prevClose = typeof meta.chartPreviousClose === "number"
+          ? meta.chartPreviousClose
+          : typeof meta.previousClose === "number"
+            ? meta.previousClose
+            : null
+        if (item.symbol.endsWith("EUR=X")) {
+          fxRates[item.symbol.replace("EUR=X", "")] = meta.regularMarketPrice
+        } else {
+          newPrices[item.symbol] = {
+            price: meta.regularMarketPrice,
+            previousClose: prevClose,
+            currency: meta.currency ?? "USD",
+          }
+        }
+      }
+
+      setManualPrices((prev) => {
+        const updated = { ...prev }
+        for (const stock of manualStocks) {
+          const quote = newPrices[stock.name]
+          if (quote) {
+            updated[stock.id] = quote
+          }
+        }
+        return updated
+      })
+    } catch {
+      // ignore fetch errors
+    }
+  }, [manualStocks])
+
+  useEffect(() => {
+    void refreshManualPrices()
+    const id = setInterval(() => void refreshManualPrices(), 30000)
+    return () => clearInterval(id)
+  }, [refreshManualPrices])
+
   const statusFor = (asset: Asset): { live?: boolean; text: string } | null => {
     const info = prices[asset.isin]
     if (!info?.symbol || info.marketOpen === undefined) return null
@@ -803,7 +867,20 @@ export function PortfolioPanel() {
                   </Select>
                 </div>
                 <div>
-                  <Label>{t("Price")} (€)</Label>
+                  <Label>{t("Currency")}</Label>
+                  <Select value={manualCurrency} onValueChange={setManualCurrency}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {CURRENCIES.map((c) => (
+                        <SelectItem key={c} value={c}>{c}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label>{t("Price")} ({manualCurrency})</Label>
                   <Input
                     type="number"
                     step={0.01}
@@ -942,6 +1019,14 @@ export function PortfolioPanel() {
                   const bep = getManualBep(stock)
                   const totalQty = getManualTotalQty(stock)
                   const isExpanded = expandedManual === stock.id
+                  const liveQuote = manualPrices[stock.id]
+                  const currentPrice = liveQuote?.price
+                  const prevClose = liveQuote?.previousClose
+                  const dayChange = currentPrice !== undefined && prevClose !== null ? currentPrice - prevClose : null
+                  const dayPct = dayChange !== null && prevClose !== null && prevClose !== 0 ? (dayChange / prevClose) * 100 : null
+                  const priceDiff = currentPrice !== undefined ? currentPrice - bep : null
+                  const priceDiffPct = priceDiff !== null && bep > 0 ? (priceDiff / bep) * 100 : null
+                  const cur = stock.currency
                   return (
                     <Fragment key={stock.id}>
                       <tr className="border-b border-border">
@@ -954,7 +1039,7 @@ export function PortfolioPanel() {
                             {stock.name}
                           </button>
                           <div className="text-xs text-muted-foreground ml-5">
-                            {stock.purchases.length} {stock.purchases.length === 1 ? "compra" : "compras"}
+                            {stock.purchases.length} {stock.purchases.length === 1 ? "compra" : "compras"} · {cur}
                           </div>
                         </td>
                         <td className="whitespace-nowrap py-3 pr-4 text-muted-foreground">
@@ -963,17 +1048,36 @@ export function PortfolioPanel() {
                         <td className="py-3 pr-4 text-right tabular-nums">
                           {totalQty.toLocaleString("es-ES")}
                         </td>
-                        <td className="py-3 pr-4 text-right tabular-nums text-muted-foreground">
-                          —
+                        <td className="py-3 pr-4 text-right tabular-nums font-medium">
+                          {currentPrice !== undefined
+                            ? `${currentPrice.toLocaleString("es-ES", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${cur}`
+                            : "—"}
+                        </td>
+                        <td className="py-3 pr-4 text-right tabular-nums">
+                          <span className="font-medium">{bep.toLocaleString("es-ES", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {cur}</span>
+                          {priceDiffPct !== null && (
+                            <div className={`text-xs ${priceDiffPct >= 0 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}>
+                              {priceDiffPct >= 0 ? "+" : ""}{priceDiffPct.toFixed(1)}%
+                            </div>
+                          )}
+                        </td>
+                        <td
+                          className={`py-3 pr-4 text-right tabular-nums ${
+                            dayPct === null
+                              ? ""
+                              : dayPct >= 0
+                                ? "text-green-600 dark:text-green-400"
+                                : "text-red-600 dark:text-red-400"
+                          }`}
+                        >
+                          {dayChange !== null && dayPct !== null
+                            ? `${dayChange >= 0 ? "+" : ""}${dayChange.toFixed(2)} (${dayPct >= 0 ? "+" : ""}${dayPct.toFixed(1)}%)`
+                            : "—"}
                         </td>
                         <td className="py-3 pr-4 text-right tabular-nums font-medium">
-                          {bep.toLocaleString("es-ES", { style: "currency", currency: "EUR" })}
-                        </td>
-                        <td className="py-3 pr-4 text-right tabular-nums text-muted-foreground">
-                          —
-                        </td>
-                        <td className="py-3 pr-4 text-right tabular-nums font-medium">
-                          {(bep * totalQty).toLocaleString("es-ES", { style: "currency", currency: "EUR" })}
+                          {currentPrice !== undefined
+                            ? `${(currentPrice * totalQty).toLocaleString("es-ES", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${cur}`
+                            : `${(bep * totalQty).toLocaleString("es-ES", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${cur}`}
                         </td>
                         <td className="py-3 text-right">
                           <Button
@@ -997,13 +1101,13 @@ export function PortfolioPanel() {
                             {purchase.quantity.toLocaleString("es-ES")}
                           </td>
                           <td className="py-2 pr-4 text-right tabular-nums text-sm">
-                            {purchase.price.toLocaleString("es-ES", { style: "currency", currency: "EUR" })}
+                            {purchase.price.toLocaleString("es-ES", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {cur}
                           </td>
                           <td className="py-2 pr-4 text-right tabular-nums text-sm text-muted-foreground">—</td>
                           <td className="py-2 pr-4 text-right tabular-nums text-sm text-muted-foreground">—</td>
-                          <td className="py-2 pr-4 text-right tabular-nums text-sm">
-                            {(purchase.price * purchase.quantity).toLocaleString("es-ES", { style: "currency", currency: "EUR" })}
-                          </td>
+                           <td className="py-2 pr-4 text-right tabular-nums text-sm">
+                             {(purchase.price * purchase.quantity).toLocaleString("es-ES", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {cur}
+                           </td>
                           <td className="py-2 text-right">
                             <Button
                               variant="ghost"
