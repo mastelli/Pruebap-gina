@@ -1139,7 +1139,10 @@ export function PortfolioPanel() {
                           </Button>
                         </td>
                       </tr>
-                      {isExpanded && stock.purchases.map((purchase) => (
+                      {isExpanded && stock.purchases.map((purchase) => {
+                        const purchaseDiff = currentPrice !== undefined ? currentPrice - purchase.price : null
+                        const purchaseDiffPct = purchaseDiff !== null && purchase.price > 0 ? (purchaseDiff / purchase.price) * 100 : null
+                        return (
                         <tr key={purchase.id} className="border-b border-border bg-secondary/30">
                           <td className="py-2 pl-10 pr-4 text-sm text-muted-foreground">
                             {purchase.date}
@@ -1155,7 +1158,19 @@ export function PortfolioPanel() {
                           </td>
                           <td className="py-2 pr-4 text-right tabular-nums text-sm text-muted-foreground">—</td>
                           <td className="py-2 pr-4 text-right tabular-nums text-sm text-muted-foreground">—</td>
-                          <td className="py-2 pr-4 text-right tabular-nums text-sm text-muted-foreground">—</td>
+                          <td
+                            className={`py-2 pr-4 text-right tabular-nums text-sm ${
+                              purchaseDiffPct === null
+                                ? ""
+                                : purchaseDiffPct >= 0
+                                  ? "text-green-600 dark:text-green-400"
+                                  : "text-red-600 dark:text-red-400"
+                            }`}
+                          >
+                            {purchaseDiff !== null && purchaseDiffPct !== null
+                              ? `${purchaseDiff >= 0 ? "+" : ""}${purchaseDiff.toFixed(priceDecimals(purchase.price))} (${purchaseDiffPct >= 0 ? "+" : ""}${purchaseDiffPct.toFixed(1)}%)`
+                              : "—"}
+                          </td>
                           <td className="py-2 pr-4 text-right tabular-nums text-sm">
                             {(purchase.price * purchase.quantity).toLocaleString("es-ES", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {cur}
                           </td>
@@ -1170,7 +1185,8 @@ export function PortfolioPanel() {
                             </Button>
                           </td>
                         </tr>
-                      ))}
+                        )
+                      })}
                     </Fragment>
                   )
                 })}
