@@ -721,10 +721,7 @@ export function PortfolioPanel() {
     try {
       const symbols = manualStocks.map((s) => s.name)
       const currencies = [...new Set(manualStocks.map((s) => s.currency).filter((c) => c !== "EUR"))]
-      const fxSymbols = currencies.map((c) => `${c}EUR=X`)
-      const allSymbols = [...symbols, ...fxSymbols]
 
-      // Use our own API to avoid CORS issues
       const res = await fetch("/api/portfolio-prices", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -736,23 +733,16 @@ export function PortfolioPanel() {
       if (!res.ok) return
       const json = await res.json()
       const results = (json?.results ?? {}) as Record<string, { price?: number; previousClose?: number | null; currency?: string; symbol?: string; exchange?: string } | null>
-      const fx = (json?.fx ?? {}) as Record<string, number>
 
       const newPrices: Record<string, { price: number; previousClose: number | null; currency: string }> = {}
 
       for (const stock of manualStocks) {
         const quote = results[stock.name]
         if (quote && typeof quote.price === "number") {
-          const cur = stock.currency
-          let priceInStockCurrency = quote.price
-          // If stock is not in EUR, convert from EUR to stock currency
-          if (cur !== "EUR" && fx[cur]) {
-            priceInStockCurrency = quote.price / fx[cur]
-          }
           newPrices[stock.name] = {
-            price: priceInStockCurrency,
+            price: quote.price,
             previousClose: quote.previousClose ?? null,
-            currency: cur,
+            currency: stock.currency,
           }
         }
       }
