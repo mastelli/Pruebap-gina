@@ -60,6 +60,7 @@ const STOOQ_SUFFIX_MAP: Record<string, string> = {
   IR: "ie",
   JO: "za",
   VX: "ch",
+  TG: "tg",
 }
 
 function isEuropeanSymbol(yahooSymbol: string): boolean {

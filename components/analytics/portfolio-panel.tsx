@@ -82,7 +82,7 @@ const EXCHANGES = [
   "LSE", "AIM",
   "BME",
   "Euronext Paris", "Euronext Amsterdam", "Euronext Brussels",
-  "XETRA", "DAX",
+  "XETRA", "DAX", "Tradegate",
   "Borsa Italiana", "Milan",
   "SIX Swiss", "Zurich",
   "OMX Stockholm", "OMX Helsinki", "OMX Copenhagen", "OMX Oslo",
