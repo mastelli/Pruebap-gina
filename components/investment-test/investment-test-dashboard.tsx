@@ -179,6 +179,7 @@ export function InvestmentTestDashboard() {
   const [data, setData] = useState<StockData | null>(null)
   const [searching, setSearching] = useState(false)
   const [range, setRange] = useState("6mo")
+  const [selectedSymbol, setSelectedSymbol] = useState<string | null>(null)
   const chartContainerRef = useRef<HTMLDivElement>(null)
   const chartRef = useRef<import("lightweight-charts").IChartApi | null>(null)
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
@@ -211,16 +212,18 @@ export function InvestmentTestDashboard() {
   }, [])
 
   useEffect(() => {
+    if (query === selectedSymbol) return
     const timer = setTimeout(() => searchStock(query), 300)
     return () => clearTimeout(timer)
-  }, [query, searchStock])
+  }, [query, searchStock, selectedSymbol])
 
-  const loadStock = useCallback(async (symbol: string) => {
+  const loadStock = useCallback(async (symbol: string, r?: string) => {
     setLoading(true)
     setResults([])
+    setSelectedSymbol(symbol)
     setQuery(symbol)
     try {
-      const res = await fetch(`/api/stock?symbol=${encodeURIComponent(symbol)}&range=${range}`)
+      const res = await fetch(`/api/stock?symbol=${encodeURIComponent(symbol)}&range=${r ?? range}`)
       if (!res.ok) return
       const json = await res.json()
       setData(json)
@@ -606,7 +609,7 @@ export function InvestmentTestDashboard() {
           {/* Range selector */}
           <div className="flex gap-2">
             {["1d", "5d", "1mo", "3mo", "6mo", "1y", "2y", "5y"].map((r) => (
-              <Button key={r} variant={range === r ? "default" : "outline"} size="sm" onClick={() => setRange(r)}>
+              <Button key={r} variant={range === r ? "default" : "outline"} size="sm" onClick={() => { setRange(r); if (selectedSymbol) loadStock(selectedSymbol, r) }}>
                 {r.toUpperCase()}
               </Button>
             ))}
