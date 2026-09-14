@@ -167,12 +167,38 @@ export function calculateValuation(input: ValuationInput): ValuationResult {
   const expectedValue = bearPrice * 0.25 + basePrice * 0.50 + bullPrice * 0.25
   const upsidePct = price > 0 ? ((expectedValue - price) / price) * 100 : 0
 
+  // Factor de restricción por fundamentales de valoración
+  // Si PE o EV/EBITDA están por encima del benchmark del sector,
+  // se reduce el upside potencial para evitar etiquetas demasiado optimistas
+  let valuationConstraint = 1.0
+  if (trailingPE > 0) {
+    const peRatio = trailingPE / SECTOR.pe
+    if (peRatio > 1.5) valuationConstraint *= 0.4
+    else if (peRatio > 1.2) valuationConstraint *= 0.6
+    else if (peRatio > 1.0) valuationConstraint *= 0.8
+  }
+  if (evEbitda > 0) {
+    const evRatio = evEbitda / SECTOR.evEbitda
+    if (evRatio > 1.5) valuationConstraint *= 0.4
+    else if (evRatio > 1.2) valuationConstraint *= 0.6
+    else if (evRatio > 1.0) valuationConstraint *= 0.8
+  }
+
+  const constrainedDiffPct = diffPct * valuationConstraint
+
   let valuationLabel = "PRECIO JUSTO"
-  const diffPct = price > 0 ? ((expectedValue - price) / price) * 100 : 0
-  if (diffPct > 30) valuationLabel = "MUY BARATA"
-  else if (diffPct > 15) valuationLabel = "BARATA"
-  else if (diffPct < -30) valuationLabel = "MUY CARA"
-  else if (diffPct < -15) valuationLabel = "CARA"
+  if (constrainedDiffPct > 30) valuationLabel = "MUY BARATA"
+  else if (constrainedDiffPct > 15) valuationLabel = "BARATA"
+  else if (constrainedDiffPct < -30) valuationLabel = "MUY CARA"
+  else if (constrainedDiffPct < -15) valuationLabel = "CARA"
+
+  // Si los fundamentales de valoración son débiles (PE/EV muy altos),
+  // añadir advertencia al label
+  const peAboveSector = trailingPE > 0 && trailingPE > SECTOR.pe * 1.3
+  const evAboveSector = evEbitda > 0 && evEbitda > SECTOR.evEbitda * 1.3
+  if (peAboveSector && evAboveSector && (valuationLabel === "MUY BARATA" || valuationLabel === "BARATA")) {
+    valuationLabel += " (valoración elevada)"
+  }
 
   const scenarios: ScenarioResult[] = [
     { label: "Bear", targetPrice: bearPrice, probability: 25, assumptions: "Crecimiento bajo, múltiplo reducido" },
