@@ -996,6 +996,9 @@ export function PortfolioPanel() {
                             ? "—"
                             : `${formatSigned(dayChange, decimals)} (${formatSigned(dayPct)}%)`}
                       </td>
+                      <td className="py-3 pr-4 text-right tabular-nums text-muted-foreground">
+                        —
+                      </td>
                       <td className="py-3 pr-4 text-right tabular-nums">
                         {totalBase !== undefined
                           ? formatMoney(totalBase * asset.quantity, displayCurrency, 2)
