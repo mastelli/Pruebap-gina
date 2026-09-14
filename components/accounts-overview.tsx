@@ -69,7 +69,9 @@ export function AccountsOverview() {
       const movements = parseBankMovements(content)
 
       if (movements.length === 0) {
-        toast.error(t("No expenses found in the file"))
+        toast.error(t("No expenses found in the file"), {
+          description: t("The bank format may not be supported. Contact support for help."),
+        })
         return
       }
 

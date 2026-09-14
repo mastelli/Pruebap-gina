@@ -416,6 +416,7 @@ const translations: Record<string, string> = {
   "Add bank statement": "Añadir extracto del banco",
   "movements imported": "movimientos importados",
   "No expenses found in the file": "No se han encontrado movimientos en el archivo",
+  "The bank format may not be supported. Contact support for help.": "El formato del banco puede no estar soportado. Contacta soporte para obtener ayuda.",
   "Error reading the file": "Error al leer el archivo",
 
   // Métricas de negocio
