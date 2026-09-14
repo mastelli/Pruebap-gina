@@ -454,9 +454,19 @@ export function InvestmentTestDashboard() {
                         </div>
                       </div>
                       {stats.enterpriseValue ? (
-                        <div className="flex justify-between items-center px-2 py-1.5 rounded-lg bg-secondary/50 text-sm">
-                          <span className="text-muted-foreground">{t("Enterprise Value")}</span>
-                          <span className="font-medium tabular-nums">{formatLargeNumber(stats.enterpriseValue)} {q.currency}</span>
+                        <div className="grid grid-cols-2 gap-2">
+                          <div className="flex justify-between items-center px-2 py-1.5 rounded-lg bg-green-500/10 text-sm">
+                            <span className="text-green-600 font-medium">EV+</span>
+                            <span className="font-bold text-green-600 tabular-nums">
+                              +{((a.targetMean - q.price)).toLocaleString("es-ES", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {q.currency}
+                            </span>
+                          </div>
+                          <div className="flex justify-between items-center px-2 py-1.5 rounded-lg bg-red-500/10 text-sm">
+                            <span className="text-red-600 font-medium">EV-</span>
+                            <span className="font-bold text-red-600 tabular-nums">
+                              {a.targetLow ? (a.targetLow - q.price).toLocaleString("es-ES", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "—"} {q.currency}
+                            </span>
+                          </div>
                         </div>
                       ) : null}
                       <Separator />
