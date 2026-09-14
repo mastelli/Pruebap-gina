@@ -9,7 +9,6 @@ import { DebtCharts } from "./DebtCharts"
 import { DebtCalendar } from "./DebtCalendar"
 import { Simulator } from "./Simulator"
 import { Recommendations } from "./Recommendations"
-import { ManualStocks } from "./ManualStocks"
 import {
   applyScenario,
   computeDerived,
@@ -88,7 +87,6 @@ export function DebtDashboard() {
       <AnalyticsHeader titleKey="Balance" showActions={false} />
       <Kpis base={base} scenario={scenario} flags={flags} />
       <Diagnosis flags={flags} />
-      <ManualStocks />
       <InputsSection items={items} onChange={setItems} />
       <DebtCharts d={scenario} items={items} projection={projection} months={months} onMonthsChange={setMonths} />
       <DebtCalendar items={items} />
