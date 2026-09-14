@@ -166,6 +166,7 @@ export function calculateValuation(input: ValuationInput): ValuationResult {
 
   const expectedValue = bearPrice * 0.25 + basePrice * 0.50 + bullPrice * 0.25
   const upsidePct = price > 0 ? ((expectedValue - price) / price) * 100 : 0
+  const diffPct = price > 0 ? ((expectedValue - price) / price) * 100 : 0
 
   // Factor de restricción por fundamentales de valoración
   // Si PE o EV/EBITDA están por encima del benchmark del sector,
