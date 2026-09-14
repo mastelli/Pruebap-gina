@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Upload, Trash2, RefreshCw, Plus, TrendingUp, ChevronDown, ChevronRight } from "lucide-react"
 import { useLanguage } from "@/lib/i18n"
 import { storageGetItem, storageSetItem } from "@/lib/auth"
-import { exchangeFromSymbol } from "@/lib/exchanges"
+import { exchangeFromSymbol, setExchangeCache } from "@/lib/exchanges"
 
 const PORTFOLIO_STORAGE_KEY = "appPortfolio"
 const PRICES_STORAGE_KEY = "appPortfolioPrices"
@@ -43,6 +43,7 @@ interface PriceInfo {
   price?: number
   previousClose?: number | null
   currency?: string
+  exchange?: string
   marketOpen?: boolean
   sessionStart?: number
   sessionEnd?: number
@@ -453,6 +454,10 @@ export function PortfolioPanel() {
         const results = (json?.results ?? {}) as Record<string, PriceInfo | null>
         for (const [isin, quote] of Object.entries(results)) {
           if (!quote) continue
+          // Populate exchange cache from Yahoo Finance data
+          if (quote.symbol && quote.exchange) {
+            setExchangeCache(quote.symbol, quote.exchange)
+          }
           const existing = merged[isin]
           // La cotizacion REST solo sustituye al streaming si es mas reciente
           // que el ultimo tick recibido (el feed de Yahoo puede ir retrasado)
@@ -970,7 +975,7 @@ export function PortfolioPanel() {
                         )}
                       </td>
                       <td className="whitespace-nowrap py-3 pr-4 text-muted-foreground">
-                        {info?.symbol ? exchangeFromSymbol(info.symbol) || "—" : "—"}
+                        {info?.exchange || (info?.symbol ? exchangeFromSymbol(info.symbol) : "") || "—"}
                       </td>
                       <td className="py-3 pr-4 text-right tabular-nums">
                         {asset.quantity.toLocaleString("es-ES")}
