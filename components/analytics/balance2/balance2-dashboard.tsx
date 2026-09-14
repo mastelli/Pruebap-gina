@@ -263,15 +263,22 @@ export function Balance2Dashboard() {
         <KPICard title={t("Non-current Liabilities")} value={fmtEuro(d.nonCurrentLiabilities)} icon={TrendingDown} />
       </div>
 
+      <Balance2AiAnalysis
+        derived={d}
+        ratios={ratios}
+        assets={allAssets}
+        liabilities={snapshot.liabilities}
+        cashFlow={allCashFlow}
+      />
+
       <Tabs defaultValue="balance" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-3 md:grid-cols-7">
+        <TabsList className="grid w-full grid-cols-2 md:grid-cols-6">
           <TabsTrigger value="balance">{t("Balance")}</TabsTrigger>
           <TabsTrigger value="assets">{t("Assets")}</TabsTrigger>
           <TabsTrigger value="liabilities">{t("Liabilities")}</TabsTrigger>
           <TabsTrigger value="ratios">{t("Ratios")}</TabsTrigger>
           <TabsTrigger value="cashflow">{t("Cash Flow")}</TabsTrigger>
           <TabsTrigger value="charts">{t("Charts")}</TabsTrigger>
-          <TabsTrigger value="ai">{t("AI Insight")}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="balance" className="space-y-4">
@@ -491,16 +498,6 @@ export function Balance2Dashboard() {
 
         <TabsContent value="charts">
           <Balance2Charts snapshot={{ ...snapshot, assets: allAssets, cashFlow: allCashFlow }} derived={d} />
-        </TabsContent>
-
-        <TabsContent value="ai">
-          <Balance2AiAnalysis
-            derived={d}
-            ratios={ratios}
-            assets={allAssets}
-            liabilities={snapshot.liabilities}
-            cashFlow={allCashFlow}
-          />
         </TabsContent>
       </Tabs>
     </div>
