@@ -17,6 +17,7 @@ import {
   PiggyBank,
   Calculator,
   LineChart,
+  Search,
   type LucideIcon,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -45,6 +46,7 @@ const navigation: NavItem[] = [
     ],
   },
   { name: "Savings and Investment", href: "/investment", icon: PiggyBank },
+  { name: "Investment Test", href: "/investment-test", icon: Search },
   { name: "Transactions", href: "/transactions", icon: Wallet },
   { name: "Invoices", href: "/invoices", icon: Receipt },
   { name: "Payments", href: "/payments", icon: CreditCard },
