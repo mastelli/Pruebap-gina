@@ -426,6 +426,183 @@ export function InvestmentTestDashboard() {
             </CardContent>
           </Card>
 
+          {/* Investment Thesis + Expected Value */}
+          {q && a && (
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+              {/* Expected Value Card */}
+              <Card className="lg:col-span-1">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Target className="h-5 w-5" />
+                    {t("Expected Value")}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {a.targetMean ? (
+                    <>
+                      <div className="text-center">
+                        <div className="text-sm text-muted-foreground">{t("Target Price")}</div>
+                        <div className="text-3xl font-bold tabular-nums mt-1">
+                          {a.targetMean.toLocaleString("es-ES", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {q.currency}
+                        </div>
+                        <div className={`text-lg font-semibold mt-1 ${a.targetMean >= q.price ? "text-green-600" : "text-red-600"}`}>
+                          {a.targetMean >= q.price ? "+" : ""}{((a.targetMean - q.price) / q.price * 100).toFixed(1)}% {t("upside")}
+                        </div>
+                      </div>
+                      <Separator />
+                      <div className="grid grid-cols-2 gap-2 text-sm">
+                        <div className="text-center p-2 rounded-lg bg-green-500/10">
+                          <div className="text-muted-foreground">{t("Bull Case")}</div>
+                          <div className="font-bold text-green-600">{a.targetHigh?.toLocaleString("es-ES", { minimumFractionDigits: 2 })}</div>
+                          <div className="text-xs text-green-600">+{a.targetHigh ? ((a.targetHigh - q.price) / q.price * 100).toFixed(1) : 0}%</div>
+                        </div>
+                        <div className="text-center p-2 rounded-lg bg-red-500/10">
+                          <div className="text-muted-foreground">{t("Bear Case")}</div>
+                          <div className="font-bold text-red-600">{a.targetLow?.toLocaleString("es-ES", { minimumFractionDigits: 2 })}</div>
+                          <div className="text-xs text-red-600">{a.targetLow ? ((a.targetLow - q.price) / q.price * 100).toFixed(1) : 0}%</div>
+                        </div>
+                      </div>
+                      <PriceRangeBar current={q.price} low={a.targetLow ?? 0} high={a.targetHigh ?? 0} />
+                    </>
+                  ) : (
+                    <div className="text-center text-muted-foreground py-4">
+                      {t("No analyst targets available")}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Investment Thesis */}
+              <Card className="lg:col-span-2">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <BarChart3 className="h-5 w-5" />
+                    {t("Investment Thesis")}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {(() => {
+                    const positives: string[] = []
+                    const negatives: string[] = []
+                    const neutral: string[] = []
+
+                    // Valuation
+                    if (stats.trailingPE) {
+                      if (stats.trailingPE < 15) positives.push(t("Low P/E indicates undervaluation"))
+                      else if (stats.trailingPE > 30) negatives.push(t("High P/E suggests overvaluation"))
+                      else neutral.push(t("P/E is within normal range"))
+                    }
+                    if (stats.pegRatio) {
+                      if (stats.pegRatio < 1) positives.push(t("PEG < 1: growth is cheap relative to earnings"))
+                      else if (stats.pegRatio > 2) negatives.push(t("PEG > 2: paying premium for growth"))
+                    }
+                    if (stats.priceToBook && stats.priceToBook < 1) positives.push(t("Trading below book value — rare opportunity"))
+
+                    // Profitability
+                    if (stats.returnOnEquity) {
+                      if (stats.returnOnEquity > 0.2) positives.push(t("ROE > 20% — excellent capital efficiency"))
+                      else if (stats.returnOnEquity < 0.05) negatives.push(t("ROE < 5% — poor capital allocation"))
+                    }
+                    if (stats.profitMargins && stats.profitMargins > 0.2) positives.push(t("Strong profit margins above 20%"))
+                    if (stats.grossMargins && stats.grossMargins > 0.5) positives.push(t("High gross margins — strong pricing power"))
+
+                    // Growth
+                    if (stats.revenueGrowth) {
+                      if (stats.revenueGrowth > 0.15) positives.push(t("Revenue growth > 15% — strong momentum"))
+                      else if (stats.revenueGrowth < 0) negatives.push(t("Declining revenue — growth concerns"))
+                    }
+                    if (stats.earningsGrowth && stats.earningsGrowth > 0.2) positives.push(t("Earnings growing faster than revenue — improving efficiency"))
+
+                    // Financial health
+                    if (stats.debtToEquity) {
+                      if (stats.debtToEquity < 50) positives.push(t("Low debt — conservative balance sheet"))
+                      else if (stats.debtToEquity > 150) negatives.push(t("High debt levels — financial risk"))
+                    }
+                    if (stats.currentRatio && stats.currentRatio > 1.5) positives.push(t("Strong liquidity position"))
+                    if (stats.freeCashflow && stats.freeCashflow > 0) positives.push(t("Positive free cash flow — self-funding growth"))
+
+                    // Analyst sentiment
+                    if (a.recommendationKey === "buy" || a.recommendationKey === "strongBuy") {
+                      positives.push(t("Analyst consensus is bullish"))
+                    } else if (a.recommendationKey === "sell" || a.recommendationKey === "strongSell") {
+                      negatives.push(t("Analyst consensus is bearish"))
+                    }
+                    if (a.targetMean && q.price && a.targetMean > q.price * 1.1) {
+                      positives.push(t("Significant upside to analyst target price"))
+                    }
+
+                    // Risk
+                    if (stats.beta) {
+                      if (stats.beta > 1.5) neutral.push(t("High beta — more volatile than market"))
+                      else if (stats.beta < 0.8) positives.push(t("Low beta — defensive stock"))
+                    }
+
+                    // Insider ownership
+                    if (stats.heldPercentInsiders && stats.heldPercentInsiders > 0.1) {
+                      positives.push(t("Significant insider ownership — aligned interests"))
+                    }
+
+                    const score = positives.length - negatives.length
+                    const rating = score >= 4 ? t("Strong Buy") : score >= 2 ? t("Buy") : score >= 0 ? t("Hold") : score >= -2 ? t("Sell") : t("Strong Sell")
+                    const ratingColor = score >= 4 ? "text-green-600 bg-green-500/10" : score >= 2 ? "text-green-500 bg-green-500/10" : score >= 0 ? "text-yellow-600 bg-yellow-500/10" : score >= -2 ? "text-red-500 bg-red-500/10" : "text-red-600 bg-red-500/10"
+
+                    return (
+                      <>
+                        <div className="flex items-center gap-3 mb-4">
+                          <Badge variant="outline" className={`text-base px-4 py-1 ${ratingColor}`}>{rating}</Badge>
+                          <span className="text-sm text-muted-foreground">
+                            {positives.length} {t("positives")} · {negatives.length} {t("negatives")} · {neutral.length} {t("neutral")}
+                          </span>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {positives.length > 0 && (
+                            <div>
+                              <h4 className="text-sm font-semibold text-green-600 mb-2">{t("Strengths")}</h4>
+                              <ul className="space-y-1">
+                                {positives.map((p, i) => (
+                                  <li key={i} className="text-sm flex items-start gap-2">
+                                    <span className="text-green-500 mt-0.5">+</span>
+                                    <span>{p}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+                          {negatives.length > 0 && (
+                            <div>
+                              <h4 className="text-sm font-semibold text-red-600 mb-2">{t("Risks")}</h4>
+                              <ul className="space-y-1">
+                                {negatives.map((n, i) => (
+                                  <li key={i} className="text-sm flex items-start gap-2">
+                                    <span className="text-red-500 mt-0.5">-</span>
+                                    <span>{n}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+                        </div>
+                        {neutral.length > 0 && (
+                          <div className="mt-3">
+                            <h4 className="text-sm font-semibold text-muted-foreground mb-2">{t("Key Observations")}</h4>
+                            <ul className="space-y-1">
+                              {neutral.map((n, i) => (
+                                <li key={i} className="text-sm text-muted-foreground flex items-start gap-2">
+                                  <span className="mt-0.5">·</span>
+                                  <span>{n}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </>
+                    )
+                  })()}
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
           {/* Range selector */}
           <div className="flex gap-2">
             {["1d", "5d", "1mo", "3mo", "6mo", "1y", "2y", "5y"].map((r) => (
