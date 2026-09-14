@@ -208,6 +208,10 @@ const CURRENCY_SYMBOLS: Record<string, string> = {
   CHF: "₣",
 }
 
+function priceDecimals(price: number): number {
+  return Math.abs(price) < 1 ? 4 : 2
+}
+
 function formatMoney(value: number, currency?: string, decimals = 2): string {
   const formatted = value.toLocaleString("es-ES", {
     minimumFractionDigits: decimals,
@@ -978,8 +982,7 @@ export function PortfolioPanel() {
                     typeof info?.price === "number" &&
                     prevClose !== null
                   const refPrice = marketClosed ? (prevClose as number) : price
-                  const decimals =
-                    refPrice !== undefined && Math.abs(refPrice) < 10 ? 4 : 2
+                  const decimals = priceDecimals(refPrice ?? 0)
                   const totalBase = marketClosed ? (prevClose as number) : price
                   return (
                     <tr key={asset.id} className="border-b border-border">
@@ -1062,6 +1065,7 @@ export function PortfolioPanel() {
                   const priceDiff = hasBep && currentPrice !== undefined ? currentPrice - bep : null
                   const priceDiffPct = priceDiff !== null && bep > 0 ? (priceDiff / bep) * 100 : null
                   const cur = stock.currency
+                  const priceDec = currentPrice !== undefined ? priceDecimals(currentPrice) : 2
                   const totalValue = currentPrice !== undefined ? currentPrice * totalQty : null
                   return (
                     <Fragment key={stock.id}>
@@ -1086,11 +1090,11 @@ export function PortfolioPanel() {
                         </td>
                         <td className="py-3 pr-4 text-right tabular-nums font-medium">
                           {currentPrice !== undefined
-                            ? `${currentPrice.toLocaleString("es-ES", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${cur}`
+                            ? `${currentPrice.toLocaleString("es-ES", { minimumFractionDigits: priceDec, maximumFractionDigits: priceDec })} ${cur}`
                             : "—"}
                         </td>
                         <td className="py-3 pr-4 text-right tabular-nums font-medium">
-                          {bep.toLocaleString("es-ES", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {cur}
+                          {bep.toLocaleString("es-ES", { minimumFractionDigits: priceDec, maximumFractionDigits: priceDec })} {cur}
                         </td>
                         <td
                           className={`py-3 pr-4 text-right tabular-nums ${
@@ -1102,7 +1106,7 @@ export function PortfolioPanel() {
                           }`}
                         >
                           {dayChange !== null && dayPct !== null
-                            ? `${dayChange >= 0 ? "+" : ""}${dayChange.toFixed(2)} (${dayPct >= 0 ? "+" : ""}${dayPct.toFixed(1)}%)`
+                            ? `${dayChange >= 0 ? "+" : ""}${dayChange.toFixed(priceDec)} (${dayPct >= 0 ? "+" : ""}${dayPct.toFixed(1)}%)`
                             : "—"}
                         </td>
                         <td
@@ -1115,7 +1119,7 @@ export function PortfolioPanel() {
                           }`}
                         >
                           {!hasBep ? "-" : priceDiff !== null && priceDiffPct !== null
-                            ? `${priceDiff >= 0 ? "+" : ""}${priceDiff.toFixed(2)} (${priceDiffPct >= 0 ? "+" : ""}${priceDiffPct.toFixed(1)}%)`
+                            ? `${priceDiff >= 0 ? "+" : ""}${priceDiff.toFixed(priceDec)} (${priceDiffPct >= 0 ? "+" : ""}${priceDiffPct.toFixed(1)}%)`
                             : "—"}
                         </td>
                         <td className="py-3 pr-4 text-right tabular-nums font-medium">
@@ -1147,7 +1151,7 @@ export function PortfolioPanel() {
                             {purchase.quantity.toLocaleString("es-ES")}
                           </td>
                           <td className="py-2 pr-4 text-right tabular-nums text-sm">
-                            {purchase.price.toLocaleString("es-ES", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {cur}
+                            {purchase.price.toLocaleString("es-ES", { minimumFractionDigits: priceDecimals(purchase.price), maximumFractionDigits: priceDecimals(purchase.price) })} {cur}
                           </td>
                           <td className="py-2 pr-4 text-right tabular-nums text-sm text-muted-foreground">—</td>
                           <td className="py-2 pr-4 text-right tabular-nums text-sm text-muted-foreground">—</td>
