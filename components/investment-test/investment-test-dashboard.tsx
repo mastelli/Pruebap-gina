@@ -399,11 +399,6 @@ export function InvestmentTestDashboard() {
                         {p.website} <ExternalLink className="h-3 w-3" />
                       </a>
                     ) : null}
-                    {p?.description ? (
-                      <p className="text-sm text-muted-foreground mt-2 leading-relaxed max-w-2xl">
-                        {p.description}
-                      </p>
-                    ) : null}
                     {p?.employees ? (
                       <p className="text-xs text-muted-foreground mt-1">
                         {p.employees.toLocaleString("es-ES")} {t("employees")}
@@ -452,6 +447,12 @@ export function InvestmentTestDashboard() {
                           {a.targetMean >= q.price ? "+" : ""}{((a.targetMean - q.price) / q.price * 100).toFixed(1)}% {t("upside")}
                         </div>
                       </div>
+                      {stats.enterpriseValue ? (
+                        <div className="flex justify-between items-center px-2 py-1.5 rounded-lg bg-secondary/50 text-sm">
+                          <span className="text-muted-foreground">{t("Enterprise Value")}</span>
+                          <span className="font-medium tabular-nums">{formatLargeNumber(stats.enterpriseValue)} {q.currency}</span>
+                        </div>
+                      ) : null}
                       <Separator />
                       <div className="grid grid-cols-2 gap-2 text-sm">
                         <div className="text-center p-2 rounded-lg bg-green-500/10">
