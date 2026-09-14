@@ -180,6 +180,7 @@ export function InvestmentTestDashboard() {
   const [searching, setSearching] = useState(false)
   const [range, setRange] = useState("6mo")
   const [selectedSymbol, setSelectedSymbol] = useState<string | null>(null)
+  const [rangeLoading, setRangeLoading] = useState(false)
   const chartContainerRef = useRef<HTMLDivElement>(null)
   const chartRef = useRef<import("lightweight-charts").IChartApi | null>(null)
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
@@ -217,8 +218,12 @@ export function InvestmentTestDashboard() {
     return () => clearTimeout(timer)
   }, [query, searchStock, selectedSymbol])
 
-  const loadStock = useCallback(async (symbol: string, r?: string) => {
-    setLoading(true)
+  const loadStock = useCallback(async (symbol: string, r?: string, isRangeChange = false) => {
+    if (isRangeChange) {
+      setRangeLoading(true)
+    } else {
+      setLoading(true)
+    }
     setResults([])
     setSelectedSymbol(symbol)
     setQuery(symbol)
@@ -231,6 +236,7 @@ export function InvestmentTestDashboard() {
       setData(null)
     } finally {
       setLoading(false)
+      setRangeLoading(false)
     }
   }, [range])
 
@@ -610,7 +616,7 @@ export function InvestmentTestDashboard() {
           {/* Range selector */}
           <div className="flex gap-2">
             {["1d", "5d", "1mo", "3mo", "6mo", "1y", "2y", "5y"].map((r) => (
-              <Button key={r} variant={range === r ? "default" : "outline"} size="sm" onClick={() => { setRange(r); if (selectedSymbol) loadStock(selectedSymbol, r) }}>
+              <Button key={r} variant={range === r ? "default" : "outline"} size="sm" onClick={() => { setRange(r); if (selectedSymbol) loadStock(selectedSymbol, r, true) }} disabled={rangeLoading}>
                 {r.toUpperCase()}
               </Button>
             ))}
@@ -622,6 +628,7 @@ export function InvestmentTestDashboard() {
               <CardTitle className="flex items-center gap-2">
                 <BarChart3 className="h-5 w-5" />
                 {t("Technical Chart")}
+                {rangeLoading && <Activity className="h-4 w-4 animate-spin text-muted-foreground" />}
               </CardTitle>
             </CardHeader>
             <CardContent>
