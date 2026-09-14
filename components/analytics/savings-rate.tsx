@@ -24,8 +24,7 @@ export function SavingsRate({ month }: { month?: string }) {
       if (isInternalTransferTransaction(transaction)) continue
       income += transaction.amount
     } else if (transaction.amount < 0) {
-      if (isInternalTransferTransaction(transaction)) expenses += -transaction.amount
-      else expenses += -transaction.amount
+      if (!isInternalTransferTransaction(transaction)) expenses += -transaction.amount
     }
   }
 
