@@ -1,13 +1,13 @@
 "use client"
 
-import { useCallback, useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useRef, useState, Fragment } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { Upload, Trash2, RefreshCw, Plus, TrendingUp } from "lucide-react"
+import { Upload, Trash2, RefreshCw, Plus, TrendingUp, ChevronDown, ChevronRight } from "lucide-react"
 import { useLanguage } from "@/lib/i18n"
 import { storageGetItem, storageSetItem } from "@/lib/auth"
 import { exchangeFromSymbol } from "@/lib/exchanges"
@@ -61,12 +61,18 @@ interface StreamTick {
   time?: number
 }
 
+interface Purchase {
+  id: string
+  price: number
+  quantity: number
+  date: string
+}
+
 interface ManualStock {
   id: string
   name: string
   exchange: string
-  price: number
-  quantity: number
+  purchases: Purchase[]
 }
 
 const EXCHANGES = ["NASDAQ", "NYSE", "LSE", "BME", "Euronext", "XETRA", "Other"]
@@ -283,6 +289,7 @@ export function PortfolioPanel() {
   const [manualExchange, setManualExchange] = useState("")
   const [manualPrice, setManualPrice] = useState("")
   const [manualQuantity, setManualQuantity] = useState("")
+  const [expandedManual, setExpandedManual] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const wsRef = useRef<WebSocket | null>(null)
   const fhRef = useRef<WebSocket | null>(null)
@@ -348,14 +355,32 @@ export function PortfolioPanel() {
 
   const addManualStock = () => {
     if (!manualName || !manualExchange || !manualPrice || !manualQuantity) return
-    const newStock: ManualStock = {
-      id: `manual-${Date.now()}`,
-      name: manualName.toUpperCase(),
-      exchange: manualExchange,
+    const purchase: Purchase = {
+      id: `purchase-${Date.now()}`,
       price: parseFloat(manualPrice),
       quantity: parseFloat(manualQuantity),
+      date: new Date().toISOString().slice(0, 10),
     }
-    setManualStocks([...manualStocks, newStock])
+    const existing = manualStocks.find(
+      (s) => s.name.toUpperCase() === manualName.toUpperCase() && s.exchange === manualExchange
+    )
+    if (existing) {
+      setManualStocks(
+        manualStocks.map((s) =>
+          s.id === existing.id
+            ? { ...s, purchases: [...s.purchases, purchase] }
+            : s
+        )
+      )
+    } else {
+      const newStock: ManualStock = {
+        id: `manual-${Date.now()}`,
+        name: manualName.toUpperCase(),
+        exchange: manualExchange,
+        purchases: [purchase],
+      }
+      setManualStocks([...manualStocks, newStock])
+    }
     setManualName("")
     setManualExchange("")
     setManualPrice("")
@@ -363,11 +388,37 @@ export function PortfolioPanel() {
     setShowAddManual(false)
   }
 
+  const removeManualPurchase = (stockId: string, purchaseId: string) => {
+    setManualStocks(
+      manualStocks
+        .map((s) =>
+          s.id === stockId
+            ? { ...s, purchases: s.purchases.filter((p) => p.id !== purchaseId) }
+            : s
+        )
+        .filter((s) => s.purchases.length > 0)
+    )
+  }
+
   const removeManualStock = (id: string) => {
     setManualStocks(manualStocks.filter((s) => s.id !== id))
   }
 
-  const manualStocksTotal = manualStocks.reduce((sum, s) => sum + s.price * s.quantity, 0)
+  const getManualBep = (stock: ManualStock) => {
+    const totalCost = stock.purchases.reduce((sum, p) => sum + p.price * p.quantity, 0)
+    const totalQty = stock.purchases.reduce((sum, p) => sum + p.quantity, 0)
+    return totalQty > 0 ? totalCost / totalQty : 0
+  }
+
+  const getManualTotalQty = (stock: ManualStock) => {
+    return stock.purchases.reduce((sum, p) => sum + p.quantity, 0)
+  }
+
+  const manualStocksTotal = manualStocks.reduce((sum, s) => {
+    const bep = getManualBep(s)
+    const qty = getManualTotalQty(s)
+    return sum + bep * qty
+  }, 0)
 
   const refreshPrices = useCallback(async (list: Asset[], force = false) => {
     if (list.length === 0) return
@@ -677,7 +728,6 @@ export function PortfolioPanel() {
   }
 
   return (
-    <>
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0">
         <CardTitle className="flex items-center gap-2 text-xl font-semibold">
@@ -696,7 +746,6 @@ export function PortfolioPanel() {
               size="sm"
               disabled={refreshing}
               onClick={() => {
-                // hard reload de datos: fuerza la consulta ignorando cachés
                 setRefreshing(true)
                 void refreshPrices(assets, true).finally(() => setRefreshing(false))
               }}
@@ -705,7 +754,7 @@ export function PortfolioPanel() {
               {t("Refresh")}
             </Button>
           )}
-          <Button size="sm" onClick={() => fileInputRef.current?.click()}>
+          <Button size="sm" variant="outline" onClick={() => fileInputRef.current?.click()}>
             <Upload className="mr-2 h-4 w-4" />
             {t("Import Portfolio")}
           </Button>
@@ -720,10 +769,67 @@ export function PortfolioPanel() {
               event.target.value = ""
             }}
           />
+          <Dialog open={showAddManual} onOpenChange={setShowAddManual}>
+            <DialogTrigger asChild>
+              <Button size="sm">
+                <Plus className="mr-2 h-4 w-4" />
+                {t("Add Stock")}
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>{t("Add Stock")}</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div>
+                  <Label>{t("Stock Name")}</Label>
+                  <Input
+                    value={manualName}
+                    onChange={(e) => setManualName(e.target.value)}
+                    placeholder="Ej: AAPL"
+                  />
+                </div>
+                <div>
+                  <Label>{t("Exchange")}</Label>
+                  <Select value={manualExchange} onValueChange={setManualExchange}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccionar..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {EXCHANGES.map((ex) => (
+                        <SelectItem key={ex} value={ex}>{ex}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label>{t("Price")} (€)</Label>
+                  <Input
+                    type="number"
+                    step={0.01}
+                    value={manualPrice}
+                    onChange={(e) => setManualPrice(e.target.value)}
+                    placeholder="0.00"
+                  />
+                </div>
+                <div>
+                  <Label>{t("Quantity")}</Label>
+                  <Input
+                    type="number"
+                    step={0.01}
+                    value={manualQuantity}
+                    onChange={(e) => setManualQuantity(e.target.value)}
+                    placeholder="0"
+                  />
+                </div>
+                <Button onClick={addManualStock} className="w-full">{t("Add Stock")}</Button>
+              </div>
+            </DialogContent>
+          </Dialog>
         </div>
       </CardHeader>
       <CardContent>
-        {assets.length === 0 ? (
+        {assets.length === 0 && manualStocks.length === 0 ? (
           <p className="py-8 text-center text-sm text-muted-foreground">{t("No assets imported yet")}</p>
         ) : (
           <div className="overflow-x-auto">
@@ -731,10 +837,10 @@ export function PortfolioPanel() {
               <thead>
                 <tr className="border-b border-border text-left">
                   <th className="py-2 pr-4 font-medium">{t("Product")}</th>
-                  <th className="py-2 pr-4 font-medium">ISIN</th>
                   <th className="py-2 pr-4 font-medium">{t("Exchange")}</th>
                   <th className="py-2 pr-4 text-right font-medium">{t("Quantity")}</th>
                   <th className="py-2 pr-4 text-right font-medium">{t("Price")}</th>
+                  <th className="py-2 pr-4 text-right font-medium">BEP</th>
                   <th className="py-2 pr-4 text-right font-medium">{t("Day +/-")}</th>
                   <th className="py-2 pr-4 text-right font-medium">{t("Total")}</th>
                   <th className="py-2" aria-label={t("Delete")} />
@@ -744,7 +850,6 @@ export function PortfolioPanel() {
                 {assets.map((asset) => {
                   const info = prices[asset.isin]
                   const status = statusFor(asset)
-                  // Si el ISIN no resuelve en Yahoo usamos el precio del propio csv
                   const fallback =
                     asset.csvPrice !== undefined
                       ? { price: asset.csvPrice, currency: asset.currency }
@@ -753,7 +858,6 @@ export function PortfolioPanel() {
                         : undefined
                   const price = info?.price ?? fallback?.price
                   const displayCurrency = info?.currency ?? fallback?.currency
-                  // Variacion diaria: precio actual frente al cierre de ayer
                   const prevClose = info?.previousClose ?? null
                   const dayChange =
                     price !== undefined && prevClose !== null ? price - prevClose : null
@@ -761,12 +865,10 @@ export function PortfolioPanel() {
                     dayChange !== null && prevClose !== null && prevClose !== 0
                       ? (dayChange / prevClose) * 100
                       : null
-                  // Mercado cerrado: sin precio ni variacion, total con el cierre anterior
                   const marketClosed =
                     info?.marketOpen === false &&
                     typeof info?.price === "number" &&
                     prevClose !== null
-                  // Precios por debajo de 10 con 4 decimales, el resto con 2
                   const refPrice = marketClosed ? (prevClose as number) : price
                   const decimals =
                     refPrice !== undefined && Math.abs(refPrice) < 10 ? 4 : 2
@@ -790,7 +892,6 @@ export function PortfolioPanel() {
                           </div>
                         )}
                       </td>
-                      <td className="py-3 pr-4 tabular-nums text-muted-foreground">{asset.isin}</td>
                       <td className="whitespace-nowrap py-3 pr-4 text-muted-foreground">
                         {info?.symbol ? exchangeFromSymbol(info.symbol) || "—" : "—"}
                       </td>
@@ -799,6 +900,9 @@ export function PortfolioPanel() {
                       </td>
                       <td className="py-3 pr-4 text-right tabular-nums">
                         {marketClosed ? "-" : price !== undefined ? formatMoney(price, displayCurrency, decimals) : "—"}
+                      </td>
+                      <td className="py-3 pr-4 text-right tabular-nums text-muted-foreground">
+                        —
                       </td>
                       <td
                         className={`py-3 pr-4 text-right tabular-nums ${
@@ -834,8 +938,110 @@ export function PortfolioPanel() {
                     </tr>
                   )
                 })}
+                {manualStocks.map((stock) => {
+                  const bep = getManualBep(stock)
+                  const totalQty = getManualTotalQty(stock)
+                  const isExpanded = expandedManual === stock.id
+                  return (
+                    <Fragment key={stock.id}>
+                      <tr className="border-b border-border">
+                        <td className="py-3 pr-4">
+                          <button
+                            className="flex items-center gap-1 font-medium hover:underline"
+                            onClick={() => setExpandedManual(isExpanded ? null : stock.id)}
+                          >
+                            {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                            {stock.name}
+                          </button>
+                          <div className="text-xs text-muted-foreground ml-5">
+                            {stock.purchases.length} {stock.purchases.length === 1 ? "compra" : "compras"}
+                          </div>
+                        </td>
+                        <td className="whitespace-nowrap py-3 pr-4 text-muted-foreground">
+                          {stock.exchange}
+                        </td>
+                        <td className="py-3 pr-4 text-right tabular-nums">
+                          {totalQty.toLocaleString("es-ES")}
+                        </td>
+                        <td className="py-3 pr-4 text-right tabular-nums text-muted-foreground">
+                          —
+                        </td>
+                        <td className="py-3 pr-4 text-right tabular-nums font-medium">
+                          {bep.toLocaleString("es-ES", { style: "currency", currency: "EUR" })}
+                        </td>
+                        <td className="py-3 pr-4 text-right tabular-nums text-muted-foreground">
+                          —
+                        </td>
+                        <td className="py-3 pr-4 text-right tabular-nums font-medium">
+                          {(bep * totalQty).toLocaleString("es-ES", { style: "currency", currency: "EUR" })}
+                        </td>
+                        <td className="py-3 text-right">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                            onClick={() => removeManualStock(stock.id)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                            <span className="sr-only">{t("Delete")}</span>
+                          </Button>
+                        </td>
+                      </tr>
+                      {isExpanded && stock.purchases.map((purchase) => (
+                        <tr key={purchase.id} className="border-b border-border bg-secondary/30">
+                          <td className="py-2 pl-10 pr-4 text-sm text-muted-foreground">
+                            {purchase.date}
+                          </td>
+                          <td className="py-2 pr-4 text-muted-foreground">—</td>
+                          <td className="py-2 pr-4 text-right tabular-nums text-sm">
+                            {purchase.quantity.toLocaleString("es-ES")}
+                          </td>
+                          <td className="py-2 pr-4 text-right tabular-nums text-sm">
+                            {purchase.price.toLocaleString("es-ES", { style: "currency", currency: "EUR" })}
+                          </td>
+                          <td className="py-2 pr-4 text-right tabular-nums text-sm text-muted-foreground">—</td>
+                          <td className="py-2 pr-4 text-right tabular-nums text-sm text-muted-foreground">—</td>
+                          <td className="py-2 pr-4 text-right tabular-nums text-sm">
+                            {(purchase.price * purchase.quantity).toLocaleString("es-ES", { style: "currency", currency: "EUR" })}
+                          </td>
+                          <td className="py-2 text-right">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-6 w-6 text-muted-foreground hover:text-destructive"
+                              onClick={() => removeManualPurchase(stock.id, purchase.id)}
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </Button>
+                          </td>
+                        </tr>
+                      ))}
+                    </Fragment>
+                  )
+                })}
               </tbody>
             </table>
+            <div className="mt-4 border-t pt-4 flex justify-between text-sm">
+              <span className="text-muted-foreground">{t("Total Value")}</span>
+              <span className="tabular-nums font-bold">
+                {(() => {
+                  const csvTotal = assets.reduce((sum, asset) => {
+                    const info = prices[asset.isin]
+                    const fallback =
+                      asset.csvPrice !== undefined
+                        ? { price: asset.csvPrice, currency: asset.currency }
+                        : asset.eurValue !== undefined && asset.quantity !== 0
+                          ? { price: asset.eurValue / asset.quantity, currency: "EUR" }
+                          : undefined
+                    const price = info?.price ?? fallback?.price
+                    const displayCurrency = info?.currency ?? fallback?.currency
+                    const rate = !displayCurrency || displayCurrency === "EUR" ? 1 : 1
+                    return sum + (price !== undefined ? price * asset.quantity * rate : 0)
+                  }, 0)
+                  return (csvTotal + manualStocksTotal).toLocaleString("es-ES", { style: "currency", currency: "EUR" })
+                })()}
+              </span>
+            </div>
             <p className="mt-2 text-xs text-muted-foreground">
               {streaming || fhConnected
                 ? t("Real-time streaming quotes")
@@ -851,126 +1057,5 @@ export function PortfolioPanel() {
         )}
       </CardContent>
     </Card>
-
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0">
-        <CardTitle className="flex items-center gap-2 text-xl font-semibold">
-          <TrendingUp className="h-5 w-5" />
-          {t("Manual Stocks")}
-        </CardTitle>
-        <Dialog open={showAddManual} onOpenChange={setShowAddManual}>
-          <DialogTrigger asChild>
-            <Button size="sm">
-              <Plus className="mr-2 h-4 w-4" />
-              {t("Add Stock")}
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>{t("Add Stock")}</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4">
-              <div>
-                <Label>{t("Stock Name")}</Label>
-                <Input
-                  value={manualName}
-                  onChange={(e) => setManualName(e.target.value)}
-                  placeholder="Ej: AAPL"
-                />
-              </div>
-              <div>
-                <Label>{t("Exchange")}</Label>
-                <Select value={manualExchange} onValueChange={setManualExchange}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Seleccionar..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {EXCHANGES.map((ex) => (
-                      <SelectItem key={ex} value={ex}>{ex}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label>{t("Price")} (€)</Label>
-                <Input
-                  type="number"
-                  step={0.01}
-                  value={manualPrice}
-                  onChange={(e) => setManualPrice(e.target.value)}
-                  placeholder="0.00"
-                />
-              </div>
-              <div>
-                <Label>{t("Quantity")}</Label>
-                <Input
-                  type="number"
-                  step={0.01}
-                  value={manualQuantity}
-                  onChange={(e) => setManualQuantity(e.target.value)}
-                  placeholder="0"
-                />
-              </div>
-              <Button onClick={addManualStock} className="w-full">{t("Add Stock")}</Button>
-            </div>
-          </DialogContent>
-        </Dialog>
-      </CardHeader>
-      <CardContent>
-        {manualStocks.length === 0 ? (
-          <p className="py-8 text-center text-sm text-muted-foreground">{t("No stocks added")}</p>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-border text-left">
-                  <th className="py-2 pr-4 font-medium">{t("Stock Name")}</th>
-                  <th className="py-2 pr-4 font-medium">{t("Exchange")}</th>
-                  <th className="py-2 pr-4 text-right font-medium">{t("Price")}</th>
-                  <th className="py-2 pr-4 text-right font-medium">{t("Quantity")}</th>
-                  <th className="py-2 pr-4 text-right font-medium">{t("Total Value")}</th>
-                  <th className="py-2" aria-label={t("Delete")} />
-                </tr>
-              </thead>
-              <tbody>
-                {manualStocks.map((stock) => (
-                  <tr key={stock.id} className="border-b border-border">
-                    <td className="py-3 pr-4 font-medium">{stock.name}</td>
-                    <td className="py-3 pr-4 text-muted-foreground">{stock.exchange}</td>
-                    <td className="py-3 pr-4 text-right tabular-nums">
-                      {stock.price.toLocaleString("es-ES", { style: "currency", currency: "EUR" })}
-                    </td>
-                    <td className="py-3 pr-4 text-right tabular-nums">
-                      {stock.quantity.toLocaleString("es-ES")}
-                    </td>
-                    <td className="py-3 pr-4 text-right tabular-nums font-medium">
-                      {(stock.price * stock.quantity).toLocaleString("es-ES", { style: "currency", currency: "EUR" })}
-                    </td>
-                    <td className="py-3 text-right">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                        onClick={() => removeManualStock(stock.id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                        <span className="sr-only">{t("Delete")}</span>
-                      </Button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            <div className="mt-4 border-t pt-4 flex justify-between font-bold">
-              <span>{t("Total Value")}</span>
-              <span className="tabular-nums">
-                {manualStocksTotal.toLocaleString("es-ES", { style: "currency", currency: "EUR" })}
-              </span>
-            </div>
-          </div>
-        )}
-      </CardContent>
-    </Card>
-  </>
   )
 }
