@@ -724,31 +724,35 @@ export function PortfolioPanel() {
       const fxSymbols = currencies.map((c) => `${c}EUR=X`)
       const allSymbols = [...symbols, ...fxSymbols]
 
-      const res = await fetch(
-        `https://query1.finance.yahoo.com/v7/finance/spark?symbols=${encodeURIComponent(allSymbols.join(","))}&range=1d&interval=5m`,
-        { headers: { "User-Agent": "Mozilla/5.0" } }
-      )
+      // Use our own API to avoid CORS issues
+      const res = await fetch("/api/portfolio-prices", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          assets: symbols.map((s) => ({ isin: s, name: s })),
+          currencies,
+        }),
+      })
       if (!res.ok) return
       const json = await res.json()
+      const results = (json?.results ?? {}) as Record<string, { price?: number; previousClose?: number | null; currency?: string; symbol?: string; exchange?: string } | null>
+      const fx = (json?.fx ?? {}) as Record<string, number>
 
       const newPrices: Record<string, { price: number; previousClose: number | null; currency: string }> = {}
-      const fxRates: Record<string, number> = {}
 
-      for (const item of json?.spark?.result ?? []) {
-        const meta = item?.response?.[0]?.meta
-        if (!item?.symbol || !meta || typeof meta.regularMarketPrice !== "number") continue
-        const prevClose = typeof meta.chartPreviousClose === "number"
-          ? meta.chartPreviousClose
-          : typeof meta.previousClose === "number"
-            ? meta.previousClose
-            : null
-        if (item.symbol.endsWith("EUR=X")) {
-          fxRates[item.symbol.replace("EUR=X", "")] = meta.regularMarketPrice
-        } else {
-          newPrices[item.symbol] = {
-            price: meta.regularMarketPrice,
-            previousClose: prevClose,
-            currency: meta.currency ?? "USD",
+      for (const stock of manualStocks) {
+        const quote = results[stock.name]
+        if (quote && typeof quote.price === "number") {
+          const cur = stock.currency
+          let priceInStockCurrency = quote.price
+          // If stock is not in EUR, convert from EUR to stock currency
+          if (cur !== "EUR" && fx[cur]) {
+            priceInStockCurrency = quote.price / fx[cur]
+          }
+          newPrices[stock.name] = {
+            price: priceInStockCurrency,
+            previousClose: quote.previousClose ?? null,
+            currency: cur,
           }
         }
       }
@@ -923,6 +927,7 @@ export function PortfolioPanel() {
                   <th className="py-2 pr-4 text-right font-medium">{t("Quantity")}</th>
                   <th className="py-2 pr-4 text-right font-medium">{t("Price")}</th>
                   <th className="py-2 pr-4 text-right font-medium">BEP</th>
+                  <th className="py-2 pr-4 text-right font-medium">{t("Day +/-")}</th>
                   <th className="py-2 pr-4 text-right font-medium">General +/-</th>
                   <th className="py-2 pr-4 text-right font-medium">{t("Total")}</th>
                   <th className="py-2" aria-label={t("Delete")} />
@@ -1026,6 +1031,9 @@ export function PortfolioPanel() {
                   const isExpanded = expandedManual === stock.id
                   const liveQuote = manualPrices[stock.id]
                   const currentPrice = liveQuote?.price
+                  const prevClose = liveQuote?.previousClose
+                  const dayChange = currentPrice !== undefined && prevClose !== null ? currentPrice - prevClose : null
+                  const dayPct = dayChange !== null && prevClose !== null && prevClose !== 0 ? (dayChange / prevClose) * 100 : null
                   const priceDiff = currentPrice !== undefined ? currentPrice - bep : null
                   const priceDiffPct = priceDiff !== null && bep > 0 ? (priceDiff / bep) * 100 : null
                   const cur = stock.currency
@@ -1057,6 +1065,19 @@ export function PortfolioPanel() {
                         </td>
                         <td className="py-3 pr-4 text-right tabular-nums font-medium">
                           {bep.toLocaleString("es-ES", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {cur}
+                        </td>
+                        <td
+                          className={`py-3 pr-4 text-right tabular-nums ${
+                            dayPct === null
+                              ? ""
+                              : dayPct >= 0
+                                ? "text-green-600 dark:text-green-400"
+                                : "text-red-600 dark:text-red-400"
+                          }`}
+                        >
+                          {dayChange !== null && dayPct !== null
+                            ? `${dayChange >= 0 ? "+" : ""}${dayChange.toFixed(2)} (${dayPct >= 0 ? "+" : ""}${dayPct.toFixed(1)}%)`
+                            : "—"}
                         </td>
                         <td
                           className={`py-3 pr-4 text-right tabular-nums font-medium ${
@@ -1102,6 +1123,7 @@ export function PortfolioPanel() {
                           <td className="py-2 pr-4 text-right tabular-nums text-sm">
                             {purchase.price.toLocaleString("es-ES", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {cur}
                           </td>
+                          <td className="py-2 pr-4 text-right tabular-nums text-sm text-muted-foreground">—</td>
                           <td className="py-2 pr-4 text-right tabular-nums text-sm text-muted-foreground">—</td>
                           <td className="py-2 pr-4 text-right tabular-nums text-sm text-muted-foreground">—</td>
                           <td className="py-2 pr-4 text-right tabular-nums text-sm">
