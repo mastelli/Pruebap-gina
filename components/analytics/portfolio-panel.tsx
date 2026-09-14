@@ -77,7 +77,28 @@ interface ManualStock {
   purchases: Purchase[]
 }
 
-const EXCHANGES = ["NASDAQ", "NYSE", "LSE", "BME", "Euronext", "XETRA", "Other"]
+const EXCHANGES = [
+  "NASDAQ", "NYSE", "AMEX",
+  "LSE", "AIM",
+  "BME",
+  "Euronext Paris", "Euronext Amsterdam", "Euronext Brussels",
+  "XETRA", "DAX",
+  "Borsa Italiana", "Milan",
+  "SIX Swiss", "Zurich",
+  "OMX Stockholm", "OMX Helsinki", "OMX Copenhagen", "OMX Oslo",
+  "Warsaw (WIG)", "Prague (PX)", "Budapest (BUX)",
+  "Istanbul (BIST)", "Athens (ATHEX)",
+  "TSE (Tokyo)", "Osaka (JPX)", "Nikkei",
+  "HKEX (Hong Kong)", "Shanghai (SSE)", "Shenzhen (SZSE)", "Taiwan (TWSE)",
+  "KOSPI (Korea)", "KOSDAQ",
+  "NSE (India)", "BSE (India)",
+  "ASX (Australia)", "NZX (New Zealand)",
+  "TSX (Toronto)", "TSXV",
+  "B3 (Brazil)", "BMV (Mexico)", "BCS (Chile)", "BVC (Colombia)",
+  "JSE (South Africa)", "NSE Nigeria",
+  "Saudi (Tadawul)", "ADX", "DFM (Dubai)",
+  "Other",
+]
 const CURRENCIES = ["EUR", "USD", "GBP", "CHF", "JPY"]
 
 // Formato del csv del broker (por posicion):

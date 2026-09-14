@@ -46,6 +46,20 @@ const STOOQ_SUFFIX_MAP: Record<string, string> = {
   SW: "sw",
   IM: "it",
   HI: "he",
+  MI: "mi",
+  TO: "to",
+  CN: "cn",
+  HK: "hk",
+  T: "t",
+  SS: "ss",
+  SZ: "sz",
+  KS: "kr",
+  SA: "sa",
+  AX: "ax",
+  NZ: "nz",
+  IR: "ie",
+  JO: "za",
+  VX: "ch",
 }
 
 function isEuropeanSymbol(yahooSymbol: string): boolean {
@@ -65,12 +79,21 @@ function yahooToStooq(yahooSymbol: string): string {
 function stooqCurrencyFromSymbol(stooqSymbol: string): string {
   const suffix = stooqSymbol.split(".")[1]
   switch (suffix) {
-    case "mc": case "pa": case "as": case "br": case "de": return "EUR"
+    case "mc": case "pa": case "as": case "br": case "de": case "it": case "he": case "mi": case "ie": return "EUR"
     case "l": return "GBP"
-    case "sw": return "CHF"
+    case "sw": case "ch": return "CHF"
     case "us": return "USD"
-    case "it": return "EUR"
-    case "he": return "EUR"
+    case "to": case "cn": return "CAD"
+    case "hk": return "HKD"
+    case "t": return "JPY"
+    case "ss": case "sz": return "CNY"
+    case "kr": return "KRW"
+    case "sa": return "SAR"
+    case "ax": return "AUD"
+    case "nz": return "NZD"
+    case "za": return "ZAR"
+    case "mx": return "MXN"
+    case "bvsp": return "BRL"
     default: return "EUR"
   }
 }

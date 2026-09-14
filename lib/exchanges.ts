@@ -27,6 +27,7 @@ const EXCHANGE_BY_SUFFIX: Record<string, string> = {
   SS: "Shanghái",
   SZ: "Shenzhen",
   T: "Tokio",
+  OSA: "Osaka",
   AX: "Sídney",
   NZ: "Nueva Zelanda",
   SA: "San Pablo",
@@ -42,6 +43,19 @@ const EXCHANGE_BY_SUFFIX: Record<string, string> = {
   BU: "Budapest",
   BD: "Belgrado",
   ZA: "Zagreb",
+  IR: "Irlanda",
+  ATH: "Atenas",
+  IST: "Estambul",
+  BVMF: "B3 Brasil",
+  BMV: "México",
+  BCS: "Chile",
+  BVC: "Colombia",
+  SNSE: "Santiago",
+  CN: "Canadá",
+  IM: "Borsa Italiana",
+  RISE: "Rusia",
+  MEX: "México",
+  KT: "Korea",
 }
 
 // Mapeo de exchange IDs de Yahoo Finance a nombres legibles
