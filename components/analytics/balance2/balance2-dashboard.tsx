@@ -18,8 +18,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { Textarea } from "@/components/ui/textarea"
 import { Progress } from "@/components/ui/progress"
-import { Plus, Trash2, TrendingUp, TrendingDown, Wallet, CreditCard, Activity, Target, Landmark, CircleDollarSign, PiggyBank, ShieldCheck, BarChart3, ArrowUpRight, ArrowDownRight, RefreshCcw, RefreshCw } from "lucide-react"
+import { Plus, Trash2, TrendingUp, TrendingDown, Wallet, CreditCard, Activity, Target, Landmark, CircleDollarSign, PiggyBank, ShieldCheck, BarChart3, ArrowUpRight, ArrowDownRight, RefreshCcw, RefreshCw, Sparkles } from "lucide-react"
 import { Balance2Charts } from "./balance2-charts"
+import { Balance2AiAnalysis } from "./balance2-ai-analysis"
 import { useLanguage } from "@/lib/i18n"
 
 function KPICard({ title, value, subtitle, icon: Icon, trend }: { title: string; value: string; subtitle?: string; icon: React.ElementType; trend?: { value: string; positive: boolean } }) {
@@ -263,13 +264,14 @@ export function Balance2Dashboard() {
       </div>
 
       <Tabs defaultValue="balance" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-2 md:grid-cols-6">
+        <TabsList className="grid w-full grid-cols-3 md:grid-cols-7">
           <TabsTrigger value="balance">{t("Balance")}</TabsTrigger>
           <TabsTrigger value="assets">{t("Assets")}</TabsTrigger>
           <TabsTrigger value="liabilities">{t("Liabilities")}</TabsTrigger>
           <TabsTrigger value="ratios">{t("Ratios")}</TabsTrigger>
           <TabsTrigger value="cashflow">{t("Cash Flow")}</TabsTrigger>
           <TabsTrigger value="charts">{t("Charts")}</TabsTrigger>
+          <TabsTrigger value="ai">{t("AI Insight")}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="balance" className="space-y-4">
@@ -489,6 +491,16 @@ export function Balance2Dashboard() {
 
         <TabsContent value="charts">
           <Balance2Charts snapshot={{ ...snapshot, assets: allAssets, cashFlow: allCashFlow }} derived={d} />
+        </TabsContent>
+
+        <TabsContent value="ai">
+          <Balance2AiAnalysis
+            derived={d}
+            ratios={ratios}
+            assets={allAssets}
+            liabilities={snapshot.liabilities}
+            cashFlow={allCashFlow}
+          />
         </TabsContent>
       </Tabs>
     </div>
