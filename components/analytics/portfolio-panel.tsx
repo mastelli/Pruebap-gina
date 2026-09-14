@@ -293,6 +293,7 @@ export function PortfolioPanel() {
   const [manualCurrency, setManualCurrency] = useState("EUR")
   const [manualPrice, setManualPrice] = useState("")
   const [manualQuantity, setManualQuantity] = useState("")
+  const [manualDate, setManualDate] = useState(new Date().toISOString().slice(0, 10))
   const [expandedManual, setExpandedManual] = useState<string | null>(null)
   const [manualPrices, setManualPrices] = useState<Record<string, { price: number; previousClose: number | null; currency: string }>>({})
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -359,12 +360,12 @@ export function PortfolioPanel() {
   }
 
   const addManualStock = () => {
-    if (!manualName || !manualExchange || !manualPrice || !manualQuantity) return
+    if (!manualName || !manualExchange || !manualPrice || !manualQuantity || !manualDate) return
     const purchase: Purchase = {
       id: `purchase-${Date.now()}`,
       price: parseFloat(manualPrice),
       quantity: parseFloat(manualQuantity),
-      date: new Date().toISOString().slice(0, 10),
+      date: manualDate,
     }
     const existing = manualStocks.find(
       (s) => s.name.toUpperCase() === manualName.toUpperCase() && s.exchange === manualExchange
@@ -392,6 +393,7 @@ export function PortfolioPanel() {
     setManualCurrency("EUR")
     setManualPrice("")
     setManualQuantity("")
+    setManualDate(new Date().toISOString().slice(0, 10))
     setShowAddManual(false)
   }
 
@@ -896,6 +898,14 @@ export function PortfolioPanel() {
                     value={manualQuantity}
                     onChange={(e) => setManualQuantity(e.target.value)}
                     placeholder="0"
+                  />
+                </div>
+                <div>
+                  <Label>{t("Date")}</Label>
+                  <Input
+                    type="date"
+                    value={manualDate}
+                    onChange={(e) => setManualDate(e.target.value)}
                   />
                 </div>
                 <Button onClick={addManualStock} className="w-full">{t("Add Stock")}</Button>
