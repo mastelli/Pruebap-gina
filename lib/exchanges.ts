@@ -44,10 +44,23 @@ const EXCHANGE_BY_SUFFIX: Record<string, string> = {
   ZA: "Zagreb",
 }
 
+// Acciones conocidas cotizadas en NASDAQ (sufijo .O en Yahoo = NASDAQ)
+const KNOWN_NASDAQ = new Set([
+  "AAPL", "MSFT", "AMZN", "NVDA", "GOOGL", "META", "TSLA", "AVGO", "COST",
+  "NFLX", "AMD", "ADBE", "PEP", "CSCO", "INTC", "CMCSA", "QCOM", "TXN",
+  "AMGN", "INTU", "BKNG", "ISRG", "ARM", "GILD", "MDLZ", "ADI", "LRCX",
+  "REGN", "KLAC", "SNPS", "CDNS", "MNST", "FTNT", "PANW", "MRVL", "Teams",
+  "ABNB", "DASH", "COIN", "PLTR", "CRWD", "ZS", "NET", "DDOG", "SNOW",
+  "MDB", "TTD", "ROKU", "SQ", "SHOP", "MELI", "SE", "CPNG",
+])
+
 // Nombre de la bolsa donde cotiza un simbolo; vacio si no se puede deducir
 export function exchangeFromSymbol(symbol?: string): string {
   if (!symbol) return ""
   const match = symbol.toUpperCase().match(/\.([A-Z]{1,3})$/)
-  if (!match) return "EE. UU."
-  return EXCHANGE_BY_SUFFIX[match[1]] ?? ""
+  if (match) return EXCHANGE_BY_SUFFIX[match[1]] ?? ""
+  // Sin sufijo: acciones US. Detectar NASDAQ vs NYSE
+  const ticker = symbol.toUpperCase().replace(/\..*$/, "")
+  if (KNOWN_NASDAQ.has(ticker)) return "NASDAQ"
+  return "NYSE"
 }
