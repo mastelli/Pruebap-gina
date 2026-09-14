@@ -1034,9 +1034,11 @@ export function PortfolioPanel() {
                   const prevClose = liveQuote?.previousClose
                   const dayChange = currentPrice !== undefined && prevClose !== null ? currentPrice - prevClose : null
                   const dayPct = dayChange !== null && prevClose !== null && prevClose !== 0 ? (dayChange / prevClose) * 100 : null
-                  const priceDiff = currentPrice !== undefined ? currentPrice - bep : null
+                  const hasBep = bep > 0
+                  const priceDiff = hasBep && currentPrice !== undefined ? currentPrice - bep : null
                   const priceDiffPct = priceDiff !== null && bep > 0 ? (priceDiff / bep) * 100 : null
                   const cur = stock.currency
+                  const totalValue = currentPrice !== undefined ? currentPrice * totalQty : null
                   return (
                     <Fragment key={stock.id}>
                       <tr className="border-b border-border">
@@ -1088,14 +1090,14 @@ export function PortfolioPanel() {
                                 : "text-red-600 dark:text-red-400"
                           }`}
                         >
-                          {priceDiff !== null && priceDiffPct !== null
+                          {!hasBep ? "-" : priceDiff !== null && priceDiffPct !== null
                             ? `${priceDiff >= 0 ? "+" : ""}${priceDiff.toFixed(2)} (${priceDiffPct >= 0 ? "+" : ""}${priceDiffPct.toFixed(1)}%)`
                             : "—"}
                         </td>
                         <td className="py-3 pr-4 text-right tabular-nums font-medium">
-                          {currentPrice !== undefined
-                            ? `${(currentPrice * totalQty).toLocaleString("es-ES", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${cur}`
-                            : `${(bep * totalQty).toLocaleString("es-ES", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${cur}`}
+                          {totalValue !== null
+                            ? `${totalValue.toLocaleString("es-ES", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${cur}`
+                            : "—"}
                         </td>
                         <td className="py-3 text-right">
                           <Button
