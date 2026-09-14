@@ -918,7 +918,7 @@ export function PortfolioPanel() {
                   <th className="py-2 pr-4 text-right font-medium">{t("Quantity")}</th>
                   <th className="py-2 pr-4 text-right font-medium">{t("Price")}</th>
                   <th className="py-2 pr-4 text-right font-medium">BEP</th>
-                  <th className="py-2 pr-4 text-right font-medium">{t("Day +/-")}</th>
+                  <th className="py-2 pr-4 text-right font-medium">General +/-</th>
                   <th className="py-2 pr-4 text-right font-medium">{t("Total")}</th>
                   <th className="py-2" aria-label={t("Delete")} />
                 </tr>
@@ -1021,9 +1021,6 @@ export function PortfolioPanel() {
                   const isExpanded = expandedManual === stock.id
                   const liveQuote = manualPrices[stock.id]
                   const currentPrice = liveQuote?.price
-                  const prevClose = liveQuote?.previousClose
-                  const dayChange = currentPrice !== undefined && prevClose !== null ? currentPrice - prevClose : null
-                  const dayPct = dayChange !== null && prevClose !== null && prevClose !== 0 ? (dayChange / prevClose) * 100 : null
                   const priceDiff = currentPrice !== undefined ? currentPrice - bep : null
                   const priceDiffPct = priceDiff !== null && bep > 0 ? (priceDiff / bep) * 100 : null
                   const cur = stock.currency
@@ -1053,25 +1050,20 @@ export function PortfolioPanel() {
                             ? `${currentPrice.toLocaleString("es-ES", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${cur}`
                             : "—"}
                         </td>
-                        <td className="py-3 pr-4 text-right tabular-nums">
-                          <span className="font-medium">{bep.toLocaleString("es-ES", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {cur}</span>
-                          {priceDiffPct !== null && (
-                            <div className={`text-xs ${priceDiffPct >= 0 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}>
-                              {priceDiffPct >= 0 ? "+" : ""}{priceDiffPct.toFixed(1)}%
-                            </div>
-                          )}
+                        <td className="py-3 pr-4 text-right tabular-nums font-medium">
+                          {bep.toLocaleString("es-ES", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {cur}
                         </td>
                         <td
-                          className={`py-3 pr-4 text-right tabular-nums ${
-                            dayPct === null
+                          className={`py-3 pr-4 text-right tabular-nums font-medium ${
+                            priceDiffPct === null
                               ? ""
-                              : dayPct >= 0
+                              : priceDiffPct >= 0
                                 ? "text-green-600 dark:text-green-400"
                                 : "text-red-600 dark:text-red-400"
                           }`}
                         >
-                          {dayChange !== null && dayPct !== null
-                            ? `${dayChange >= 0 ? "+" : ""}${dayChange.toFixed(2)} (${dayPct >= 0 ? "+" : ""}${dayPct.toFixed(1)}%)`
+                          {priceDiff !== null && priceDiffPct !== null
+                            ? `${priceDiff >= 0 ? "+" : ""}${priceDiff.toFixed(2)} (${priceDiffPct >= 0 ? "+" : ""}${priceDiffPct.toFixed(1)}%)`
                             : "—"}
                         </td>
                         <td className="py-3 pr-4 text-right tabular-nums font-medium">
@@ -1096,7 +1088,9 @@ export function PortfolioPanel() {
                           <td className="py-2 pl-10 pr-4 text-sm text-muted-foreground">
                             {purchase.date}
                           </td>
-                          <td className="py-2 pr-4 text-muted-foreground">—</td>
+                          <td className="py-2 pr-4 text-muted-foreground">
+                            {stock.exchange}
+                          </td>
                           <td className="py-2 pr-4 text-right tabular-nums text-sm">
                             {purchase.quantity.toLocaleString("es-ES")}
                           </td>
@@ -1105,9 +1099,9 @@ export function PortfolioPanel() {
                           </td>
                           <td className="py-2 pr-4 text-right tabular-nums text-sm text-muted-foreground">—</td>
                           <td className="py-2 pr-4 text-right tabular-nums text-sm text-muted-foreground">—</td>
-                           <td className="py-2 pr-4 text-right tabular-nums text-sm">
-                             {(purchase.price * purchase.quantity).toLocaleString("es-ES", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {cur}
-                           </td>
+                          <td className="py-2 pr-4 text-right tabular-nums text-sm">
+                            {(purchase.price * purchase.quantity).toLocaleString("es-ES", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {cur}
+                          </td>
                           <td className="py-2 text-right">
                             <Button
                               variant="ghost"
