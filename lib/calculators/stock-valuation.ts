@@ -168,21 +168,27 @@ export function calculateValuation(input: ValuationInput): ValuationResult {
   const upsidePct = price > 0 ? ((expectedValue - price) / price) * 100 : 0
   const diffPct = price > 0 ? ((expectedValue - price) / price) * 100 : 0
 
-  // Factor de restricción por fundamentales de valoración
-  // Si PE o EV/EBITDA están por encima del benchmark del sector,
-  // se reduce el upside potencial para evitar etiquetas demasiado optimistas
+  // Factor de restricción/bonificación por fundamentales de valoración
+  // Penaliza PE/EV por encima del benchmark del sector
+  // Bonifica PE/EV por debajo del benchmark del sector
   let valuationConstraint = 1.0
   if (trailingPE > 0) {
     const peRatio = trailingPE / SECTOR.pe
     if (peRatio > 1.5) valuationConstraint *= 0.4
     else if (peRatio > 1.2) valuationConstraint *= 0.6
     else if (peRatio > 1.0) valuationConstraint *= 0.8
+    else if (peRatio < 0.5) valuationConstraint *= 1.3
+    else if (peRatio < 0.7) valuationConstraint *= 1.2
+    else if (peRatio < 0.9) valuationConstraint *= 1.1
   }
   if (evEbitda > 0) {
     const evRatio = evEbitda / SECTOR.evEbitda
     if (evRatio > 1.5) valuationConstraint *= 0.4
     else if (evRatio > 1.2) valuationConstraint *= 0.6
     else if (evRatio > 1.0) valuationConstraint *= 0.8
+    else if (evRatio < 0.5) valuationConstraint *= 1.3
+    else if (evRatio < 0.7) valuationConstraint *= 1.2
+    else if (evRatio < 0.9) valuationConstraint *= 1.1
   }
 
   const constrainedDiffPct = diffPct * valuationConstraint
