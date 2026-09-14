@@ -828,7 +828,6 @@ export function StockAnalyzer() {
                   <li key={i} className="py-3 first:pt-0 last:pb-0">
                     <a href={item.link} target="_blank" rel="noopener noreferrer" className="group block">
                       <p className="text-sm font-medium text-foreground group-hover:text-primary transition-colors line-clamp-2">{item.title}</p>
-                      {item.description && <p className="mt-1 text-xs text-muted-foreground line-clamp-2">{item.description}</p>}
                       <div className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
                         {item.source && <span className="font-medium">{item.source}</span>}
                         {item.source && item.date && <span>·</span>}
