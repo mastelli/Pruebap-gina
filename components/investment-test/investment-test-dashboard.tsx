@@ -19,6 +19,8 @@ interface StockProfile {
   country: string
   logo: string
   website: string
+  description: string
+  employees: number | null
 }
 
 interface StockQuote {
@@ -393,6 +395,16 @@ export function InvestmentTestDashboard() {
                       <a href={p.website} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-500 hover:underline inline-flex items-center gap-1 mt-1">
                         {p.website} <ExternalLink className="h-3 w-3" />
                       </a>
+                    ) : null}
+                    {p?.description ? (
+                      <p className="text-sm text-muted-foreground mt-2 leading-relaxed max-w-2xl">
+                        {p.description}
+                      </p>
+                    ) : null}
+                    {p?.employees ? (
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {p.employees.toLocaleString("es-ES")} {t("employees")}
+                      </p>
                     ) : null}
                   </div>
                 </div>

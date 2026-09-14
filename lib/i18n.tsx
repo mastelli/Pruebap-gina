@@ -1259,6 +1259,7 @@ const translations: Record<string, string> = {
   Hold: "Mantener",
   Sell: "Venta",
   "Strong Sell": "Venta Fuerte",
+  employees: "empleados",
   Revenue: "Ingresos",
   EBITDA: "EBITDA",
   "Free Cash Flow": "Flujo de Caja Libre",

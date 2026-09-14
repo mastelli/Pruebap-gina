@@ -313,6 +313,8 @@ export async function GET(req: NextRequest) {
       country: profile.country ?? "N/A",
       logo: profile.logo?.url ?? "",
       website: profile.website ?? "",
+      description: profile.longBusinessSummary ?? "",
+      employees: profile.fullTimeEmployees ?? null,
     },
     quote: {
       price,
