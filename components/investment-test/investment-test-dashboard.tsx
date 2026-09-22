@@ -498,7 +498,7 @@ export function InvestmentTestDashboard() {
                           {ev.evPerShare >= 0 ? "+" : ""}{ev.evPerShare.toLocaleString("es-ES", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {q.currency}
                         </div>
                         <div className="text-sm text-muted-foreground mt-0.5">
-                          {ev.evPct >= 0 ? "+" : ""}{(ev.evPct * 100).toFixed(1)}% {t("Expected return")} · {ev.months} {t("months")} · {t("Conservative")} (−5 {t("points")})
+                          {ev.evPct >= 0 ? "+" : ""}{(ev.evPct * 100).toFixed(1)}% {t("Expected return")} · {ev.months} {t("months")}
                         </div>
                       </div>
                       <Separator />
@@ -521,7 +521,7 @@ export function InvestmentTestDashboard() {
                         </span>
                       </div>
                       <div className="text-[11px] text-muted-foreground text-center leading-snug">
-                        {t("Conservative EV = mean less 5 points")} · {t("Monte Carlo simulation over historical returns")} ({ev.simulations.toLocaleString("es-ES")} {t("scenarios of")} {ev.months} {t("months")}, {ev.fromHistory.toLocaleString("es-ES")} {t("historical sessions")})
+                        {t("Monte Carlo simulation over historical returns")} ({ev.simulations.toLocaleString("es-ES")} {t("scenarios of")} {ev.months} {t("months")}, {ev.fromHistory.toLocaleString("es-ES")} {t("historical sessions")})
                       </div>
                     </>
                   ) : (
