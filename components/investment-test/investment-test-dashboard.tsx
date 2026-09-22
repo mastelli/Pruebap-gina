@@ -705,15 +705,12 @@ export function InvestmentTestDashboard() {
               size="sm"
               className="ml-auto gap-1.5"
               onClick={() => {
-                setMeasureActive((v) => {
-                  const next = !v
-                  measureRef.current?.setMeasureActive(next)
-                  return next
-                })
+                const next = !measureActive
+                setMeasureActive(next)
               }}
             >
               <Ruler className="h-4 w-4" />
-              {t("Measure")}
+              {measureActive ? t("Measuring…") : t("Measure")}
             </Button>
           </CardTitle>
         </CardHeader>

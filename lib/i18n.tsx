@@ -776,6 +776,7 @@ const translations: Record<string, string> = {
   "Insufficient historical data for EV": "Datos históricos insuficientes para el EV",
   "Worst case": "Peor escenario",
   "Measure": "Medir",
+  "Measuring…": "Midiendo…",
   "Potential": "Potencial",
   "Fundamental Score": "Score Fundamental",
   "Fundamentals": "Fundamentales",
