@@ -128,8 +128,7 @@ async function getChart(symbol: string, range: string = "6mo"): Promise<any> {
 // EV estilo poker: P(ganar) x ganancia - P(perder) x perdida.
 // Se estima con bootstrap Monte Carlo a partir de los retornos historicos reales
 // de la accion (no se usan precios objetivo ni cifras inventadas).
-// Se usa SIEMPRE la version conservadora: el peor caso razonable (cuantil 25%),
-// es decir el retorno por debajo del cual solo caen el 25% de las simulaciones.
+// Se usa SIEMPRE la version conservadora: el valor medio esperado menos 5 puntos.
 function computePokerEV(closes: number[], currentPrice: number, horizonDays = 252, sims = 5000): any {
   if (!closes || closes.length < 30 || !currentPrice || currentPrice <= 0) return null
   const returns: number[] = []
@@ -148,14 +147,7 @@ function computePokerEV(closes: number[], currentPrice: number, horizonDays = 25
     }
     outcomes.push(Math.exp(acc) - 1)
   }
-  outcomes.sort((a, b) => a - b)
 
-  const quantile = (q: number) => {
-    const idx = Math.max(0, Math.min(outcomes.length - 1, Math.floor(q * outcomes.length)))
-    return outcomes[idx]
-  }
-
-  // Media ponderada (referencia) y EV conservador (cuantil 25)
   let wins = 0
   let sumWin = 0
   let sumLoss = 0
@@ -167,11 +159,10 @@ function computePokerEV(closes: number[], currentPrice: number, horizonDays = 25
   const avgWin = wins > 0 ? sumWin / wins : 0
   const avgLoss = sims - wins > 0 ? sumLoss / (sims - wins) : 0
   const evMean = pWin * avgWin - pLoss * avgLoss
-  const q25 = quantile(0.25)
-  const q5 = quantile(0.05)
+  const q5 = outcomes.sort((a, b) => a - b)[Math.max(0, Math.min(outcomes.length - 1, Math.floor(0.05 * outcomes.length)))]
 
-  // La version conservadora es el cuantil 25: pesimista pero no catastrófica.
-  const evPct = q25
+  // Version conservadora: valor medio esperado menos 5 puntos porcentuales.
+  const evPct = evMean - 0.05
   return {
     pWin: Math.round(pWin * 100) / 100,
     pLoss: Math.round(pLoss * 100) / 100,
