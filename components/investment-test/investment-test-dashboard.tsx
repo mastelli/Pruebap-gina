@@ -8,7 +8,8 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Separator } from "@/components/ui/separator"
-import { Search, TrendingUp, TrendingDown, Activity, BarChart3, DollarSign, Building2, Users, Target, AlertTriangle, Globe, ChevronDown, ChevronUp, ExternalLink } from "lucide-react"
+import { Search, TrendingUp, TrendingDown, Activity, BarChart3, DollarSign, Building2, Users, Target, AlertTriangle, Globe, ChevronDown, ChevronUp, ExternalLink, Ruler } from "lucide-react"
+import { MeasurePrimitive } from "@/lib/measure-primitive"
 
 interface StockProfile {
   symbol: string
@@ -205,6 +206,8 @@ export function InvestmentTestDashboard() {
   const candleSeriesRef = useRef<import("lightweight-charts").ISeriesApi<"Candlestick"> | null>(null)
   const volumeSeriesRef = useRef<import("lightweight-charts").ISeriesApi<"Histogram"> | null>(null)
   const dataRef = useRef<StockData | null>(null)
+  const measureRef = useRef<MeasurePrimitive | null>(null)
+  const [measureActive, setMeasureActive] = useState(false)
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
     valuation: true,
     financials: true,
@@ -312,6 +315,9 @@ export function InvestmentTestDashboard() {
       chartRef.current = chart
       candleSeriesRef.current = candleSeries
       volumeSeriesRef.current = volumeSeries
+      measureRef.current = new MeasurePrimitive()
+      measureRef.current.setCurrency(dataRef.current?.quote?.currency ?? "")
+      candleSeries.attachPrimitive(measureRef.current)
       scheduleChartApply()
     }).catch((err) => {
       console.error("Failed to create chart:", err)
@@ -346,6 +352,13 @@ export function InvestmentTestDashboard() {
   }, [data])
 
   useEffect(() => {
+    if (measureRef.current) {
+      measureRef.current.setCurrency(data?.quote?.currency ?? "")
+      measureRef.current.setMeasureActive(measureActive)
+    }
+  }, [data, measureActive])
+
+  useEffect(() => {
     const container = chartContainerRef.current
     if (!container) return
 
@@ -360,6 +373,10 @@ export function InvestmentTestDashboard() {
     return () => {
       ro.disconnect()
       if (chartRef.current) {
+        if (measureRef.current) {
+          candleSeriesRef.current?.detachPrimitive(measureRef.current)
+          measureRef.current = null
+        }
         chartRef.current.remove()
         chartRef.current = null
         candleSeriesRef.current = null
@@ -662,7 +679,58 @@ export function InvestmentTestDashboard() {
               </Card>
             </div>
           )}
+        </>
+      )}
 
+      {/* Range selector */}
+      {selectedSymbol && (
+        <div className="flex gap-2">
+          {["1d", "5d", "1mo", "3mo", "6mo", "1y", "2y", "5y"].map((r) => (
+            <Button key={r} variant={range === r ? "default" : "outline"} size="sm" onClick={() => { setRange(r); loadStock(selectedSymbol, r, true) }} disabled={rangeLoading}>
+              {r.toUpperCase()}
+            </Button>
+          ))}
+        </div>
+      )}
+
+      {/* Chart */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <BarChart3 className="h-5 w-5" />
+            {t("Technical Chart")}
+            {rangeLoading && <Activity className="h-4 w-4 animate-spin text-muted-foreground" />}
+            <Button
+              variant={measureActive ? "default" : "outline"}
+              size="sm"
+              className="ml-auto gap-1.5"
+              onClick={() => {
+                setMeasureActive((v) => {
+                  const next = !v
+                  measureRef.current?.setMeasureActive(next)
+                  return next
+                })
+              }}
+            >
+              <Ruler className="h-4 w-4" />
+              {t("Measure")}
+            </Button>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="relative">
+          <div ref={chartContainerRef} className="w-full" style={{ minHeight: 450 }} />
+          {!data && !loading && (
+            <div className="absolute inset-0 flex flex-col items-center justify-center text-center text-muted-foreground pointer-events-none">
+              <BarChart3 className="h-12 w-12 mx-auto mb-4 opacity-50" />
+              <p className="text-lg font-medium">{t("Search for a stock to begin analysis")}</p>
+              <p className="text-sm mt-1">{t("Type a symbol like AAPL, TSLA, Iberdrola...")}</p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {data && !loading && (
+        <>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {/* Valuation Metrics */}
             <Card>
@@ -882,38 +950,6 @@ export function InvestmentTestDashboard() {
           )}
         </>
       )}
-
-      {/* Range selector */}
-      {selectedSymbol && (
-        <div className="flex gap-2">
-          {["1d", "5d", "1mo", "3mo", "6mo", "1y", "2y", "5y"].map((r) => (
-            <Button key={r} variant={range === r ? "default" : "outline"} size="sm" onClick={() => { setRange(r); loadStock(selectedSymbol, r, true) }} disabled={rangeLoading}>
-              {r.toUpperCase()}
-            </Button>
-          ))}
-        </div>
-      )}
-
-      {/* Chart */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <BarChart3 className="h-5 w-5" />
-            {t("Technical Chart")}
-            {rangeLoading && <Activity className="h-4 w-4 animate-spin text-muted-foreground" />}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="relative">
-          <div ref={chartContainerRef} className="w-full" style={{ minHeight: 450 }} />
-          {!data && !loading && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center text-center text-muted-foreground pointer-events-none">
-              <BarChart3 className="h-12 w-12 mx-auto mb-4 opacity-50" />
-              <p className="text-lg font-medium">{t("Search for a stock to begin analysis")}</p>
-              <p className="text-sm mt-1">{t("Type a symbol like AAPL, TSLA, Iberdrola...")}</p>
-            </div>
-          )}
-        </CardContent>
-      </Card>
     </div>
   )
 }
