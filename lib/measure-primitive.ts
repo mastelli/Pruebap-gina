@@ -19,6 +19,8 @@ interface MeasurePoint {
  * de preview, y fija el segundo punto con otro clic mostrando el resultado.
  * Un tercer clic reinicia la medicion.
  */
+const dbg = (msg: string, ...args: unknown[]) => console.log("[measure]", msg, ...args)
+
 export class MeasurePrimitive implements ISeriesPrimitive<Time> {
   private _chart: IChartApi | null = null
   private _series: import("lightweight-charts").ISeriesApi<SeriesType, Time> | null = null
@@ -74,6 +76,7 @@ export class MeasurePrimitive implements ISeriesPrimitive<Time> {
   }
 
   setStart(point: MeasurePoint) {
+    dbg("setStart", point)
     this._start = point
     this._end = null
     this._preview = null
@@ -81,6 +84,7 @@ export class MeasurePrimitive implements ISeriesPrimitive<Time> {
   }
 
   setEnd(point: MeasurePoint) {
+    dbg("setEnd", point)
     this._end = point
     this._preview = null
     this._requestUpdate?.()
@@ -100,15 +104,26 @@ export class MeasurePrimitive implements ISeriesPrimitive<Time> {
   }
 
   attached(param: ISeriesAttachedParameters<Time, SeriesType>) {
+    dbg("attached", {
+      hasChart: !!param.chart,
+      hasSeries: !!param.series,
+      hasRequestUpdate: typeof param.requestUpdate === "function",
+    })
     this._chart = param.chart as IChartApi
     this._series = param.series
     this._requestUpdate = param.requestUpdate
 
     this._clearHandlers()
     const clickHandler = (e: MouseEventParams<Time>) => {
+      dbg("click event", {
+        active: this._measureActive,
+        hasPoint: !!e.point,
+        time: e.time,
+      })
       if (!this._measureActive) return
       const time = this._timeAt(e)
       const price = this._priceAt(e)
+      dbg("click resolved", { time, price })
       if (time == null || price == null) return
       const point: MeasurePoint = { time, price }
       if (!this._start) {
@@ -157,6 +172,7 @@ export class MeasurePrimitive implements ISeriesPrimitive<Time> {
   updateAllViews() {}
 
   paneViews(): readonly IPrimitivePaneView[] {
+    dbg("paneViews called")
     return this._viewsCache
   }
 }
@@ -185,6 +201,7 @@ class MeasureRenderer implements IPrimitivePaneRenderer {
     const series = (p as unknown as { _series: import("lightweight-charts").ISeriesApi<SeriesType, Time> | null })._series
     const start = p.start
     const current = p.end ?? p.preview
+    dbg("renderer draw", { hasSeries: !!series, start, current })
     if (!series) return
 
     target.useMediaCoordinateSpace(({ context: ctx, mediaSize }) => {

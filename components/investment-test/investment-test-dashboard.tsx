@@ -318,6 +318,7 @@ export function InvestmentTestDashboard() {
       measureRef.current = new MeasurePrimitive()
       measureRef.current.setCurrency(dataRef.current?.quote?.currency ?? "")
       candleSeries.attachPrimitive(measureRef.current)
+      console.log("[measure] attached primitive", { hasChartRef: !!chartRef.current })
       scheduleChartApply()
     }).catch((err) => {
       console.error("Failed to create chart:", err)
@@ -352,6 +353,7 @@ export function InvestmentTestDashboard() {
   }, [data])
 
   useEffect(() => {
+    console.log("[measure] sync effect", { measureActive, hasMeasure: !!measureRef.current })
     if (measureRef.current) {
       measureRef.current.setCurrency(data?.quote?.currency ?? "")
       measureRef.current.setMeasureActive(measureActive)
@@ -706,6 +708,7 @@ export function InvestmentTestDashboard() {
               className="ml-auto gap-1.5"
               onClick={() => {
                 const next = !measureActive
+                console.log("[measure] toggle click", { next })
                 setMeasureActive(next)
               }}
             >
