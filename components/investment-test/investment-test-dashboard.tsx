@@ -183,6 +183,8 @@ export function InvestmentTestDashboard() {
   const [rangeLoading, setRangeLoading] = useState(false)
   const chartContainerRef = useRef<HTMLDivElement>(null)
   const chartRef = useRef<import("lightweight-charts").IChartApi | null>(null)
+  const candleSeriesRef = useRef<import("lightweight-charts").ISeriesApi<"Candlestick"> | null>(null)
+  const volumeSeriesRef = useRef<import("lightweight-charts").ISeriesApi<"Volume"> | null>(null)
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
     valuation: true,
     financials: true,
@@ -245,42 +247,58 @@ export function InvestmentTestDashboard() {
     const container = chartContainerRef.current
 
     import("lightweight-charts").then(({ createChart, CandlestickSeries, VolumeSeries }) => {
-      if (chartRef.current) {
-        chartRef.current.remove()
-        chartRef.current = null
+      // Crear el chart UNA sola vez
+      if (!chartRef.current) {
+        const chart = createChart(container, {
+          width: container.clientWidth,
+          height: 450,
+          layout: {
+            background: { color: "transparent" },
+            textColor: "hsl(240 3.8% 46.1%)",
+          },
+          grid: {
+            vertLines: { color: "hsl(240 5% 85% / 0.3)" },
+            horzLines: { color: "hsl(240 5% 85% / 0.3)" },
+          },
+          crosshair: {
+            mode: 0,
+          },
+          rightPriceScale: {
+            borderColor: "hsl(240 5% 85%)",
+          },
+          timeScale: {
+            borderColor: "hsl(240 5% 85%)",
+            timeVisible: false,
+          },
+        })
+
+        const candleSeries = chart.addSeries(CandlestickSeries, {
+          upColor: "#22c55e",
+          downColor: "#ef4444",
+          borderDownColor: "#ef4444",
+          borderUpColor: "#22c55e",
+          wickDownColor: "#ef4444",
+          wickUpColor: "#22c55e",
+        })
+
+        const volumeSeries = chart.addSeries(VolumeSeries, {
+          priceFormat: { type: "volume" },
+          priceScaleId: "",
+        })
+
+        volumeSeries.priceScale().applyOptions({
+          scaleMargins: { top: 0.8, bottom: 0 },
+        })
+
+        chartRef.current = chart
+        candleSeriesRef.current = candleSeries
+        volumeSeriesRef.current = volumeSeries
       }
 
-      const chart = createChart(container, {
-        width: container.clientWidth,
-        height: 450,
-        layout: {
-          background: { color: "transparent" },
-          textColor: "hsl(240 3.8% 46.1%)",
-        },
-        grid: {
-          vertLines: { color: "hsl(240 5% 85% / 0.3)" },
-          horzLines: { color: "hsl(240 5% 85% / 0.3)" },
-        },
-        crosshair: {
-          mode: 0,
-        },
-        rightPriceScale: {
-          borderColor: "hsl(240 5% 85%)",
-        },
-        timeScale: {
-          borderColor: "hsl(240 5% 85%)",
-          timeVisible: false,
-        },
-      })
-
-      const candleSeries = chart.addSeries(CandlestickSeries, {
-        upColor: "#22c55e",
-        downColor: "#ef4444",
-        borderDownColor: "#ef4444",
-        borderUpColor: "#22c55e",
-        wickDownColor: "#ef4444",
-        wickUpColor: "#22c55e",
-      })
+      const chart = chartRef.current
+      const candleSeries = candleSeriesRef.current
+      const volumeSeries = volumeSeriesRef.current
+      if (!chart || !candleSeries || !volumeSeries) return
 
       const candleData = data.history.map((c) => ({
         time: c.date as string,
@@ -292,15 +310,6 @@ export function InvestmentTestDashboard() {
 
       candleSeries.setData(candleData as any)
 
-      const volumeSeries = chart.addSeries(VolumeSeries, {
-        priceFormat: { type: "volume" },
-        priceScaleId: "",
-      })
-
-      volumeSeries.priceScale().applyOptions({
-        scaleMargins: { top: 0.8, bottom: 0 },
-      })
-
       const volData = data.history.map((c) => ({
         time: c.date as string,
         value: c.volume ?? 0,
@@ -310,23 +319,27 @@ export function InvestmentTestDashboard() {
       volumeSeries.setData(volData as any)
 
       chart.timeScale().fitContent()
-      chartRef.current = chart
-
-      const handleResize = () => {
-        if (chartContainerRef.current) {
-          chart.applyOptions({ width: chartContainerRef.current.clientWidth })
-        }
-      }
-      window.addEventListener("resize", handleResize)
-      return () => window.removeEventListener("resize", handleResize)
     })
   }, [data])
+
+  useEffect(() => {
+    if (!chartContainerRef.current) return
+    const handleResize = () => {
+      if (chartContainerRef.current && chartRef.current) {
+        chartRef.current.applyOptions({ width: chartContainerRef.current.clientWidth })
+      }
+    }
+    window.addEventListener("resize", handleResize)
+    return () => window.removeEventListener("resize", handleResize)
+  }, [])
 
   useEffect(() => {
     return () => {
       if (chartRef.current) {
         chartRef.current.remove()
         chartRef.current = null
+        candleSeriesRef.current = null
+        volumeSeriesRef.current = null
       }
     }
   }, [])
@@ -453,22 +466,26 @@ export function InvestmentTestDashboard() {
                           {a.targetMean >= q.price ? "+" : ""}{((a.targetMean - q.price) / q.price * 100).toFixed(1)}% {t("upside")}
                         </div>
                       </div>
-                      {stats.enterpriseValue ? (
-                        <div className="grid grid-cols-2 gap-2">
-                          <div className="flex justify-between items-center px-2 py-1.5 rounded-lg bg-green-500/10 text-sm">
-                            <span className="text-green-600 font-medium">EV+</span>
-                            <span className="font-bold text-green-600 tabular-nums">
-                              +{((a.targetMean - q.price)).toLocaleString("es-ES", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {q.currency}
+                      {(() => {
+                        const diff = a.targetMean - q.price
+                        const isPositive = diff > 0
+                        const isZero = Math.abs(diff) < 1e-9
+                        const label = isZero ? "EV0" : isPositive ? "EV+" : "EV-"
+                        const cls = isZero
+                          ? "bg-secondary/50 text-foreground"
+                          : isPositive
+                            ? "bg-green-500/10"
+                            : "bg-red-500/10"
+                        const color = isZero ? "text-foreground" : isPositive ? "text-green-600" : "text-red-600"
+                        return (
+                          <div className={`flex items-center justify-between px-3 py-2 rounded-lg text-sm ${cls}`}>
+                            <span className={`font-bold ${color}`}>{label}</span>
+                            <span className={`font-bold tabular-nums ${color}`}>
+                              {isPositive ? "+" : ""}{diff.toLocaleString("es-ES", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {q.currency}
                             </span>
                           </div>
-                          <div className="flex justify-between items-center px-2 py-1.5 rounded-lg bg-red-500/10 text-sm">
-                            <span className="text-red-600 font-medium">EV-</span>
-                            <span className="font-bold text-red-600 tabular-nums">
-                              {a.targetLow ? (a.targetLow - q.price).toLocaleString("es-ES", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "—"} {q.currency}
-                            </span>
-                          </div>
-                        </div>
-                      ) : null}
+                        )
+                      })()}
                       <Separator />
                       <div className="grid grid-cols-2 gap-2 text-sm">
                         <div className="text-center p-2 rounded-lg bg-green-500/10">
