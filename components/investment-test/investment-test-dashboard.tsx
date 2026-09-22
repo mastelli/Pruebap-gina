@@ -203,7 +203,7 @@ export function InvestmentTestDashboard() {
   const chartContainerRef = useRef<HTMLDivElement>(null)
   const chartRef = useRef<import("lightweight-charts").IChartApi | null>(null)
   const candleSeriesRef = useRef<import("lightweight-charts").ISeriesApi<"Candlestick"> | null>(null)
-  const volumeSeriesRef = useRef<import("lightweight-charts").ISeriesApi<"Volume"> | null>(null)
+  const volumeSeriesRef = useRef<import("lightweight-charts").ISeriesApi<"Histogram"> | null>(null)
   const dataRef = useRef<StockData | null>(null)
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
     valuation: true,
@@ -266,7 +266,7 @@ export function InvestmentTestDashboard() {
     const container = chartContainerRef.current
     if (!container) return
 
-    import("lightweight-charts").then(({ createChart, CandlestickSeries, VolumeSeries }) => {
+    import("lightweight-charts").then(({ createChart, CandlestickSeries, HistogramSeries }) => {
       if (chartRef.current || !container.isConnected) return
       const chart = createChart(container, {
         width: container.clientWidth || 0,
@@ -300,7 +300,7 @@ export function InvestmentTestDashboard() {
         wickUpColor: "#22c55e",
       })
 
-      const volumeSeries = chart.addSeries(VolumeSeries, {
+      const volumeSeries = chart.addSeries(HistogramSeries, {
         priceFormat: { type: "volume" },
         priceScaleId: "",
       })
@@ -313,6 +313,8 @@ export function InvestmentTestDashboard() {
       candleSeriesRef.current = candleSeries
       volumeSeriesRef.current = volumeSeries
       scheduleChartApply()
+    }).catch((err) => {
+      console.error("Failed to create chart:", err)
     })
   }, [])
 
