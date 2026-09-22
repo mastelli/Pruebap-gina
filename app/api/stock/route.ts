@@ -401,6 +401,7 @@ export async function GET(req: NextRequest) {
       return timestamps
         .map((ts: number, i: number) => ({
           date: new Date(ts * 1000).toISOString().split("T")[0],
+          ts,
           price: closes[i] != null ? Math.round(closes[i] * 100) / 100 : null,
           open: opens[i] != null ? Math.round(opens[i] * 100) / 100 : null,
           high: highs[i] != null ? Math.round(highs[i] * 100) / 100 : null,
