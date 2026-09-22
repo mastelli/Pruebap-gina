@@ -67,12 +67,15 @@ interface EvData {
   pLoss: number
   avgWin: number
   avgLoss: number
+  evMean: number
   evPct: number
   evPerShare: number
+  worstCase: number
   simulations: number
   horizonDays: number
   months: number
   label: "EV+" | "EV-" | "EV0"
+  method: string
   fromHistory: number
 }
 
@@ -201,7 +204,7 @@ export function InvestmentTestDashboard() {
   const chartRef = useRef<import("lightweight-charts").IChartApi | null>(null)
   const candleSeriesRef = useRef<import("lightweight-charts").ISeriesApi<"Candlestick"> | null>(null)
   const volumeSeriesRef = useRef<import("lightweight-charts").ISeriesApi<"Volume"> | null>(null)
-  const chartCreatedRef = useRef(false)
+  const dataRef = useRef<StockData | null>(null)
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
     valuation: true,
     financials: true,
@@ -242,15 +245,6 @@ export function InvestmentTestDashboard() {
       setRangeLoading(true)
     } else {
       setLoading(true)
-      // Al cargar un simbolo nuevo el bloque del chart se desmonta,
-      // asi que el chart hay que recrearlo cuando vuelva a montarse.
-      if (chartRef.current) {
-        chartRef.current.remove()
-        chartRef.current = null
-        candleSeriesRef.current = null
-        volumeSeriesRef.current = null
-      }
-      chartCreatedRef.current = false
     }
     setResults([])
     setSelectedSymbol(symbol)
@@ -269,10 +263,62 @@ export function InvestmentTestDashboard() {
   }, [range])
 
   useEffect(() => {
-    if (!data || !chartContainerRef.current) return
     const container = chartContainerRef.current
+    if (!container) return
 
-    const applyChartData = () => {
+    import("lightweight-charts").then(({ createChart, CandlestickSeries, VolumeSeries }) => {
+      if (chartRef.current || !container.isConnected) return
+      const chart = createChart(container, {
+        width: container.clientWidth || 0,
+        height: 450,
+        layout: {
+          background: { color: "transparent" },
+          textColor: "hsl(240 3.8% 46.1%)",
+        },
+        grid: {
+          vertLines: { color: "hsl(240 5% 85% / 0.3)" },
+          horzLines: { color: "hsl(240 5% 85% / 0.3)" },
+        },
+        crosshair: {
+          mode: 0,
+        },
+        rightPriceScale: {
+          borderColor: "hsl(240 5% 85%)",
+        },
+        timeScale: {
+          borderColor: "hsl(240 5% 85%)",
+          timeVisible: false,
+        },
+      })
+
+      const candleSeries = chart.addSeries(CandlestickSeries, {
+        upColor: "#22c55e",
+        downColor: "#ef4444",
+        borderDownColor: "#ef4444",
+        borderUpColor: "#22c55e",
+        wickDownColor: "#ef4444",
+        wickUpColor: "#22c55e",
+      })
+
+      const volumeSeries = chart.addSeries(VolumeSeries, {
+        priceFormat: { type: "volume" },
+        priceScaleId: "",
+      })
+
+      volumeSeries.priceScale().applyOptions({
+        scaleMargins: { top: 0.8, bottom: 0 },
+      })
+
+      chartRef.current = chart
+      candleSeriesRef.current = candleSeries
+      volumeSeriesRef.current = volumeSeries
+      scheduleChartApply()
+    })
+  }, [])
+
+  const scheduleChartApply = () => {
+    requestAnimationFrame(() => {
+      const data = dataRef.current
       if (!data || !chartRef.current || !candleSeriesRef.current || !volumeSeriesRef.current) return
       const candleData = data.history.map((c) => ({
         time: c.ts ?? (c.date as any),
@@ -289,86 +335,33 @@ export function InvestmentTestDashboard() {
       })).sort((a, b) => Number(a.time) - Number(b.time))
       volumeSeriesRef.current.setData(volData as any)
       chartRef.current.timeScale().fitContent()
-    }
+    })
+  }
 
-    // Crear el chart una sola vez (guarda síncrona para evitar duplicados)
-    if (!chartCreatedRef.current) {
-      chartCreatedRef.current = true
-      import("lightweight-charts").then(({ createChart, CandlestickSeries, VolumeSeries }) => {
-        if (chartRef.current) return
-        container.innerHTML = ""
-        const chart = createChart(container, {
-          width: container.clientWidth,
-          height: 450,
-          layout: {
-            background: { color: "transparent" },
-            textColor: "hsl(240 3.8% 46.1%)",
-          },
-          grid: {
-            vertLines: { color: "hsl(240 5% 85% / 0.3)" },
-            horzLines: { color: "hsl(240 5% 85% / 0.3)" },
-          },
-          crosshair: {
-            mode: 0,
-          },
-          rightPriceScale: {
-            borderColor: "hsl(240 5% 85%)",
-          },
-          timeScale: {
-            borderColor: "hsl(240 5% 85%)",
-            timeVisible: false,
-          },
-        })
-
-        const candleSeries = chart.addSeries(CandlestickSeries, {
-          upColor: "#22c55e",
-          downColor: "#ef4444",
-          borderDownColor: "#ef4444",
-          borderUpColor: "#22c55e",
-          wickDownColor: "#ef4444",
-          wickUpColor: "#22c55e",
-        })
-
-        const volumeSeries = chart.addSeries(VolumeSeries, {
-          priceFormat: { type: "volume" },
-          priceScaleId: "",
-        })
-
-        volumeSeries.priceScale().applyOptions({
-          scaleMargins: { top: 0.8, bottom: 0 },
-        })
-
-        chartRef.current = chart
-        candleSeriesRef.current = candleSeries
-        volumeSeriesRef.current = volumeSeries
-        applyChartData()
-      })
-      return
-    }
-
-    // El chart ya existe: solo actualizar los datos
-    applyChartData()
+  useEffect(() => {
+    dataRef.current = data
+    scheduleChartApply()
   }, [data])
 
   useEffect(() => {
-    if (!chartContainerRef.current) return
-    const handleResize = () => {
-      if (chartContainerRef.current && chartRef.current) {
-        chartRef.current.applyOptions({ width: chartContainerRef.current.clientWidth })
-      }
-    }
-    window.addEventListener("resize", handleResize)
-    return () => window.removeEventListener("resize", handleResize)
-  }, [])
+    const container = chartContainerRef.current
+    if (!container) return
 
-  useEffect(() => {
+    const ro = new ResizeObserver((entries) => {
+      const w = entries[0]?.contentRect?.width
+      if (w && chartRef.current) {
+        chartRef.current.applyOptions({ width: w })
+      }
+    })
+    ro.observe(container)
+
     return () => {
+      ro.disconnect()
       if (chartRef.current) {
         chartRef.current.remove()
         chartRef.current = null
         candleSeriesRef.current = null
         volumeSeriesRef.current = null
-        chartCreatedRef.current = false
       }
     }
   }, [])
@@ -503,7 +496,7 @@ export function InvestmentTestDashboard() {
                           {ev.evPerShare >= 0 ? "+" : ""}{ev.evPerShare.toLocaleString("es-ES", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {q.currency}
                         </div>
                         <div className="text-sm text-muted-foreground mt-0.5">
-                          {ev.evPct >= 0 ? "+" : ""}{(ev.evPct * 100).toFixed(1)}% {t("Expected return")} · {ev.months} {t("months")}
+                          {ev.evPct >= 0 ? "+" : ""}{(ev.evPct * 100).toFixed(1)}% {t("Expected return")} · {ev.months} {t("months")} · {t("Conservative (Q25)")}
                         </div>
                       </div>
                       <Separator />
@@ -519,8 +512,14 @@ export function InvestmentTestDashboard() {
                           <div className="text-xs text-muted-foreground">{t("Avg loss")} -{(ev.avgLoss * 100).toFixed(1)}%</div>
                         </div>
                       </div>
+                      <div className="flex items-center justify-between px-2 py-1.5 rounded-lg bg-secondary/50 text-sm">
+                        <span className="text-muted-foreground font-medium">{t("Worst case")} (5%)</span>
+                        <span className={`font-bold tabular-nums ${ev.worstCase < 0 ? "text-red-600" : "text-green-600"}`}>
+                          {ev.worstCase >= 0 ? "+" : ""}{(ev.worstCase * 100).toFixed(1)}%
+                        </span>
+                      </div>
                       <div className="text-[11px] text-muted-foreground text-center leading-snug">
-                        {t("Monte Carlo simulation over historical returns")} ({ev.simulations.toLocaleString("es-ES")} {t("scenarios of")} {ev.months} {t("months")}, {ev.fromHistory.toLocaleString("es-ES")} {t("historical sessions")})
+                        {t("Conservative EV uses the 25th percentile")} · {t("Monte Carlo simulation over historical returns")} ({ev.simulations.toLocaleString("es-ES")} {t("scenarios of")} {ev.months} {t("months")}, {ev.fromHistory.toLocaleString("es-ES")} {t("historical sessions")})
                       </div>
                     </>
                   ) : (
@@ -661,29 +660,6 @@ export function InvestmentTestDashboard() {
               </Card>
             </div>
           )}
-
-          {/* Range selector */}
-          <div className="flex gap-2">
-            {["1d", "5d", "1mo", "3mo", "6mo", "1y", "2y", "5y"].map((r) => (
-              <Button key={r} variant={range === r ? "default" : "outline"} size="sm" onClick={() => { setRange(r); if (selectedSymbol) loadStock(selectedSymbol, r, true) }} disabled={rangeLoading}>
-                {r.toUpperCase()}
-              </Button>
-            ))}
-          </div>
-
-          {/* Chart */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <BarChart3 className="h-5 w-5" />
-                {t("Technical Chart")}
-                {rangeLoading && <Activity className="h-4 w-4 animate-spin text-muted-foreground" />}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div ref={chartContainerRef} className="w-full" />
-            </CardContent>
-          </Card>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {/* Valuation Metrics */}
@@ -905,15 +881,37 @@ export function InvestmentTestDashboard() {
         </>
       )}
 
-      {!data && !loading && (
-        <Card>
-          <CardContent className="py-16 text-center text-muted-foreground">
-            <BarChart3 className="h-12 w-12 mx-auto mb-4 opacity-50" />
-            <p className="text-lg font-medium">{t("Search for a stock to begin analysis")}</p>
-            <p className="text-sm mt-1">{t("Type a symbol like AAPL, TSLA, Iberdrola...")}</p>
-          </CardContent>
-        </Card>
+      {/* Range selector */}
+      {selectedSymbol && (
+        <div className="flex gap-2">
+          {["1d", "5d", "1mo", "3mo", "6mo", "1y", "2y", "5y"].map((r) => (
+            <Button key={r} variant={range === r ? "default" : "outline"} size="sm" onClick={() => { setRange(r); loadStock(selectedSymbol, r, true) }} disabled={rangeLoading}>
+              {r.toUpperCase()}
+            </Button>
+          ))}
+        </div>
       )}
+
+      {/* Chart */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <BarChart3 className="h-5 w-5" />
+            {t("Technical Chart")}
+            {rangeLoading && <Activity className="h-4 w-4 animate-spin text-muted-foreground" />}
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="relative">
+          <div ref={chartContainerRef} className="w-full" style={{ minHeight: 450 }} />
+          {!data && !loading && (
+            <div className="absolute inset-0 flex flex-col items-center justify-center text-center text-muted-foreground pointer-events-none">
+              <BarChart3 className="h-12 w-12 mx-auto mb-4 opacity-50" />
+              <p className="text-lg font-medium">{t("Search for a stock to begin analysis")}</p>
+              <p className="text-sm mt-1">{t("Type a symbol like AAPL, TSLA, Iberdrola...")}</p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   )
 }
