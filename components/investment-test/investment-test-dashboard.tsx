@@ -201,7 +201,7 @@ export function InvestmentTestDashboard() {
   const chartRef = useRef<import("lightweight-charts").IChartApi | null>(null)
   const candleSeriesRef = useRef<import("lightweight-charts").ISeriesApi<"Candlestick"> | null>(null)
   const volumeSeriesRef = useRef<import("lightweight-charts").ISeriesApi<"Volume"> | null>(null)
-  const pendingDataRef = useRef<StockData | null>(null)
+  const chartCreatedRef = useRef(false)
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
     valuation: true,
     financials: true,
@@ -242,6 +242,15 @@ export function InvestmentTestDashboard() {
       setRangeLoading(true)
     } else {
       setLoading(true)
+      // Al cargar un simbolo nuevo el bloque del chart se desmonta,
+      // asi que el chart hay que recrearlo cuando vuelva a montarse.
+      if (chartRef.current) {
+        chartRef.current.remove()
+        chartRef.current = null
+        candleSeriesRef.current = null
+        volumeSeriesRef.current = null
+      }
+      chartCreatedRef.current = false
     }
     setResults([])
     setSelectedSymbol(symbol)
@@ -260,104 +269,85 @@ export function InvestmentTestDashboard() {
   }, [range])
 
   useEffect(() => {
-    if (!chartContainerRef.current) return
+    if (!data || !chartContainerRef.current) return
     const container = chartContainerRef.current
 
-    import("lightweight-charts").then(({ createChart, CandlestickSeries, VolumeSeries }) => {
-      if (chartRef.current) return
-      container.innerHTML = ""
-      const chart = createChart(container, {
-        width: container.clientWidth,
-        height: 450,
-        layout: {
-          background: { color: "transparent" },
-          textColor: "hsl(240 3.8% 46.1%)",
-        },
-        grid: {
-          vertLines: { color: "hsl(240 5% 85% / 0.3)" },
-          horzLines: { color: "hsl(240 5% 85% / 0.3)" },
-        },
-        crosshair: {
-          mode: 0,
-        },
-        rightPriceScale: {
-          borderColor: "hsl(240 5% 85%)",
-        },
-        timeScale: {
-          borderColor: "hsl(240 5% 85%)",
-          timeVisible: false,
-        },
+    const applyChartData = () => {
+      if (!data || !chartRef.current || !candleSeriesRef.current || !volumeSeriesRef.current) return
+      const candleData = data.history.map((c) => ({
+        time: c.ts ?? (c.date as any),
+        open: c.open,
+        high: c.high,
+        low: c.low,
+        close: c.price,
+      })).sort((a, b) => Number(a.time) - Number(b.time))
+      candleSeriesRef.current.setData(candleData as any)
+      const volData = data.history.map((c) => ({
+        time: c.ts ?? (c.date as any),
+        value: c.volume ?? 0,
+        color: c.price >= c.open ? "rgba(34,197,94,0.3)" : "rgba(239,68,68,0.3)",
+      })).sort((a, b) => Number(a.time) - Number(b.time))
+      volumeSeriesRef.current.setData(volData as any)
+      chartRef.current.timeScale().fitContent()
+    }
+
+    // Crear el chart una sola vez (guarda síncrona para evitar duplicados)
+    if (!chartCreatedRef.current) {
+      chartCreatedRef.current = true
+      import("lightweight-charts").then(({ createChart, CandlestickSeries, VolumeSeries }) => {
+        if (chartRef.current) return
+        container.innerHTML = ""
+        const chart = createChart(container, {
+          width: container.clientWidth,
+          height: 450,
+          layout: {
+            background: { color: "transparent" },
+            textColor: "hsl(240 3.8% 46.1%)",
+          },
+          grid: {
+            vertLines: { color: "hsl(240 5% 85% / 0.3)" },
+            horzLines: { color: "hsl(240 5% 85% / 0.3)" },
+          },
+          crosshair: {
+            mode: 0,
+          },
+          rightPriceScale: {
+            borderColor: "hsl(240 5% 85%)",
+          },
+          timeScale: {
+            borderColor: "hsl(240 5% 85%)",
+            timeVisible: false,
+          },
+        })
+
+        const candleSeries = chart.addSeries(CandlestickSeries, {
+          upColor: "#22c55e",
+          downColor: "#ef4444",
+          borderDownColor: "#ef4444",
+          borderUpColor: "#22c55e",
+          wickDownColor: "#ef4444",
+          wickUpColor: "#22c55e",
+        })
+
+        const volumeSeries = chart.addSeries(VolumeSeries, {
+          priceFormat: { type: "volume" },
+          priceScaleId: "",
+        })
+
+        volumeSeries.priceScale().applyOptions({
+          scaleMargins: { top: 0.8, bottom: 0 },
+        })
+
+        chartRef.current = chart
+        candleSeriesRef.current = candleSeries
+        volumeSeriesRef.current = volumeSeries
+        applyChartData()
       })
-
-      const candleSeries = chart.addSeries(CandlestickSeries, {
-        upColor: "#22c55e",
-        downColor: "#ef4444",
-        borderDownColor: "#ef4444",
-        borderUpColor: "#22c55e",
-        wickDownColor: "#ef4444",
-        wickUpColor: "#22c55e",
-      })
-
-      const volumeSeries = chart.addSeries(VolumeSeries, {
-        priceFormat: { type: "volume" },
-        priceScaleId: "",
-      })
-
-      volumeSeries.priceScale().applyOptions({
-        scaleMargins: { top: 0.8, bottom: 0 },
-      })
-
-      chartRef.current = chart
-      candleSeriesRef.current = candleSeries
-      volumeSeriesRef.current = volumeSeries
-
-      if (pendingDataRef.current && chartRef.current && candleSeriesRef.current && volumeSeriesRef.current) {
-        const chartNow = chartRef.current
-        const candle = candleSeriesRef.current
-        const volume = volumeSeriesRef.current
-        const d = pendingDataRef.current
-        candle.setData(d.history.map((c) => ({
-          time: c.ts ?? (c.date as any),
-          open: c.open,
-          high: c.high,
-          low: c.low,
-          close: c.price,
-        })).sort((a, b) => Number(a.time) - Number(b.time)) as any)
-        volume.setData(d.history.map((c) => ({
-          time: c.ts ?? (c.date as any),
-          value: c.volume ?? 0,
-          color: c.price >= c.open ? "rgba(34,197,94,0.3)" : "rgba(239,68,68,0.3)",
-        })).sort((a, b) => Number(a.time) - Number(b.time)) as any)
-        chartNow.timeScale().fitContent()
-        pendingDataRef.current = null
-      }
-    })
-  }, [])
-
-  useEffect(() => {
-    if (!data || !chartRef.current || !candleSeriesRef.current || !volumeSeriesRef.current) {
-      if (data) pendingDataRef.current = data
       return
     }
-    const candleData = data.history.map((c) => ({
-      time: c.ts ?? (c.date as any),
-      open: c.open,
-      high: c.high,
-      low: c.low,
-      close: c.price,
-    })).sort((a, b) => Number(a.time) - Number(b.time))
 
-    candleSeriesRef.current.setData(candleData as any)
-
-    const volData = data.history.map((c) => ({
-      time: c.ts ?? (c.date as any),
-      value: c.volume ?? 0,
-      color: c.price >= c.open ? "rgba(34,197,94,0.3)" : "rgba(239,68,68,0.3)",
-    })).sort((a, b) => Number(a.time) - Number(b.time))
-
-    volumeSeriesRef.current.setData(volData as any)
-
-    chartRef.current.timeScale().fitContent()
+    // El chart ya existe: solo actualizar los datos
+    applyChartData()
   }, [data])
 
   useEffect(() => {
@@ -378,6 +368,7 @@ export function InvestmentTestDashboard() {
         chartRef.current = null
         candleSeriesRef.current = null
         volumeSeriesRef.current = null
+        chartCreatedRef.current = false
       }
     }
   }, [])
