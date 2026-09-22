@@ -61,11 +61,26 @@ interface CandleData {
   low: number
 }
 
+interface EvData {
+  pWin: number
+  pLoss: number
+  avgWin: number
+  avgLoss: number
+  evPct: number
+  evPerShare: number
+  simulations: number
+  horizonDays: number
+  months: number
+  label: "EV+" | "EV-" | "EV0"
+  fromHistory: number
+}
+
 interface StockData {
   profile: StockProfile
   quote: StockQuote
   stats: StockStats
   analystData: AnalystData
+  ev: EvData | null
   history: CandleData[]
 }
 
@@ -348,6 +363,7 @@ export function InvestmentTestDashboard() {
   const q = data?.quote
   const a = data?.analystData
   const p = data?.profile
+  const ev = data?.ev ?? null
 
   return (
     <div className="space-y-4">
@@ -455,55 +471,47 @@ export function InvestmentTestDashboard() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {a.targetMean ? (
+                  {ev ? (
                     <>
                       <div className="text-center">
-                        <div className="text-sm text-muted-foreground">{t("Target Price")}</div>
-                        <div className="text-3xl font-bold tabular-nums mt-1">
-                          {a.targetMean.toLocaleString("es-ES", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {q.currency}
+                        <div className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-lg font-bold ${
+                          ev.label === "EV0"
+                            ? "bg-secondary/50 text-foreground"
+                            : ev.label === "EV+"
+                              ? "bg-green-500/10 text-green-600"
+                              : "bg-red-500/10 text-red-600"
+                        }`}>
+                          {ev.label}
                         </div>
-                        <div className={`text-lg font-semibold mt-1 ${a.targetMean >= q.price ? "text-green-600" : "text-red-600"}`}>
-                          {a.targetMean >= q.price ? "+" : ""}{((a.targetMean - q.price) / q.price * 100).toFixed(1)}% {t("upside")}
+                        <div className={`text-3xl font-bold tabular-nums mt-2 ${
+                          ev.label === "EV0" ? "text-foreground" : ev.label === "EV+" ? "text-green-600" : "text-red-600"
+                        }`}>
+                          {ev.evPerShare >= 0 ? "+" : ""}{ev.evPerShare.toLocaleString("es-ES", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {q.currency}
+                        </div>
+                        <div className="text-sm text-muted-foreground mt-0.5">
+                          {ev.evPct >= 0 ? "+" : ""}{(ev.evPct * 100).toFixed(1)}% {t("Expected return")} · {ev.months} {t("months")}
                         </div>
                       </div>
-                      {(() => {
-                        const diff = a.targetMean - q.price
-                        const isPositive = diff > 0
-                        const isZero = Math.abs(diff) < 1e-9
-                        const label = isZero ? "EV0" : isPositive ? "EV+" : "EV-"
-                        const cls = isZero
-                          ? "bg-secondary/50 text-foreground"
-                          : isPositive
-                            ? "bg-green-500/10"
-                            : "bg-red-500/10"
-                        const color = isZero ? "text-foreground" : isPositive ? "text-green-600" : "text-red-600"
-                        return (
-                          <div className={`flex items-center justify-between px-3 py-2 rounded-lg text-sm ${cls}`}>
-                            <span className={`font-bold ${color}`}>{label}</span>
-                            <span className={`font-bold tabular-nums ${color}`}>
-                              {isPositive ? "+" : ""}{diff.toLocaleString("es-ES", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {q.currency}
-                            </span>
-                          </div>
-                        )
-                      })()}
                       <Separator />
                       <div className="grid grid-cols-2 gap-2 text-sm">
                         <div className="text-center p-2 rounded-lg bg-green-500/10">
-                          <div className="text-muted-foreground">{t("Bull Case")}</div>
-                          <div className="font-bold text-green-600">{a.targetHigh?.toLocaleString("es-ES", { minimumFractionDigits: 2 })}</div>
-                          <div className="text-xs text-green-600">+{a.targetHigh ? ((a.targetHigh - q.price) / q.price * 100).toFixed(1) : 0}%</div>
+                          <div className="text-muted-foreground">{t("Win probability")}</div>
+                          <div className="font-bold text-green-600">{(ev.pWin * 100).toFixed(0)}%</div>
+                          <div className="text-xs text-muted-foreground">{t("Avg gain")} +{(ev.avgWin * 100).toFixed(1)}%</div>
                         </div>
                         <div className="text-center p-2 rounded-lg bg-red-500/10">
-                          <div className="text-muted-foreground">{t("Bear Case")}</div>
-                          <div className="font-bold text-red-600">{a.targetLow?.toLocaleString("es-ES", { minimumFractionDigits: 2 })}</div>
-                          <div className="text-xs text-red-600">{a.targetLow ? ((a.targetLow - q.price) / q.price * 100).toFixed(1) : 0}%</div>
+                          <div className="text-muted-foreground">{t("Loss probability")}</div>
+                          <div className="font-bold text-red-600">{(ev.pLoss * 100).toFixed(0)}%</div>
+                          <div className="text-xs text-muted-foreground">{t("Avg loss")} -{(ev.avgLoss * 100).toFixed(1)}%</div>
                         </div>
                       </div>
-                      <PriceRangeBar current={q.price} low={a.targetLow ?? 0} high={a.targetHigh ?? 0} />
+                      <div className="text-[11px] text-muted-foreground text-center leading-snug">
+                        {t("Monte Carlo simulation over historical returns")} ({ev.simulations.toLocaleString("es-ES")} {t("scenarios of")} {ev.months} {t("months")}, {ev.fromHistory.toLocaleString("es-ES")} {t("historical sessions")})
+                      </div>
                     </>
                   ) : (
                     <div className="text-center text-muted-foreground py-4">
-                      {t("No analyst targets available")}
+                      {t("Insufficient historical data for EV")}
                     </div>
                   )}
                 </CardContent>

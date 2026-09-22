@@ -125,6 +125,50 @@ async function getChart(symbol: string, range: string = "6mo"): Promise<any> {
   } catch { return null }
 }
 
+// EV estilo poker: P(ganar) x ganancia media - P(perder) x perdida media.
+// Se estima con bootstrap Monte Carlo a partir de los retornos historicos reales
+// de la accion (no se usan precios objetivo ni cifras inventadas).
+function computePokerEV(closes: number[], currentPrice: number, horizonDays = 252, sims = 5000): any {
+  if (!closes || closes.length < 30 || !currentPrice || currentPrice <= 0) return null
+  const returns: number[] = []
+  for (let i = 1; i < closes.length; i++) {
+    const prev = closes[i - 1]
+    const cur = closes[i]
+    if (prev && cur && prev > 0) returns.push(Math.log(cur / prev))
+  }
+  if (returns.length < 30) return null
+  const total = returns.length
+  let wins = 0
+  let sumWin = 0
+  let sumLoss = 0
+  for (let s = 0; s < sims; s++) {
+    let acc = 0
+    for (let d = 0; d < horizonDays; d++) {
+      acc += returns[Math.floor(Math.random() * total)]
+    }
+    const ret = Math.exp(acc) - 1
+    if (ret > 0) { wins++; sumWin += ret } else { sumLoss += -ret }
+  }
+  const pWin = wins / sims
+  const pLoss = 1 - pWin
+  const avgWin = wins > 0 ? sumWin / wins : 0
+  const avgLoss = sims - wins > 0 ? sumLoss / (sims - wins) : 0
+  const evPct = pWin * avgWin - pLoss * avgLoss
+  return {
+    pWin: Math.round(pWin * 100) / 100,
+    pLoss: Math.round(pLoss * 100) / 100,
+    avgWin: Math.round(avgWin * 10000) / 10000,
+    avgLoss: Math.round(avgLoss * 10000) / 10000,
+    evPct: Math.round(evPct * 10000) / 10000,
+    evPerShare: Math.round(currentPrice * evPct * 100) / 100,
+    simulations: sims,
+    horizonDays,
+    months: Math.round(horizonDays / 21),
+    label: evPct > 0.0005 ? "EV+" : evPct < -0.0005 ? "EV-" : "EV0",
+    fromHistory: closes.length,
+  }
+}
+
 export async function GET(req: NextRequest) {
   try {
     const symbol = req.nextUrl.searchParams.get("symbol")
@@ -172,9 +216,10 @@ export async function GET(req: NextRequest) {
   const validRanges = ["1d", "5d", "1mo", "3mo", "6mo", "1y", "2y", "5y", "10y", "ytd", "max"]
   const chartRange = validRanges.includes(range) ? range : "6mo"
 
-  const [summary, chart] = await Promise.all([
+  const [summary, chart, chartEV] = await Promise.all([
     fetchYahoo(ticker, "assetProfile,defaultKeyStatistics,financialData,earningsTrend,summaryDetail,recommendationTrend,price,growthEstimates,cashflowStatementHistory,incomeStatementHistory"),
     getChart(ticker, chartRange),
+    getChart(ticker, "5y"),
   ])
 
   if (!summary && !chart) {
@@ -303,6 +348,9 @@ export async function GET(req: NextRequest) {
   const analystTotal = raw(financial.numberOfAnalystOpinions) ?? recTotal
   const scale = recTotal > 0 && analystTotal > 0 ? analystTotal / recTotal : 1
 
+  const evCloses = (chartEV?.indicators?.quote?.[0]?.close ?? []).filter((c: number) => c != null && c > 0)
+  const ev = chartEV ? computePokerEV(evCloses, price) : null
+
   return NextResponse.json({
     profile: {
       symbol: ticker,
@@ -341,6 +389,7 @@ export async function GET(req: NextRequest) {
       sellCount: Math.round(sell * scale),
       strongSell: Math.round(strongSell * scale),
     },
+    ev,
     history: (() => {
       const timestamps = chart?.timestamp ?? []
       const quote = chart?.indicators?.quote?.[0] ?? {}
