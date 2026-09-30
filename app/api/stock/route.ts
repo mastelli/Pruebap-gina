@@ -125,59 +125,161 @@ async function getChart(symbol: string, range: string = "6mo"): Promise<any> {
   } catch { return null }
 }
 
-// EV estilo poker: P(ganar) x ganancia - P(perder) x perdida.
-// Se estima con bootstrap Monte Carlo a partir de los retornos historicos reales
-// de la accion (no se usan precios objetivo ni cifras inventadas).
-// Se usa SIEMPRE la version conservadora: el valor medio esperado menos 5 puntos.
-function computePokerEV(closes: number[], currentPrice: number, horizonDays = 252, sims = 5000): any {
+// ────────────────────────────────────────────────────────────────────────────
+// VALOR ESPERADO (EV) con razonamiento matematico de poker
+// ────────────────────────────────────────────────────────────────────────────
+//   EV = Σ (Probabilidad × Resultado neto)
+//   EV ajustado = EV × 0,95   <- el margen pesimista se aplica SOLO al EV final,
+//                                nunca a las probabilidades.
+// Cada escenario es un tramo excluyente de la misma distribucion, por lo que las
+// probabilidades suman exactamente 1 y no hay doble contabilizacion.
+// ────────────────────────────────────────────────────────────────────────────
+const TRADING_DAYS = 252
+const PESSIMISM = 0.95
+const Z_QUARTILE = 0.6744897501960817 // 75% de la normal estandar
+const Z_TAIL_5 = -1.6448536269514722 // 5% inferior de la normal estandar
+const WAIT_DISCOUNT = 0.15 // la alternativa "esperar" exige esta correccion
+
+function erf(x: number): number {
+  // Aproximacion de Abramowitz & Stegun 7.1.27 (error < 1.5e-7)
+  const sign = x < 0 ? -1 : 1
+  const ax = Math.abs(x)
+  const t = 1 / (1 + 0.3275911 * ax)
+  const poly = ((((1.061405429 * t - 1.453152027) * t + 1.421413741) * t - 0.284496736) * t + 0.254829592) * t
+  return sign * (1 - poly * Math.exp(-ax * ax))
+}
+const normCdf = (x: number) => 0.5 * (1 + erf(x / Math.SQRT2))
+const normPdf = (x: number) => Math.exp(-0.5 * x * x) / Math.sqrt(2 * Math.PI)
+const r4 = (x: number) => (Number.isFinite(x) ? Math.round(x * 1e4) / 1e4 : 0)
+const r2 = (x: number) => (Number.isFinite(x) ? Math.round(x * 100) / 100 : 0)
+
+function computePokerEV(closes: number[], currentPrice: number, horizonDays = TRADING_DAYS) {
   if (!closes || closes.length < 30 || !currentPrice || currentPrice <= 0) return null
-  const returns: number[] = []
+
+  const logReturns: number[] = []
   for (let i = 1; i < closes.length; i++) {
     const prev = closes[i - 1]
     const cur = closes[i]
-    if (prev && cur && prev > 0) returns.push(Math.log(cur / prev))
+    if (prev > 0 && cur > 0) logReturns.push(Math.log(cur / prev))
   }
-  if (returns.length < 30) return null
-  const total = returns.length
-  const outcomes: number[] = []
-  for (let s = 0; s < sims; s++) {
-    let acc = 0
-    for (let d = 0; d < horizonDays; d++) {
-      acc += returns[Math.floor(Math.random() * total)]
-    }
-    outcomes.push(Math.exp(acc) - 1)
+  const sessions = logReturns.length
+  if (sessions < 30) return null
+
+  const meanDaily = logReturns.reduce((a, b) => a + b, 0) / sessions
+  const varDaily = logReturns.reduce((a, b) => a + (b - meanDaily) ** 2, 0) / (sessions - 1)
+  const sdDaily = Math.sqrt(varDaily)
+  if (!Number.isFinite(sdDaily) || sdDaily <= 0) return null
+
+  // Parametros del horizonte: log(1+r) ~ N(m, s)
+  const m = meanDaily * horizonDays
+  const s = sdDaily * Math.sqrt(horizonDays)
+  const driftAnnual = meanDaily * TRADING_DAYS
+  const volAnnual = sdDaily * Math.sqrt(TRADING_DAYS)
+
+  // Tramo de probabilidad de la normal -> { probability, result }.
+  // El resultado es la MEDIA CONDICIONADA del tramo, no un percentil puntual:
+  // asi la suma ponderada es matematicamente coherente.
+  const bucket = (z1: number, z2: number, mu: number, sd: number) => {
+    const lo = z1 === -Infinity ? 0 : normCdf(z1)
+    const hi = z2 === Infinity ? 1 : normCdf(z2)
+    const mass = Math.max(hi - lo, 1e-9)
+    const d1 = z1 === -Infinity ? 0 : normPdf(z1)
+    const d2 = z2 === Infinity ? 0 : normPdf(z2)
+    return { probability: mass, result: Math.exp(mu + sd * ((d1 - d2) / mass)) - 1 }
+  }
+  const split = (mu: number, sd: number) => ({
+    bear: bucket(-Infinity, -Z_QUARTILE, mu, sd),
+    base: bucket(-Z_QUARTILE, Z_QUARTILE, mu, sd),
+    bull: bucket(Z_QUARTILE, Infinity, mu, sd),
+  })
+  const weighted = (b: { bear: { probability: number; result: number }; base: { probability: number; result: number }; bull: { probability: number; result: number } }) =>
+    b.bear.probability * b.bear.result + b.base.probability * b.base.result + b.bull.probability * b.bull.result
+
+  const S = split(m, s)
+  const evOriginal = weighted(S)
+
+  // Alternativas: reutilizan la MISMA distribucion, solo cambia el precio de
+  // entrada, por lo que no se recalcula ni se duplica ninguna probabilidad.
+  const evWait = (1 + evOriginal) / (1 - WAIT_DISCOUNT) - 1
+  const alternatives = [
+    { key: "buy", evOriginal, entryFactor: 1 },
+    { key: "wait", evOriginal: evWait, entryFactor: 1 - WAIT_DISCOUNT },
+    { key: "cash", evOriginal: 0, entryFactor: 1 - WAIT_DISCOUNT },
+  ].map((a) => ({
+    key: a.key,
+    evOriginal: a.evOriginal,
+    evAdjusted: a.evOriginal * PESSIMISM,
+    evPerShare: currentPrice * a.evOriginal * PESSIMISM,
+    // Precio de entrada que iguala el EV de esa alternativa a 0.
+    fairValue: a.entryFactor > 0 && 1 + a.evOriginal !== 0 ? (currentPrice * a.entryFactor) / (1 + a.evOriginal) : 0,
+  }))
+  const best = alternatives.reduce((a, b) => (b.evAdjusted > a.evAdjusted ? b : a))
+
+  // Punto de equilibrio de la accion: precio que iguala el EV a 0.
+  const fairValue = currentPrice * (1 + evOriginal)
+  // Probabilidad del tramo alcista necesaria para que EV = 0, manteniendo el
+  // reparto proporcional del resto de la masa.
+  const nonBullMass = S.bear.probability + S.base.probability
+  const nonBullEv = nonBullMass > 0 ? (S.bear.probability * S.bear.result + S.base.probability * S.base.result) / nonBullMass : 0
+  const breakEvenBullProb = S.bull.result > nonBullEv ? -nonBullEv / (S.bull.result - nonBullEv) : null
+
+  // Sensibilidad: como se mueve el EV si cambian probabilidades o resultados.
+  const scaleResults = (k: number) => weighted({ bear: { ...S.bear, result: S.bear.result * k }, base: { ...S.base, result: S.base.result * k }, bull: { ...S.bull, result: S.bull.result * k } })
+  const shiftBull = (d: number) => {
+    const pBull = Math.min(Math.max(S.bull.probability + d, 0), S.bull.probability + S.base.probability)
+    return weighted({ bear: S.bear, base: { ...S.base, probability: S.base.probability - (pBull - S.bull.probability) }, bull: { ...S.bull, probability: pBull } })
+  }
+  const sensitivity = {
+    resultsUp: scaleResults(1.2),
+    resultsDown: scaleResults(0.8),
+    probUp: shiftBull(0.1),
+    probDown: shiftBull(-0.1),
+    volUp: weighted(split(m, s * 1.2)),
+    volDown: weighted(split(m, s * 0.8)),
   }
 
-  let wins = 0
-  let sumWin = 0
-  let sumLoss = 0
-  for (const ret of outcomes) {
-    if (ret > 0) { wins++; sumWin += ret } else { sumLoss += -ret }
+  // Hechos de mercado frente a estimaciones del modelo.
+  let peak = closes[0]
+  let maxDrawdown = 0
+  for (const c of closes) {
+    if (c > peak) peak = c
+    const dd = (peak - c) / peak
+    if (dd > maxDrawdown) maxDrawdown = dd
   }
-  const pWin = wins / sims
-  const pLoss = 1 - pWin
-  const avgWin = wins > 0 ? sumWin / wins : 0
-  const avgLoss = sims - wins > 0 ? sumLoss / (sims - wins) : 0
-  const evMean = pWin * avgWin - pLoss * avgLoss
-  const q5 = outcomes.sort((a, b) => a - b)[Math.max(0, Math.min(outcomes.length - 1, Math.floor(0.05 * outcomes.length)))]
 
-  // Version conservadora: valor medio esperado menos 5 puntos porcentuales.
-  const evPct = evMean - 0.05
   return {
-    pWin: Math.round(pWin * 100) / 100,
-    pLoss: Math.round(pLoss * 100) / 100,
-    avgWin: Math.round(avgWin * 10000) / 10000,
-    avgLoss: Math.round(avgLoss * 10000) / 10000,
-    evMean: Math.round(evMean * 10000) / 10000,
-    evPct: Math.round(evPct * 10000) / 10000,
-    evPerShare: Math.round(currentPrice * evPct * 100) / 100,
-    worstCase: Math.round(q5 * 10000) / 10000,
-    simulations: sims,
     horizonDays,
     months: Math.round(horizonDays / 21),
-    label: evPct > 0.0005 ? "EV+" : evPct < -0.0005 ? "EV-" : "EV0",
-    method: "conservative",
-    fromHistory: closes.length,
+    sessions,
+    facts: { price: r2(currentPrice), driftAnnual: r4(driftAnnual), volAnnual: r4(volAnnual), maxDrawdown: r4(maxDrawdown) },
+    assumptions: { distribution: "lognormal", split: [r4(S.bear.probability), r4(S.base.probability), r4(S.bull.probability)], pessimism: PESSIMISM, waitDiscount: WAIT_DISCOUNT },
+    scenarios: {
+      bear: { probability: r4(S.bear.probability), result: r4(S.bear.result) },
+      base: { probability: r4(S.base.probability), result: r4(S.base.result) },
+      bull: { probability: r4(S.bull.probability), result: r4(S.bull.result) },
+    },
+    evOriginal: r4(evOriginal),
+    evAdjusted: r4(evOriginal * PESSIMISM),
+    evPerShareOriginal: r2(currentPrice * evOriginal),
+    evPerShareAdjusted: r2(currentPrice * evOriginal * PESSIMISM),
+    fairValue: r2(fairValue),
+    breakEvenBullProb: breakEvenBullProb != null ? r4(breakEvenBullProb) : null,
+    alternatives: alternatives.map((a) => ({
+      key: a.key,
+      evOriginal: r4(a.evOriginal),
+      evAdjusted: r4(a.evAdjusted),
+      evPerShare: r2(a.evPerShare),
+      fairValue: r2(a.fairValue),
+    })),
+    bestAlternative: best.key,
+    sensitivity: Object.fromEntries(Object.entries(sensitivity).map(([k, v]) => [k, r4(v)])),
+    risk: {
+      probLoss: r4(normCdf(-m / s)),
+      maxLoss: r4(S.bear.result),
+      tail5: r4(Math.exp(m + s * Z_TAIL_5) - 1),
+      volHorizon: r4(s),
+    },
+    label: evOriginal * PESSIMISM > 0.0005 ? "EV+" : evOriginal * PESSIMISM < -0.0005 ? "EV-" : "EV0",
   }
 }
 

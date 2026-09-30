@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react"
 import { useLanguage } from "@/lib/i18n"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -65,21 +65,37 @@ interface CandleData {
   volume?: number | null
 }
 
-interface EvData {
-  pWin: number
-  pLoss: number
-  avgWin: number
-  avgLoss: number
-  evMean: number
-  evPct: number
+interface EvScenario {
+  probability: number
+  result: number
+}
+
+interface EvAlternative {
+  key: "buy" | "wait" | "cash"
+  evOriginal: number
+  evAdjusted: number
   evPerShare: number
-  worstCase: number
-  simulations: number
+  fairValue: number
+}
+
+interface EvData {
   horizonDays: number
   months: number
+  sessions: number
+  facts: { price: number; driftAnnual: number; volAnnual: number; maxDrawdown: number }
+  assumptions: { distribution: string; split: [number, number, number]; pessimism: number; waitDiscount: number }
+  scenarios: { bear: EvScenario; base: EvScenario; bull: EvScenario }
+  evOriginal: number
+  evAdjusted: number
+  evPerShareOriginal: number
+  evPerShareAdjusted: number
+  fairValue: number
+  breakEvenBullProb: number | null
+  alternatives: EvAlternative[]
+  bestAlternative: EvAlternative["key"]
+  sensitivity: { resultsUp: number; resultsDown: number; probUp: number; probDown: number; volUp: number; volDown: number }
+  risk: { probLoss: number; maxLoss: number; tail5: number; volHorizon: number }
   label: "EV+" | "EV-" | "EV0"
-  method: string
-  fromHistory: number
 }
 
 interface StockData {
@@ -150,6 +166,42 @@ function MetricRow({ label, value, format, colorClass }: { label: string; value:
     </div>
   )
 }
+
+function EvSection({ title, children }: { title: string; children: ReactNode }) {
+  return (
+    <div>
+      <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">{title}</h4>
+      {children}
+    </div>
+  )
+}
+
+function EvFact({ label, value, tone = "muted" }: { label: string; value: string; tone?: "pos" | "neg" | "muted" }) {
+  const toneClass = tone === "pos" ? "text-green-600 dark:text-green-400" : tone === "neg" ? "text-red-600 dark:text-red-400" : ""
+  return (
+    <div className="flex items-baseline justify-between gap-3 py-1 border-b border-border/50 last:border-0">
+      <span className="text-sm text-muted-foreground">{label}</span>
+      <span className={`text-sm font-medium tabular-nums shrink-0 ${toneClass}`}>{value}</span>
+    </div>
+  )
+}
+
+function EvBullet({ children }: { children: ReactNode }) {
+  return (
+    <li className="text-sm text-muted-foreground flex items-start gap-2">
+      <span className="text-muted-foreground/60 mt-0.5">·</span>
+      <span>{children}</span>
+    </li>
+  )
+}
+
+function evTone(v: number): "pos" | "neg" | "muted" {
+  return v > 0.00005 ? "pos" : v < -0.00005 ? "neg" : "muted"
+}
+
+const pctSigned = (v: number) => `${v >= 0 ? "+" : ""}${(v * 100).toFixed(1)}%`
+const moneySigned = (v: number) =>
+  `${v >= 0 ? "+" : ""}${v.toLocaleString("es-ES", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
 
 function RecommendationBar({ data }: { data: AnalystData }) {
   const total = (data.strongBuy ?? 0) + (data.buyCount ?? 0) + (data.holdCount ?? 0) + (data.sellCount ?? 0) + (data.strongSell ?? 0)
@@ -486,71 +538,223 @@ export function InvestmentTestDashboard() {
             </CardContent>
           </Card>
 
-          {/* Investment Thesis + Expected Value */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-              {/* Expected Value Card */}
-              <Card className="lg:col-span-1">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Target className="h-5 w-5" />
-                    {t("Expected Value")}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {ev ? (
-                    <>
-                      <div className="text-center">
-                        <div className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-lg font-bold ${
-                          ev.label === "EV0"
-                            ? "bg-secondary/50 text-foreground"
-                            : ev.label === "EV+"
-                              ? "bg-green-500/10 text-green-600"
-                              : "bg-red-500/10 text-red-600"
-                        }`}>
-                          {ev.label}
-                        </div>
-                        <div className={`text-3xl font-bold tabular-nums mt-2 ${
-                          ev.label === "EV0" ? "text-foreground" : ev.label === "EV+" ? "text-green-600" : "text-red-600"
-                        }`}>
-                          {ev.evPerShare >= 0 ? "+" : ""}{ev.evPerShare.toLocaleString("es-ES", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {q?.currency}
-                        </div>
-                        <div className="text-sm text-muted-foreground mt-0.5">
-                          {ev.evPct >= 0 ? "+" : ""}{(ev.evPct * 100).toFixed(1)}% {t("Expected return")} · {ev.months} {t("months")}
-                        </div>
+          {/* Valor esperado — razonamiento matemático de póker */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Target className="h-5 w-5" />
+                {t("Expected Value")}
+                {ev && (
+                  <Badge variant="outline" className={
+                    ev.label === "EV0" ? "" : ev.label === "EV+" ? "text-green-600 border-green-500/40" : "text-red-600 border-red-500/40"
+                  }>
+                    {ev.label}
+                  </Badge>
+                )}
+                {ev && (
+                  <span className="ml-auto text-xs font-normal text-muted-foreground">
+                    EV = Σ(probabilidad × resultado) · {ev.horizonDays} {t("trading days")}
+                  </span>
+                )}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-5">
+              {ev ? (
+                <>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div className="p-3 rounded-lg border">
+                      <div className="text-xs text-muted-foreground">{t("Original EV")}</div>
+                      <div className={`text-2xl font-bold tabular-nums ${ev.evOriginal >= 0 ? "text-green-600" : "text-red-600"}`}>
+                        {pctSigned(ev.evOriginal)}
                       </div>
-                      <Separator />
-                      <div className="grid grid-cols-2 gap-2 text-sm">
-                        <div className="text-center p-2 rounded-lg bg-green-500/10">
-                          <div className="text-muted-foreground">{t("Win probability")}</div>
-                          <div className="font-bold text-green-600">{(ev.pWin * 100).toFixed(0)}%</div>
-                          <div className="text-xs text-muted-foreground">{t("Avg gain")} +{(ev.avgWin * 100).toFixed(1)}%</div>
-                        </div>
-                        <div className="text-center p-2 rounded-lg bg-red-500/10">
-                          <div className="text-muted-foreground">{t("Loss probability")}</div>
-                          <div className="font-bold text-red-600">{(ev.pLoss * 100).toFixed(0)}%</div>
-                          <div className="text-xs text-muted-foreground">{t("Avg loss")} -{(ev.avgLoss * 100).toFixed(1)}%</div>
-                        </div>
+                      <div className="text-xs text-muted-foreground tabular-nums">
+                        {moneySigned(ev.evPerShareOriginal)} {q?.currency} / {t("share")}
                       </div>
-                      <div className="flex items-center justify-between px-2 py-1.5 rounded-lg bg-secondary/50 text-sm">
-                        <span className="text-muted-foreground font-medium">{t("Worst case")} (5%)</span>
-                        <span className={`font-bold tabular-nums ${ev.worstCase < 0 ? "text-red-600" : "text-green-600"}`}>
-                          {ev.worstCase >= 0 ? "+" : ""}{(ev.worstCase * 100).toFixed(1)}%
-                        </span>
-                      </div>
-                      <div className="text-[11px] text-muted-foreground text-center leading-snug">
-                        {t("Monte Carlo simulation over historical returns")} ({ev.simulations.toLocaleString("es-ES")} {t("scenarios of")} {ev.months} {t("months")}, {ev.fromHistory.toLocaleString("es-ES")} {t("historical sessions")})
-                      </div>
-                    </>
-                  ) : (
-                    <div className="text-center text-muted-foreground py-4">
-                      {data ? t("Insufficient historical data for EV") : t("Search for a stock to begin analysis")}
                     </div>
-                  )}
-                </CardContent>
-              </Card>
+                    <div className={`p-3 rounded-lg border ${ev.evAdjusted >= 0 ? "bg-green-500/5 border-green-500/30" : "bg-red-500/5 border-red-500/30"}`}>
+                      <div className="text-xs text-muted-foreground">
+                        {t("Adjusted EV (-5%)")} · EV × {ev.assumptions.pessimism}
+                      </div>
+                      <div className={`text-2xl font-bold tabular-nums ${ev.evAdjusted >= 0 ? "text-green-600" : "text-red-600"}`}>
+                        {pctSigned(ev.evAdjusted)}
+                      </div>
+                      <div className="text-xs text-muted-foreground tabular-nums">
+                        {moneySigned(ev.evPerShareAdjusted)} {q?.currency} / {t("share")} · {t("final figure for comparison")}
+                      </div>
+                    </div>
+                  </div>
 
-              {/* Investment Thesis */}
-              <Card className="lg:col-span-2">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+                    <EvSection title={t("Known data")}>
+                      <EvFact label={t("Current price")} value={`${ev.facts.price} ${q?.currency ?? ""}`} />
+                      <EvFact label={t("Historical sessions used")} value={ev.sessions.toLocaleString("es-ES")} />
+                      <EvFact label={t("Annualized drift")} value={pctSigned(ev.facts.driftAnnual)} tone={evTone(ev.facts.driftAnnual)} />
+                      <EvFact label={t("Annualized volatility")} value={pctSigned(ev.facts.volAnnual)} />
+                      <EvFact label={t("Historical max drawdown")} value={pctSigned(-ev.facts.maxDrawdown)} tone="neg" />
+                      <EvFact label={t("Horizon")} value={`${ev.horizonDays} ${t("trading days")} (${ev.months} ${t("months")})`} />
+                    </EvSection>
+
+                    <EvSection title={t("Assumptions")}>
+                      <ul className="space-y-1">
+                        <EvBullet>{t("Log returns are fitted to a normal distribution (lognormal prices)")}</EvBullet>
+                        <EvBullet>
+                          {t("Scenarios are split at the quartiles")} ({ev.assumptions.split.map((p) => `${(p * 100).toFixed(0)}%`).join(" / ")})
+                        </EvBullet>
+                        <EvBullet>{t("Each scenario shows the conditional mean of its range, not a single percentile")}</EvBullet>
+                        <EvBullet>{t("No commissions, taxes or dividends are deducted from the net result")}</EvBullet>
+                        <EvBullet>{t("Grouping into 3 scenarios understates the exact lognormal mean by a few tenths, so the EV stays conservative")}</EvBullet>
+                        <EvBullet>{t("The pessimistic margin is applied only to the final EV, never to the probabilities")}</EvBullet>
+                      </ul>
+                    </EvSection>
+                  </div>
+
+                  <EvSection title={t("Scenarios and probabilities")}>
+                    <div className="grid grid-cols-[1fr_auto_auto_auto] gap-x-4 text-xs text-muted-foreground pb-1 border-b border-border">
+                      <span>{t("Scenario")}</span>
+                      <span className="w-16 text-right">{t("Probability")}</span>
+                      <span className="w-20 text-right">{t("Net result")}</span>
+                      <span className="w-20 text-right">{t("EV contribution")}</span>
+                    </div>
+                    {([
+                      { key: "bear", label: t("Bear scenario"), s: ev.scenarios.bear },
+                      { key: "base", label: t("Base scenario"), s: ev.scenarios.base },
+                      { key: "bull", label: t("Bull scenario"), s: ev.scenarios.bull },
+                    ] as const).map(({ label, s }) => (
+                      <div key={label} className="grid grid-cols-[1fr_auto_auto_auto] gap-x-4 items-baseline py-1.5 border-b border-border/50">
+                        <span className="text-sm">{label}</span>
+                        <span className="w-16 text-right text-sm tabular-nums">{(s.probability * 100).toFixed(1)}%</span>
+                        <span className={`w-20 text-right text-sm font-medium tabular-nums ${s.result >= 0 ? "text-green-600" : "text-red-600"}`}>{pctSigned(s.result)}</span>
+                        <span className="w-20 text-right text-sm tabular-nums text-muted-foreground">{pctSigned(s.probability * s.result)}</span>
+                      </div>
+                    ))}
+                    <p className="text-xs text-muted-foreground mt-2 font-mono leading-relaxed break-words">
+                      EV = {(ev.scenarios.bear.probability * 100).toFixed(2)}% × {pctSigned(ev.scenarios.bear.result)}
+                      {" + "}{(ev.scenarios.base.probability * 100).toFixed(2)}% × {pctSigned(ev.scenarios.base.result)}
+                      {" + "}{(ev.scenarios.bull.probability * 100).toFixed(2)}% × {pctSigned(ev.scenarios.bull.result)}
+                      {" = "}{pctSigned(ev.evOriginal)}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1 font-mono leading-relaxed break-words">
+                      EV ajustado = {pctSigned(ev.evOriginal)} × {ev.assumptions.pessimism} = {pctSigned(ev.evAdjusted)} ({t("effect of the adjustment")} {pctSigned(ev.evAdjusted - ev.evOriginal)})
+                    </p>
+                  </EvSection>
+
+                  <EvSection title={t("EV per alternative")}>
+                    <div className="grid grid-cols-[1fr_auto_auto_auto] gap-x-4 text-xs text-muted-foreground pb-1 border-b border-border">
+                      <span>{t("Alternative")}</span>
+                      <span className="w-20 text-right">{t("Original EV")}</span>
+                      <span className="w-20 text-right">{t("Adjusted EV (-5%)")}</span>
+                      <span className="w-24 text-right">{t("Break-even price")}</span>
+                    </div>
+                    {ev.alternatives.map((alt) => {
+                      const names: Record<EvAlternative["key"], string> = {
+                        buy: t("Buy now"),
+                        wait: t(`Wait for a correction (-${Math.round(ev.assumptions.waitDiscount * 100)}%)`),
+                        cash: t("Do not invest (cash)"),
+                      }
+                      return (
+                        <div key={alt.key} className="grid grid-cols-[1fr_auto_auto_auto] gap-x-4 items-baseline py-1.5 border-b border-border/50">
+                          <span className="text-sm flex items-center gap-1.5">
+                            {names[alt.key]}
+                            {alt.key === ev.bestAlternative ? <Badge variant="secondary" className="text-[10px] px-1.5 py-0">{t("highest EV")}</Badge> : null}
+                          </span>
+                          <span className="w-20 text-right text-sm tabular-nums text-muted-foreground">{pctSigned(alt.evOriginal)}</span>
+                          <span className={`w-20 text-right text-sm font-semibold tabular-nums ${alt.evAdjusted >= 0 ? "text-green-600" : "text-red-600"}`}>{pctSigned(alt.evAdjusted)}</span>
+                          <span className="w-24 text-right text-sm tabular-nums">{alt.fairValue > 0 ? `${alt.fairValue} ${q?.currency ?? ""}` : "—"}</span>
+                        </div>
+                      )
+                    })}
+                  </EvSection>
+
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+                    <EvSection title={t("Break-even")}>
+                      <EvFact label={t("Fair value where EV = 0")} value={`${ev.fairValue} ${q?.currency ?? ""}`} />
+                      <EvFact
+                        label={t("Distance to the current price")}
+                        value={pctSigned(ev.facts.price > 0 ? ev.evOriginal : 0)}
+                        tone={evTone(ev.evOriginal)}
+                      />
+                      <EvFact
+                        label={t("Bull probability needed for EV = 0")}
+                        value={ev.breakEvenBullProb != null ? `${(ev.breakEvenBullProb * 100).toFixed(1)}%` : t("Not attainable")}
+                      />
+                      <p className="text-xs text-muted-foreground mt-1.5 leading-relaxed">
+                        {t("Above the fair value the expected result is negative, so the position stops being a positive-EV bet.")}
+                      </p>
+                    </EvSection>
+
+                    <EvSection title={t("Risk")}>
+                      <EvFact label={t("Probability of loss")} value={`${(ev.risk.probLoss * 100).toFixed(1)}%`} tone="neg" />
+                      <EvFact label={t("Maximum expected loss")} value={pctSigned(ev.risk.maxLoss)} tone="neg" />
+                      <EvFact label={t("Loss in the 5% tail")} value={pctSigned(ev.risk.tail5)} tone="neg" />
+                      <EvFact label={t("Horizon volatility")} value={pctSigned(ev.risk.volHorizon)} />
+                      <p className="text-xs text-muted-foreground mt-1.5 leading-relaxed">
+                        {t("EV and risk are independent: a positive EV can coexist with a high probability of loss.")}
+                      </p>
+                    </EvSection>
+                  </div>
+
+                  <EvSection title={t("Sensitivity")}>
+                    <div className="grid grid-cols-[1fr_auto_auto] gap-x-4 text-xs text-muted-foreground pb-1 border-b border-border">
+                      <span>{t("Variable")}</span>
+                      <span className="w-24 text-right">{t("Better")}</span>
+                      <span className="w-24 text-right">{t("Worse")}</span>
+                    </div>
+                    {([
+                      { label: t("Results 20% higher / lower"), up: ev.sensitivity.resultsUp, down: ev.sensitivity.resultsDown },
+                      { label: t("Probabilities +10pp / -10pp on the bull scenario"), up: ev.sensitivity.probUp, down: ev.sensitivity.probDown },
+                      { label: t("Volatility 20% higher / lower"), up: ev.sensitivity.volUp, down: ev.sensitivity.volDown },
+                    ]).map((row) => (
+                      <div key={row.label} className="grid grid-cols-[1fr_auto_auto] gap-x-4 items-baseline py-1.5 border-b border-border/50">
+                        <span className="text-sm">{row.label}</span>
+                        <span className={`w-24 text-right text-sm tabular-nums ${row.up >= 0 ? "text-green-600" : "text-red-600"}`}>{pctSigned(row.up)}</span>
+                        <span className={`w-24 text-right text-sm tabular-nums ${row.down >= 0 ? "text-green-600" : "text-red-600"}`}>{pctSigned(row.down)}</span>
+                      </div>
+                    ))}
+                    <p className="text-xs text-muted-foreground mt-2">
+                      {t("The original EV is the reference for all rows; the -5% margin is applied afterwards.")}
+                    </p>
+                  </EvSection>
+
+                  <EvSection title={t("Mathematical conclusion")}>
+                    <div className={`p-3 rounded-lg text-sm leading-relaxed border ${ev.evAdjusted >= 0 ? "bg-green-500/5 border-green-500/30" : "bg-red-500/5 border-red-500/30"}`}>
+                      <p>
+                        {t("With the current distribution, the adjusted EV is")}{" "}
+                        <strong className="tabular-nums">{pctSigned(ev.evAdjusted)}</strong>{" "}
+                        {t("over")} {ev.months} {t("months")} ({moneySigned(ev.evPerShareAdjusted)} {q?.currency} {t("per share")}).
+                      </p>
+                      <p className="mt-1.5">
+                        {ev.evAdjusted >= 0
+                          ? t("The positive-EV action is the one with the highest adjusted EV. The bet only breaks even at a price of") + " " + `${ev.fairValue} ${q?.currency ?? ""}` + ", " + t("so any entry above that level removes the edge.")
+                          : t("The negative adjusted EV means the expected net result is a loss. It becomes positive only if the outcomes are better or the entry price falls below the fair value of") + " " + `${ev.fairValue} ${q?.currency ?? ""}` + "."}
+                      </p>
+                      <p className="mt-1.5">
+                        {t("The loss side remains wide:")} {(ev.risk.probLoss * 100).toFixed(1)}% {t("of probability of loss and a")} {" "}
+                        {pctSigned(ev.risk.tail5)} {t("move in the 5% tail.")}
+                      </p>
+                    </div>
+                  </EvSection>
+
+                  <EvSection title={t("Missing data")}>
+                    <ul className="space-y-1">
+                      <EvBullet>{t("Dividends and buybacks are not included")}</EvBullet>
+                      <EvBullet>{t("Commissions, taxes and slippage are not included")}</EvBullet>
+                      <EvBullet>{t("No dispersion of analyst target prices is used")}</EvBullet>
+                      <EvBullet>{t("No fundamental scenarios are modelled (revenue, margins, multiples)")}</EvBullet>
+                      <EvBullet>{t("Skewness and kurtosis of returns are not modelled")}</EvBullet>
+                      <EvBullet>{t("Annualized drift is estimated from the selected range and is very sensitive to it")}</EvBullet>
+                    </ul>
+                  </EvSection>
+                </>
+              ) : (
+                <div className="text-center text-muted-foreground py-4">
+                  {data ? t("Insufficient historical data for EV") : t("Search for a stock to begin analysis")}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Investment Thesis */}
+          <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <BarChart3 className="h-5 w-5" />
@@ -681,7 +885,6 @@ export function InvestmentTestDashboard() {
                   )}
                 </CardContent>
               </Card>
-          </div>
 
       {/* Range selector */}
       {selectedSymbol && (
