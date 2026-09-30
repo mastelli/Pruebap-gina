@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Separator } from "@/components/ui/separator"
 import { Search, TrendingUp, TrendingDown, Activity, BarChart3, DollarSign, Building2, Users, Target, AlertTriangle, Globe, ChevronDown, ChevronUp, ExternalLink, Ruler } from "lucide-react"
 import { MeasureTool } from "@/lib/measure-tool"
+import { CompanyNews } from "@/components/company-news"
 
 interface StockProfile {
   symbol: string
@@ -953,6 +954,9 @@ export function InvestmentTestDashboard() {
               </div>
             </CardContent>
           </Card>
+
+          {/* Noticias de la compañía */}
+          <CompanyNews companyName={p?.name} />
     </div>
   )
 }
