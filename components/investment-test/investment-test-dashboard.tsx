@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Separator } from "@/components/ui/separator"
 import { Search, TrendingUp, TrendingDown, Activity, BarChart3, DollarSign, Building2, Users, Target, AlertTriangle, Globe, ChevronDown, ChevronUp, ExternalLink, Ruler } from "lucide-react"
-import { MeasurePrimitive } from "@/lib/measure-primitive"
+import { MeasureTool } from "@/lib/measure-tool"
 
 interface StockProfile {
   symbol: string
@@ -206,7 +206,7 @@ export function InvestmentTestDashboard() {
   const candleSeriesRef = useRef<import("lightweight-charts").ISeriesApi<"Candlestick"> | null>(null)
   const volumeSeriesRef = useRef<import("lightweight-charts").ISeriesApi<"Histogram"> | null>(null)
   const dataRef = useRef<StockData | null>(null)
-  const measureRef = useRef<MeasurePrimitive | null>(null)
+  const measureRef = useRef<MeasureTool | null>(null)
   const [measureActive, setMeasureActive] = useState(false)
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
     valuation: true,
@@ -315,10 +315,10 @@ export function InvestmentTestDashboard() {
       chartRef.current = chart
       candleSeriesRef.current = candleSeries
       volumeSeriesRef.current = volumeSeries
-      measureRef.current = new MeasurePrimitive()
-      measureRef.current.setCurrency(dataRef.current?.quote?.currency ?? "")
-      candleSeries.attachPrimitive(measureRef.current)
-      console.log("[measure] attached primitive", { hasChartRef: !!chartRef.current })
+      measureRef.current = new MeasureTool(chart, candleSeries, {
+        currency: dataRef.current?.quote?.currency ?? "",
+      })
+      console.log("[measure] tool created", { hasChartRef: !!chartRef.current })
       scheduleChartApply()
     }).catch((err) => {
       console.error("Failed to create chart:", err)
@@ -355,8 +355,8 @@ export function InvestmentTestDashboard() {
   useEffect(() => {
     console.log("[measure] sync effect", { measureActive, hasMeasure: !!measureRef.current })
     if (measureRef.current) {
-      measureRef.current.setCurrency(data?.quote?.currency ?? "")
-      measureRef.current.setMeasureActive(measureActive)
+      measureRef.current.updateCurrency(data?.quote?.currency ?? "")
+      measureRef.current.setActive(measureActive)
     }
   }, [data, measureActive])
 
@@ -376,7 +376,7 @@ export function InvestmentTestDashboard() {
       ro.disconnect()
       if (chartRef.current) {
         if (measureRef.current) {
-          candleSeriesRef.current?.detachPrimitive(measureRef.current)
+          measureRef.current.remove()
           measureRef.current = null
         }
         chartRef.current.remove()
