@@ -279,7 +279,9 @@ function computePokerEV(closes: number[], currentPrice: number, horizonDays = TR
       tail5: r4(Math.exp(m + s * Z_TAIL_5) - 1),
       volHorizon: r4(s),
     },
-    label: evOriginal * PESSIMISM > 0.0005 ? "EV+" : evOriginal * PESSIMISM < -0.0005 ? "EV-" : "EV0",
+    // Etiqueta de la cabecera: EV+ / EV- segun el signo del EV ajustado, y EV0
+    // mientras el EV ajustado se mantenga dentro de la banda de +-10%.
+    label: evOriginal * PESSIMISM > 0.1 ? "EV+" : evOriginal * PESSIMISM < -0.1 ? "EV-" : "EV0",
   }
 }
 

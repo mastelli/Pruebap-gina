@@ -778,6 +778,8 @@ const translations: Record<string, string> = {
   "share": "acción",
   "Original EV": "EV original",
   "Adjusted EV (-5%)": "EV ajustado (-5%)",
+  "EV = sum of probability x net result on the quartile scenarios of the lognormal fit": "EV = suma de probabilidad × resultado neto sobre los escenarios por cuartiles del ajuste lognormal",
+  "The -5% margin is applied only to the final EV": "El margen del -5% se aplica solo al EV final",
   "final figure for comparison": "cifra final de comparación",
   "Known data": "Datos conocidos",
   "Current price": "Precio actual",
