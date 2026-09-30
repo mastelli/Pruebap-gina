@@ -61,6 +61,7 @@ interface CandleData {
   open: number
   high: number
   low: number
+  volume?: number | null
 }
 
 interface EvData {
@@ -318,7 +319,6 @@ export function InvestmentTestDashboard() {
       measureRef.current = new MeasureTool(chart, candleSeries, {
         currency: dataRef.current?.quote?.currency ?? "",
       })
-      console.log("[measure] tool created", { hasChartRef: !!chartRef.current })
       scheduleChartApply()
     }).catch((err) => {
       console.error("Failed to create chart:", err)
@@ -353,7 +353,6 @@ export function InvestmentTestDashboard() {
   }, [data])
 
   useEffect(() => {
-    console.log("[measure] sync effect", { measureActive, hasMeasure: !!measureRef.current })
     if (measureRef.current) {
       measureRef.current.updateCurrency(data?.quote?.currency ?? "")
       measureRef.current.setActive(measureActive)
@@ -442,20 +441,28 @@ export function InvestmentTestDashboard() {
         </Card>
       )}
 
-      {data && !loading && (
-        <>
-          {/* Header: Price + Company Info */}
-          <Card>
+      {/* Header: Price + Company Info */}
+      <Card>
             <CardContent className="pt-6">
               <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
                 <div className="flex items-start gap-4">
-                  {p?.logo ? <img src={p.logo} alt={p.name} className="h-12 w-12 rounded-lg" /> : null}
+                  {p?.logo ? (
+                    <img src={p.logo} alt={p.name} className="h-12 w-12 rounded-lg" />
+                  ) : (
+                    <div className="h-12 w-12 rounded-lg bg-secondary shrink-0" />
+                  )}
                   <div>
-                    <h3 className="text-2xl font-bold">{p?.name}</h3>
+                    <h3 className="text-2xl font-bold">{p?.name ?? "—"}</h3>
                     <div className="flex items-center gap-2 mt-1">
-                      <Badge variant="secondary">{p?.symbol}</Badge>
-                      <Badge variant="outline">{p?.exchange}</Badge>
-                      {p?.sector ? <Badge variant="outline">{p.sector}</Badge> : null}
+                      {p ? (
+                        <>
+                          <Badge variant="secondary">{p.symbol}</Badge>
+                          <Badge variant="outline">{p.exchange}</Badge>
+                          {p.sector ? <Badge variant="outline">{p.sector}</Badge> : null}
+                        </>
+                      ) : (
+                        <span className="text-sm text-muted-foreground">{t("Search for a stock to begin analysis")}</span>
+                      )}
                     </div>
                     {p?.website ? (
                       <a href={p.website} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-500 hover:underline inline-flex items-center gap-1 mt-1">
@@ -469,27 +476,30 @@ export function InvestmentTestDashboard() {
                     ) : null}
                   </div>
                 </div>
-                {q && (
-                  <div className="text-right">
-                    <div className="text-3xl font-bold tabular-nums">
-                      {q.price.toLocaleString("es-ES", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {q.currency}
-                    </div>
-                    <div className={`flex items-center justify-end gap-2 text-lg font-medium ${q.dayChange >= 0 ? "text-green-600" : "text-red-600"}`}>
-                      {q.dayChange >= 0 ? <TrendingUp className="h-5 w-5" /> : <TrendingDown className="h-5 w-5" />}
-                      <span>{q.dayChange >= 0 ? "+" : ""}{q.dayChange.toFixed(2)} ({q.dayChangePct >= 0 ? "+" : ""}{q.dayChangePct.toFixed(2)}%)</span>
-                    </div>
-                    <div className="text-sm text-muted-foreground mt-1">
-                      Vol: {formatLargeNumber(q.volume)} · MCap: {formatLargeNumber(q.marketCap)}
-                    </div>
+                <div className="text-right">
+                  <div className="text-3xl font-bold tabular-nums">
+                    {q ? `${q.price.toLocaleString("es-ES", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${q.currency}` : "—"}
                   </div>
-                )}
+                  {q ? (
+                    <>
+                      <div className={`flex items-center justify-end gap-2 text-lg font-medium ${q.dayChange >= 0 ? "text-green-600" : "text-red-600"}`}>
+                        {q.dayChange >= 0 ? <TrendingUp className="h-5 w-5" /> : <TrendingDown className="h-5 w-5" />}
+                        <span>{q.dayChange >= 0 ? "+" : ""}{q.dayChange.toFixed(2)} ({q.dayChangePct >= 0 ? "+" : ""}{q.dayChangePct.toFixed(2)}%)</span>
+                      </div>
+                      <div className="text-sm text-muted-foreground mt-1">
+                        Vol: {formatLargeNumber(q.volume)} · MCap: {formatLargeNumber(q.marketCap)}
+                      </div>
+                    </>
+                  ) : (
+                    <div className="text-sm text-muted-foreground mt-1">{t("No data to display")}</div>
+                  )}
+                </div>
               </div>
             </CardContent>
           </Card>
 
           {/* Investment Thesis + Expected Value */}
-          {q && a && (
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
               {/* Expected Value Card */}
               <Card className="lg:col-span-1">
                 <CardHeader>
@@ -514,7 +524,7 @@ export function InvestmentTestDashboard() {
                         <div className={`text-3xl font-bold tabular-nums mt-2 ${
                           ev.label === "EV0" ? "text-foreground" : ev.label === "EV+" ? "text-green-600" : "text-red-600"
                         }`}>
-                          {ev.evPerShare >= 0 ? "+" : ""}{ev.evPerShare.toLocaleString("es-ES", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {q.currency}
+                          {ev.evPerShare >= 0 ? "+" : ""}{ev.evPerShare.toLocaleString("es-ES", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {q?.currency}
                         </div>
                         <div className="text-sm text-muted-foreground mt-0.5">
                           {ev.evPct >= 0 ? "+" : ""}{(ev.evPct * 100).toFixed(1)}% {t("Expected return")} · {ev.months} {t("months")}
@@ -545,7 +555,7 @@ export function InvestmentTestDashboard() {
                     </>
                   ) : (
                     <div className="text-center text-muted-foreground py-4">
-                      {t("Insufficient historical data for EV")}
+                      {data ? t("Insufficient historical data for EV") : t("Search for a stock to begin analysis")}
                     </div>
                   )}
                 </CardContent>
@@ -560,7 +570,7 @@ export function InvestmentTestDashboard() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  {(() => {
+                  {data ? (() => {
                     const positives: string[] = []
                     const negatives: string[] = []
                     const neutral: string[] = []
@@ -601,12 +611,12 @@ export function InvestmentTestDashboard() {
                     if (stats.freeCashflow && stats.freeCashflow > 0) positives.push(t("Positive free cash flow — self-funding growth"))
 
                     // Analyst sentiment
-                    if (a.recommendationKey === "buy" || a.recommendationKey === "strongBuy") {
+                    if (a?.recommendationKey === "buy" || a?.recommendationKey === "strongBuy") {
                       positives.push(t("Analyst consensus is bullish"))
-                    } else if (a.recommendationKey === "sell" || a.recommendationKey === "strongSell") {
+                    } else if (a?.recommendationKey === "sell" || a?.recommendationKey === "strongSell") {
                       negatives.push(t("Analyst consensus is bearish"))
                     }
-                    if (a.targetMean && q.price && a.targetMean > q.price * 1.1) {
+                    if (a?.targetMean && q?.price && a.targetMean > q.price * 1.1) {
                       positives.push(t("Significant upside to analyst target price"))
                     }
 
@@ -676,13 +686,14 @@ export function InvestmentTestDashboard() {
                         )}
                       </>
                     )
-                  })()}
+                  })() : (
+                    <div className="text-center text-muted-foreground py-4">
+                      {t("Search for a stock to begin analysis")}
+                    </div>
+                  )}
                 </CardContent>
               </Card>
-            </div>
-          )}
-        </>
-      )}
+          </div>
 
       {/* Range selector */}
       {selectedSymbol && (
@@ -707,9 +718,7 @@ export function InvestmentTestDashboard() {
               size="sm"
               className="ml-auto gap-1.5"
               onClick={() => {
-                const next = !measureActive
-                console.log("[measure] toggle click", { next })
-                setMeasureActive(next)
+                setMeasureActive(!measureActive)
               }}
             >
               <Ruler className="h-4 w-4" />
@@ -729,9 +738,7 @@ export function InvestmentTestDashboard() {
         </CardContent>
       </Card>
 
-      {data && !loading && (
-        <>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {/* Valuation Metrics */}
             <Card>
               <CardHeader className="cursor-pointer" onClick={() => toggleSection("valuation")}>
@@ -766,9 +773,9 @@ export function InvestmentTestDashboard() {
                   {expandedSections.analysts ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                 </CardTitle>
               </CardHeader>
-              {expandedSections.analysts && a && (
+              {expandedSections.analysts && (
                 <CardContent className="pt-0 space-y-4">
-                  {a.recommendationKey && (
+                  {a?.recommendationKey ? (
                     <div className="flex items-center gap-2">
                       <span className="text-sm text-muted-foreground">{t("Consensus")}:</span>
                       <Badge variant={a.recommendationKey === "buy" || a.recommendationKey === "strongBuy" ? "default" : a.recommendationKey === "sell" ? "destructive" : "secondary"}>
@@ -776,10 +783,10 @@ export function InvestmentTestDashboard() {
                       </Badge>
                       {a.recommendationMean ? <span className="text-sm">({a.recommendationMean.toFixed(1)}/5)</span> : null}
                     </div>
-                  )}
+                  ) : null}
                   <div>
                     <div className="text-sm text-muted-foreground mb-1">{t("Price Target")}</div>
-                    {a.targetMean && q ? (
+                    {a?.targetMean && q ? (
                       <div className="space-y-2">
                         <div className="flex justify-between text-sm">
                           <span>{t("Low")}: {a.targetLow?.toLocaleString("es-ES", { minimumFractionDigits: 2 })}</span>
@@ -794,8 +801,8 @@ export function InvestmentTestDashboard() {
                     ) : <span className="text-sm text-muted-foreground">—</span>}
                   </div>
                   <div>
-                    <div className="text-sm text-muted-foreground mb-1">{t("Rating Distribution")} ({a.numberOfAnalysts ?? 0} {t("analysts")})</div>
-                    <RecommendationBar data={a} />
+                    <div className="text-sm text-muted-foreground mb-1">{t("Rating Distribution")} ({a?.numberOfAnalysts ?? 0} {t("analysts")})</div>
+                    {a ? <RecommendationBar data={a} /> : <span className="text-sm text-muted-foreground">—</span>}
                   </div>
                 </CardContent>
               )}
@@ -895,7 +902,7 @@ export function InvestmentTestDashboard() {
                   <MetricRow label="% Held by Insiders" value={stats.heldPercentInsiders} format="percent" />
                   <MetricRow label="% Held by Institutions" value={stats.heldPercentInstitutions} format="percent" />
                   <Separator className="my-2" />
-                  {data.history.length > 1 && (() => {
+                  {data && data.history.length > 1 && (() => {
                     const prices = data.history.map((c) => c.price)
                     const returns: number[] = []
                     for (let i = 1; i < prices.length; i++) {
@@ -930,26 +937,22 @@ export function InvestmentTestDashboard() {
           </div>
 
           {/* Company Description */}
-          {p?.industry && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Globe className="h-5 w-5" />
-                  {t("Company Info")}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                  <div><span className="text-muted-foreground">{t("Sector")}:</span> <span className="font-medium">{p.sector}</span></div>
-                  <div><span className="text-muted-foreground">{t("Industry")}:</span> <span className="font-medium">{p.industry}</span></div>
-                  <div><span className="text-muted-foreground">{t("Country")}:</span> <span className="font-medium">{p.country}</span></div>
-                  <div><span className="text-muted-foreground">{t("Exchange")}:</span> <span className="font-medium">{p.exchange}</span></div>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-        </>
-      )}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Globe className="h-5 w-5" />
+                {t("Company Info")}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                <div><span className="text-muted-foreground">{t("Sector")}:</span> <span className="font-medium">{p?.sector ?? "—"}</span></div>
+                <div><span className="text-muted-foreground">{t("Industry")}:</span> <span className="font-medium">{p?.industry ?? "—"}</span></div>
+                <div><span className="text-muted-foreground">{t("Country")}:</span> <span className="font-medium">{p?.country ?? "—"}</span></div>
+                <div><span className="text-muted-foreground">{t("Exchange")}:</span> <span className="font-medium">{p?.exchange ?? "—"}</span></div>
+              </div>
+            </CardContent>
+          </Card>
     </div>
   )
 }

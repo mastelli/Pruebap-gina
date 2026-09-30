@@ -1250,6 +1250,7 @@ const translations: Record<string, string> = {
   "Company Info": "Información de la Empresa",
   "Search for a stock to begin analysis": "Busca una acción para comenzar el análisis",
   "Type a symbol like AAPL, TSLA, Iberdrola...": "Escribe un símbolo como AAPL, TSLA, Iberdrola...",
+  "No data to display": "Sin datos que mostrar",
   Consensus: "Consenso",
   "Price Target": "Objetivo de Precio",
   Low: "Mínimo",

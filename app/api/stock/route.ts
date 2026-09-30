@@ -409,6 +409,7 @@ export async function GET(req: NextRequest) {
       const opens = quote.open ?? []
       const highs = quote.high ?? []
       const lows = quote.low ?? []
+      const volumes = quote.volume ?? []
       if (!timestamps.length) return []
       return timestamps
         .map((ts: number, i: number) => ({
@@ -418,6 +419,7 @@ export async function GET(req: NextRequest) {
           open: opens[i] != null ? Math.round(opens[i] * 100) / 100 : null,
           high: highs[i] != null ? Math.round(highs[i] * 100) / 100 : null,
           low: lows[i] != null ? Math.round(lows[i] * 100) / 100 : null,
+          volume: volumes[i] != null ? Math.round(volumes[i]) : null,
         }))
         .filter((d: any) => d.price != null)
     })(),

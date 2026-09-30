@@ -155,11 +155,6 @@ class MeasureRenderer implements IPrimitivePaneRenderer {
   }
 
   draw(target: CanvasTarget) {
-    dbg("renderer draw", {
-      p1: this._p1,
-      p2: this._p2,
-      currency: this._source.options.currency,
-    })
     target.useBitmapCoordinateSpace((scope) => {
       const ctx = scope.context
       if (this._p1.x === null || this._p1.y === null || this._p2.x === null || this._p2.y === null) return
