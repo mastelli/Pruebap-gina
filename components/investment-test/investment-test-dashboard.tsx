@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Separator } from "@/components/ui/separator"
-import { Search, TrendingUp, TrendingDown, Activity, BarChart3, DollarSign, Building2, Users, Target, AlertTriangle, Globe, ChevronDown, ChevronUp, ExternalLink, Ruler } from "lucide-react"
+import { Search, TrendingUp, TrendingDown, Activity, BarChart3, DollarSign, Building2, Users, Target, AlertTriangle, Globe, ExternalLink, Ruler } from "lucide-react"
 import { MeasureTool } from "@/lib/measure-tool"
 import { CompanyNews } from "@/components/company-news"
 
@@ -210,19 +210,6 @@ export function InvestmentTestDashboard() {
   const dataRef = useRef<StockData | null>(null)
   const measureRef = useRef<MeasureTool | null>(null)
   const [measureActive, setMeasureActive] = useState(false)
-  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
-    valuation: true,
-    financials: true,
-    growth: true,
-    profitability: true,
-    balance: true,
-    analysts: true,
-    risk: true,
-  })
-
-  const toggleSection = (key: string) => {
-    setExpandedSections((prev) => ({ ...prev, [key]: !prev[key] }))
-  }
 
   const searchStock = useCallback(async (q: string) => {
     if (!q.trim() || q.trim().length < 1) { setResults([]); return }
@@ -742,198 +729,180 @@ export function InvestmentTestDashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {/* Valuation Metrics */}
             <Card>
-              <CardHeader className="cursor-pointer" onClick={() => toggleSection("valuation")}>
-                <CardTitle className="flex items-center justify-between">
-                  <span className="flex items-center gap-2"><DollarSign className="h-5 w-5" />{t("Valuation")}</span>
-                  {expandedSections.valuation ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <DollarSign className="h-5 w-5" />{t("Valuation")}
                 </CardTitle>
               </CardHeader>
-              {expandedSections.valuation && (
-                <CardContent className="pt-0">
-                  <MetricRow label="P/E (TTM)" value={stats.trailingPE} colorClass={valuationColor("trailingPE", stats.trailingPE ?? 0)} />
-                  <MetricRow label="P/E Forward" value={stats.forwardPE} colorClass={valuationColor("forwardPE", stats.forwardPE ?? 0)} />
-                  <MetricRow label="PEG Ratio" value={stats.pegRatio} />
-                  <MetricRow label="P/B" value={stats.priceToBook} colorClass={valuationColor("priceToBook", stats.priceToBook ?? 0)} />
-                  <MetricRow label="P/S (TTM)" value={stats.priceToSalesTrailing12Months} />
-                  <MetricRow label="EV/Revenue" value={stats.enterpriseToRevenue} />
-                  <MetricRow label="EV/EBITDA" value={stats.enterpriseToEbitda} />
-                  <MetricRow label="Enterprise Value" value={stats.enterpriseValue} format="large" />
-                  <Separator className="my-2" />
-                  <MetricRow label="Trailing EPS" value={stats.trailingEps} format="currency" />
-                  <MetricRow label="Forward EPS" value={stats.forwardEps} format="currency" />
-                  <MetricRow label="Book Value" value={stats.bookValue} format="currency" />
-                </CardContent>
-              )}
+              <CardContent className="pt-0">
+                <MetricRow label="P/E (TTM)" value={stats.trailingPE} colorClass={valuationColor("trailingPE", stats.trailingPE ?? 0)} />
+                <MetricRow label="P/E Forward" value={stats.forwardPE} colorClass={valuationColor("forwardPE", stats.forwardPE ?? 0)} />
+                <MetricRow label="PEG Ratio" value={stats.pegRatio} />
+                <MetricRow label="P/B" value={stats.priceToBook} colorClass={valuationColor("priceToBook", stats.priceToBook ?? 0)} />
+                <MetricRow label="P/S (TTM)" value={stats.priceToSalesTrailing12Months} />
+                <MetricRow label="EV/Revenue" value={stats.enterpriseToRevenue} />
+                <MetricRow label="EV/EBITDA" value={stats.enterpriseToEbitda} />
+                <MetricRow label="Enterprise Value" value={stats.enterpriseValue} format="large" />
+                <Separator className="my-2" />
+                <MetricRow label="Trailing EPS" value={stats.trailingEps} format="currency" />
+                <MetricRow label="Forward EPS" value={stats.forwardEps} format="currency" />
+                <MetricRow label="Book Value" value={stats.bookValue} format="currency" />
+              </CardContent>
             </Card>
 
             {/* Analyst Recommendations */}
             <Card>
-              <CardHeader className="cursor-pointer" onClick={() => toggleSection("analysts")}>
-                <CardTitle className="flex items-center justify-between">
-                  <span className="flex items-center gap-2"><Target className="h-5 w-5" />{t("Analyst Recommendations")}</span>
-                  {expandedSections.analysts ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Target className="h-5 w-5" />{t("Analyst Recommendations")}
                 </CardTitle>
               </CardHeader>
-              {expandedSections.analysts && (
-                <CardContent className="pt-0 space-y-4">
-                  {a?.recommendationKey ? (
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm text-muted-foreground">{t("Consensus")}:</span>
-                      <Badge variant={a.recommendationKey === "buy" || a.recommendationKey === "strongBuy" ? "default" : a.recommendationKey === "sell" ? "destructive" : "secondary"}>
-                        {a.recommendationKey}
-                      </Badge>
-                      {a.recommendationMean ? <span className="text-sm">({a.recommendationMean.toFixed(1)}/5)</span> : null}
-                    </div>
-                  ) : null}
-                  <div>
-                    <div className="text-sm text-muted-foreground mb-1">{t("Price Target")}</div>
-                    {a?.targetMean && q ? (
-                      <div className="space-y-2">
-                        <div className="flex justify-between text-sm">
-                          <span>{t("Low")}: {a.targetLow?.toLocaleString("es-ES", { minimumFractionDigits: 2 })}</span>
-                          <span className="font-medium">{t("Mean")}: {a.targetMean.toLocaleString("es-ES", { minimumFractionDigits: 2 })}</span>
-                          <span>{t("High")}: {a.targetHigh?.toLocaleString("es-ES", { minimumFractionDigits: 2 })}</span>
-                        </div>
-                        <PriceRangeBar current={q.price} low={a.targetLow ?? 0} high={a.targetHigh ?? 0} />
-                        <div className="text-xs text-muted-foreground text-center">
-                          {t("Upside")}: {a.targetMean > q.price ? "+" : ""}{((a.targetMean - q.price) / q.price * 100).toFixed(1)}%
-                        </div>
+              <CardContent className="pt-0 space-y-4">
+                {a?.recommendationKey ? (
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-muted-foreground">{t("Consensus")}:</span>
+                    <Badge variant={a.recommendationKey === "buy" || a.recommendationKey === "strongBuy" ? "default" : a.recommendationKey === "sell" ? "destructive" : "secondary"}>
+                      {a.recommendationKey}
+                    </Badge>
+                    {a.recommendationMean ? <span className="text-sm">({a.recommendationMean.toFixed(1)}/5)</span> : null}
+                  </div>
+                ) : null}
+                <div>
+                  <div className="text-sm text-muted-foreground mb-1">{t("Price Target")}</div>
+                  {a?.targetMean && q ? (
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span>{t("Low")}: {a.targetLow?.toLocaleString("es-ES", { minimumFractionDigits: 2 })}</span>
+                        <span className="font-medium">{t("Mean")}: {a.targetMean.toLocaleString("es-ES", { minimumFractionDigits: 2 })}</span>
+                        <span>{t("High")}: {a.targetHigh?.toLocaleString("es-ES", { minimumFractionDigits: 2 })}</span>
                       </div>
-                    ) : <span className="text-sm text-muted-foreground">—</span>}
-                  </div>
-                  <div>
-                    <div className="text-sm text-muted-foreground mb-1">{t("Rating Distribution")} ({a?.numberOfAnalysts ?? 0} {t("analysts")})</div>
-                    {a ? <RecommendationBar data={a} /> : <span className="text-sm text-muted-foreground">—</span>}
-                  </div>
-                </CardContent>
-              )}
+                      <PriceRangeBar current={q.price} low={a.targetLow ?? 0} high={a.targetHigh ?? 0} />
+                      <div className="text-xs text-muted-foreground text-center">
+                        {t("Upside")}: {a.targetMean > q.price ? "+" : ""}{((a.targetMean - q.price) / q.price * 100).toFixed(1)}%
+                      </div>
+                    </div>
+                  ) : <span className="text-sm text-muted-foreground">—</span>}
+                </div>
+                <div>
+                  <div className="text-sm text-muted-foreground mb-1">{t("Rating Distribution")} ({a?.numberOfAnalysts ?? 0} {t("analysts")})</div>
+                  {a ? <RecommendationBar data={a} /> : <span className="text-sm text-muted-foreground">—</span>}
+                </div>
+              </CardContent>
             </Card>
 
             {/* Growth */}
             <Card>
-              <CardHeader className="cursor-pointer" onClick={() => toggleSection("growth")}>
-                <CardTitle className="flex items-center justify-between">
-                  <span className="flex items-center gap-2"><TrendingUp className="h-5 w-5" />{t("Growth")}</span>
-                  {expandedSections.growth ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <TrendingUp className="h-5 w-5" />{t("Growth")}
                 </CardTitle>
               </CardHeader>
-              {expandedSections.growth && (
-                <CardContent className="pt-0">
-                  <MetricRow label="Revenue Growth" value={stats.revenueGrowth} format="percent" />
-                  <MetricRow label="Earnings Growth" value={stats.earningsGrowth} format="percent" />
-                  <MetricRow label="Sales Growth QoQ" value={stats.salesGrowthQoQ} format="percent" />
-                  <MetricRow label="5Y Revenue Growth" value={stats.salesGrowth5Y} format="percent" />
-                  <MetricRow label="Est. Revenue Growth" value={stats.estimatedRevenueGrowth} format="percent" />
-                  <MetricRow label="FCF Growth" value={stats.fcfGrowth} format="percent" />
-                  <MetricRow label="Est. EPS Current Year" value={stats.estimatedEpsCurrentYear} format="currency" />
-                  <MetricRow label="Est. EPS Next Year" value={stats.estimatedEpsNextYear} format="currency" />
-                </CardContent>
-              )}
+              <CardContent className="pt-0">
+                <MetricRow label="Revenue Growth" value={stats.revenueGrowth} format="percent" />
+                <MetricRow label="Earnings Growth" value={stats.earningsGrowth} format="percent" />
+                <MetricRow label="Sales Growth QoQ" value={stats.salesGrowthQoQ} format="percent" />
+                <MetricRow label="5Y Revenue Growth" value={stats.salesGrowth5Y} format="percent" />
+                <MetricRow label="Est. Revenue Growth" value={stats.estimatedRevenueGrowth} format="percent" />
+                <MetricRow label="FCF Growth" value={stats.fcfGrowth} format="percent" />
+                <MetricRow label="Est. EPS Current Year" value={stats.estimatedEpsCurrentYear} format="currency" />
+                <MetricRow label="Est. EPS Next Year" value={stats.estimatedEpsNextYear} format="currency" />
+              </CardContent>
             </Card>
 
             {/* Profitability */}
             <Card>
-              <CardHeader className="cursor-pointer" onClick={() => toggleSection("profitability")}>
-                <CardTitle className="flex items-center justify-between">
-                  <span className="flex items-center gap-2"><Activity className="h-5 w-5" />{t("Profitability")}</span>
-                  {expandedSections.profitability ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Activity className="h-5 w-5" />{t("Profitability")}
                 </CardTitle>
               </CardHeader>
-              {expandedSections.profitability && (
-                <CardContent className="pt-0">
-                  <MetricRow label="Return on Equity" value={stats.returnOnEquity} format="percent" colorClass={valuationColor("returnOnEquity", stats.returnOnEquity ?? 0)} />
-                  <MetricRow label="Return on Assets" value={stats.returnOnAssets} format="percent" />
-                  <MetricRow label="Return on Capital" value={stats.returnOnCapitalEmployed} format="percent" />
-                  <MetricRow label="Gross Margin" value={stats.grossMargins} format="percent" />
-                  <MetricRow label="Operating Margin" value={stats.operatingMargins} format="percent" />
-                  <MetricRow label="Profit Margin" value={stats.profitMargins} format="percent" />
-                </CardContent>
-              )}
+              <CardContent className="pt-0">
+                <MetricRow label="Return on Equity" value={stats.returnOnEquity} format="percent" colorClass={valuationColor("returnOnEquity", stats.returnOnEquity ?? 0)} />
+                <MetricRow label="Return on Assets" value={stats.returnOnAssets} format="percent" />
+                <MetricRow label="Return on Capital" value={stats.returnOnCapitalEmployed} format="percent" />
+                <MetricRow label="Gross Margin" value={stats.grossMargins} format="percent" />
+                <MetricRow label="Operating Margin" value={stats.operatingMargins} format="percent" />
+                <MetricRow label="Profit Margin" value={stats.profitMargins} format="percent" />
+              </CardContent>
             </Card>
 
             {/* Balance Sheet */}
             <Card>
-              <CardHeader className="cursor-pointer" onClick={() => toggleSection("balance")}>
-                <CardTitle className="flex items-center justify-between">
-                  <span className="flex items-center gap-2"><Building2 className="h-5 w-5" />{t("Balance Sheet & Cash Flow")}</span>
-                  {expandedSections.balance ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Building2 className="h-5 w-5" />{t("Balance Sheet & Cash Flow")}
                 </CardTitle>
               </CardHeader>
-              {expandedSections.balance && (
-                <CardContent className="pt-0">
-                  <MetricRow label="Revenue" value={stats.revenue} format="large" />
-                  <MetricRow label="EBITDA" value={stats.ebitda} format="large" />
-                  <MetricRow label="Free Cash Flow" value={stats.freeCashflow} format="large" />
-                  <MetricRow label="Operating Cash Flow" value={stats.operatingCashflow} format="large" />
-                  <Separator className="my-2" />
-                  <MetricRow label="Total Cash" value={stats.totalCash} format="large" />
-                  <MetricRow label="Total Debt" value={stats.totalDebt} format="large" />
-                  <MetricRow label="Debt/Equity" value={stats.debtToEquity} colorClass={valuationColor("debtToEquity", stats.debtToEquity ?? 0)} />
-                  <MetricRow label="Current Ratio" value={stats.currentRatio} />
-                  <Separator className="my-2" />
-                  <MetricRow label="Dividend Yield" value={stats.dividendYield} format="percent" />
-                  <MetricRow label="Payout Ratio" value={stats.payoutRatio} format="percent" />
-                  <MetricRow label="Beta" value={stats.beta} />
-                </CardContent>
-              )}
+              <CardContent className="pt-0">
+                <MetricRow label="Revenue" value={stats.revenue} format="large" />
+                <MetricRow label="EBITDA" value={stats.ebitda} format="large" />
+                <MetricRow label="Free Cash Flow" value={stats.freeCashflow} format="large" />
+                <MetricRow label="Operating Cash Flow" value={stats.operatingCashflow} format="large" />
+                <Separator className="my-2" />
+                <MetricRow label="Total Cash" value={stats.totalCash} format="large" />
+                <MetricRow label="Total Debt" value={stats.totalDebt} format="large" />
+                <MetricRow label="Debt/Equity" value={stats.debtToEquity} colorClass={valuationColor("debtToEquity", stats.debtToEquity ?? 0)} />
+                <MetricRow label="Current Ratio" value={stats.currentRatio} />
+                <Separator className="my-2" />
+                <MetricRow label="Dividend Yield" value={stats.dividendYield} format="percent" />
+                <MetricRow label="Payout Ratio" value={stats.payoutRatio} format="percent" />
+                <MetricRow label="Beta" value={stats.beta} />
+              </CardContent>
             </Card>
 
             {/* Risk */}
             <Card>
-              <CardHeader className="cursor-pointer" onClick={() => toggleSection("risk")}>
-                <CardTitle className="flex items-center justify-between">
-                  <span className="flex items-center gap-2"><AlertTriangle className="h-5 w-5" />{t("Risk & Ownership")}</span>
-                  {expandedSections.risk ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <AlertTriangle className="h-5 w-5" />{t("Risk & Ownership")}
                 </CardTitle>
               </CardHeader>
-              {expandedSections.risk && (
-                <CardContent className="pt-0">
-                  {q && (
-                    <>
-                      <div className="text-sm text-muted-foreground mb-1">{t("52 Week Range")}</div>
-                      <PriceRangeBar current={q.price} low={q.week52Low} high={q.week52High} />
-                      <div className="flex justify-between text-xs text-muted-foreground mt-1 mb-3">
-                        <span>Low: {q.week52Low.toLocaleString("es-ES", { minimumFractionDigits: 2 })}</span>
-                        <span>High: {q.week52High.toLocaleString("es-ES", { minimumFractionDigits: 2 })}</span>
-                      </div>
-                    </>
-                  )}
-                  <MetricRow label="Beta" value={stats.beta} />
-                  <MetricRow label="Shares Outstanding" value={stats.sharesOutstanding} format="large" />
-                  <MetricRow label="% Held by Insiders" value={stats.heldPercentInsiders} format="percent" />
-                  <MetricRow label="% Held by Institutions" value={stats.heldPercentInstitutions} format="percent" />
-                  <Separator className="my-2" />
-                  {data && data.history.length > 1 && (() => {
-                    const prices = data.history.map((c) => c.price)
-                    const returns: number[] = []
-                    for (let i = 1; i < prices.length; i++) {
-                      if (prices[i - 1] !== 0) returns.push((prices[i] - prices[i - 1]) / prices[i - 1])
+              <CardContent className="pt-0">
+                {q && (
+                  <>
+                    <div className="text-sm text-muted-foreground mb-1">{t("52 Week Range")}</div>
+                    <PriceRangeBar current={q.price} low={q.week52Low} high={q.week52High} />
+                    <div className="flex justify-between text-xs text-muted-foreground mt-1 mb-3">
+                      <span>Low: {q.week52Low.toLocaleString("es-ES", { minimumFractionDigits: 2 })}</span>
+                      <span>High: {q.week52High.toLocaleString("es-ES", { minimumFractionDigits: 2 })}</span>
+                    </div>
+                  </>
+                )}
+                <MetricRow label="Beta" value={stats.beta} />
+                <MetricRow label="Shares Outstanding" value={stats.sharesOutstanding} format="large" />
+                <MetricRow label="% Held by Insiders" value={stats.heldPercentInsiders} format="percent" />
+                <MetricRow label="% Held by Institutions" value={stats.heldPercentInstitutions} format="percent" />
+                <Separator className="my-2" />
+                {data && data.history.length > 1 && (() => {
+                  const prices = data.history.map((c) => c.price)
+                  const returns: number[] = []
+                  for (let i = 1; i < prices.length; i++) {
+                    if (prices[i - 1] !== 0) returns.push((prices[i] - prices[i - 1]) / prices[i - 1])
+                  }
+                  if (returns.length === 0) return null
+                  const mean = returns.reduce((a, b) => a + b, 0) / returns.length
+                  const variance = returns.reduce((a, b) => a + (b - mean) ** 2, 0) / returns.length
+                  const dailyVol = Math.sqrt(variance)
+                  const annualVol = dailyVol * Math.sqrt(252)
+                  const maxDrawdown = (() => {
+                    let peak = prices[0]
+                    let maxDd = 0
+                    for (const p of prices) {
+                      if (p > peak) peak = p
+                      const dd = (peak - p) / peak
+                      if (dd > maxDd) maxDd = dd
                     }
-                    if (returns.length === 0) return null
-                    const mean = returns.reduce((a, b) => a + b, 0) / returns.length
-                    const variance = returns.reduce((a, b) => a + (b - mean) ** 2, 0) / returns.length
-                    const dailyVol = Math.sqrt(variance)
-                    const annualVol = dailyVol * Math.sqrt(252)
-                    const maxDrawdown = (() => {
-                      let peak = prices[0]
-                      let maxDd = 0
-                      for (const p of prices) {
-                        if (p > peak) peak = p
-                        const dd = (peak - p) / peak
-                        if (dd > maxDd) maxDd = dd
-                      }
-                      return maxDd
-                    })()
-                    return (
-                      <>
-                        <MetricRow label="Annualized Volatility" value={annualVol} format="percent" />
-                        <MetricRow label="Max Drawdown" value={maxDrawdown} format="percent" />
-                        <MetricRow label="Daily Volatility" value={dailyVol} format="percent" />
-                      </>
-                    )
-                  })()}
-                </CardContent>
-              )}
+                    return maxDd
+                  })()
+                  return (
+                    <>
+                      <MetricRow label="Annualized Volatility" value={annualVol} format="percent" />
+                      <MetricRow label="Max Drawdown" value={maxDrawdown} format="percent" />
+                      <MetricRow label="Daily Volatility" value={dailyVol} format="percent" />
+                    </>
+                  )
+                })()}
+              </CardContent>
             </Card>
           </div>
 
