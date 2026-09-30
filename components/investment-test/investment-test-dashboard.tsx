@@ -558,10 +558,7 @@ export function InvestmentTestDashboard() {
                           {pctSigned(ev.evAdjusted)}
                         </div>
                         <div className="text-sm text-muted-foreground mt-0.5">
-                          {t("Adjusted EV (-5%)")} · {moneySigned(ev.evPerShareAdjusted)} {q?.currency} / {t("share")}
-                        </div>
-                        <div className="text-xs text-muted-foreground mt-1 font-mono">
-                          EV {pctSigned(ev.evOriginal)} × {ev.assumptions.pessimism} = {pctSigned(ev.evAdjusted)}
+                          {moneySigned(ev.evPerShareAdjusted)} {q?.currency} / {t("share")}
                         </div>
                       </div>
                       <Separator />
@@ -574,7 +571,7 @@ export function InvestmentTestDashboard() {
                         <EvFact label={t("Horizon")} value={`${ev.horizonDays} ${t("trading days")} (${ev.months} ${t("months")})`} />
                       </EvSection>
                       <div className="text-[11px] text-muted-foreground text-center leading-snug">
-                        {t("EV = sum of probability x net result on the quartile scenarios of the lognormal fit")} · {t("The -5% margin is applied only to the final EV")}
+                        {t("EV = sum of probability x net result on the quartile scenarios of the lognormal fit")}
                       </div>
                     </>
                   ) : (
