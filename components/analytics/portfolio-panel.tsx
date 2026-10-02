@@ -763,7 +763,9 @@ export function PortfolioPanel() {
       const newPrices: Record<string, { price: number; previousClose: number | null; currency: string }> = {}
 
       for (const stock of manualStocks) {
-        const quote = results[stock.name.toUpperCase()] ?? results[stock.name] ?? results[(stock.name?stock.name.toUpperCase():String(stock.id).toUpperCase())]
+        const key1 = stock.name ? stock.name.trim().toUpperCase() : ""
+        const key2 = String(stock.id).trim().toUpperCase()
+        const quote = results[key1] ?? (key1 && results[stock.name.trim()]) ?? results[key2] ?? results[stock.name]
         if (quote && typeof quote.price === "number") {
           newPrices[stock.name] = {
             price: quote.price,
