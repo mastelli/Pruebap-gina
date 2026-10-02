@@ -326,7 +326,7 @@ export async function POST(request: NextRequest) {
   }
 
   const results: Record<string, Quote | null> = {}
-  const pendingAssets: Array<{ isin: string; name?: string }> = []
+  const pendingAssets: Array<{ key: string; isin: string; name?: string }> = []
 
   for (const asset of assets) {
     const name = String(asset?.name ?? "").trim()
@@ -340,14 +340,16 @@ export async function POST(request: NextRequest) {
       continue
     }
 
-    pendingAssets.push({ isin: isin || key, name })
+    pendingAssets.push({ key, isin: isin || key, name })
   }
 
   // 1) aseguramos el simbolo de cada ISIN pendiente (solo la primera vez)
   const resolved = new Map<string, SymbolInfo>()
-  for (const { isin, name } of pendingAssets) {
+  for (const { key, isin, name } of pendingAssets) {
     const info = await resolveAsset(isin, name).catch(() => null)
-    if (info) resolved.set(isin, info)
+    if (info) {
+      resolved.set(key, info)
+    }
   }
 
   // 2) cotizaciones: Stooq para europeas, Yahoo para el resto
@@ -362,7 +364,7 @@ export async function POST(request: NextRequest) {
   ])
 
   // 3) combinar resultados: Stooq tiene prioridad para europeas
-  for (const [isin, info] of resolved) {
+  for (const [key, info] of resolved) {
     let quote = stooqBatch.get(info.symbol) ?? yahooBatch.get(info.symbol) ?? null
     if (!quote) {
       quote = await getChartQuote(info.symbol).catch(() => null)
@@ -370,18 +372,14 @@ export async function POST(request: NextRequest) {
     if (quote && !quote.currency && info.currency) {
       quote = { ...quote, currency: info.currency }
     }
-    quoteCache.set(isin, { ts: Date.now(), quote })
-    results[isin] = quote
+    quoteCache.set(key, { ts: Date.now(), quote })
+    results[key] = quote
     if (quote) {
-      const found = pendingAssets.find((p) => p.isin === isin)
-      if (found?.name) {
-        const n = found.name.trim().toUpperCase()
-        if (!results[n]) results[n] = quote
-      }
-      // tambien indexar por el propio key si no era ISIN
-      if (!isin && found?.name) {
-        const n = found.name.trim().toUpperCase()
-        if (!results[n]) results[n] = quote
+      for (const p of pendingAssets) {
+        if (p.key === key && p.name) {
+          const n = p.name.trim().toUpperCase()
+          if (n && !results[n]) results[n] = quote
+        }
       }
     }
   }
