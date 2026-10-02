@@ -1,7 +1,7 @@
 "use client"
 
-import { DebtDashboard } from "@/components/analytics/debt/DebtDashboard"
+import { InvestmentSavingsV2 } from "@/components/analytics/investment-savings-v2"
 
 export default function AnalyticsSavingsPage() {
-  return <DebtDashboard />
+  return <InvestmentSavingsV2 />
 }
