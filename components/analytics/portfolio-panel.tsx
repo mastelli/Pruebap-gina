@@ -320,6 +320,10 @@ export function PortfolioPanel() {
   const [manualQuantity, setManualQuantity] = useState("")
   const [manualDate, setManualDate] = useState(new Date().toISOString().slice(0, 10))
   const [expandedManual, setExpandedManual] = useState<string | null>(null)
+  const [searchQuery, setSearchQuery] = useState("")
+  const [searchResults, setSearchResults] = useState<Array<{ symbol: string; name: string; exchange?: string; currency?: string }>>([])
+  const [searchLoading, setSearchLoading] = useState(false)
+  const searchTimer = useRef<NodeJS.Timeout | null>(null)
   const [manualPrices, setManualPrices] = useState<Record<string, { price: number; previousClose: number | null; currency: string }>>({})
   const fileInputRef = useRef<HTMLInputElement>(null)
   const wsRef = useRef<WebSocket | null>(null)
@@ -798,10 +802,29 @@ export function PortfolioPanel() {
   }, [manualStocks])
 
   useEffect(() => {
-    void refreshManualPrices()
-    const id = setInterval(() => void refreshManualPrices(), 30000)
-    return () => clearInterval(id)
-  }, [refreshManualPrices])
+    if (searchTimer.current) clearTimeout(searchTimer.current)
+    if (!searchQuery || searchQuery.trim().length < 1) {
+      setSearchResults([])
+      return
+    }
+    searchTimer.current = setTimeout(async () => {
+      try {
+        setSearchLoading(true)
+        const res = await fetch(`/api/ticker-search?q=${encodeURIComponent(searchQuery.trim())}`)
+        if (res.ok) {
+          const json = await res.json()
+          setSearchResults(Array.isArray(json?.results) ? json.results : [])
+        }
+      } catch {
+        // ignore
+      } finally {
+        setSearchLoading(false)
+      }
+    }, 250)
+    return () => {
+      if (searchTimer.current) clearTimeout(searchTimer.current)
+    }
+  }, [searchQuery])
 
   const statusFor = (asset: Asset): { live?: boolean; text: string } | null => {
     const info = prices[asset.isin]
@@ -880,12 +903,34 @@ export function PortfolioPanel() {
               </DialogHeader>
               <div className="space-y-4">
                 <div>
-                  <Label>{t("Stock Name")}</Label>
+                  <Label>{t("Search")} / {t("Stock Name")}</Label>
                   <Input
-                    value={manualName}
-                    onChange={(e) => setManualName(e.target.value)}
-                    placeholder="Ej: AAPL"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Buscar ticker (ej: MSFT, SAP, ASML...)"
                   />
+                  {searchLoading && <div className="text-xs text-muted-foreground mt-1">Buscando...</div>}
+                  {searchResults.length > 0 && (
+                    <div className="mt-2 max-h-48 overflow-auto border rounded-md">
+                      {searchResults.map((r) => (
+                        <button
+                          key={r.symbol}
+                          type="button"
+                          className="w-full text-left px-3 py-2 hover:bg-accent text-sm border-b last:border-b-0"
+                          onClick={() => {
+                            setManualName(r.symbol)
+                            if (r.exchange) setManualExchange(r.exchange)
+                            if (r.currency) setManualCurrency(r.currency.toUpperCase())
+                            setSearchQuery("")
+                            setSearchResults([])
+                          }}
+                        >
+                          <div className="font-medium">{r.symbol} {r.exchange ? `· ${r.exchange}` : ""}</div>
+                          <div className="text-xs text-muted-foreground truncate">{r.name}</div>
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
                 <div>
                   <Label>{t("Exchange")}</Label>
