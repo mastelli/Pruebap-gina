@@ -169,8 +169,9 @@ async function getStooqBatch(yahooSymbols: string[]): Promise<Map<string, Quote>
 
 // --- Yahoo Finance (resto del mundo) ---
 
-async function resolveSymbolCandidates(isin: string, name?: string): Promise<string[]> {
+async function resolveSymbolCandidates(isin: string, name?: string, exchangeReq?: string): Promise<string[]> {
   const symbols: string[] = []
+  const exchangeNorm = exchangeReq ? exchangeReq.trim().toUpperCase() : ""
   try {
     const res = await fetch(
       `https://query2.finance.yahoo.com/v1/finance/lookup?query=${encodeURIComponent(isin)}&type=all&count=5`,
@@ -187,12 +188,19 @@ async function resolveSymbolCandidates(isin: string, name?: string): Promise<str
   if (symbols.length === 0 && name && name.trim().length > 1) {
     try {
       const res = await fetch(
-        `https://query1.finance.yahoo.com/v1/finance/search?q=${encodeURIComponent(name.trim())}&quotesCount=3&newsCount=0`,
+        `https://query1.finance.yahoo.com/v1/finance/search?q=${encodeURIComponent(name.trim())}&quotesCount=5&newsCount=0`,
         { headers: UA },
       )
       const json = await res.json()
-      const symbol = (json?.quotes ?? []).find((q: { symbol?: string }) => q.symbol)?.symbol ?? null
-      if (symbol) symbols.push(symbol)
+      const quotes: Array<{ symbol?: string; exchange?: string }> = json?.quotes ?? []
+      if (exchangeNorm) {
+        const m = quotes.find((q) => (q.exchange ?? "").toUpperCase().includes(exchangeNorm) || exchangeNorm.includes((q.exchange ?? "").toUpperCase()))
+        if (m?.symbol) symbols.push(m.symbol)
+      }
+      if (symbols.length === 0) {
+        const symbol = quotes.find((q: { symbol?: string }) => q.symbol)?.symbol ?? null
+        if (symbol) symbols.push(symbol)
+      }
     } catch {
       // sin simbolo
     }
@@ -245,24 +253,41 @@ async function getChartQuote(symbol: string): Promise<Quote | null> {
 
 // Resuelve el ISIN probando candidatos y prefiriendo el listado en EUR
 // (p. ej. listing europeo en vez de la suiza en CHF para ETFs UCITS)
-async function resolveAsset(isin: string, name?: string): Promise<SymbolInfo | null> {
-  const cached = symbolCache.get(isin)
+async function resolveAsset(isin: string, name?: string, exchangeReq?: string, symbolReq?: string): Promise<SymbolInfo | null> {
+  const cacheKey = `${symbolReq ?? ""}|${isin}|${exchangeReq ?? ""}`
+  const cached = symbolCache.get(cacheKey) || symbolCache.get(isin)
   if (cached) return cached
 
-  const candidates = await resolveSymbolCandidates(isin, name)
-  let fallback: Quote | null = null
-  for (const symbol of candidates) {
-    const quote = await getChartQuote(symbol).catch(() => null)
-    if (!quote) continue
-    if (quote.currency === "EUR") {
-      const info = { symbol, currency: quote.currency || undefined }
+  if (symbolReq) {
+    const quote = await getChartQuote(symbolReq).catch(() => null)
+    if (quote) {
+      const info = { symbol: quote.symbol ?? symbolReq, currency: quote.currency || undefined }
+      symbolCache.set(cacheKey, info)
       symbolCache.set(isin, info)
       return info
     }
-    if (!fallback) fallback = quote
+  }
+
+  const candidates = await resolveSymbolCandidates(isin, name, exchangeReq)
+  let fallback: Quote | null = null
+  const ex = exchangeReq ? exchangeReq.trim().toUpperCase() : ""
+  for (const symbol of candidates) {
+    const quote = await getChartQuote(symbol).catch(() => null)
+    if (!quote) continue
+    const qex = (quote.exchange ?? "").toUpperCase()
+    const matchesEx = !ex || qex.includes(ex) || ex.includes(qex)
+    if (quote.currency === "EUR" && matchesEx) {
+      const info = { symbol, currency: quote.currency || undefined }
+      symbolCache.set(cacheKey, info)
+      symbolCache.set(isin, info)
+      return info
+    }
+    if (matchesEx && !fallback) fallback = quote
+    if (!matchesEx && !fallback) fallback = quote
   }
   if (fallback) {
     const info = { symbol: fallback.symbol, currency: fallback.currency || undefined }
+    symbolCache.set(cacheKey, info)
     symbolCache.set(isin, info)
     return info
   }
@@ -309,7 +334,7 @@ async function getBatchQuotes(symbols: string[]): Promise<Map<string, Quote>> {
 }
 
 export async function POST(request: NextRequest) {
-  let assets: Array<{ isin?: string; name?: string }> = []
+  let assets: Array<{ isin?: string; name?: string; exchange?: string; symbol?: string }> = []
   let currencies: string[] = []
   try {
     const body = await request.json()
@@ -326,7 +351,7 @@ export async function POST(request: NextRequest) {
   }
 
   const results: Record<string, Quote | null> = {}
-  const pendingAssets: Array<{ key: string; isin: string; name?: string }> = []
+  const pendingAssets: Array<{ key: string; isin: string; name?: string; exchange?: string; symbol?: string }> = []
 
   for (const asset of assets) {
     const name = String(asset?.name ?? "").trim()
@@ -340,13 +365,13 @@ export async function POST(request: NextRequest) {
       continue
     }
 
-    pendingAssets.push({ key, isin: isin || key, name })
+    pendingAssets.push({ key, isin: isin || key, name, exchange: asset?.exchange ? String(asset.exchange) : undefined, symbol: asset?.symbol ? String(asset.symbol).trim() : undefined })
   }
 
   // 1) aseguramos el simbolo de cada ISIN pendiente (solo la primera vez)
   const resolved = new Map<string, SymbolInfo>()
-  for (const { key, isin, name } of pendingAssets) {
-    const info = await resolveAsset(isin, name).catch(() => null)
+  for (const { key, isin, name, exchange, symbol } of pendingAssets) {
+    const info = await resolveAsset(isin, name, exchange, symbol).catch(() => null)
     if (info) {
       resolved.set(key, info)
     }
