@@ -372,11 +372,16 @@ export async function POST(request: NextRequest) {
     }
     quoteCache.set(isin, { ts: Date.now(), quote })
     results[isin] = quote
-    // tambien guardar por nombre (uppercase) para manual stocks
     if (quote) {
       const found = pendingAssets.find((p) => p.isin === isin)
       if (found?.name) {
-        results[found.name.trim().toUpperCase()] = quote
+        const n = found.name.trim().toUpperCase()
+        if (!results[n]) results[n] = quote
+      }
+      // tambien indexar por el propio key si no era ISIN
+      if (!isin && found?.name) {
+        const n = found.name.trim().toUpperCase()
+        if (!results[n]) results[n] = quote
       }
     }
   }
