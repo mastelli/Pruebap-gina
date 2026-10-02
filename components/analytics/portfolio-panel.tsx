@@ -765,7 +765,14 @@ export function PortfolioPanel() {
       for (const stock of manualStocks) {
         const key1 = stock.name ? stock.name.trim().toUpperCase() : ""
         const key2 = String(stock.id).trim().toUpperCase()
-        const quote = results[key1] ?? (key1 && results[stock.name.trim()]) ?? results[key2] ?? results[stock.name]
+        const norm = (v?: string) => (v ? v.trim().toUpperCase().replace(/[^A-Z0-9]/g, "") : "")
+        const quote =
+          results[key1] ??
+          (key1 && results[stock.name.trim()]) ??
+          results[key2] ??
+          results[stock.name] ??
+          (key1 && Object.entries(results).find(([k]) => k.toUpperCase() === key1)?.[1]) ??
+          Object.entries(results).find(([k]) => norm(k) === norm(stock.name) || norm(k) === norm(stock.id))?.[1]
         if (quote && typeof quote.price === "number") {
           newPrices[stock.name] = {
             price: quote.price,
