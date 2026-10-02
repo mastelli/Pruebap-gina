@@ -147,7 +147,7 @@ function ExpenseOverview({ month, setMonth }: { month: string; setMonth: (m: str
             <div className="mt-4 flex flex-wrap items-center gap-2 text-sm">
               {delta !== null && (
                 <span className="inline-flex items-center gap-1.5 rounded-full border bg-secondary px-3 py-1 font-semibold">
-                  <TrendingUp className={`h-3.5 w-3.5 ${delta < 0 ? "rotate-180" : ""} ${delta < 0 ? "text-red-500" : "text-emerald-500"}`} />
+                  <TrendingUp className={`h-3.5 w-3.5 ${delta < 0 ? "rotate-180 text-emerald-500" : "text-red-500"}`} />
                   {`${delta >= 0 ? "+" : ""}${delta.toFixed(1).replace(".", ",")}% ${t("vs last month")}`}
                 </span>
               )}
