@@ -75,6 +75,7 @@ interface ManualStock {
   exchange: string
   currency: string
   purchases: Purchase[]
+  symbol?: string
 }
 
 const EXCHANGES = [
@@ -323,6 +324,7 @@ export function PortfolioPanel() {
   const [searchQuery, setSearchQuery] = useState("")
   const [searchResults, setSearchResults] = useState<Array<{ symbol: string; name: string; exchange?: string; currency?: string }>>([])
   const [searchLoading, setSearchLoading] = useState(false)
+  const [selectedSymbol, setSelectedSymbol] = useState<string>("")
   const searchTimer = useRef<NodeJS.Timeout | null>(null)
   const [manualPrices, setManualPrices] = useState<Record<string, { price: number; previousClose: number | null; currency: string }>>({})
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -414,7 +416,8 @@ export function PortfolioPanel() {
         exchange: manualExchange,
         currency: manualCurrency,
         purchases: [purchase],
-      }
+        symbol: selectedSymbol || undefined,
+      } as ManualStock & { symbol?: string }
       setManualStocks([...manualStocks, newStock])
     }
     setManualName("")
@@ -424,6 +427,7 @@ export function PortfolioPanel() {
     setManualQuantity("")
     setManualDate(new Date().toISOString().slice(0, 10))
     setShowAddManual(false)
+    setSelectedSymbol("")
   }
 
   const removeManualPurchase = (stockId: string, purchaseId: string) => {
@@ -756,7 +760,7 @@ export function PortfolioPanel() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          assets: manualStocks.map((s) => ({ name: s.name, exchange: s.exchange })),
+          assets: manualStocks.map((s: any) => ({ name: s.name, exchange: s.exchange, symbol: s.symbol })),
           currencies,
         }),
       })
@@ -923,7 +927,7 @@ export function PortfolioPanel() {
                             if (r.currency) setManualCurrency(r.currency.toUpperCase())
                             setSearchQuery("")
                             setSearchResults([])
-                          }}
+                            setSelectedSymbol(r.symbol)                          }}
                         >
                           <div className="font-medium">{r.symbol} {r.exchange ? `· ${r.exchange}` : ""}</div>
                           <div className="text-xs text-muted-foreground truncate">{r.name}</div>
