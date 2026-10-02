@@ -927,7 +927,8 @@ export function PortfolioPanel() {
                             if (r.currency) setManualCurrency(r.currency.toUpperCase())
                             setSearchQuery("")
                             setSearchResults([])
-                            setSelectedSymbol(r.symbol)                          }}
+                            setSelectedSymbol(r.symbol)
+                          }}
                         >
                           <div className="font-medium">{r.symbol} {r.exchange ? `· ${r.exchange}` : ""}</div>
                           <div className="text-xs text-muted-foreground truncate">{r.name}</div>
