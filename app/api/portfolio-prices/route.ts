@@ -329,16 +329,18 @@ export async function POST(request: NextRequest) {
   const pendingAssets: Array<{ isin: string; name?: string }> = []
 
   for (const asset of assets) {
+    const name = String(asset?.name ?? "").trim()
     const isin = String(asset?.isin ?? "").trim().toUpperCase()
-    if (!isin || results[isin] !== undefined) continue
+    const key = isin || name.toUpperCase()
+    if (!key || results[key] !== undefined) continue
 
-    const cached = quoteCache.get(isin)
+    const cached = quoteCache.get(key)
     if (cached && Date.now() - cached.ts < QUOTE_TTL) {
-      results[isin] = cached.quote
+      results[key] = cached.quote
       continue
     }
 
-    pendingAssets.push({ isin, name: String(asset?.name ?? "") })
+    pendingAssets.push({ isin: isin || key, name })
   }
 
   // 1) aseguramos el simbolo de cada ISIN pendiente (solo la primera vez)
@@ -370,6 +372,13 @@ export async function POST(request: NextRequest) {
     }
     quoteCache.set(isin, { ts: Date.now(), quote })
     results[isin] = quote
+    // tambien guardar por nombre (uppercase) para manual stocks
+    if (quote) {
+      const found = pendingAssets.find((p) => p.isin === isin)
+      if (found?.name) {
+        results[found.name.trim().toUpperCase()] = quote
+      }
+    }
   }
 
   // 4) tipos de cambio frente al euro
