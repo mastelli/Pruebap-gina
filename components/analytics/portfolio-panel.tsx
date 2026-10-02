@@ -746,14 +746,13 @@ export function PortfolioPanel() {
   const refreshManualPrices = useCallback(async () => {
     if (manualStocks.length === 0) return
     try {
-      const symbols = manualStocks.map((s) => s.name)
       const currencies = [...new Set(manualStocks.map((s) => s.currency).filter((c) => c !== "EUR"))]
 
       const res = await fetch("/api/portfolio-prices", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          assets: symbols.map((s) => ({ isin: s, name: s })),
+          assets: manualStocks.map((s) => ({ name: s.name, exchange: s.exchange })),
           currencies,
         }),
       })
@@ -764,12 +763,12 @@ export function PortfolioPanel() {
       const newPrices: Record<string, { price: number; previousClose: number | null; currency: string }> = {}
 
       for (const stock of manualStocks) {
-        const quote = results[stock.name]
+        const quote = results[stock.name.toUpperCase()] ?? results[stock.name]
         if (quote && typeof quote.price === "number") {
           newPrices[stock.name] = {
             price: quote.price,
             previousClose: quote.previousClose ?? null,
-            currency: stock.currency,
+            currency: quote.currency ?? stock.currency,
           }
         }
       }
