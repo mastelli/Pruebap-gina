@@ -168,6 +168,46 @@ async function getStooqBatch(yahooSymbols: string[]): Promise<Map<string, Quote>
   return out
 }
 
+// --- Tradegate Exchange (endpoint publico por ISIN) ---
+
+function tradegateNumber(value: unknown): number | null {
+  if (typeof value === "number") return Number.isFinite(value) ? value : null
+  if (typeof value === "string") {
+    const s = value.trim()
+    if (!s) return null
+    // Tradegate mezcla floats ("130.21") y formato aleman ("296,40")
+    const normalized = /,\d{1,4}$/.test(s) ? s.replace(/\./g, "").replace(",", ".") : s
+    const n = parseFloat(normalized)
+    return Number.isFinite(n) ? n : null
+  }
+  return null
+}
+
+async function getTradegateQuote(isin: string): Promise<Quote | null> {
+  if (!/^[A-Z]{2}[A-Z0-9]{9}\d$/.test(isin.trim().toUpperCase())) return null
+  try {
+    const res = await fetch(
+      `https://www.tradegate.de/refresh.php?isin=${encodeURIComponent(isin.trim().toUpperCase())}`,
+      { headers: UA, signal: AbortSignal.timeout(5000) },
+    )
+    if (!res.ok) return null
+    const text = await res.text()
+    if (!text.trim()) return null
+    const json = JSON.parse(text)
+    const price = tradegateNumber(json?.last) ?? tradegateNumber(json?.ask) ?? tradegateNumber(json?.bid)
+    if (price === null) return null
+    return {
+      symbol: isin.trim().toUpperCase(),
+      price,
+      previousClose: tradegateNumber(json?.close),
+      currency: "EUR",
+      exchange: "Tradegate",
+    }
+  } catch {
+    return null
+  }
+}
+
 // --- Yahoo Finance (resto del mundo) ---
 
 async function resolveSymbolCandidates(isin: string, name?: string, exchangeReq?: string): Promise<string[]> {
@@ -268,6 +308,22 @@ async function resolveAsset(isin: string, name?: string, exchangeReq?: string, s
       symbolCache.set(isin, info)
       return info
     }
+    // El usuario eligio un listing exacto (p. ej. "MSF.TG"). Si no existe
+    // tal cual, se prueba Stooq en Europa, pero jamas se sustituye por otro
+    // listing distinto (p. ej. el de EEUU). Solo cuando el "simbolo" es en
+    // realidad un ISIN se sigue buscando por ISIN/nombre.
+    if (!/^[A-Z]{2}[A-Z0-9]{9}\d$/.test(symbolReq.trim().toUpperCase())) {
+      if (isEuropeanSymbol(symbolReq)) {
+        const stooq = await getStooqQuote(symbolReq).catch(() => null)
+        if (stooq) {
+          const info = { symbol: stooq.symbol ?? symbolReq, currency: stooq.currency || undefined }
+          symbolCache.set(cacheKey, info)
+          symbolCache.set(isin, info)
+          return info
+        }
+      }
+      return null
+    }
   }
 
   const candidates = await resolveSymbolCandidates(isin, name, exchangeReq)
@@ -365,6 +421,22 @@ export async function POST(request: NextRequest) {
     const cached = quoteCache.get(key)
     if (cached && Date.now() - cached.ts < QUOTE_TTL) {
       results[key] = cached.quote
+      continue
+    }
+
+    // Posiciones de Tradegate: cotizan en su propio endpoint por ISIN.
+    // Si no hay ISIN o Tradegate no lo conoce, no se inventa otra cotizacion.
+    const symbolReq = asset?.symbol ? String(asset.symbol).trim() : ""
+    const exchangeReq = asset?.exchange ? String(asset.exchange).trim() : ""
+    if (/tradegate/i.test(exchangeReq) || /\.tg$/i.test(symbolReq)) {
+      const tgIsin = /^[A-Z]{2}[A-Z0-9]{9}\d$/.test(isin)
+        ? isin
+        : /^[A-Z]{2}[A-Z0-9]{9}\d$/.test(symbolReq.toUpperCase())
+          ? symbolReq.toUpperCase()
+          : ""
+      const tgQuote = tgIsin ? await getTradegateQuote(tgIsin).catch(() => null) : null
+      quoteCache.set(key, { ts: Date.now(), quote: tgQuote })
+      results[key] = tgQuote
       continue
     }
 

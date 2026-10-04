@@ -114,6 +114,7 @@ export function PortfolioPro() {
   const [manualMode, setManualMode] = useState(false)
   const [mSymbol, setMSymbol] = useState("")
   const [mName, setMName] = useState("")
+  const [mIsin, setMIsin] = useState("")
   const [mExchange, setMExchange] = useState("")
   const [mCurrency, setMCurrency] = useState("EUR")
   const [mKind, setMKind] = useState<Kind>("stock")
@@ -130,6 +131,7 @@ export function PortfolioPro() {
   const [editFor, setEditFor] = useState<Position | null>(null)
   const [eSymbol, setESymbol] = useState("")
   const [eName, setEName] = useState("")
+  const [eIsin, setEIsin] = useState("")
   const [eExchange, setEExchange] = useState("")
   const [eCurrency, setECurrency] = useState("EUR")
   const [eKind, setEKind] = useState<Kind>("stock")
@@ -308,6 +310,7 @@ export function PortfolioPro() {
     setManualMode(false)
     setMSymbol("")
     setMName("")
+    setMIsin("")
     setMExchange("")
     setMCurrency("EUR")
     setMKind("stock")
@@ -326,14 +329,15 @@ export function PortfolioPro() {
         ? { symbol: selected.symbol.trim(), name: selected.name, exchange: selected.exchange ?? "", kind: kindFromYahoo(selected.type), currency: (selected.currency ?? "EUR").toUpperCase() }
         : null
     if (!base || !base.symbol) return
+    const isin = manualMode ? mIsin.trim().toUpperCase() || undefined : undefined
     const purchase: Purchase = { id: uid("buy"), qty, price, date: buyDate }
     const same = positions.find((p) => p.symbol.toUpperCase() === base.symbol.toUpperCase())
     if (same) {
-      setPositions(positions.map((p) => (p.id === same.id ? { ...p, purchases: [...p.purchases, purchase] } : p)))
+      setPositions(positions.map((p) => (p.id === same.id ? { ...p, purchases: [...p.purchases, purchase], isin: p.isin ?? isin } : p)))
     } else {
       setPositions([
         ...positions,
-        { id: uid("pos"), symbol: base.symbol, name: base.name, exchange: base.exchange, kind: base.kind, currency: base.currency, purchases: [purchase] },
+        { id: uid("pos"), symbol: base.symbol, name: base.name, exchange: base.exchange, kind: base.kind, currency: base.currency, purchases: [purchase], isin },
       ])
     }
     resetBuyForm()
@@ -387,6 +391,7 @@ export function PortfolioPro() {
               exchange: eExchange.trim(),
               currency: (eCurrency || "EUR").toUpperCase(),
               kind: eKind,
+              isin: eIsin.trim().toUpperCase() || undefined,
             }
           : p,
       ),
@@ -773,6 +778,10 @@ export function PortfolioPro() {
                         <Label>Nombre</Label>
                         <Input value={mName} onChange={(e) => setMName(e.target.value)} placeholder="Ej: Microsoft (Tradegate)" />
                       </div>
+                      <div className="sm:col-span-2">
+                        <Label>ISIN (opcional)</Label>
+                        <Input value={mIsin} onChange={(e) => setMIsin(e.target.value)} placeholder="Ej: US0378331005 (necesario para Tradegate)" />
+                      </div>
                       <div>
                         <Label>Bolsa</Label>
                         <Input value={mExchange} onChange={(e) => setMExchange(e.target.value)} placeholder="Ej: Tradegate, XETRA, NASDAQ…" />
@@ -922,6 +931,7 @@ export function PortfolioPro() {
                                   setEditFor(r.p)
                                   setESymbol(r.p.symbol)
                                   setEName(r.p.name)
+                                  setEIsin(r.p.isin ?? "")
                                   setEExchange(r.p.exchange)
                                   setECurrency(r.p.currency)
                                   setEKind(r.p.kind)
@@ -1054,6 +1064,10 @@ export function PortfolioPro() {
             <div className="sm:col-span-2">
               <Label>Nombre</Label>
               <Input value={eName} onChange={(e) => setEName(e.target.value)} placeholder="Ej: Apple Inc." />
+            </div>
+            <div className="sm:col-span-2">
+              <Label>ISIN (opcional)</Label>
+              <Input value={eIsin} onChange={(e) => setEIsin(e.target.value)} placeholder="Ej: US0378331005 (necesario para Tradegate)" />
             </div>
             <div>
               <Label>Bolsa</Label>
