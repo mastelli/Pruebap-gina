@@ -252,13 +252,22 @@ function parseDegiroTransactionLines(lines: string[], delimiter: string): Broker
     const product = (cells[2] ?? "").trim()
     const qty = parseNumber(cells[6] ?? "")
     if (!Number.isFinite(qty) || qty === 0) continue
-    const totalEur = parseNumber(cells[15] ?? "")
+    // Precio nativo de la orden (columna Precio + su moneda): p. ej.
+    // 15 acciones a 9,36 USD. Solo si falta se deriva del Total EUR.
+    const nativePrice = parseNumber(cells[7] ?? "")
     const priceCcy = (cells[8] ?? "").trim().toUpperCase()
-    const hasEurTotal = Number.isFinite(totalEur) && totalEur !== 0
-    const unit = hasEurTotal
-      ? Math.abs(totalEur) / Math.abs(qty)
-      : parseNumber(cells[7] ?? "")
-    if (!Number.isFinite(unit)) continue
+    const totalEur = parseNumber(cells[15] ?? "")
+    let unit: number
+    let currency: string
+    if (Number.isFinite(nativePrice)) {
+      unit = nativePrice
+      currency = priceCcy || "EUR"
+    } else if (Number.isFinite(totalEur) && totalEur !== 0) {
+      unit = Math.abs(totalEur) / Math.abs(qty)
+      currency = "EUR"
+    } else {
+      continue
+    }
     const date = isoFromSpanishDate((cells[0] ?? "").trim().replace(/-/g, "/"))
     if (!date) continue
     const orderId = (cells[16] ?? "").trim() || undefined
@@ -267,7 +276,7 @@ function parseDegiroTransactionLines(lines: string[], delimiter: string): Broker
       product: product || isin,
       isin,
       quantity: Math.abs(qty),
-      currency: hasEurTotal ? "EUR" : priceCcy || "EUR",
+      currency,
       csvPrice: unit,
       kind: /etf/i.test(product) ? "etf" : /\betc\b/i.test(product) ? "etf" : "stock",
       date,
