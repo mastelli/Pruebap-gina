@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Badge } from "@/components/ui/badge"
-import { Plus, Trash2, RefreshCw, Search, TrendingUp, TrendingDown, Upload, Wallet, Download, ArrowUpRight, ArrowDownRight, ChevronDown, ChevronRight } from "lucide-react"
+import { Pencil, Plus, Trash2, RefreshCw, Search, TrendingUp, TrendingDown, Upload, Wallet, Download, ArrowUpRight, ArrowDownRight, ChevronDown, ChevronRight } from "lucide-react"
 import { applyTransactions, parsePortfolioCsv } from "@/lib/portfolio-csv"
 import { InvestmentTips } from "@/components/analytics/investment-tips"
 import { FinanceNews } from "@/components/analytics/finance-news"
@@ -123,6 +123,12 @@ export function PortfolioPro() {
   const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const [topUpFor, setTopUpFor] = useState<Position | null>(null)
+  const [editFor, setEditFor] = useState<Position | null>(null)
+  const [eSymbol, setESymbol] = useState("")
+  const [eName, setEName] = useState("")
+  const [eExchange, setEExchange] = useState("")
+  const [eCurrency, setECurrency] = useState("EUR")
+  const [eKind, setEKind] = useState<Kind>("stock")
   const [expanded, setExpanded] = useState<string | null>(null)
   const [filterText, setFilterText] = useState("")
   const [filterKind, setFilterKind] = useState<"all" | Kind>("all")
@@ -341,6 +347,27 @@ export function PortfolioPro() {
     setBuyQty("")
     setBuyPrice("")
     setBuyDate(todayISO())
+  }
+
+  const saveEdit = () => {
+    if (!editFor) return
+    const symbol = eSymbol.trim()
+    if (!symbol) return
+    setPositions(
+      positions.map((p) =>
+        p.id === editFor.id
+          ? {
+              ...p,
+              symbol,
+              name: eName.trim() || symbol,
+              exchange: eExchange.trim(),
+              currency: (eCurrency || "EUR").toUpperCase(),
+              kind: eKind,
+            }
+          : p,
+      ),
+    )
+    setEditFor(null)
   }
 
   const removePosition = (id: string) => {
@@ -862,6 +889,22 @@ export function PortfolioPro() {
                               >
                                 <Plus className="h-4 w-4" />
                               </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                                title="Editar"
+                                onClick={() => {
+                                  setEditFor(r.p)
+                                  setESymbol(r.p.symbol)
+                                  setEName(r.p.name)
+                                  setEExchange(r.p.exchange)
+                                  setECurrency(r.p.currency)
+                                  setEKind(r.p.kind)
+                                }}
+                              >
+                                <Pencil className="h-4 w-4" />
+                              </Button>
                               <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive" title="Eliminar" onClick={() => removePosition(r.p.id)}>
                                 <Trash2 className="h-4 w-4" />
                               </Button>
@@ -918,6 +961,53 @@ export function PortfolioPro() {
             </div>
           </div>
           <Button className="mt-4 w-full" onClick={addTopUp}>Guardar compra</Button>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={editFor !== null} onOpenChange={(o) => { if (!o) setEditFor(null) }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Editar posición{editFor ? ` · ${editFor.symbol}` : ""}</DialogTitle>
+            <DialogDescription>Modifica los datos del activo. Las compras se mantienen.</DialogDescription>
+          </DialogHeader>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div>
+              <Label>Símbolo *</Label>
+              <Input value={eSymbol} onChange={(e) => setESymbol(e.target.value)} placeholder="Ej: AAPL" />
+            </div>
+            <div>
+              <Label>Tipo</Label>
+              <Select value={eKind} onValueChange={(v) => setEKind(v as Kind)}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="stock">Acción</SelectItem>
+                  <SelectItem value="etf">ETF</SelectItem>
+                  <SelectItem value="fund">Fondo</SelectItem>
+                  <SelectItem value="other">Otro</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="sm:col-span-2">
+              <Label>Nombre</Label>
+              <Input value={eName} onChange={(e) => setEName(e.target.value)} placeholder="Ej: Apple Inc." />
+            </div>
+            <div>
+              <Label>Bolsa</Label>
+              <Input value={eExchange} onChange={(e) => setEExchange(e.target.value)} placeholder="Ej: NASDAQ" />
+            </div>
+            <div>
+              <Label>Divisa</Label>
+              <Select value={eCurrency} onValueChange={setECurrency}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {["EUR", "USD", "GBP", "CHF", "JPY", "CAD", "SEK", "NOK", "DKK"].map((c) => (
+                    <SelectItem key={c} value={c}>{c}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <Button className="mt-4 w-full" onClick={saveEdit} disabled={!eSymbol.trim()}>Guardar cambios</Button>
         </DialogContent>
       </Dialog>
       <InvestmentTips />
