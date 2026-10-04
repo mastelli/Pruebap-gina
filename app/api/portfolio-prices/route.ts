@@ -12,6 +12,7 @@ interface Quote {
   price: number
   previousClose: number | null
   currency: string
+  longName?: string
   exchange?: string
   marketOpen?: boolean
   sessionStart?: number
@@ -243,6 +244,7 @@ async function getChartQuote(symbol: string): Promise<Quote | null> {
     price: meta.regularMarketPrice,
     previousClose,
     currency: meta.currency ?? "",
+    longName: meta.longName ?? meta.shortName ?? undefined,
     exchange: meta.exchangeData?.exchange ?? meta.exchange ?? undefined,
     marketOpen: session.marketOpen,
     sessionStart: session.sessionStart,
@@ -320,6 +322,7 @@ async function getBatchQuotes(symbols: string[]): Promise<Map<string, Quote>> {
         price: meta.regularMarketPrice,
         previousClose,
         currency: meta.currency ?? "",
+        longName: meta.longName ?? meta.shortName ?? undefined,
         exchange: meta.exchangeData?.exchange ?? meta.exchange ?? undefined,
         marketOpen: session.marketOpen,
         sessionStart: session.sessionStart,

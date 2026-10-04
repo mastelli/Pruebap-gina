@@ -54,6 +54,7 @@ interface Quote {
   previousClose?: number | null
   currency?: string
   symbol?: string
+  longName?: string
   exchange?: string
 }
 
@@ -239,7 +240,15 @@ export function PortfolioPro() {
       const dayAbs = price !== undefined && prev !== null && prev !== undefined ? (price - prev) * qty : null
       const dayPct = price !== undefined && prev !== null && prev !== undefined && prev !== 0 ? ((price - prev) / prev) * 100 : null
       const cur = (q?.currency ?? p.currency ?? "EUR").toUpperCase()
-      return { p, qty, invested, avg, price, prev, value, pnl, pnlPct, dayAbs, dayPct, cur }
+      // Si no hay nombre guardado (o es el propio simbolo/ISIN), usar el
+      // nombre real que devuelve la cotizacion en vez de dejar el ISIN
+      const storedName = (p.name ?? "").trim()
+      const nameMissing =
+        storedName === "" ||
+        storedName.toUpperCase() === p.symbol.trim().toUpperCase() ||
+        /^[A-Z]{2}[A-Z0-9]{9}\d$/.test(storedName.toUpperCase())
+      const displayName = nameMissing && q?.longName ? q.longName : storedName || p.symbol
+      return { p, qty, invested, avg, price, prev, value, pnl, pnlPct, dayAbs, dayPct, cur, displayName }
     })
   }, [positions, quotes])
 
@@ -735,7 +744,7 @@ export function PortfolioPro() {
                           <td className="py-3 pr-3">
                             <button className="flex items-center gap-1 text-left font-medium hover:underline" onClick={() => setExpanded(isOpen ? null : r.p.id)}>
                               {isOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-                              {r.p.name}
+                              {r.displayName}
                             </button>
                             <div className="ml-5 flex flex-wrap items-center gap-1 text-xs text-muted-foreground">
                               <span className="font-semibold text-foreground">{r.p.symbol}</span>
