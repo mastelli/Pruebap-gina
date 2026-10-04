@@ -391,7 +391,7 @@ export function PortfolioPro() {
             : typeof a.eurValue === "number" && a.quantity > 0
               ? a.eurValue / a.quantity
               : 0
-        const purchase: Purchase = { id: uid("buy"), qty: a.quantity, price, date: todayISO() }
+        const purchase: Purchase = { id: uid("buy"), qty: a.quantity, price, date: a.date ?? todayISO() }
         const same = next.find(
           (p) =>
             (p.isin && p.isin.toUpperCase() === a.isin.toUpperCase()) ||
@@ -406,7 +406,7 @@ export function PortfolioPro() {
             symbol: a.isin,
             name: a.product || a.isin,
             exchange: "",
-            kind: /etf/i.test(a.product) ? "etf" : "stock",
+            kind: a.kind ?? (/etf/i.test(a.product) ? "etf" : "stock"),
             currency: (a.currency || "EUR").toUpperCase(),
             purchases: [purchase],
             isin: a.isin,

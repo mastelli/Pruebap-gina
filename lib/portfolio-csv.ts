@@ -1,5 +1,8 @@
-// Parser del CSV del broker (por posicion):
-// Producto, ISIN, Cantidad, Precio actual, Moneda, Valor local total, Valor EUR total.
+// Parser de CSVs de broker. Dos formatos:
+// 1) Por posicion: Producto, ISIN, Cantidad, Precio actual, Moneda,
+//    Valor local total, Valor EUR total.
+// 2) Ordenes de MyInvestor: Fecha de la orden, ISIN, Importe estimado,
+//    N de participaciones, Estado (solo se importan las finalizadas).
 // El delimitador se detecta solo (tabulador, ";" o ",") y respeta
 // campos entre comillas. Sin dependencias de React: se puede usar
 // tanto en la cartera clasica como en la cartera 2.0.
@@ -12,6 +15,8 @@ export interface BrokerAsset {
   currency?: string
   csvPrice?: number
   eurValue?: number
+  kind?: "stock" | "etf" | "fund" | "other"
+  date?: string
 }
 
 export interface ParsedPortfolio {
@@ -65,6 +70,12 @@ export function parsePortfolioCsv(text: string): ParsedPortfolio {
   const commas = firstLine.match(/,/g)?.length ?? 0
   const delimiter = tabs > semis && tabs > commas ? "\t" : semis > commas ? ";" : ","
 
+  // Formato MyInvestor (ordenes de fondos): Fecha, ISIN, Importe,
+  // N de participaciones, Estado. Se detecta por la cabecera.
+  if (isMyInvestorHeader(splitCsvLine(firstLine, delimiter))) {
+    return { assets: parseMyInvestorLines(lines.slice(1), delimiter), cash: 0 }
+  }
+
   const assets: BrokerAsset[] = []
   let cash = 0
 
@@ -109,4 +120,47 @@ export function parsePortfolioCsv(text: string): ParsedPortfolio {
   }
 
   return { assets, cash }
+}
+
+function isMyInvestorHeader(cells: string[]): boolean {
+  const head = cells.join(" ").toLowerCase()
+  return head.includes("fecha") && head.includes("isin") && head.includes("participacion")
+}
+
+function isoFromSpanishDate(raw: string): string {
+  const m = (raw ?? "").trim().match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/)
+  if (!m) return ""
+  return `${m[3]}-${m[2].padStart(2, "0")}-${m[1].padStart(2, "0")}`
+}
+
+// Ordenes de fondos de MyInvestor: solo se importan las finalizadas.
+// Precio = importe / participaciones; la divisa sale del propio importe ("500 EUR").
+function parseMyInvestorLines(lines: string[], delimiter: string): BrokerAsset[] {
+  const out: BrokerAsset[] = []
+  for (const line of lines) {
+    const cells = splitCsvLine(line, delimiter)
+    if (cells.length < 4) continue
+    const status = (cells[4] ?? "").toLowerCase()
+    if (!status.includes("finalizada")) continue
+    const isin = (cells[1] ?? "").trim().toUpperCase()
+    if (!/^[A-Z]{2}[A-Z0-9]{9}\d$/.test(isin)) continue
+    const amountRaw = (cells[2] ?? "").trim()
+    const currency = ((/([A-Za-z]{3})\s*$/.exec(amountRaw) ?? [])[1] ?? "EUR").toUpperCase()
+    const amount = parseNumber(amountRaw)
+    const shares = parseNumber(cells[3] ?? "")
+    if (!Number.isFinite(amount) || !Number.isFinite(shares) || shares <= 0) continue
+    const date = isoFromSpanishDate(cells[0] ?? "")
+    out.push({
+      id: `${isin}-${date || Date.now()}-${out.length}`,
+      product: "",
+      isin,
+      quantity: shares,
+      currency,
+      csvPrice: amount / shares,
+      eurValue: currency === "EUR" ? amount : undefined,
+      kind: "fund",
+      date: date || undefined,
+    })
+  }
+  return out
 }
