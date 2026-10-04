@@ -11,7 +11,6 @@ import { Badge } from "@/components/ui/badge"
 import { Plus, Trash2, RefreshCw, Search, TrendingUp, TrendingDown, Wallet, Download, ArrowUpRight, ArrowDownRight, ChevronDown, ChevronRight } from "lucide-react"
 import { useLanguage } from "@/lib/i18n"
 import { storageGetItem, storageSetItem } from "@/lib/auth"
-import { resetAccountToZero } from "@/lib/reset-account"
 import { exchangeFromSymbol } from "@/lib/exchanges"
 
 // force-redeploy-v2
@@ -514,20 +513,6 @@ export function PortfolioPro() {
             </Button>
             <Button size="sm" variant="outline" onClick={() => void refresh()} disabled={loading || positions.length === 0}>
               <RefreshCw className={`mr-2 h-4 w-4 ${loading ? "animate-spin" : ""}`} /> Actualizar
-            </Button>
-            <Button
-              size="sm"
-              variant="ghost"
-              className="text-muted-foreground hover:text-destructive"
-              title="Vaciar cartera y poner a 0,00 €"
-              onClick={() => {
-                if (!window.confirm("¿Vaciar la cartera y poner la cuenta a 0,00 €?")) return
-                setPositions([])
-                setQuotes({})
-                void resetAccountToZero().then(() => window.location.reload())
-              }}
-            >
-              <Trash2 className="mr-2 h-4 w-4" /> Vaciar
             </Button>
             <Dialog open={showAdd} onOpenChange={(o) => { setShowAdd(o); if (!o) resetBuyForm() }}>
               <DialogTrigger asChild>
