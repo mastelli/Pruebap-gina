@@ -464,6 +464,7 @@ export function PortfolioPro() {
                   <div className="h-2 flex-1 overflow-hidden rounded-full bg-secondary">
                     <div className="h-full rounded-full bg-primary" style={{ width: `${Math.min(100, w)}%` }} />
                   </div>
+                  <span className="w-12 text-right tabular-nums text-muted-foreground">{fmtNum(w, 1)}%</span>
                   <span className="w-24 text-right tabular-nums text-muted-foreground">{fmtMoney(v)}</span>
                 </div>
               )
@@ -669,14 +670,14 @@ export function PortfolioPro() {
                           <td className="py-3 pr-3">
                             <button className="flex items-center gap-1 text-left font-medium hover:underline" onClick={() => setExpanded(isOpen ? null : r.p.id)}>
                               {isOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-                              {r.p.symbol}
+                              {r.p.name}
                             </button>
                             <div className="ml-5 flex flex-wrap items-center gap-1 text-xs text-muted-foreground">
+                              <span className="font-semibold text-foreground">{r.p.symbol}</span>
                               <Badge variant="secondary">{KIND_LABEL[r.p.kind]}</Badge>
                               {exch ? <span>{exch}</span> : null}
                               <span>· {r.cur}</span>
                             </div>
-                            <div className="ml-5 truncate text-xs text-muted-foreground">{r.p.name}</div>
                           </td>
                           <td className="py-3 pr-3 text-right tabular-nums">{fmtNum(r.qty, r.qty % 1 === 0 ? 0 : 4)}</td>
                           <td className="py-3 pr-3 text-right tabular-nums">
