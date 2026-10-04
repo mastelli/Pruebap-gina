@@ -11,6 +11,7 @@ import { useUser } from "@clerk/nextjs"
 import { useState } from "react"
 import { toast } from "sonner"
 import { useLanguage } from "@/lib/i18n"
+import { resetAccountToZero } from "@/lib/reset-account"
 
 const sections = [
   { id: "account", label: "Account" },
@@ -28,6 +29,7 @@ export default function SettingsPage() {
   const [newPassword, setNewPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
   const [isChangingPassword, setIsChangingPassword] = useState(false)
+  const [isResettingAccount, setIsResettingAccount] = useState(false)
 
   const scrollTo = (id: string) => {
     setActiveSection(id)
@@ -145,6 +147,31 @@ export default function SettingsPage() {
               <Button onClick={() => { updateSettings({ avatar: settings.avatar, fullName: settings.fullName, email: settings.email }); toast.success(t("Account settings saved successfully")) }}>
                 {t("Save Account Settings")}
               </Button>
+              <div className="rounded-md border border-destructive/40 p-4">
+                <p className="font-medium">{t("Reset account to zero")}</p>
+                <p className="text-sm text-muted-foreground">
+                  {t("Removes all transactions, balances, portfolio, invoices and debts. Settings are kept.")}
+                </p>
+                <Button
+                  variant="destructive"
+                  className="mt-3"
+                  disabled={isResettingAccount}
+                  onClick={() => {
+                    if (!window.confirm(t("Are you sure? All account data will be set to 0.00"))) return
+                    setIsResettingAccount(true)
+                    try {
+                      resetAccountToZero()
+                      toast.success(t("Account reset to 0.00"))
+                      window.location.reload()
+                    } catch {
+                      toast.error(t("Unable to reset account"))
+                      setIsResettingAccount(false)
+                    }
+                  }}
+                >
+                  {t("Set account to 0.00")}
+                </Button>
+              </div>
             </div>
           </section>
 
