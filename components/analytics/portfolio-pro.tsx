@@ -123,6 +123,10 @@ export function PortfolioPro() {
   const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const [topUpFor, setTopUpFor] = useState<Position | null>(null)
+  const [editBuyFor, setEditBuyFor] = useState<{ posId: string; buyId: string } | null>(null)
+  const [eBuyQty, setEBuyQty] = useState("")
+  const [eBuyPrice, setEBuyPrice] = useState("")
+  const [eBuyDate, setEBuyDate] = useState(todayISO())
   const [editFor, setEditFor] = useState<Position | null>(null)
   const [eSymbol, setESymbol] = useState("")
   const [eName, setEName] = useState("")
@@ -347,6 +351,26 @@ export function PortfolioPro() {
     setBuyQty("")
     setBuyPrice("")
     setBuyDate(todayISO())
+  }
+
+  const saveBuyEdit = () => {
+    if (!editBuyFor) return
+    const qty = Number.parseFloat(eBuyQty)
+    const price = Number.parseFloat(eBuyPrice)
+    if (!Number.isFinite(qty) || qty <= 0 || !Number.isFinite(price) || price <= 0 || !eBuyDate) return
+    setPositions(
+      positions.map((p) =>
+        p.id === editBuyFor.posId
+          ? {
+              ...p,
+              purchases: p.purchases.map((b) =>
+                b.id === editBuyFor.buyId ? { ...b, qty, price, date: eBuyDate } : b,
+              ),
+            }
+          : p,
+      ),
+    )
+    setEditBuyFor(null)
   }
 
   const saveEdit = () => {
@@ -921,9 +945,25 @@ export function PortfolioPro() {
                                   .map((b) => (
                                     <div key={b.id} className="flex items-center justify-between gap-2 text-sm">
                                       <span className="tabular-nums">{b.date} · {fmtNum(b.qty, b.qty % 1 === 0 ? 0 : 4)} uds. a {fmtNum(b.price, dec)} {r.cur}</span>
-                                      <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-destructive" onClick={() => removePurchase(r.p.id, b.id)}>
-                                        <Trash2 className="h-3.5 w-3.5" />
-                                      </Button>
+                                      <div className="flex items-center gap-1">
+                                        <Button
+                                          variant="ghost"
+                                          size="icon"
+                                          className="h-7 w-7 text-muted-foreground hover:text-foreground"
+                                          title="Editar compra"
+                                          onClick={() => {
+                                            setEditBuyFor({ posId: r.p.id, buyId: b.id })
+                                            setEBuyQty(String(b.qty))
+                                            setEBuyPrice(String(b.price))
+                                            setEBuyDate(b.date)
+                                          }}
+                                        >
+                                          <Pencil className="h-3.5 w-3.5" />
+                                        </Button>
+                                        <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-destructive" title="Eliminar compra" onClick={() => removePurchase(r.p.id, b.id)}>
+                                          <Trash2 className="h-3.5 w-3.5" />
+                                        </Button>
+                                      </div>
                                     </div>
                                   ))}
                               </div>
@@ -961,6 +1001,30 @@ export function PortfolioPro() {
             </div>
           </div>
           <Button className="mt-4 w-full" onClick={addTopUp}>Guardar compra</Button>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={editBuyFor !== null} onOpenChange={(o) => { if (!o) setEditBuyFor(null) }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Editar compra</DialogTitle>
+            <DialogDescription>Modifica cantidad, precio y fecha de esta compra.</DialogDescription>
+          </DialogHeader>
+          <div className="grid grid-cols-3 gap-3">
+            <div>
+              <Label>Cantidad *</Label>
+              <Input type="number" min="0" step="any" value={eBuyQty} onChange={(e) => setEBuyQty(e.target.value)} placeholder="10" />
+            </div>
+            <div>
+              <Label>Precio *</Label>
+              <Input type="number" min="0" step="any" value={eBuyPrice} onChange={(e) => setEBuyPrice(e.target.value)} placeholder="0.00" />
+            </div>
+            <div>
+              <Label>Fecha *</Label>
+              <Input type="date" value={eBuyDate} onChange={(e) => setEBuyDate(e.target.value)} />
+            </div>
+          </div>
+          <Button className="mt-4 w-full" onClick={saveBuyEdit}>Guardar cambios</Button>
         </DialogContent>
       </Dialog>
 
