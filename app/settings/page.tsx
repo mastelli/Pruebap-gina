@@ -159,14 +159,15 @@ export default function SettingsPage() {
                   onClick={() => {
                     if (!window.confirm(t("Are you sure? All account data will be set to 0.00"))) return
                     setIsResettingAccount(true)
-                    try {
-                      resetAccountToZero()
-                      toast.success(t("Account reset to 0.00"))
-                      window.location.reload()
-                    } catch {
-                      toast.error(t("Unable to reset account"))
-                      setIsResettingAccount(false)
-                    }
+                    resetAccountToZero()
+                      .then(() => {
+                        toast.success(t("Account reset to 0.00"))
+                        window.location.reload()
+                      })
+                      .catch(() => {
+                        toast.error(t("Unable to reset account"))
+                        setIsResettingAccount(false)
+                      })
                   }}
                 >
                   {t("Set account to 0.00")}
