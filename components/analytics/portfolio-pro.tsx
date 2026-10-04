@@ -9,6 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Badge } from "@/components/ui/badge"
 import { Plus, Trash2, RefreshCw, Search, TrendingUp, TrendingDown, Wallet, Download, ArrowUpRight, ArrowDownRight, ChevronDown, ChevronRight } from "lucide-react"
+import { InvestmentTips } from "@/components/analytics/investment-tips"
+import { FinanceNews } from "@/components/analytics/finance-news"
 import { useLanguage } from "@/lib/i18n"
 import { storageGetItem, storageSetItem } from "@/lib/auth"
 import { exchangeFromSymbol } from "@/lib/exchanges"
@@ -796,6 +798,8 @@ export function PortfolioPro() {
           <Button className="mt-4 w-full" onClick={addTopUp}>Guardar compra</Button>
         </DialogContent>
       </Dialog>
+      <InvestmentTips />
+      <FinanceNews />
     </div>
   )
 }
