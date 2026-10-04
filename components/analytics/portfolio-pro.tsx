@@ -8,7 +8,8 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Badge } from "@/components/ui/badge"
-import { Plus, Trash2, RefreshCw, Search, TrendingUp, TrendingDown, Wallet, Download, ArrowUpRight, ArrowDownRight, ChevronDown, ChevronRight } from "lucide-react"
+import { Plus, Trash2, RefreshCw, Search, TrendingUp, TrendingDown, Upload, Wallet, Download, ArrowUpRight, ArrowDownRight, ChevronDown, ChevronRight } from "lucide-react"
+import { parsePortfolioCsv } from "@/lib/portfolio-csv"
 import { InvestmentTips } from "@/components/analytics/investment-tips"
 import { FinanceNews } from "@/components/analytics/finance-news"
 import { useLanguage } from "@/lib/i18n"
@@ -37,6 +38,7 @@ interface Position {
   kind: Kind
   currency: string
   purchases: Purchase[]
+  isin?: string
 }
 
 interface SearchHit {
@@ -153,7 +155,7 @@ export function PortfolioPro() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          assets: positions.map((p) => ({ name: p.symbol, symbol: p.symbol, exchange: p.exchange })),
+          assets: positions.map((p) => ({ name: p.symbol, symbol: p.symbol, exchange: p.exchange, isin: p.isin })),
           currencies,
         }),
       })
@@ -166,7 +168,8 @@ export function PortfolioPro() {
       const next: Record<string, Quote> = {}
       for (const p of positions) {
         const key = p.symbol.trim().toUpperCase()
-        const q = results[key] ?? results[p.symbol] ?? null
+        const isinKey = p.isin ? p.isin.trim().toUpperCase() : ""
+        const q = results[key] ?? (isinKey ? results[isinKey] : null) ?? results[p.symbol] ?? null
         if (q) next[p.id] = q
       }
       setQuotes(next)
@@ -373,6 +376,54 @@ export function PortfolioPro() {
     }
   }, [])
 
+  const csvInputRef = useRef<HTMLInputElement | null>(null)
+
+  const handleCsvFile = async (file: File) => {
+    const text = await file.text()
+    const { assets, cash } = parsePortfolioCsv(text)
+    if (assets.length === 0 && !(cash > 0)) return
+    setPositions((prev) => {
+      const next = [...prev]
+      for (const a of assets) {
+        const price =
+          typeof a.csvPrice === "number" && Number.isFinite(a.csvPrice)
+            ? a.csvPrice
+            : typeof a.eurValue === "number" && a.quantity > 0
+              ? a.eurValue / a.quantity
+              : 0
+        const purchase: Purchase = { id: uid("buy"), qty: a.quantity, price, date: todayISO() }
+        const same = next.find(
+          (p) =>
+            (p.isin && p.isin.toUpperCase() === a.isin.toUpperCase()) ||
+            p.symbol.toUpperCase() === a.isin.toUpperCase(),
+        )
+        if (same) {
+          const idx = next.indexOf(same)
+          next[idx] = { ...same, purchases: [...same.purchases, purchase] }
+        } else {
+          next.push({
+            id: uid("pos"),
+            symbol: a.isin,
+            name: a.product || a.isin,
+            exchange: "",
+            kind: /etf/i.test(a.product) ? "etf" : "stock",
+            currency: (a.currency || "EUR").toUpperCase(),
+            purchases: [purchase],
+            isin: a.isin,
+          })
+        }
+      }
+      return next
+    })
+    if (cash > 0) {
+      try {
+        storageSetItem("appPortfolioCash", String(cash))
+      } catch {
+        // almacenamiento no disponible
+      }
+    }
+  }
+
   const exportCsv = () => {
     const lines = ["symbol;name;type;exchange;currency;quantity;avg_cost;price;value_eur;pnl_pct"]
     for (const r of rows) {
@@ -481,6 +532,20 @@ export function PortfolioPro() {
             <CardDescription>Cotizaciones en tiempo real</CardDescription>
           </div>
           <div className="flex flex-wrap items-center gap-2">
+            <Button size="sm" variant="outline" onClick={() => csvInputRef.current?.click()}>
+              <Upload className="mr-2 h-4 w-4" /> Importar CSV
+            </Button>
+            <input
+              ref={csvInputRef}
+              type="file"
+              accept=".csv,text/csv"
+              className="hidden"
+              onChange={(event) => {
+                const file = event.target.files?.[0]
+                if (file) void handleCsvFile(file)
+                event.target.value = ""
+              }}
+            />
             <Button size="sm" variant="outline" onClick={exportCsv} disabled={positions.length === 0}>
               <Download className="mr-2 h-4 w-4" /> CSV
             </Button>
