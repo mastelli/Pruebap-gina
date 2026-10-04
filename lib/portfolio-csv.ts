@@ -17,6 +17,9 @@ export interface BrokerAsset {
   eurValue?: number
   kind?: "stock" | "etf" | "fund" | "other"
   date?: string
+  exchange?: string
+  side?: "buy" | "sell"
+  orderId?: string
 }
 
 export interface ParsedPortfolio {
@@ -76,6 +79,13 @@ export function parsePortfolioCsv(text: string): ParsedPortfolio {
     return { assets: parseMyInvestorLines(lines.slice(1), delimiter), cash: 0 }
   }
 
+  // Extracto de transacciones de DEGIRO: Fecha, Hora, Producto, ISIN,
+  // Bolsa, Centro, Numero (positivo = compra, negativo = venta), Precio,
+  // ..., Total EUR, ID Orden. Se detecta por la cabecera.
+  if (isDegiroTransactionsHeader(splitCsvLine(firstLine, delimiter))) {
+    return { assets: parseDegiroTransactionLines(lines.slice(1), delimiter), cash: 0 }
+  }
+
   const assets: BrokerAsset[] = []
   let cash = 0
 
@@ -122,6 +132,70 @@ export function parsePortfolioCsv(text: string): ParsedPortfolio {
   return { assets, cash }
 }
 
+function isDegiroTransactionsHeader(cells: string[]): boolean {
+  const head = cells.join(" ").toLowerCase()
+  return head.includes("id orden") && head.includes("isin")
+}
+
+// Lotes para conciliar compras y ventas (FIFO): las ventas consumen las
+// compras mas antiguas. Todo en la misma moneda de la posicion.
+export interface TxLot {
+  qty: number
+  price: number
+  date: string
+  orderId?: string
+}
+
+export interface TxRow {
+  quantity: number
+  price: number
+  date: string
+  orderId?: string
+  side: "buy" | "sell"
+}
+
+// Aplica filas de transacciones sobre los lotes de apertura y devuelve
+// los lotes restantes. Las filas con orderId ya presente se ignoran
+// (reimportar el mismo archivo no duplica). Si todo se ha vendido,
+// devuelve [] para que la posicion desaparezca.
+export function applyTransactions(opening: TxLot[], rows: TxRow[]): TxLot[] {
+  const seen = new Set<string>()
+  for (const lot of opening) {
+    if (lot.orderId) seen.add(lot.orderId)
+  }
+  const lots: TxLot[] = opening.map((lot) => ({ ...lot }))
+  const sorted = [...rows].sort((a, b) => (a.date || "").localeCompare(b.date || ""))
+  for (const row of sorted) {
+    if (row.orderId && seen.has(row.orderId)) continue
+    if (row.orderId) seen.add(row.orderId)
+    if (!(row.quantity > 0)) continue
+    if (row.side === "sell") {
+      let need = row.quantity
+      for (const lot of lots) {
+        if (need <= 0) break
+        if (!(lot.qty > 0)) continue
+        const take = Math.min(lot.qty, need)
+        lot.qty -= take
+        need -= take
+      }
+    } else {
+      lots.push({ qty: row.quantity, price: row.price, date: row.date, orderId: row.orderId })
+    }
+  }
+  return lots.filter((lot) => lot.qty > 1e-9)
+}
+
+// Codigo de bolsa de referencia de DEGIRO -> nombre para elegir listing.
+// Si no se conoce, se deja vacio y la API elige el listado en EUR.
+function mapDegiroExchange(raw: string): string {
+  const code = (raw ?? "").trim().toUpperCase()
+  if (code === "NDQ") return "NASDAQ"
+  if (code === "MAD") return "BME"
+  if (code === "TDG") return "XETRA"
+  if (code === "MIL") return "MIL"
+  return ""
+}
+
 function isMyInvestorHeader(cells: string[]): boolean {
   const head = cells.join(" ").toLowerCase()
   return head.includes("fecha") && head.includes("isin") && head.includes("participacion")
@@ -160,6 +234,46 @@ function parseMyInvestorLines(lines: string[], delimiter: string): BrokerAsset[]
       eurValue: currency === "EUR" ? amount : undefined,
       kind: "fund",
       date: date || undefined,
+    })
+  }
+  return out
+}
+
+// Filas del extracto de transacciones de DEGIRO. Numero positivo =
+// compra, negativo = venta. El coste unitario sale del Total EUR
+// (dinero realmente pagado, con comisiones y cambio ya aplicados).
+function parseDegiroTransactionLines(lines: string[], delimiter: string): BrokerAsset[] {
+  const out: BrokerAsset[] = []
+  for (const line of lines) {
+    const cells = splitCsvLine(line, delimiter)
+    if (cells.length < 16) continue
+    const isin = (cells[3] ?? "").trim().toUpperCase()
+    if (!/^[A-Z]{2}[A-Z0-9]{9}\d$/.test(isin)) continue
+    const product = (cells[2] ?? "").trim()
+    const qty = parseNumber(cells[6] ?? "")
+    if (!Number.isFinite(qty) || qty === 0) continue
+    const totalEur = parseNumber(cells[15] ?? "")
+    const priceCcy = (cells[8] ?? "").trim().toUpperCase()
+    const hasEurTotal = Number.isFinite(totalEur) && totalEur !== 0
+    const unit = hasEurTotal
+      ? Math.abs(totalEur) / Math.abs(qty)
+      : parseNumber(cells[7] ?? "")
+    if (!Number.isFinite(unit)) continue
+    const date = isoFromSpanishDate((cells[0] ?? "").trim().replace(/-/g, "/"))
+    if (!date) continue
+    const orderId = (cells[16] ?? "").trim() || undefined
+    out.push({
+      id: `${isin}-${date}-${orderId ?? out.length}`,
+      product: product || isin,
+      isin,
+      quantity: Math.abs(qty),
+      currency: hasEurTotal ? "EUR" : priceCcy || "EUR",
+      csvPrice: unit,
+      kind: /etf/i.test(product) ? "etf" : /\betc\b/i.test(product) ? "etf" : "stock",
+      date,
+      exchange: mapDegiroExchange(cells[4] ?? ""),
+      side: qty > 0 ? "buy" : "sell",
+      orderId,
     })
   }
   return out

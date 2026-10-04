@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Badge } from "@/components/ui/badge"
 import { Plus, Trash2, RefreshCw, Search, TrendingUp, TrendingDown, Upload, Wallet, Download, ArrowUpRight, ArrowDownRight, ChevronDown, ChevronRight } from "lucide-react"
-import { parsePortfolioCsv } from "@/lib/portfolio-csv"
+import { applyTransactions, parsePortfolioCsv } from "@/lib/portfolio-csv"
 import { InvestmentTips } from "@/components/analytics/investment-tips"
 import { FinanceNews } from "@/components/analytics/finance-news"
 import { useLanguage } from "@/lib/i18n"
@@ -28,6 +28,7 @@ interface Purchase {
   qty: number
   price: number
   date: string
+  orderId?: string
 }
 
 interface Position {
@@ -39,6 +40,7 @@ interface Position {
   currency: string
   purchases: Purchase[]
   isin?: string
+  seenOrderIds?: string[]
 }
 
 interface SearchHit {
@@ -391,9 +393,87 @@ export function PortfolioPro() {
     const text = await file.text()
     const { assets, cash } = parsePortfolioCsv(text)
     if (assets.length === 0 && !(cash > 0)) return
+    // Filas de transacciones (DEGIRO: con ID de orden o ventas) se
+    // concilian por ISIN con FIFO; el resto se suma como compras.
+    const txByIsin = new Map<string, typeof assets>()
+    const snapshots: typeof assets = []
+    for (const a of assets) {
+      if (a.orderId || a.side === "sell") {
+        const list = txByIsin.get(a.isin) ?? []
+        list.push(a)
+        txByIsin.set(a.isin, list)
+      } else {
+        snapshots.push(a)
+      }
+    }
     setPositions((prev) => {
       const next = [...prev]
-      for (const a of assets) {
+      const findByIsin = (isin: string) =>
+        next.find(
+          (p) =>
+            (p.isin && p.isin.toUpperCase() === isin.toUpperCase()) ||
+            p.symbol.toUpperCase() === isin.toUpperCase(),
+        )
+      for (const [isin, rows] of txByIsin) {
+        const same = findByIsin(isin)
+        const template = rows[0]
+        // IDs ya procesados (incluye compras consumidas por ventas) para
+        // que reimportar el mismo archivo no duplique nada
+        const seen = new Set<string>(same?.seenOrderIds ?? [])
+        for (const b of same?.purchases ?? []) {
+          if (b.orderId) seen.add(b.orderId)
+        }
+        const fresh = rows.filter((r) => !r.orderId || !seen.has(r.orderId))
+        for (const r of fresh) {
+          if (r.orderId) seen.add(r.orderId)
+        }
+        const seenOrderIds = [...seen]
+        const opening = (same?.purchases ?? []).map((b) => ({
+          qty: b.qty,
+          price: b.price,
+          date: b.date,
+          orderId: b.orderId,
+        }))
+        const remaining = applyTransactions(
+          opening,
+          fresh.map((r) => ({
+            quantity: r.quantity,
+            price:
+              typeof r.csvPrice === "number" && Number.isFinite(r.csvPrice) ? r.csvPrice : 0,
+            date: r.date ?? todayISO(),
+            orderId: r.orderId,
+            side: r.side ?? "buy",
+          })),
+        )
+        if (remaining.length === 0) {
+          if (same) next.splice(next.indexOf(same), 1)
+          continue
+        }
+        const purchases: Purchase[] = remaining.map((l) => ({
+          id: uid("buy"),
+          qty: l.qty,
+          price: l.price,
+          date: l.date,
+          orderId: l.orderId,
+        }))
+        if (same) {
+          const idx = next.indexOf(same)
+          next[idx] = { ...same, purchases, seenOrderIds }
+        } else {
+          next.push({
+            id: uid("pos"),
+            symbol: isin,
+            name: template.product || isin,
+            exchange: template.exchange ?? "",
+            kind: template.kind ?? (/etf/i.test(template.product) ? "etf" : "stock"),
+            currency: (template.currency || "EUR").toUpperCase(),
+            purchases,
+            isin,
+            seenOrderIds,
+          })
+        }
+      }
+      for (const a of snapshots) {
         const price =
           typeof a.csvPrice === "number" && Number.isFinite(a.csvPrice)
             ? a.csvPrice
@@ -401,11 +481,7 @@ export function PortfolioPro() {
               ? a.eurValue / a.quantity
               : 0
         const purchase: Purchase = { id: uid("buy"), qty: a.quantity, price, date: a.date ?? todayISO() }
-        const same = next.find(
-          (p) =>
-            (p.isin && p.isin.toUpperCase() === a.isin.toUpperCase()) ||
-            p.symbol.toUpperCase() === a.isin.toUpperCase(),
-        )
+        const same = findByIsin(a.isin)
         if (same) {
           const idx = next.indexOf(same)
           next[idx] = { ...same, purchases: [...same.purchases, purchase] }
