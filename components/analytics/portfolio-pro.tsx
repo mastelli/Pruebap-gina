@@ -13,6 +13,7 @@ import { useLanguage } from "@/lib/i18n"
 import { storageGetItem, storageSetItem } from "@/lib/auth"
 import { exchangeFromSymbol } from "@/lib/exchanges"
 
+// force-redeploy-v2
 const STORAGE_KEY = "appPortfolioProV1"
 const LEGACY_KEY = "appManualStocks"
 const REFRESH_MS = 30 * 1000
