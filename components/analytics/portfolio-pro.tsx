@@ -181,7 +181,10 @@ export function PortfolioPro() {
 
   useEffect(() => {
     void refresh()
-    const id = setInterval(() => void refresh(), REFRESH_MS)
+    const id = setInterval(() => {
+      if (document.hidden) return
+      void refresh()
+    }, REFRESH_MS)
     return () => clearInterval(id)
   }, [refresh])
 
@@ -446,44 +449,12 @@ export function PortfolioPro() {
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base">Asignación por activo</CardTitle>
-            <CardDescription>Peso de cada posición sobre el valor total</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            {rows.length === 0 && <p className="text-sm text-muted-foreground">Sin posiciones todavía.</p>}
-            {[...rows]
-              .sort((a, b) => {
-                const av = a.value !== null ? toEur(a.value, a.cur) : 0
-                const bv = b.value !== null ? toEur(b.value, b.cur) : 0
-                return bv - av
-              })
-              .slice(0, 6)
-              .map((r) => {
-                const v = r.value !== null ? toEur(r.value, r.cur) : 0
-                const w = totals.valueEur > 0 ? (v / totals.valueEur) * 100 : 0
-                return (
-                  <div key={r.p.id} className="space-y-1">
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="font-medium">{r.p.symbol}</span>
-                      <span className="tabular-nums text-muted-foreground">{fmtNum(w, 1)}%</span>
-                    </div>
-                    <div className="h-2 overflow-hidden rounded-full bg-secondary">
-                      <div className="h-full rounded-full bg-primary" style={{ width: `${Math.min(100, w)}%` }} />
-                    </div>
-                  </div>
-                )
-              })}
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base">Por tipo de activo</CardTitle>
-            <CardDescription>Acciones, ETFs y fondos de inversión</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-2">
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base">Asignación</CardTitle>
+          <CardDescription>Acciones, ETFs y fondos de inversión</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-2">
             {(Object.keys(byKind) as Kind[]).map((k) => {
               const v = byKind[k]
               const w = totals.valueEur > 0 ? (v / totals.valueEur) * 100 : 0
@@ -497,9 +468,8 @@ export function PortfolioPro() {
                 </div>
               )
             })}
-          </CardContent>
-        </Card>
-      </div>
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -507,7 +477,7 @@ export function PortfolioPro() {
             <CardTitle className="flex items-center gap-2 text-xl">
               <Wallet className="h-5 w-5" /> Mis posiciones
             </CardTitle>
-            <CardDescription>Cotizaciones en tiempo real del listing exacto que elijas (Tradegate, XETRA, NASDAQ…)</CardDescription>
+            <CardDescription>Cotizaciones en tiempo real</CardDescription>
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <Button size="sm" variant="outline" onClick={exportCsv} disabled={positions.length === 0}>
@@ -664,14 +634,15 @@ export function PortfolioPro() {
           </div>
 
           {visible.length === 0 ? (
-            <div className="rounded-md border border-dashed p-8 text-center">
-              <p className="font-medium">Aún no tienes posiciones</p>
+            <div className="rounded-xl border border-dashed p-8 text-center">
+              <Wallet className="mx-auto h-8 w-8 text-muted-foreground/50" />
+              <p className="mt-2 font-medium">Aún no tienes posiciones</p>
               <p className="mx-auto mt-1 max-w-md text-sm text-muted-foreground">
-                Pulsa «{t("Add Stock")}», busca el ticker (vale cualquier bolsa: NASDAQ, NYSE, XETRA, Tradegate, BME, ETFs UCITS o fondos) y elige el listing exacto. Verás el precio real de tu bolsa, no el de otra.
+                Pulsa «{t("Add Stock")}» y elige el listing exacto de tu bolsa.
               </p>
             </div>
           ) : (
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto rounded-xl border">
               <table className="w-full min-w-[760px] text-sm">
                 <thead>
                   <tr className="border-b text-left text-xs uppercase text-muted-foreground">
@@ -694,7 +665,7 @@ export function PortfolioPro() {
                     const exch = quotes[r.p.id]?.exchange || r.p.exchange || exchangeFromSymbol(r.p.symbol)
                     return (
                       <Fragment key={r.p.id}>
-                        <tr className="border-b">
+                        <tr className="border-b transition-colors hover:bg-muted/40">
                           <td className="py-3 pr-3">
                             <button className="flex items-center gap-1 text-left font-medium hover:underline" onClick={() => setExpanded(isOpen ? null : r.p.id)}>
                               {isOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
