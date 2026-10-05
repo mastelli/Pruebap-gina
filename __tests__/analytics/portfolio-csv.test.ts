@@ -43,6 +43,10 @@ describe("parsePortfolioCsv", () => {
     const sell = assets.find((a) => a.side === "sell")
     expect(sell?.quantity).toBe(9)
     expect(sell?.orderId).toBe("9410ae88-8162-467f-bd80-d8d0abe2c722")
+    // NDQ/XNAS -> NASDAQ, TDG/XGAT -> Tradegate
+    expect(adma?.exchange).toBe("NASDAQ")
+    const vanguard = assets.find((a) => a.isin === "IE00BFMXXD54" && a.side === "buy")
+    expect(vanguard?.exchange).toBe("Tradegate")
   })
 
   it("reconciles sells with FIFO and ignores repeated order ids", () => {

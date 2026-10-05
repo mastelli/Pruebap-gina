@@ -185,13 +185,15 @@ export function applyTransactions(opening: TxLot[], rows: TxRow[]): TxLot[] {
   return lots.filter((lot) => lot.qty > 1e-9)
 }
 
-// Codigo de bolsa de referencia de DEGIRO -> nombre para elegir listing.
+// Bolsa de referencia / centro de ejecucion de DEGIRO -> nombre de bolsa.
+// XGAT es el codigo MIC de Tradegate (igual que TDG en bolsa de referencia).
 // Si no se conoce, se deja vacio y la API elige el listado en EUR.
-function mapDegiroExchange(raw: string): string {
+function mapDegiroExchange(raw: string, venue?: string): string {
   const code = (raw ?? "").trim().toUpperCase()
+  const exec = (venue ?? "").trim().toUpperCase()
+  if (code === "TDG" || exec === "XGAT") return "Tradegate"
   if (code === "NDQ") return "NASDAQ"
   if (code === "MAD") return "BME"
-  if (code === "TDG") return "XETRA"
   if (code === "MIL") return "MIL"
   return ""
 }
@@ -280,7 +282,7 @@ function parseDegiroTransactionLines(lines: string[], delimiter: string): Broker
       csvPrice: unit,
       kind: /etf/i.test(product) ? "etf" : /\betc\b/i.test(product) ? "etf" : "stock",
       date,
-      exchange: mapDegiroExchange(cells[4] ?? ""),
+      exchange: mapDegiroExchange(cells[4] ?? "", cells[5] ?? ""),
       side: qty > 0 ? "buy" : "sell",
       orderId,
     })

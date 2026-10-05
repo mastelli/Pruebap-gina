@@ -452,6 +452,26 @@ export async function POST(request: NextRequest) {
     }
   }
 
+  // 1b) rescate por Tradegate: lo que Yahoo/Stooq no resolvieron y tenga
+  // ISIN valido se prueba en Tradegate (p. ej. ejecuciones XGAT ya
+  // importadas). Si tampoco esta, queda sin cotizacion: no se inventa nada.
+  const tgMissing = pendingAssets.filter(
+    (p) => !resolved.has(p.key) && /^[A-Z]{2}[A-Z0-9]{9}\d$/.test(p.isin),
+  )
+  if (tgMissing.length > 0) {
+    const tgResults = await Promise.allSettled(
+      tgMissing.map((p) => getTradegateQuote(p.isin).catch(() => null)),
+    )
+    tgResults.forEach((r, i) => {
+      const quote = r.status === "fulfilled" ? r.value : null
+      if (quote) {
+        const key = tgMissing[i].key
+        quoteCache.set(key, { ts: Date.now(), quote })
+        results[key] = quote
+      }
+    })
+  }
+
   // 2) cotizaciones: Stooq para europeas, Yahoo para el resto
   const symbols = Array.from(resolved.values()).map((info) => info.symbol)
   const europeanSymbols = symbols.filter(isEuropeanSymbol)
