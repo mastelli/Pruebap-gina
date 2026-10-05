@@ -127,6 +127,82 @@ export function setExchangeCache(symbol: string, exchange: string) {
   exchangeCache.set(symbol.toUpperCase(), exchange)
 }
 
+// Grupos de alias de la misma bolsa en distintos proveedores (IDs de Yahoo,
+// sufijos de simbolo, codigos de TradingView, MICs y nombres en ES/EN).
+// Sirve para decidir si el listing encontrado es el que pide el usuario:
+// el ISIN solo no basta (el mismo valor cotiza en USD en Nasdaq y en EUR
+// en Xetra/Tradegate).
+const VENUE_ALIAS_GROUPS: string[][] = [
+  ["NMS", "NCM", "NAS", "NASDAQ", "NGM", "XNAS"],
+  ["NYQ", "NYSE", "XNYS", "NYS"],
+  ["PCX", "ARCX", "NYSEARCA"],
+  ["GER", "ETR", "XETR", "XETRA"],
+  ["MC", "MCE", "BCN", "BME", "BMEMADRID", "XMAD", "MAD", "MADRID", "MESI"],
+  ["MI", "MIL", "MTAA", "IM", "MILAN", "MILANO", "BOLSAITALIANA", "BORSAITALIANA"],
+  ["PA", "PAR", "XPAR", "PARIS", "EURONEXTPARIS"],
+  ["AS", "AMS", "XAMS", "AMSTERDAM", "EURONEXTAMSTERDAM"],
+  ["BR", "BRU", "XBRU", "BRUSELAS", "BRUSSELS", "BRUXELLES", "EURONEXTBRUSSELS"],
+  ["LI", "LIS", "XLIS", "LISBOA", "LISBON", "EURONEXTLISBON"],
+  ["L", "LON", "LSE", "XLON", "LONDRES", "LONDON", "AIMX", "AIM"],
+  ["SW", "VX", "XSWX", "XVTX", "SIX", "SIXSWISS", "SIXSUIZA", "SUIZA", "SWITZERLAND", "SWX"],
+  ["TG", "TGA", "TDG", "XGAT", "TRADEGATE"],
+  ["F", "FRA", "FSE", "FRANKFURT", "XFRA"],
+  ["SG", "SGF", "STUTTGART", "XSTU"],
+  ["HAM", "HAMBURGO", "HAMBURG", "XHAM"],
+  ["MUN", "MUNICH", "XMUN", "MUENCHEN"],
+  ["DUS", "DUSSELDORF", "XDUS"],
+  ["BE", "BERLIN", "XBER"],
+  ["HM", "HANNOVER", "XHAN"],
+  ["TO", "TOR", "XTSE", "TORONTO", "TSX"],
+  ["V", "VEF", "TSXVENTURE"],
+  ["T", "TSE", "XTKS", "TOKIO", "TOKYO"],
+  ["HK", "HKG", "XHKG", "HONGKONG"],
+  ["SS", "SHA", "XSHG", "SHANGHAI"],
+  ["SZ", "SHE", "XSHE", "SHENZHEN"],
+  ["ST", "STO", "XSTO", "ESTOCOLMO", "STOCKHOLM"],
+  ["HE", "HEL", "XHEL", "HELSINKI"],
+  ["CO", "CPH", "XCSE", "COPENHAGUE", "COPENHAGEN"],
+  ["OL", "OSL", "XOSL", "OSLO"],
+  ["VI", "VIA", "XVIE", "VIENA", "VIENNA"],
+  ["AX", "ASX", "XASX", "SIDNEY", "SYDNEY", "AUSTRALIA"],
+  ["MX", "MEX", "BMV", "XMEX", "MEXICO"],
+  ["SA", "BVMF", "SANPABLO", "SAOPAULO", "XBSP", "BRASIL", "BRAZIL"],
+  ["SNSE", "SANTIAGO", "XSGO"],
+  ["BCS", "CHILE"],
+  ["BVC", "COLOMBIA", "XBOG"],
+  ["KS", "KSE", "XKRX", "COREA", "KOREA"],
+  ["BK", "BOM", "XBOM", "BOMBAY", "MUMBAI"],
+  ["NS", "NSE", "XNSE", "INDIA"],
+  ["JO", "JNB", "XJSE", "JOHANNESBURGO", "JOHANNESBURG"],
+  ["IR", "IRLANDA", "IRELAND", "XDUB", "DUBLIN"],
+  ["ATH", "ATENAS", "ATHENS", "XATH"],
+  ["IST", "ESTAMBUL", "ISTANBUL", "XIST"],
+  ["WA", "WSE", "XWAR", "VARSOVIA", "WARSAW"],
+  ["PR", "PRA", "XPRG", "PRAGA", "PRAGUE"],
+  ["BU", "BUD", "XBUD", "BUDAPEST"],
+  ["NZ", "NZE", "XNZE", "NUEVAZELANDA", "NEWZEALAND"],
+  ["CN", "CANADA"],
+  ["TW", "TAI", "XTAI", "TAIPEI"],
+]
+
+function normalizeVenueName(value: string): string {
+  return (value ?? "")
+    .toUpperCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^A-Z0-9]/g, "")
+}
+
+// true si dos nombres/codigos de bolsa designan el mismo mercado
+export function sameVenue(a: string, b: string): boolean {
+  const na = normalizeVenueName(a)
+  const nb = normalizeVenueName(b)
+  if (na === "" || nb === "") return false
+  if (na === nb) return true
+  if (na.includes(nb) || nb.includes(na)) return true
+  return VENUE_ALIAS_GROUPS.some((group) => group.includes(na) && group.includes(nb))
+}
+
 // Nombre de la bolsa donde cotiza un simbolo; vacio si no se puede deducir
 export function exchangeFromSymbol(symbol?: string): string {
   if (!symbol) return ""

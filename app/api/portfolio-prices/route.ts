@@ -1,4 +1,5 @@
 ﻿import { NextRequest, NextResponse } from "next/server"
+import { sameVenue } from "@/lib/exchanges"
 import { getTradingViewQuoteByIsin } from "@/lib/tradingview"
 
 export const runtime = "nodejs"
@@ -404,24 +405,24 @@ async function resolveAsset(isin: string, name?: string, exchangeReq?: string, s
   }
 
   const candidates = await resolveSymbolCandidates(isin, name, exchangeReq)
-  let fallback: Quote | null = null
-  const ex = exchangeReq ? exchangeReq.trim().toUpperCase() : ""
+  const ex = exchangeReq ?? ""
+  // Se evaluan TODOS los candidatos y se elige el mejor: el ISIN solo no
+  // basta porque el mismo valor cotiza en USD (Nasdaq) y en EUR (Xetra,
+  // Tradegate...). Orden: EUR de la bolsa pedida > EUR > bolsa pedida > primero.
+  let best: Quote | null = null
+  let bestScore = -1
   for (const symbol of candidates) {
     const quote = await getChartQuote(symbol).catch(() => null)
     if (!quote) continue
-    const qex = (quote.exchange ?? "").toUpperCase()
-    const matchesEx = !ex || qex.includes(ex) || ex.includes(qex)
-    if (quote.currency === "EUR" && matchesEx) {
-      const info = { symbol, currency: quote.currency || undefined }
-      symbolCache.set(cacheKey, info)
-      symbolCache.set(isin, info)
-      return info
+    const matchesEx = ex === "" || sameVenue(quote.exchange ?? "", ex)
+    const score = (quote.currency === "EUR" ? 2 : 0) + (matchesEx ? 1 : 0)
+    if (score > bestScore) {
+      bestScore = score
+      best = quote
     }
-    if (matchesEx && !fallback) fallback = quote
-    if (!matchesEx && !fallback) fallback = quote
   }
-  if (fallback) {
-    const info = { symbol: fallback.symbol, currency: fallback.currency || undefined }
+  if (best) {
+    const info = { symbol: best.symbol, currency: best.currency || undefined }
     symbolCache.set(cacheKey, info)
     symbolCache.set(isin, info)
     return info

@@ -19,6 +19,13 @@ describe("tradingview helpers", () => {
     expect(pickTvRow(rows, "Tradegate")?.exchange).toBe("TRADEGATE")
     // Sin bolsa pedida prefiere el listado en EUR
     expect(pickTvRow(rows)?.currency).toBe("EUR")
+    // Los alias valen: XETRA encuentra XETR, BME Madrid encuentra BME
+    const euRows = [
+      { symbol: "MSF", exchange: "XETR", currency: "EUR", description: "Microsoft" },
+      { symbol: "MSFT", exchange: "NASDAQ", currency: "USD", description: "Microsoft" },
+    ]
+    expect(pickTvRow(euRows, "XETRA")?.exchange).toBe("XETR")
+    expect(pickTvRow([{ symbol: "OHL", exchange: "BME", currency: "EUR", description: "OHLA" }], "BME Madrid")?.exchange).toBe("BME")
     // Sin filas validas devuelve null
     expect(pickTvRow([{ symbol: "", exchange: "X" }])).toBeNull()
     expect(pickTvRow([])).toBeNull()

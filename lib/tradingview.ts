@@ -1,6 +1,7 @@
 // Cotizaciones directas de TradingView por ISIN: primero se busca el
 // ticker en cada bolsa (symbol-search) y luego se lee el scanner.
 // Sin dependencias de React: se usa desde las API routes.
+import { sameVenue } from "./exchanges"
 
 export interface TvSearchRow {
   symbol?: unknown
@@ -33,8 +34,10 @@ export function isValidIsin(value: string): boolean {
   return /^[A-Z]{2}[A-Z0-9]{9}\d$/.test((value ?? "").trim().toUpperCase())
 }
 
-// Elige la fila del listado exacto si coincide la bolsa, si no el
-// listado en EUR y si no la primera fila con simbolo.
+// Elige la fila del listado exacto si coincide la bolsa (comparando con
+// alias: "XETRA" vale para "XETR", "BME Madrid" para "BME"...), si no el
+// listado en EUR y si no la primera fila con simbolo. El ISIN solo no
+// basta: el mismo valor cotiza en USD y en EUR.
 export function pickTvRow(
   rows: TvSearchRow[],
   exchangeReq?: string,
@@ -48,12 +51,9 @@ export function pickTvRow(
     }))
     .filter((r) => r.symbol !== "" && r.exchange !== "")
   if (clean.length === 0) return null
-  const ex = (exchangeReq ?? "").trim().toUpperCase()
-  if (ex !== "") {
-    const match = clean.find((r) => {
-      const e = r.exchange.toUpperCase()
-      return e.includes(ex) || ex.includes(e)
-    })
+  const ex = exchangeReq ?? ""
+  if (ex.trim() !== "") {
+    const match = clean.find((r) => sameVenue(r.exchange, ex))
     if (match) return match
   }
   return clean.find((r) => r.currency === "EUR") ?? clean[0] ?? null
