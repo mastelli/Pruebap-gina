@@ -689,7 +689,10 @@ export function PortfolioPro() {
                 <div key={k} className="space-y-1">
                   <div className="flex items-center justify-between gap-2 text-sm">
                     <span className="font-medium">{KIND_LABEL[k]}</span>
-                    <span className="shrink-0 tabular-nums text-muted-foreground">{fmtMoney(v)}</span>
+                    <div className="flex shrink-0 items-center gap-2">
+                      <span className="tabular-nums text-muted-foreground">{fmtNum(w, 1)}%</span>
+                      <span className="tabular-nums text-muted-foreground">{fmtMoney(v)}</span>
+                    </div>
                   </div>
                   <div className="h-2 overflow-hidden rounded-full bg-secondary">
                     <div className="h-full rounded-full bg-primary" style={{ width: `${Math.min(100, w)}%` }} />
@@ -894,7 +897,7 @@ export function PortfolioPro() {
               <table className="w-full min-w-[760px] text-sm">
                 <thead>
                   <tr className="border-b text-left text-xs uppercase text-muted-foreground">
-                    <th className="py-2 pr-3">Activo</th>
+                    <th className="py-2 pl-4 pr-3">Activo</th>
                     <th className="py-2 pr-3 text-right">Cant.</th>
                     <th className="py-2 pr-3 text-right">Precio</th>
                     <th className="py-2 pr-3 text-right">Coste medio</th>
@@ -914,7 +917,7 @@ export function PortfolioPro() {
                     return (
                       <Fragment key={r.p.id}>
                         <tr className="border-b transition-colors hover:bg-muted/40">
-                          <td className="py-3 pr-3">
+                          <td className="py-3 pl-4 pr-3">
                             <button className="text-left font-medium hover:underline" onClick={() => setExpanded(isOpen ? null : r.p.id)} title={isOpen ? "Ocultar compras" : "Ver compras"}>
                               {r.displayName}
                             </button>
