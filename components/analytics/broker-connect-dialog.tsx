@@ -178,10 +178,15 @@ export function BrokerConnectDialog({
               <div className="mt-3 space-y-2">
                 {accounts.length === 0 ? (
                   <div className="flex items-center justify-between gap-2 rounded-lg bg-secondary/40 p-3">
-                    <p className="text-xs text-muted-foreground">
-                      {t("No hay cuentas conectadas todavía.")}
-                    </p>
-                    <Button size="sm" variant="outline" onClick={openPortal}>
+                    <div className="min-w-0">
+                      <p className="text-xs text-muted-foreground">
+                        {t("No hay cuentas conectadas todavía.")}
+                      </p>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        {t("Si acabas de pulsar Done en el portal, espera unos minutos y pulsa Sincronizar de nuevo.")}
+                      </p>
+                    </div>
+                    <Button size="sm" variant="outline" className="shrink-0" onClick={openPortal}>
                       {t("Abrir portal")}
                     </Button>
                   </div>
