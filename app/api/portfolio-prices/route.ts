@@ -173,9 +173,10 @@ async function getStooqBatch(yahooSymbols: string[]): Promise<Map<string, Quote>
 function tradegateNumber(value: unknown): number | null {
   if (typeof value === "number") return Number.isFinite(value) ? value : null
   if (typeof value === "string") {
-    const s = value.trim()
+    // Tradegate mezcla floats ("130.21"), formato aleman ("296,40") y
+    // miles con espacio ("1 220,00"): se quitan todos los espacios primero
+    const s = value.trim().replace(/\s/g, "")
     if (!s) return null
-    // Tradegate mezcla floats ("130.21") y formato aleman ("296,40")
     const normalized = /,\d{1,4}$/.test(s) ? s.replace(/\./g, "").replace(",", ".") : s
     const n = parseFloat(normalized)
     return Number.isFinite(n) ? n : null
