@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Badge } from "@/components/ui/badge"
-import { Pencil, Plus, Trash2, RefreshCw, Search, TrendingUp, TrendingDown, Upload, Wallet, Download, ArrowUpRight, ArrowDownRight, ChevronDown, ChevronRight } from "lucide-react"
+import { Pencil, Plus, Trash2, RefreshCw, Search, TrendingUp, TrendingDown, Upload, Wallet, Download, ArrowUpRight, ArrowDownRight } from "lucide-react"
 import { applyTransactions, parsePortfolioCsv } from "@/lib/portfolio-csv"
 import { InvestmentTips } from "@/components/analytics/investment-tips"
 import { FinanceNews } from "@/components/analytics/finance-news"
@@ -641,9 +641,41 @@ export function PortfolioPro() {
         </Card>
       </div>
 
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-base">Asignación</CardTitle>
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base">Mayores posiciones</CardTitle>
+            <CardDescription>Las 5 posiciones con más valor</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {rows.length === 0 && <p className="text-sm text-muted-foreground">Sin posiciones todavía.</p>}
+            {[...rows]
+              .sort((a, b) => {
+                const av = a.value !== null ? toEur(a.value, a.cur) : 0
+                const bv = b.value !== null ? toEur(b.value, b.cur) : 0
+                return bv - av
+              })
+              .slice(0, 5)
+              .map((r) => {
+                const v = r.value !== null ? toEur(r.value, r.cur) : 0
+                const w = totals.valueEur > 0 ? (v / totals.valueEur) * 100 : 0
+                return (
+                  <div key={r.p.id} className="space-y-1">
+                    <div className="flex items-center justify-between gap-2 text-sm">
+                      <span className="truncate font-medium">{r.displayName}</span>
+                      <span className="shrink-0 tabular-nums text-muted-foreground">{fmtMoney(v)}</span>
+                    </div>
+                    <div className="h-2 overflow-hidden rounded-full bg-secondary">
+                      <div className="h-full rounded-full bg-primary" style={{ width: `${Math.min(100, w)}%` }} />
+                    </div>
+                  </div>
+                )
+              })}
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base">Asignación</CardTitle>
           <CardDescription>Acciones, ETFs y fondos de inversión</CardDescription>
         </CardHeader>
         <CardContent className="space-y-2">
@@ -662,7 +694,8 @@ export function PortfolioPro() {
               )
             })}
         </CardContent>
-      </Card>
+        </Card>
+      </div>
 
       <Card>
         <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -878,8 +911,7 @@ export function PortfolioPro() {
                       <Fragment key={r.p.id}>
                         <tr className="border-b transition-colors hover:bg-muted/40">
                           <td className="py-3 pr-3">
-                            <button className="flex items-center gap-1 text-left font-medium hover:underline" onClick={() => setExpanded(isOpen ? null : r.p.id)}>
-                              {isOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                            <button className="text-left font-medium hover:underline" onClick={() => setExpanded(isOpen ? null : r.p.id)} title={isOpen ? "Ocultar compras" : "Ver compras"}>
                               {r.displayName}
                             </button>
                             <div className="ml-5 flex flex-wrap items-center gap-1 text-xs text-muted-foreground">
