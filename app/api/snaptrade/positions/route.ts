@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { getSnapTradeClient, isSnapTradeConfigured } from "@/lib/snaptrade-server"
+import { getCallerSnapTradeUser, getSnapTradeClient, isSnapTradeConfigured } from "@/lib/snaptrade-server"
 
 export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
@@ -21,8 +21,8 @@ function kindFromSnapTrade(kind: unknown): "stock" | "etf" | "fund" | "other" {
   return "other"
 }
 
-// Posiciones de una cuenta de SnapTrade normalizadas para la cartera.
-// No se inventa nada: solo lo que devuelve el broker.
+// Posiciones de una cuenta del cliente que llama, normalizadas para la
+// cartera. No se inventa nada: solo lo que devuelve su broker.
 export async function GET(request: NextRequest) {
   const accountId = request.nextUrl.searchParams.get("accountId")?.trim()
   if (!accountId) {
@@ -33,8 +33,11 @@ export async function GET(request: NextRequest) {
   }
   try {
     const client = getSnapTradeClient()
+    const { userId, userSecret } = await getCallerSnapTradeUser()
     const res = (await client.accountInformation.getAllAccountPositions({
       accountId,
+      userId,
+      userSecret,
     })) as unknown as { data?: { results?: Array<Record<string, unknown>> } }
     const results = Array.isArray(res?.data?.results) ? res.data.results : []
     const positions = []

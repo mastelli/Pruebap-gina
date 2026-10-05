@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Clock, Landmark, RefreshCw, Upload } from "lucide-react"
+import { Clock, Landmark, Link2, RefreshCw, Upload } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
@@ -27,11 +27,10 @@ interface BrokerAccount {
 type DegiroState = "idle" | "checking" | "setup" | "accounts" | "importing" | "error"
 
 const SETUP_STEPS: string[] = [
-  "Crea tu cuenta en dashboard.snaptrade.com y verifica el email.",
-  "Conecta tu cuenta de DEGIRO en su panel.",
-  "Activa la verificación en dos pasos y crea una Personal API key (página API Key): copia el clientId y el consumerKey.",
+  "Crea tu cuenta Commercial en dashboard.snaptrade.com (para probar vale la clave de test; para clientes reales pide aprobación y facturación).",
+  "Copia el clientId y el consumerKey de tu API key.",
   "En Vercel > tu proyecto > Settings > Environment Variables añade SNAPTRADE_CLIENT_ID y SNAPTRADE_CONSUMER_KEY y haz Redeploy.",
-  "Vuelve aquí y pulsa Sincronizar.",
+  "Cada cliente pulsa Conectar, enlaza su propio DEGIRO en el portal y luego Sincronizar: cada uno ve solo su cartera.",
 ]
 
 export function BrokerConnectDialog({
@@ -136,18 +135,23 @@ export function BrokerConnectDialog({
                   </p>
                 </div>
               </div>
-              <Button
-                size="sm"
-                variant="outline"
-                className="shrink-0"
-                disabled={degiroState === "checking" || degiroState === "importing"}
-                onClick={syncDegiro}
-              >
-                <RefreshCw
-                  className={`mr-2 h-4 w-4 ${degiroState === "checking" || degiroState === "importing" ? "animate-spin" : ""}`}
-                />
-                {t("Sincronizar")}
-              </Button>
+              <div className="flex shrink-0 gap-2">
+                <Button size="sm" variant="outline" onClick={openPortal}>
+                  <Link2 className="mr-2 h-4 w-4" />
+                  {t("Conectar")}
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={degiroState === "checking" || degiroState === "importing"}
+                  onClick={syncDegiro}
+                >
+                  <RefreshCw
+                    className={`mr-2 h-4 w-4 ${degiroState === "checking" || degiroState === "importing" ? "animate-spin" : ""}`}
+                  />
+                  {t("Sincronizar")}
+                </Button>
+              </div>
             </div>
 
             {syncError && (

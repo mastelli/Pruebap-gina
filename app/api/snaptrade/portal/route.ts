@@ -1,18 +1,23 @@
 import { NextResponse } from "next/server"
-import { getSnapTradeClient, isSnapTradeConfigured } from "@/lib/snaptrade-server"
+import { getCallerSnapTradeUser, getSnapTradeClient, isSnapTradeConfigured } from "@/lib/snaptrade-server"
 
 export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
 
-// Genera la URL del portal de SnapTrade para conectar el broker
-// (el usuario inicia sesion en DEGIRO dentro del portal, nunca aqui).
+// Genera la URL del portal de SnapTrade para que EL CLIENTE conecte su
+// propio broker (sus credenciales de DEGIRO se escriben en el portal,
+// nunca en esta pagina).
 export async function POST() {
   if (!isSnapTradeConfigured()) {
     return NextResponse.json({ error: "SnapTrade no configurado" }, { status: 400 })
   }
   try {
     const client = getSnapTradeClient()
-    const res = (await client.authentication.loginSnapTradeUser({})) as unknown as {
+    const { userId, userSecret } = await getCallerSnapTradeUser()
+    const res = (await client.authentication.loginSnapTradeUser({
+      userId,
+      userSecret,
+    })) as unknown as {
       data?: { redirectURI?: string }
     }
     const redirectURI = res?.data?.redirectURI
