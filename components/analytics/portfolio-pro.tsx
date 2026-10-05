@@ -967,6 +967,9 @@ export function PortfolioPro() {
                               {exch ? <span>{exch}</span> : null}
                               <span>· {r.cur}</span>
                             </div>
+                            {r.p.isin && r.p.isin.trim().toUpperCase() !== r.p.symbol.trim().toUpperCase() ? (
+                              <div className="ml-5 truncate font-mono text-[11px] text-muted-foreground/70">{r.p.isin.trim().toUpperCase()}</div>
+                            ) : null}
                           </td>
                           <td className="py-3 pr-3 text-right tabular-nums">{fmtNum(r.qty, r.qty % 1 === 0 ? 0 : 4)}</td>
                           <td className="py-3 pr-3 text-right tabular-nums">
