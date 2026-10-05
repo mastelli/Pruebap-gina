@@ -683,13 +683,14 @@ export function PortfolioPro() {
               const v = byKind[k]
               const w = totals.valueEur > 0 ? (v / totals.valueEur) * 100 : 0
               return (
-                <div key={k} className="flex items-center justify-between gap-3 text-sm">
-                  <Badge variant="secondary">{KIND_LABEL[k]}</Badge>
-                  <div className="h-2 flex-1 overflow-hidden rounded-full bg-secondary">
+                <div key={k} className="space-y-1">
+                  <div className="flex items-center justify-between gap-2 text-sm">
+                    <span className="font-medium">{KIND_LABEL[k]}</span>
+                    <span className="shrink-0 tabular-nums text-muted-foreground">{fmtMoney(v)}</span>
+                  </div>
+                  <div className="h-2 overflow-hidden rounded-full bg-secondary">
                     <div className="h-full rounded-full bg-primary" style={{ width: `${Math.min(100, w)}%` }} />
                   </div>
-                  <span className="w-12 text-right tabular-nums text-muted-foreground">{fmtNum(w, 1)}%</span>
-                  <span className="w-24 text-right tabular-nums text-muted-foreground">{fmtMoney(v)}</span>
                 </div>
               )
             })}
