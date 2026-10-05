@@ -704,7 +704,7 @@ export function PortfolioPro() {
         </Card>
       </div>
 
-      <Card>
+      <Card id="mis-posiciones">
         <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <CardTitle className="flex items-center gap-2 text-xl">
