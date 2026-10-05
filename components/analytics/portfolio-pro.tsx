@@ -344,7 +344,9 @@ export function PortfolioPro() {
         storedName.toUpperCase() === p.symbol.trim().toUpperCase() ||
         /^[A-Z]{2}[A-Z0-9]{9}\d$/.test(storedName.toUpperCase())
       const displayName = nameMissing && q?.longName ? q.longName : storedName || p.symbol
-      return { p, qty, invested, avg, price, prev, value, pnl, pnlPct, dayAbs, dayPct, cur, displayName }
+      // Sin cotizacion de ninguna fuente: hay que revisar el ISIN
+      const needsIsin = price === undefined
+      return { p, qty, invested, avg, price, prev, value, pnl, pnlPct, dayAbs, dayPct, cur, displayName, needsIsin }
     })
   }, [positions, quotes])
 
@@ -457,6 +459,16 @@ export function PortfolioPro() {
       ),
     )
     setEditBuyFor(null)
+  }
+
+  const startEdit = (p: Position) => {
+    setEditFor(p)
+    setESymbol(p.symbol)
+    setEName(p.name)
+    setEIsin(p.isin ?? "")
+    setEExchange(p.exchange)
+    setECurrency(p.currency)
+    setEKind(p.kind)
   }
 
   const saveEdit = () => {
@@ -1013,6 +1025,15 @@ export function PortfolioPro() {
                             {r.p.isin && r.p.isin.trim().toUpperCase() !== r.p.symbol.trim().toUpperCase() ? (
                               <div className="ml-5 truncate font-mono text-[11px] text-muted-foreground/70">{r.p.isin.trim().toUpperCase()}</div>
                             ) : null}
+                            {r.needsIsin ? (
+                              <button
+                                className="ml-5 mt-0.5 text-left text-[11px] font-medium text-amber-600 hover:underline dark:text-amber-400"
+                                title="Ajustar ISIN"
+                                onClick={() => startEdit(r.p)}
+                              >
+                                Necesario ajuste de ISIN
+                              </button>
+                            ) : null}
                           </td>
                           <td className="py-3 pr-3 text-right tabular-nums">{fmtNum(r.qty, r.qty % 1 === 0 ? 0 : 4)}</td>
                           <td className="py-3 pr-3 text-right tabular-nums">
@@ -1051,15 +1072,7 @@ export function PortfolioPro() {
                                 size="icon"
                                 className="h-8 w-8 text-muted-foreground hover:text-foreground"
                                 title="Editar"
-                                onClick={() => {
-                                  setEditFor(r.p)
-                                  setESymbol(r.p.symbol)
-                                  setEName(r.p.name)
-                                  setEIsin(r.p.isin ?? "")
-                                  setEExchange(r.p.exchange)
-                                  setECurrency(r.p.currency)
-                                  setEKind(r.p.kind)
-                                }}
+                                onClick={() => startEdit(r.p)}
                               >
                                 <Pencil className="h-4 w-4" />
                               </Button>
