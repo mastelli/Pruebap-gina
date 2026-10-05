@@ -49,6 +49,29 @@ describe("parsePortfolioCsv", () => {
     expect(vanguard?.exchange).toBe("Tradegate")
   })
 
+  it("maps MIC execution venues and reference exchanges", () => {
+    const header =
+      "Fecha,Hora,Producto,ISIN,Bolsa de referencia,Centro de ejecución,Número,Precio,,Valor local,,Valor EUR,Tipo de cambio,Comisión AutoFX,Costes de transacción y/o externos EUR,Total EUR,ID Orden"
+    const row = (bolsa: string, centro: string, isin: string, id: string) =>
+      `28-08-2026,12:25,TEST PRODUCTO,${isin},${bolsa},${centro},10,"1,0000",EUR,"-10,00",EUR,"-10,00",,"0,00","-1,00","-11,00",${id}`
+    const csv = [
+      header,
+      row("MAD", "XMAD", "US5949181045", "id-1"),
+      row("NDQ", "XNAS", "IE00B4L5Y983", "id-2"),
+      row("MIL", "ETFP", "ES0142090317", "id-3"),
+      row("TDG", "XGAT", "JE00B7305Z55", "id-4"),
+      row("ZZ9", "UNKNOWN", "IE00BK5BR733", "id-5"),
+    ].join("\n")
+    const { assets } = parsePortfolioCsv(csv)
+    expect(assets).toHaveLength(5)
+    const byId = (id: string) => assets.find((a) => a.orderId === id)?.exchange
+    expect(byId("id-1")).toBe("BME Madrid")
+    expect(byId("id-2")).toBe("NASDAQ")
+    expect(byId("id-3")).toBe("Bolsa Italiana")
+    expect(byId("id-4")).toBe("Tradegate")
+    expect(byId("id-5")).toBe("")
+  })
+
   it("reconciles sells with FIFO and ignores repeated order ids", () => {
     const opening: { qty: number; price: number; date: string; orderId?: string }[] = []
     const buy = { quantity: 40, price: 7.481, date: "2026-04-07", orderId: "buy-1", side: "buy" as const }

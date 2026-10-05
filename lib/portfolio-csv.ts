@@ -185,16 +185,108 @@ export function applyTransactions(opening: TxLot[], rows: TxRow[]): TxLot[] {
   return lots.filter((lot) => lot.qty > 1e-9)
 }
 
-// Bolsa de referencia / centro de ejecucion de DEGIRO -> nombre de bolsa.
-// XGAT es el codigo MIC de Tradegate (igual que TDG en bolsa de referencia).
-// Si no se conoce, se deja vacio y la API elige el listado en EUR.
+// Codigos MIC (ISO 10383) de centros de ejecucion -> nombre de bolsa.
+const MIC_NAMES: Record<string, string> = {
+  // EEUU y Canada
+  XNAS: "NASDAQ",
+  XNYS: "NYSE",
+  ARCX: "NYSE Arca",
+  BATS: "Cboe BZX",
+  BATD: "Cboe Europe",
+  BATE: "Cboe Europe",
+  CHIX: "Cboe CXE",
+  EDGA: "Cboe EDGA",
+  EDGX: "Cboe EDGX",
+  MEMX: "MEMX",
+  IEXG: "IEX",
+  PSX: "Nasdaq PSX",
+  XTSE: "Toronto",
+  XTSX: "Toronto Venture",
+  // Alemania (XGAT = Tradegate)
+  XGAT: "Tradegate",
+  XETR: "XETRA",
+  XFRA: "Fráncfort",
+  XSTU: "Stuttgart",
+  XDUS: "Düsseldorf",
+  XHAM: "Hamburgo",
+  XHAN: "Hannover",
+  XMUN: "Múnich",
+  XBER: "Berlín",
+  // Resto de Europa
+  XMAD: "BME Madrid",
+  MESI: "BME Madrid",
+  MTAA: "Bolsa Italiana",
+  XPAR: "Euronext París",
+  XAMS: "Euronext Ámsterdam",
+  XBRU: "Euronext Bruselas",
+  XLIS: "Euronext Lisboa",
+  XLON: "Londres",
+  AIMX: "AIM Londres",
+  XSTO: "Estocolmo",
+  XHEL: "Helsinki",
+  XCSE: "Copenhague",
+  XOSL: "Oslo",
+  XSWX: "SIX Suiza",
+  XVTX: "SIX Suiza",
+  XDUB: "Dublín",
+  XWBO: "Viena",
+  XWAR: "Varsovia",
+  XPRG: "Praga",
+  XBUD: "Budapest",
+  XIST: "Estambul",
+  XATH: "Atenas",
+  // Asia y Oceania
+  XTKS: "Tokio",
+  XHKG: "Hong Kong",
+  XSHG: "Shanghái",
+  XSHE: "Shenzhen",
+  XKRX: "Corea",
+  XNSE: "India NSE",
+  XBOM: "India BSE",
+  XASX: "Australia",
+  XNZE: "Nueva Zelanda",
+  // Latinoamerica, Africa y Oriente Medio
+  XMEX: "México",
+  XBSP: "B3 Brasil",
+  XSGO: "Santiago",
+  XBOG: "Colombia",
+  XTAE: "Tel Aviv",
+  XJSE: "Johannesburgo",
+}
+
+// Codigos propios de DEGIRO en "Bolsa de referencia" -> nombre de bolsa.
+const DEGIRO_REF_NAMES: Record<string, string> = {
+  TDG: "Tradegate",
+  NDQ: "NASDAQ",
+  NYS: "NYSE",
+  NSY: "NYSE",
+  MAD: "BME Madrid",
+  MIL: "Bolsa Italiana",
+  LSE: "Londres",
+  PAR: "Euronext París",
+  AMS: "Euronext Ámsterdam",
+  BRU: "Euronext Bruselas",
+  LIS: "Euronext Lisboa",
+  STO: "Estocolmo",
+  HEL: "Helsinki",
+  COP: "Copenhague",
+  OSL: "Oslo",
+  SWX: "SIX Suiza",
+  TOR: "Toronto",
+  MEX: "México",
+}
+
+// Bolsa de referencia + centro de ejecucion (MIC) de DEGIRO -> nombre.
+// El centro de ejecucion manda (es donde se cruzo la orden); la bolsa de
+// referencia vale de respaldo. Si no se conoce, se deja vacio y la API
+// elige el listado en EUR.
 function mapDegiroExchange(raw: string, venue?: string): string {
   const code = (raw ?? "").trim().toUpperCase()
   const exec = (venue ?? "").trim().toUpperCase()
   if (code === "TDG" || exec === "XGAT") return "Tradegate"
-  if (code === "NDQ") return "NASDAQ"
-  if (code === "MAD") return "BME"
-  if (code === "MIL") return "MIL"
+  if (exec && MIC_NAMES[exec]) return MIC_NAMES[exec]
+  if (code && DEGIRO_REF_NAMES[code]) return DEGIRO_REF_NAMES[code]
+  if (code && MIC_NAMES[code]) return MIC_NAMES[code]
   return ""
 }
 
