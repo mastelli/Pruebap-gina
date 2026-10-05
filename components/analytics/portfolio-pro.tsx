@@ -689,7 +689,10 @@ export function PortfolioPro() {
                 <div key={k} className="space-y-1">
                   <div className="flex items-center justify-between gap-2 text-sm">
                     <span className="font-medium">{KIND_LABEL[k]}</span>
-                    <span className="shrink-0 tabular-nums text-muted-foreground">{fmtMoney(v)}</span>
+                    <div className="flex shrink-0 items-center gap-2">
+                      <span className="tabular-nums text-muted-foreground">{fmtNum(w, 1)}%</span>
+                      <span className="tabular-nums text-muted-foreground">{fmtMoney(v)}</span>
+                    </div>
                   </div>
                   <div className="h-2 overflow-hidden rounded-full bg-secondary">
                     <div className="h-full rounded-full bg-primary" style={{ width: `${Math.min(100, w)}%` }} />
