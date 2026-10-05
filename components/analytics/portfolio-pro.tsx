@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Badge } from "@/components/ui/badge"
 import { Pencil, Plus, Trash2, RefreshCw, Search, Upload, Wallet, Download, ArrowUpRight, ArrowDownRight, ChevronDown, ChevronRight } from "lucide-react"
 import { applyTransactions, parsePortfolioCsv } from "@/lib/portfolio-csv"
+import type { SnapTradeImportItem } from "./broker-connect-dialog"
 import { InvestmentTips } from "@/components/analytics/investment-tips"
 import { FinanceNews } from "@/components/analytics/finance-news"
 import { useLanguage } from "@/lib/i18n"
@@ -150,6 +151,44 @@ export function PortfolioPro() {
     } catch {
       // sin almacenamiento
     }
+  }, [])
+
+  // Posiciones sincronizadas desde el broker (dialogo Conectar broker).
+  // Se fusionan por simbolo: si ya existe se suma como compra.
+  useEffect(() => {
+    const handler = (event: Event) => {
+      const items = (event as CustomEvent<SnapTradeImportItem[]>).detail ?? []
+      if (!Array.isArray(items) || items.length === 0) return
+      setPositions((prev) => {
+        const next = [...prev]
+        for (const item of items) {
+          if (!item.symbol || !(item.quantity > 0)) continue
+          const price =
+            typeof item.costBasis === "number" && Number.isFinite(item.costBasis) && item.costBasis > 0
+              ? item.costBasis
+              : 0
+          const purchase: Purchase = { id: uid("buy"), qty: item.quantity, price, date: todayISO() }
+          const same = next.find((p) => p.symbol.toUpperCase() === item.symbol.toUpperCase())
+          if (same) {
+            const idx = next.indexOf(same)
+            next[idx] = { ...same, purchases: [...same.purchases, purchase] }
+          } else {
+            next.push({
+              id: uid("pos"),
+              symbol: item.symbol,
+              name: item.name || item.symbol,
+              exchange: item.exchange,
+              kind: item.kind,
+              currency: (item.currency || "EUR").toUpperCase(),
+              purchases: [purchase],
+            })
+          }
+        }
+        return next
+      })
+    }
+    window.addEventListener("snaptrade:import", handler)
+    return () => window.removeEventListener("snaptrade:import", handler)
   }, [])
 
   useEffect(() => {
