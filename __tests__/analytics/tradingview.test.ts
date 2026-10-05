@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { isValidIsin, parseTvScanner, pickTvRow } from "@/lib/tradingview"
+import { isValidIsin, parseTvScanner, pickIsinRow, pickTvRow } from "@/lib/tradingview"
 
 describe("tradingview helpers", () => {
   it("validates ISINs", () => {
@@ -50,5 +50,23 @@ describe("tradingview helpers", () => {
 
     expect(parseTvScanner("X", "Y", { close: null })).toBeNull()
     expect(parseTvScanner("X", "Y", {})).toBeNull()
+  })
+
+  it("picks the ISIN only from exact-symbol rows", () => {
+    const rows = [
+      { symbol: "MSF", exchange: "TRADEGATE", isin: "US5949181045" },
+      { symbol: "MSF", exchange: "XETR", isin: "US5949181045" },
+      { symbol: "MSFU", exchange: "NASDAQ", isin: "US00LEV12345" },
+    ]
+    // Prefiere la bolsa pedida dentro del mismo simbolo
+    expect(pickIsinRow(rows, "MSF", "Tradegate")).toBe("US5949181045")
+    expect(pickIsinRow(rows, "msf", "Xetra")).toBe("US5949181045")
+    // Sin bolsa, coge el simbolo exacto aunque haya apalancados
+    expect(pickIsinRow(rows, "MSF")).toBe("US5949181045")
+    // Sin simbolo exacto no inventa nada (el apalancado tiene otro ISIN)
+    expect(pickIsinRow(rows, "MSFU")).toBe("US00LEV12345")
+    expect(pickIsinRow(rows, "APPLE")).toBeNull()
+    expect(pickIsinRow([], "MSF")).toBeNull()
+    expect(pickIsinRow(rows, "")).toBeNull()
   })
 })

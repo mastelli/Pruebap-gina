@@ -153,6 +153,49 @@ export function PortfolioPro() {
     }
   }, [])
 
+  // Rellena solo el ISIN que falte buscando por simbolo y bolsa (una vez
+  // por combinacion). Con ISIN, Tradegate y el resto de bolsas cotizan solas.
+  const isinLookupTried = useRef<Set<string>>(new Set())
+  useEffect(() => {
+    const missing = positions.filter((p) => !p.isin && p.symbol.trim() !== "")
+    if (missing.length === 0) return
+    const fresh = missing.filter((p) => {
+      const key = `${p.symbol.trim().toUpperCase()}|${(p.exchange ?? "").trim().toUpperCase()}`
+      if (isinLookupTried.current.has(key)) return false
+      isinLookupTried.current.add(key)
+      return true
+    })
+    if (fresh.length === 0) return
+    let cancelled = false
+    ;(async () => {
+      const found = new Map<string, string>()
+      for (const p of fresh) {
+        try {
+          const res = await fetch(
+            `/api/isin-lookup?symbol=${encodeURIComponent(p.symbol)}&exchange=${encodeURIComponent(p.exchange ?? "")}`,
+          )
+          if (!res.ok) continue
+          const json = await res.json()
+          const isin = typeof json?.isin === "string" ? json.isin.trim().toUpperCase() : ""
+          if (/^[A-Z]{2}[A-Z0-9]{9}\d$/.test(isin)) found.set(p.id, isin)
+        } catch {
+          // siguiente posicion
+        }
+      }
+      if (!cancelled && found.size > 0) {
+        setPositions((prev) =>
+          prev.map((pp) => {
+            const isin = found.get(pp.id)
+            return isin && !pp.isin ? { ...pp, isin } : pp
+          }),
+        )
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [positions])
+
   // Posiciones sincronizadas desde el broker (dialogo Conectar broker).
   // Se fusionan por simbolo: si ya existe se suma como compra.
   useEffect(() => {

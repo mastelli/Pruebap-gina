@@ -8,6 +8,7 @@ export interface TvSearchRow {
   exchange?: unknown
   currency?: unknown
   description?: unknown
+  isin?: unknown
 }
 
 export interface TvQuote {
@@ -84,14 +85,53 @@ export function parseTvScanner(ticker: string, exchange: string, json: unknown):
   }
 }
 
-async function tvSearchByIsin(isin: string): Promise<TvSearchRow[]> {
+async function tvSearch(text: string): Promise<TvSearchRow[]> {
   const res = await fetch(
-    `https://symbol-search.tradingview.com/symbol_search/?text=${encodeURIComponent(isin.trim().toUpperCase())}`,
+    `https://symbol-search.tradingview.com/symbol_search/?text=${encodeURIComponent(text.trim())}`,
     { headers: TV_HEADERS, signal: AbortSignal.timeout(8000) },
   )
   if (!res.ok) return []
   const json = await res.json()
   return Array.isArray(json) ? (json as TvSearchRow[]) : []
+}
+
+async function tvSearchByIsin(isin: string): Promise<TvSearchRow[]> {
+  return tvSearch(isin.trim().toUpperCase())
+}
+
+// ISIN de un simbolo (p. ej. "MSF" de Tradegate -> su ISIN). Solo se
+// aceptan filas con el simbolo exacto para no mezclar valores distintos
+// (p. ej. un ETF apalancado sobre el mismo subyacente tiene otro ISIN).
+export function pickIsinRow(
+  rows: TvSearchRow[],
+  symbol: string,
+  exchangeReq?: string,
+): string | null {
+  const up = symbol.trim().toUpperCase()
+  if (up === "") return null
+  const clean = (Array.isArray(rows) ? rows : [])
+    .map((r) => ({
+      symbol: String(r?.symbol ?? "").trim().toUpperCase(),
+      exchange: String(r?.exchange ?? "").trim(),
+      isin: String(r?.isin ?? "").trim().toUpperCase(),
+    }))
+    .filter((r) => r.symbol === up && isValidIsin(r.isin))
+  if (clean.length === 0) return null
+  const ex = exchangeReq ?? ""
+  if (ex.trim() !== "") {
+    const match = clean.find((r) => sameVenue(r.exchange, ex))
+    if (match) return match.isin
+  }
+  return clean[0]?.isin ?? null
+}
+
+export async function findIsinForSymbol(symbol: string, exchangeReq?: string): Promise<string | null> {
+  if (symbol.trim() === "") return null
+  try {
+    return pickIsinRow(await tvSearch(symbol), symbol, exchangeReq)
+  } catch {
+    return null
+  }
 }
 
 // Cotizacion directa de TradingView para un ISIN (search + scanner).
