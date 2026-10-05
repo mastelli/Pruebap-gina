@@ -208,6 +208,80 @@ async function getTradegateQuote(isin: string): Promise<Quote | null> {
   }
 }
 
+// --- TradingView (respaldo para Tradegate: search por ISIN + scanner) ---
+
+const TV_HEADERS = {
+  ...UA,
+  Accept: "application/json, text/plain, */*",
+  "Accept-Language": "es-ES,es;q=0.9,en;q=0.8",
+  Referer: "https://www.tradingview.com/",
+  Origin: "https://www.tradingview.com",
+}
+
+const tvTickerCache: Map<string, string | null> = (
+  globalThis as unknown as { __tvTickers?: Map<string, string | null> }
+).__tvTickers ??= new Map()
+
+// Ticker del ISIN en Tradegate segun TradingView (p. ej. MSFT -> "MSF")
+async function getTradingViewTradegateTicker(isin: string): Promise<string | null> {
+  const key = isin.trim().toUpperCase()
+  if (!/^[A-Z]{2}[A-Z0-9]{9}\d$/.test(key)) return null
+  const cached = tvTickerCache.get(key)
+  if (cached !== undefined) return cached
+  try {
+    const res = await fetch(
+      `https://symbol-search.tradingview.com/symbol_search/?text=${encodeURIComponent(key)}`,
+      { headers: TV_HEADERS, signal: AbortSignal.timeout(8000) },
+    )
+    if (!res.ok) return null
+    const json = await res.json()
+    const rows = Array.isArray(json) ? json : []
+    const hit = rows.find(
+      (h: { exchange?: unknown; symbol?: unknown }) =>
+        String(h?.exchange ?? "").toUpperCase() === "TRADEGATE" && typeof h?.symbol === "string" && h.symbol !== "",
+    ) as { symbol?: string } | undefined
+    const ticker = hit?.symbol ?? null
+    if (ticker) tvTickerCache.set(key, ticker)
+    return ticker
+  } catch {
+    return null
+  }
+}
+
+async function getTradingViewTradegateQuote(isin: string): Promise<Quote | null> {
+  const ticker = await getTradingViewTradegateTicker(isin).catch(() => null)
+  if (!ticker) return null
+  try {
+    const res = await fetch(
+      `https://scanner.tradingview.com/symbol?symbol=${encodeURIComponent(`TRADEGATE:${ticker}`)}&fields=${encodeURIComponent("close,change_abs,currency,description")}`,
+      { headers: TV_HEADERS, signal: AbortSignal.timeout(8000) },
+    )
+    if (!res.ok) return null
+    const json = await res.json()
+    const price = typeof json?.close === "number" && Number.isFinite(json.close) ? json.close : null
+    if (price === null) return null
+    const changeAbs =
+      typeof json?.change_abs === "number" && Number.isFinite(json.change_abs) ? json.change_abs : null
+    return {
+      symbol: `TRADEGATE:${ticker}`,
+      price,
+      previousClose: changeAbs !== null ? price - changeAbs : null,
+      currency: typeof json?.currency === "string" && json.currency !== "" ? json.currency : "EUR",
+      longName: typeof json?.description === "string" && json.description !== "" ? json.description : undefined,
+      exchange: "Tradegate",
+    }
+  } catch {
+    return null
+  }
+}
+
+// Tradegate por ISIN con respaldo en TradingView
+async function getTradegateQuoteWithFallback(isin: string): Promise<Quote | null> {
+  const direct = await getTradegateQuote(isin).catch(() => null)
+  if (direct) return direct
+  return getTradingViewTradegateQuote(isin).catch(() => null)
+}
+
 // --- Yahoo Finance (resto del mundo) ---
 
 async function resolveSymbolCandidates(isin: string, name?: string, exchangeReq?: string): Promise<string[]> {
@@ -434,7 +508,7 @@ export async function POST(request: NextRequest) {
         : /^[A-Z]{2}[A-Z0-9]{9}\d$/.test(symbolReq.toUpperCase())
           ? symbolReq.toUpperCase()
           : ""
-      const tgQuote = tgIsin ? await getTradegateQuote(tgIsin).catch(() => null) : null
+      const tgQuote = tgIsin ? await getTradegateQuoteWithFallback(tgIsin).catch(() => null) : null
       quoteCache.set(key, { ts: Date.now(), quote: tgQuote })
       results[key] = tgQuote
       continue
@@ -460,7 +534,7 @@ export async function POST(request: NextRequest) {
   )
   if (tgMissing.length > 0) {
     const tgResults = await Promise.allSettled(
-      tgMissing.map((p) => getTradegateQuote(p.isin).catch(() => null)),
+      tgMissing.map((p) => getTradegateQuoteWithFallback(p.isin).catch(() => null)),
     )
     tgResults.forEach((r, i) => {
       const quote = r.status === "fulfilled" ? r.value : null
