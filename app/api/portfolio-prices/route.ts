@@ -1,9 +1,11 @@
 ﻿import { NextRequest, NextResponse } from "next/server"
+import { getTradingViewQuoteByIsin } from "@/lib/tradingview"
 
 export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
 
-// Fuentes: Yahoo Finance + Stooq.com para mercados europeos
+// Fuentes: TradingView directo por ISIN, Tradegate por ISIN,
+// Yahoo Finance + Stooq.com como respaldo
 const UA = { "User-Agent": "Mozilla/5.0" }
 const QUOTE_TTL = 5 * 1000
 
@@ -513,6 +515,25 @@ export async function POST(request: NextRequest) {
       quoteCache.set(key, { ts: Date.now(), quote: tgQuote })
       results[key] = tgQuote
       continue
+    }
+
+    // TradingView directo por ISIN antes que Yahoo: respeta el listing
+    // de la bolsa pedida y trae nombre oficial + moneda real.
+    const tvIsin = /^[A-Z]{2}[A-Z0-9]{9}\d$/.test(isin)
+      ? isin
+      : /^[A-Z]{2}[A-Z0-9]{9}\d$/.test(key)
+        ? key
+        : ""
+    if (tvIsin) {
+      const tvQuote = await getTradingViewQuoteByIsin(
+        tvIsin,
+        asset?.exchange ? String(asset.exchange) : undefined,
+      ).catch(() => null)
+      if (tvQuote) {
+        quoteCache.set(key, { ts: Date.now(), quote: tvQuote })
+        results[key] = tvQuote
+        continue
+      }
     }
 
     pendingAssets.push({ key, isin: isin || key, name, exchange: asset?.exchange ? String(asset.exchange) : undefined, symbol: asset?.symbol ? String(asset.symbol).trim() : undefined })
