@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Badge } from "@/components/ui/badge"
-import { Pencil, Plus, Trash2, RefreshCw, Search, TrendingUp, TrendingDown, Upload, Wallet, Download, ArrowUpRight, ArrowDownRight } from "lucide-react"
+import { Pencil, Plus, Trash2, RefreshCw, Search, Upload, Wallet, Download, ArrowUpRight, ArrowDownRight, ChevronDown, ChevronRight } from "lucide-react"
 import { applyTransactions, parsePortfolioCsv } from "@/lib/portfolio-csv"
 import { InvestmentTips } from "@/components/analytics/investment-tips"
 import { FinanceNews } from "@/components/analytics/finance-news"
@@ -689,10 +689,7 @@ export function PortfolioPro() {
                 <div key={k} className="space-y-1">
                   <div className="flex items-center justify-between gap-2 text-sm">
                     <span className="font-medium">{KIND_LABEL[k]}</span>
-                    <div className="flex shrink-0 items-center gap-2">
-                      <span className="tabular-nums text-muted-foreground">{fmtNum(w, 1)}%</span>
-                      <span className="tabular-nums text-muted-foreground">{fmtMoney(v)}</span>
-                    </div>
+                    <span className="shrink-0 tabular-nums text-muted-foreground">{fmtMoney(v)}</span>
                   </div>
                   <div className="h-2 overflow-hidden rounded-full bg-secondary">
                     <div className="h-full rounded-full bg-primary" style={{ width: `${Math.min(100, w)}%` }} />
@@ -897,7 +894,7 @@ export function PortfolioPro() {
               <table className="w-full min-w-[760px] text-sm">
                 <thead>
                   <tr className="border-b text-left text-xs uppercase text-muted-foreground">
-                    <th className="py-2 pl-4 pr-3">Activo</th>
+                    <th className="py-2 pr-3">Activo</th>
                     <th className="py-2 pr-3 text-right">Cant.</th>
                     <th className="py-2 pr-3 text-right">Precio</th>
                     <th className="py-2 pr-3 text-right">Coste medio</th>
@@ -917,8 +914,9 @@ export function PortfolioPro() {
                     return (
                       <Fragment key={r.p.id}>
                         <tr className="border-b transition-colors hover:bg-muted/40">
-                          <td className="py-3 pl-4 pr-3">
-                            <button className="text-left font-medium hover:underline" onClick={() => setExpanded(isOpen ? null : r.p.id)} title={isOpen ? "Ocultar compras" : "Ver compras"}>
+                          <td className="py-3 pr-3">
+                            <button className="flex items-center gap-1 text-left font-medium hover:underline" onClick={() => setExpanded(isOpen ? null : r.p.id)} title={isOpen ? "Ocultar compras" : "Ver compras"}>
+                              {isOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
                               {r.displayName}
                             </button>
                             <div className="ml-5 flex flex-wrap items-center gap-1 text-xs text-muted-foreground">
@@ -940,8 +938,7 @@ export function PortfolioPro() {
                           </td>
                           <td className={`py-3 pr-3 text-right tabular-nums font-medium ${pnlColor(r.pnlPct)}`}>
                             {r.pnl !== null && r.pnlPct !== null ? (
-                              <span className="flex items-center justify-end gap-1">
-                                {r.pnlPct >= 0 ? <TrendingUp className="h-3.5 w-3.5" /> : <TrendingDown className="h-3.5 w-3.5" />}
+                              <span>
                                 {r.pnl >= 0 ? "+" : ""}{fmtNum(r.pnl, 2)} ({r.pnlPct >= 0 ? "+" : ""}{fmtNum(r.pnlPct, 2)}%)
                               </span>
                             ) : "—"}
