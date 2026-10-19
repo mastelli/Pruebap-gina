@@ -765,6 +765,22 @@ export function InvestmentTestDashboard() {
                   <div className="text-sm text-muted-foreground mb-1">{t("Price Target")}</div>
                   {a?.targetMean && q ? (
                     <div className="space-y-2">
+                      {targetMean !== null && targetMinus5 !== null ? (
+                        <div className="grid grid-cols-2 gap-2">
+                          <div className="rounded-md border bg-muted/40 px-3 py-2">
+                            <div className="text-[11px] text-muted-foreground">{t("Target Price")}</div>
+                            <div className="text-sm font-semibold tabular-nums">
+                              {targetMean.toLocaleString("es-ES", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {q.currency}
+                            </div>
+                          </div>
+                          <div className="rounded-md border bg-muted/40 px-3 py-2">
+                            <div className="text-[11px] text-muted-foreground">{t("MakeItRight Target Price")}</div>
+                            <div className="text-sm font-semibold tabular-nums">
+                              {targetMinus5.toLocaleString("es-ES", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {q.currency}
+                            </div>
+                          </div>
+                        </div>
+                      ) : null}
                       <div className="flex justify-between text-sm">
                         <span>{t("Low")}: {a.targetLow?.toLocaleString("es-ES", { minimumFractionDigits: 2 })}</span>
                         <span className="font-medium">{t("Mean")}: {a.targetMean.toLocaleString("es-ES", { minimumFractionDigits: 2 })}</span>
@@ -909,22 +925,6 @@ export function InvestmentTestDashboard() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              {data && targetMean !== null && targetMinus5 !== null ? (
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="rounded-md border bg-muted/40 px-3 py-2">
-                    <div className="text-[11px] text-muted-foreground">{t("Target Price")}</div>
-                    <div className="text-sm font-semibold tabular-nums">
-                      {targetMean.toLocaleString("es-ES", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {q?.currency}
-                    </div>
-                  </div>
-                  <div className="rounded-md border bg-muted/40 px-3 py-2">
-                    <div className="text-[11px] text-muted-foreground">{t("MakeItRight Target Price")}</div>
-                    <div className="text-sm font-semibold tabular-nums">
-                      {targetMinus5.toLocaleString("es-ES", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {q?.currency}
-                    </div>
-                  </div>
-                </div>
-              ) : null}
               {!data ? (
                 <div className="text-center text-muted-foreground py-4">
                   {t("Search for a stock to begin analysis")}
