@@ -769,6 +769,8 @@ const translations: Record<string, string> = {
   "Generating technical analysis...": "Generando análisis técnico...",
   "AI-generated summary of the searched stock based on real market data.": "Resumen generado por IA de la acción buscada a partir de datos reales de mercado.",
   "Could not generate the analysis.": "No se pudo generar el análisis.",
+  "AI is not configured on the server.": "La IA no está configurada en el servidor.",
+  "Not enough market data to generate the analysis.": "No hay suficientes datos de mercado para generar el análisis.",
   "Retry": "Reintentar",
   "Expected return": "Retorno esperado",
   "Win probability": "Probabilidad de ganar",

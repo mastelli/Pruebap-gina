@@ -195,7 +195,7 @@ export function InvestmentTestDashboard() {
   const [measureActive, setMeasureActive] = useState(false)
   const [aiAnalysis, setAiAnalysis] = useState<string | null>(null)
   const [aiLoading, setAiLoading] = useState(false)
-  const [aiError, setAiError] = useState(false)
+  const [aiError, setAiError] = useState<string | null>(null)
   const [aiRetry, setAiRetry] = useState(0)
   const aiCacheRef = useRef<Map<string, string>>(new Map())
   const aiForceRef = useRef(false)
@@ -249,7 +249,7 @@ export function InvestmentTestDashboard() {
     if (!data || !selectedSymbol || data.profile.symbol.toUpperCase() !== selectedSymbol.toUpperCase()) {
       setAiAnalysis(null)
       setAiLoading(false)
-      setAiError(false)
+      setAiError(null)
       return
     }
 
@@ -260,7 +260,7 @@ export function InvestmentTestDashboard() {
     if (cached) {
       setAiAnalysis(cached)
       setAiLoading(false)
-      setAiError(false)
+      setAiError(null)
       return
     }
 
@@ -268,14 +268,14 @@ export function InvestmentTestDashboard() {
     if (!snapshot) {
       setAiAnalysis(null)
       setAiLoading(false)
-      setAiError(true)
+      setAiError("no_data")
       return
     }
 
     const controller = new AbortController()
     setAiAnalysis(null)
     setAiLoading(true)
-    setAiError(false)
+    setAiError(null)
 
     fetch("/api/stock-analysis", {
       method: "POST",
@@ -298,8 +298,10 @@ export function InvestmentTestDashboard() {
         aiCacheRef.current.set(cacheKey, analysis)
         setAiAnalysis(analysis)
       })
-      .catch(() => {
-        if (!controller.signal.aborted) setAiError(true)
+      .catch((error: unknown) => {
+        if (controller.signal.aborted) return
+        const message = error instanceof Error ? error.message : ""
+        setAiError(message === "analysis_error_503" ? "missing_key" : "unavailable")
       })
       .finally(() => {
         if (!controller.signal.aborted) setAiLoading(false)
@@ -568,7 +570,13 @@ export function InvestmentTestDashboard() {
                     </>
                   ) : (
                     <div className="text-center space-y-3 py-4">
-                      <p className="text-sm text-muted-foreground">{t("Could not generate the analysis.")}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {aiError === "missing_key"
+                          ? t("AI is not configured on the server.")
+                          : aiError === "no_data"
+                            ? t("Not enough market data to generate the analysis.")
+                            : t("Could not generate the analysis.")}
+                      </p>
                       <Button
                         size="sm"
                         variant="outline"

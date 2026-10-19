@@ -56,7 +56,13 @@ async function generate(prompt: string, system: string): Promise<string> {
       body: JSON.stringify({
         contents: [{ role: "user", parts: [{ text: prompt }] }],
         systemInstruction: { parts: [{ text: system }] },
-        generationConfig: { temperature: 0.5, maxOutputTokens: 400 },
+        generationConfig: {
+          temperature: 0.5,
+          maxOutputTokens: 4096,
+          // Sin "thinking": el resumen es corto y el pensamiento interno
+          // consumia el presupuesto de salida y truncaba la respuesta.
+          thinkingConfig: { thinkingBudget: 0 },
+        },
       }),
       signal: AbortSignal.timeout(20000),
     },
