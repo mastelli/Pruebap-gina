@@ -766,7 +766,7 @@ const translations: Record<string, string> = {
   "Target Price": "Precio Objetivo",
   "Expected Value": "Valor Esperado",
   "AI Technical Analysis": "Análisis Técnico IA",
-  "Analyst target −5%": "Precio objetivo analistas −5%",
+  "MakeItRight Target Price": "Precio Objetivo MakeItRight",
   "Generating technical analysis...": "Generando análisis técnico...",
   "AI-generated summary of the searched stock based on real market data.": "Resumen generado por IA de la acción buscada a partir de datos reales de mercado.",
   "Could not generate the analysis.": "No se pudo generar el análisis.",
