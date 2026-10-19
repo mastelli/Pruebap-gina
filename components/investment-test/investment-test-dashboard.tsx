@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useEffect, useRef, useState, type ReactNode } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { useLanguage } from "@/lib/i18n"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -8,8 +8,9 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Separator } from "@/components/ui/separator"
-import { Search, TrendingUp, TrendingDown, Activity, BarChart3, DollarSign, Building2, Users, Target, AlertTriangle, Globe, ExternalLink, Ruler } from "lucide-react"
+import { Search, TrendingUp, TrendingDown, Activity, BarChart3, DollarSign, Building2, Users, Target, AlertTriangle, Globe, ExternalLink, Ruler, Loader2 } from "lucide-react"
 import { MeasureTool } from "@/lib/measure-tool"
+import { buildTechnicalSnapshot } from "@/lib/technical-indicators"
 import { CompanyNews } from "@/components/company-news"
 
 interface StockProfile {
@@ -65,45 +66,11 @@ interface CandleData {
   volume?: number | null
 }
 
-interface EvScenario {
-  probability: number
-  result: number
-}
-
-interface EvAlternative {
-  key: "buy" | "wait" | "cash"
-  evOriginal: number
-  evAdjusted: number
-  evPerShare: number
-  fairValue: number
-}
-
-interface EvData {
-  horizonDays: number
-  months: number
-  sessions: number
-  facts: { price: number; driftAnnual: number; volAnnual: number; maxDrawdown: number }
-  assumptions: { distribution: string; split: [number, number, number]; pessimism: number; waitDiscount: number }
-  scenarios: { bear: EvScenario; base: EvScenario; bull: EvScenario }
-  evOriginal: number
-  evAdjusted: number
-  evPerShareOriginal: number
-  evPerShareAdjusted: number
-  fairValue: number
-  breakEvenBullProb: number | null
-  alternatives: EvAlternative[]
-  bestAlternative: EvAlternative["key"]
-  sensitivity: { resultsUp: number; resultsDown: number; probUp: number; probDown: number; volUp: number; volDown: number }
-  risk: { probLoss: number; maxLoss: number; tail5: number; volHorizon: number }
-  label: "EV+" | "EV-" | "EV0"
-}
-
 interface StockData {
   profile: StockProfile
   quote: StockQuote
   stats: StockStats
   analystData: AnalystData
-  ev: EvData | null
   history: CandleData[]
 }
 
@@ -167,33 +134,6 @@ function MetricRow({ label, value, format, colorClass }: { label: string; value:
   )
 }
 
-function EvSection({ title, children }: { title: string; children: ReactNode }) {
-  return (
-    <div>
-      <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">{title}</h4>
-      {children}
-    </div>
-  )
-}
-
-function EvFact({ label, value, tone = "muted" }: { label: string; value: string; tone?: "pos" | "neg" | "muted" }) {
-  const toneClass = tone === "pos" ? "text-green-600 dark:text-green-400" : tone === "neg" ? "text-red-600 dark:text-red-400" : ""
-  return (
-    <div className="flex items-baseline justify-between gap-3 py-1 border-b border-border/50 last:border-0">
-      <span className="text-sm text-muted-foreground">{label}</span>
-      <span className={`text-sm font-medium tabular-nums shrink-0 ${toneClass}`}>{value}</span>
-    </div>
-  )
-}
-
-function evTone(v: number): "pos" | "neg" | "muted" {
-  return v > 0.00005 ? "pos" : v < -0.00005 ? "neg" : "muted"
-}
-
-const pctSigned = (v: number) => `${v >= 0 ? "+" : ""}${(v * 100).toFixed(1)}%`
-const moneySigned = (v: number) =>
-  `${v >= 0 ? "+" : ""}${v.toLocaleString("es-ES", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-
 function RecommendationBar({ data }: { data: AnalystData }) {
   const total = (data.strongBuy ?? 0) + (data.buyCount ?? 0) + (data.holdCount ?? 0) + (data.sellCount ?? 0) + (data.strongSell ?? 0)
   if (total === 0) return null
@@ -237,7 +177,7 @@ function PriceRangeBar({ current, low, high }: { current: number; low: number; h
 }
 
 export function InvestmentTestDashboard() {
-  const { t } = useLanguage()
+  const { t, lang } = useLanguage()
   const [query, setQuery] = useState("")
   const [results, setResults] = useState<SearchResult[]>([])
   const [loading, setLoading] = useState(false)
@@ -253,6 +193,12 @@ export function InvestmentTestDashboard() {
   const dataRef = useRef<StockData | null>(null)
   const measureRef = useRef<MeasureTool | null>(null)
   const [measureActive, setMeasureActive] = useState(false)
+  const [aiAnalysis, setAiAnalysis] = useState<string | null>(null)
+  const [aiLoading, setAiLoading] = useState(false)
+  const [aiError, setAiError] = useState(false)
+  const [aiRetry, setAiRetry] = useState(0)
+  const aiCacheRef = useRef<Map<string, string>>(new Map())
+  const aiForceRef = useRef(false)
 
   const searchStock = useCallback(async (q: string) => {
     if (!q.trim() || q.trim().length < 1) { setResults([]); return }
@@ -296,6 +242,71 @@ export function InvestmentTestDashboard() {
       setRangeLoading(false)
     }
   }, [range])
+
+  // Resumen de analisis tecnico por IA. Se genera una vez por simbolo e idioma
+  // y se reutiliza al cambiar de rango para no repetir llamadas.
+  useEffect(() => {
+    if (!data || !selectedSymbol || data.profile.symbol.toUpperCase() !== selectedSymbol.toUpperCase()) {
+      setAiAnalysis(null)
+      setAiLoading(false)
+      setAiError(false)
+      return
+    }
+
+    const force = aiForceRef.current
+    aiForceRef.current = false
+    const cacheKey = `${selectedSymbol}:${lang}`
+    const cached = force ? undefined : aiCacheRef.current.get(cacheKey)
+    if (cached) {
+      setAiAnalysis(cached)
+      setAiLoading(false)
+      setAiError(false)
+      return
+    }
+
+    const snapshot = buildTechnicalSnapshot(data.history, data.quote)
+    if (!snapshot) {
+      setAiAnalysis(null)
+      setAiLoading(false)
+      setAiError(true)
+      return
+    }
+
+    const controller = new AbortController()
+    setAiAnalysis(null)
+    setAiLoading(true)
+    setAiError(false)
+
+    fetch("/api/stock-analysis", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        symbol: data.profile.symbol,
+        name: data.profile.name,
+        exchange: data.profile.exchange,
+        currency: data.quote.currency,
+        lang,
+        snapshot,
+      }),
+      signal: controller.signal,
+    })
+      .then(async (res) => {
+        if (!res.ok) throw new Error(`analysis_error_${res.status}`)
+        const json = await res.json()
+        const analysis = typeof json?.analysis === "string" ? json.analysis.trim() : ""
+        if (!analysis) throw new Error("empty_analysis")
+        aiCacheRef.current.set(cacheKey, analysis)
+        setAiAnalysis(analysis)
+      })
+      .catch(() => {
+        if (!controller.signal.aborted) setAiError(true)
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setAiLoading(false)
+      })
+
+    return () => controller.abort()
+  }, [data, selectedSymbol, lang, aiRetry])
 
   useEffect(() => {
     const container = chartContainerRef.current
@@ -421,7 +432,6 @@ export function InvestmentTestDashboard() {
   const q = data?.quote
   const a = data?.analystData
   const p = data?.profile
-  const ev = data?.ev ?? null
 
   return (
     <div className="space-y-4">
@@ -529,54 +539,47 @@ export function InvestmentTestDashboard() {
             </CardContent>
           </Card>
 
-          {/* Investment Thesis + Expected Value */}
+          {/* AI Technical Analysis + Investment Thesis */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-              {/* Expected Value Card */}
+              {/* AI Technical Analysis Card */}
               <Card className="lg:col-span-1">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <Target className="h-5 w-5" />
-                    {t("Expected Value")}
+                    <Activity className="h-5 w-5" />
+                    {t("AI Technical Analysis")}
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  {ev ? (
+                <CardContent className="space-y-3">
+                  {!data ? (
+                    <div className="text-center text-muted-foreground py-4">
+                      {t("Search for a stock to begin analysis")}
+                    </div>
+                  ) : aiLoading || (!aiAnalysis && !aiError) ? (
+                    <div className="flex items-center justify-center gap-2 text-muted-foreground py-8">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <span className="text-sm">{t("Generating technical analysis...")}</span>
+                    </div>
+                  ) : aiAnalysis ? (
                     <>
-                      <div className="text-center">
-                        <div className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-lg font-bold ${
-                          ev.label === "EV0"
-                            ? "bg-secondary/50 text-foreground"
-                            : ev.label === "EV+"
-                              ? "bg-green-500/10 text-green-600"
-                              : "bg-red-500/10 text-red-600"
-                        }`}>
-                          {ev.label}
-                        </div>
-                        <div className={`text-3xl font-bold tabular-nums mt-2 ${
-                          ev.label === "EV0" ? "text-foreground" : ev.label === "EV+" ? "text-green-600" : "text-red-600"
-                        }`}>
-                          {pctSigned(ev.evAdjusted)}
-                        </div>
-                        <div className="text-sm text-muted-foreground mt-0.5">
-                          {moneySigned(ev.evPerShareAdjusted)} {q?.currency} / {t("share")}
-                        </div>
-                      </div>
-                      <Separator />
-                      <EvSection title={t("Known data")}>
-                        <EvFact label={t("Current price")} value={`${ev.facts.price} ${q?.currency ?? ""}`} />
-                        <EvFact label={t("Historical sessions used")} value={ev.sessions.toLocaleString("es-ES")} />
-                        <EvFact label={t("Annualized drift")} value={pctSigned(ev.facts.driftAnnual)} tone={evTone(ev.facts.driftAnnual)} />
-                        <EvFact label={t("Annualized volatility")} value={formatPercent(ev.facts.volAnnual)} />
-                        <EvFact label={t("Historical max drawdown")} value={pctSigned(-ev.facts.maxDrawdown)} tone="neg" />
-                        <EvFact label={t("Horizon")} value={`${ev.horizonDays} ${t("trading days")} (${ev.months} ${t("months")})`} />
-                      </EvSection>
-                      <div className="text-[11px] text-muted-foreground text-center leading-snug">
-                        {t("EV = sum of probability x net result on the quartile scenarios of the lognormal fit")}
-                      </div>
+                      <p className="text-sm leading-relaxed">{aiAnalysis}</p>
+                      <p className="text-[11px] text-muted-foreground leading-snug">
+                        {t("AI-generated summary of the searched stock based on real market data.")}
+                      </p>
                     </>
                   ) : (
-                    <div className="text-center text-muted-foreground py-4">
-                      {data ? t("Insufficient historical data for EV") : t("Search for a stock to begin analysis")}
+                    <div className="text-center space-y-3 py-4">
+                      <p className="text-sm text-muted-foreground">{t("Could not generate the analysis.")}</p>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          if (!selectedSymbol) return
+                          aiForceRef.current = true
+                          setAiRetry((n) => n + 1)
+                        }}
+                      >
+                        {t("Retry")}
+                      </Button>
                     </div>
                   )}
                 </CardContent>
