@@ -761,7 +761,6 @@ export function InvestmentTestDashboard() {
                         return label.charAt(0).toUpperCase() + label.slice(1)
                       })()}
                     </Badge>
-                    {a.recommendationMean ? <span className="text-sm">({a.recommendationMean.toFixed(1)}/5)</span> : null}
                   </div>
                 ) : null}
                 <div>
