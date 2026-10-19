@@ -434,6 +434,8 @@ export function InvestmentTestDashboard() {
   const q = data?.quote
   const a = data?.analystData
   const p = data?.profile
+  // Precio objetivo medio de los analistas con un margen del 5%
+  const targetMinus5 = a?.targetMean != null ? a.targetMean * 0.95 : null
 
   return (
     <div className="space-y-4">
@@ -541,60 +543,8 @@ export function InvestmentTestDashboard() {
             </CardContent>
           </Card>
 
-          {/* AI Technical Analysis + Investment Thesis */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-              {/* AI Technical Analysis Card */}
-              <Card className="lg:col-span-1">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Activity className="h-5 w-5" />
-                    {t("AI Technical Analysis")}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  {!data ? (
-                    <div className="text-center text-muted-foreground py-4">
-                      {t("Search for a stock to begin analysis")}
-                    </div>
-                  ) : aiLoading || (!aiAnalysis && !aiError) ? (
-                    <div className="flex items-center justify-center gap-2 text-muted-foreground py-8">
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                      <span className="text-sm">{t("Generating technical analysis...")}</span>
-                    </div>
-                  ) : aiAnalysis ? (
-                    <>
-                      <p className="text-sm leading-relaxed">{aiAnalysis}</p>
-                      <p className="text-[11px] text-muted-foreground leading-snug">
-                        {t("AI-generated summary of the searched stock based on real market data.")}
-                      </p>
-                    </>
-                  ) : (
-                    <div className="text-center space-y-3 py-4">
-                      <p className="text-sm text-muted-foreground">
-                        {aiError === "missing_key"
-                          ? t("AI is not configured on the server.")
-                          : aiError === "no_data"
-                            ? t("Not enough market data to generate the analysis.")
-                            : t("Could not generate the analysis.")}
-                      </p>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => {
-                          if (!selectedSymbol) return
-                          aiForceRef.current = true
-                          setAiRetry((n) => n + 1)
-                        }}
-                      >
-                        {t("Retry")}
-                      </Button>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-
           {/* Investment Thesis */}
-          <Card className="lg:col-span-2">
+          <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <BarChart3 className="h-5 w-5" />
@@ -725,7 +675,6 @@ export function InvestmentTestDashboard() {
                   )}
                 </CardContent>
               </Card>
-          </div>
 
       {/* Range selector */}
       {selectedSymbol && (
@@ -949,6 +898,64 @@ export function InvestmentTestDashboard() {
               </CardContent>
             </Card>
           </div>
+
+          {/* AI Technical Analysis */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Activity className="h-5 w-5" />
+                {t("AI Technical Analysis")}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {data && targetMinus5 !== null ? (
+                <div className="flex items-center justify-between rounded-md border bg-muted/40 px-3 py-2">
+                  <span className="text-xs text-muted-foreground">{t("Analyst target −5%")}</span>
+                  <span className="text-sm font-semibold tabular-nums">
+                    {targetMinus5.toLocaleString("es-ES", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {q?.currency}
+                  </span>
+                </div>
+              ) : null}
+              {!data ? (
+                <div className="text-center text-muted-foreground py-4">
+                  {t("Search for a stock to begin analysis")}
+                </div>
+              ) : aiLoading || (!aiAnalysis && !aiError) ? (
+                <div className="flex items-center justify-center gap-2 text-muted-foreground py-8">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <span className="text-sm">{t("Generating technical analysis...")}</span>
+                </div>
+              ) : aiAnalysis ? (
+                <>
+                  <p className="text-sm leading-relaxed">{aiAnalysis}</p>
+                  <p className="text-[11px] text-muted-foreground leading-snug">
+                    {t("AI-generated summary of the searched stock based on real market data.")}
+                  </p>
+                </>
+              ) : (
+                <div className="text-center space-y-3 py-4">
+                  <p className="text-sm text-muted-foreground">
+                    {aiError === "missing_key"
+                      ? t("AI is not configured on the server.")
+                      : aiError === "no_data"
+                        ? t("Not enough market data to generate the analysis.")
+                        : t("Could not generate the analysis.")}
+                  </p>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => {
+                      if (!selectedSymbol) return
+                      aiForceRef.current = true
+                      setAiRetry((n) => n + 1)
+                    }}
+                  >
+                    {t("Retry")}
+                  </Button>
+                </div>
+              )}
+            </CardContent>
+          </Card>
 
           {/* Company Description */}
           <Card>
