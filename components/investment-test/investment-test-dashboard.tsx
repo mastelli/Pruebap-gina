@@ -765,20 +765,12 @@ export function InvestmentTestDashboard() {
                   <div className="text-sm text-muted-foreground mb-1">{t("Price Target")}</div>
                   {a?.targetMean && q ? (
                     <div className="space-y-2">
-                      {targetMean !== null && targetMinus5 !== null ? (
-                        <div className="grid grid-cols-2 gap-2">
-                          <div className="rounded-md border bg-muted/40 px-3 py-2">
-                            <div className="text-[11px] text-muted-foreground">{t("Target Price")}</div>
-                            <div className="text-sm font-semibold tabular-nums">
-                              {targetMean.toLocaleString("es-ES", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {q.currency}
-                            </div>
-                          </div>
-                          <div className="rounded-md border bg-muted/40 px-3 py-2">
-                            <div className="text-[11px] text-muted-foreground">{t("MakeItRight Target Price")}</div>
-                            <div className="text-sm font-semibold tabular-nums">
-                              {targetMinus5.toLocaleString("es-ES", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {q.currency}
-                            </div>
-                          </div>
+                      {targetMinus5 !== null ? (
+                        <div className="flex items-center justify-between rounded-md border bg-muted/40 px-3 py-2">
+                          <span className="text-xs text-muted-foreground">{t("MakeItRight Target Price")}</span>
+                          <span className="text-sm font-semibold tabular-nums">
+                            {targetMinus5.toLocaleString("es-ES", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {q.currency}
+                          </span>
                         </div>
                       ) : null}
                       <div className="flex justify-between text-sm">
