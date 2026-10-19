@@ -756,7 +756,10 @@ export function InvestmentTestDashboard() {
                   <div className="flex items-center gap-2">
                     <span className="text-sm text-muted-foreground">{t("Consensus")}:</span>
                     <Badge variant={a.recommendationKey === "buy" || a.recommendationKey === "strongBuy" ? "default" : a.recommendationKey === "sell" ? "destructive" : "secondary"}>
-                      {a.recommendationKey}
+                      {(() => {
+                        const label = a.recommendationKey.replace(/_/g, " ")
+                        return label.charAt(0).toUpperCase() + label.slice(1)
+                      })()}
                     </Badge>
                     {a.recommendationMean ? <span className="text-sm">({a.recommendationMean.toFixed(1)}/5)</span> : null}
                   </div>
