@@ -47,8 +47,8 @@ function fitToRange(text: string): string {
   return `${text.split(/\s+/).slice(0, MAX_WORDS).join(" ").replace(/[,;:]$/, "")}…`
 }
 
-async function generate(prompt: string, system: string): Promise<string> {
-  const response = await fetch(
+async function callModel(prompt: string, system: string, generationConfig: Record<string, unknown>) {
+  return fetch(
     `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${API_KEY}`,
     {
       method: "POST",
@@ -56,17 +56,25 @@ async function generate(prompt: string, system: string): Promise<string> {
       body: JSON.stringify({
         contents: [{ role: "user", parts: [{ text: prompt }] }],
         systemInstruction: { parts: [{ text: system }] },
-        generationConfig: {
-          temperature: 0.5,
-          maxOutputTokens: 4096,
-          // Sin "thinking": el resumen es corto y el pensamiento interno
-          // consumia el presupuesto de salida y truncaba la respuesta.
-          thinkingConfig: { thinkingBudget: 0 },
-        },
+        generationConfig,
       }),
       signal: AbortSignal.timeout(20000),
     },
   )
+}
+
+async function generate(prompt: string, system: string): Promise<string> {
+  // Sin "thinking": el resumen es corto y el pensamiento interno consumia el
+  // presupuesto de salida y truncaba la respuesta. Si el modelo configurado no
+  // admite thinkingConfig, se reintenta con un presupuesto amplio.
+  let response = await callModel(prompt, system, {
+    temperature: 0.5,
+    maxOutputTokens: 4096,
+    thinkingConfig: { thinkingBudget: 0 },
+  })
+  if (response.status === 400) {
+    response = await callModel(prompt, system, { temperature: 0.5, maxOutputTokens: 8192 })
+  }
   if (!response.ok) throw new Error(`upstream_error (${response.status})`)
   const data = await response.json()
   const reply =
